@@ -1,0 +1,95 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Queer Ally Flag"
+  encoder "TheNewEMCee"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Queer_Ally_Flag.svg"
+}
+palette {
+  red "#e40303"
+  orange "#ff8c00"
+  yellow "#ffed00"
+  green "#008026"
+  blue "#004dff"
+  pink "#750787"
+  white "#ffffff"
+  black "#000000"
+  brown "#613915"
+  teal "#74d7ee"
+  pink-2 "#ffafc8"
+  yellow-2 "#ffd800"
+  purple "#7902aa"
+}
+proportion hoist=96 fly=144
+
+bars red orange yellow green blue pink
+
+charge polygon white {
+  point fly=0 hoist=96
+  point fly=72 hoist=0
+  point fly=144 hoist=96
+}
+
+charge polygon black {
+  point fly=60 hoist=16
+  point fly=72 hoist=0
+  point fly=84 hoist=16
+}
+
+charge polygon black {
+  point fly=36 hoist=48
+  point fly=48 hoist=32
+  point fly=96 hoist=32
+  point fly=108 hoist=48
+}
+
+charge polygon black {
+  point fly=12 hoist=80
+  point fly=24 hoist=64
+  point fly=120 hoist=64
+  point fly=132 hoist=80
+}
+
+charge polygon black {
+  point fly=24 hoist=96
+  point fly=72 hoist=32
+  point fly=120 hoist=96
+}
+
+charge polygon brown {
+  point fly=30 hoist=96
+  point fly=72 hoist=40
+  point fly=114 hoist=96
+}
+
+charge polygon teal {
+  point fly=36 hoist=96
+  point fly=72 hoist=48
+  point fly=108 hoist=96
+}
+
+charge polygon pink-2 {
+  point fly=42 hoist=96
+  point fly=72 hoist=56
+  point fly=102 hoist=96
+}
+
+charge polygon white {
+  point fly=48 hoist=96
+  point fly=72 hoist=64
+  point fly=96 hoist=96
+}
+
+charge polygon yellow-2 {
+  point fly=54 hoist=96
+  point fly=72 hoist=72
+  point fly=90 hoist=96
+}
+
+charge ring purple {
+  radius 6.5
+  inner 5.5
+  at fly=72 hoist=88
+}

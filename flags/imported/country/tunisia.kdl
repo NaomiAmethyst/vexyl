@@ -1,0 +1,37 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Tunisia"
+  encoder "Various Wikimedia Commons' contributors"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Tunisia.svg"
+}
+palette {
+  red "#e70013"
+  white "#ffffff"
+}
+proportion hoist=80 fly=120
+
+field red
+
+charge disc white {
+  radius 20
+  at fly=60 hoist=40
+}
+
+charge disc red {
+  radius 15
+  at fly=60 hoist=40
+}
+
+charge disc white {
+  radius 12
+  at fly=64 hoist=40
+}
+
+charge star red {
+  radius 8.9998
+  rotate -18
+  at fly=64.0002 hoist=40
+}

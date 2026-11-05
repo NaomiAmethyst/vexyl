@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Pangender flag"
+  encoder "Nikki"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Pangender_flag.svg"
+}
+palette {
+  yellow "#fff798"
+  orange "#feddcc"
+  pink "#ffebfc"
+  white "#ffffff"
+}
+proportion hoist=21 fly=35
+
+bars yellow orange pink white pink orange yellow

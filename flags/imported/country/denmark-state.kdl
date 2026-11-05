@@ -1,0 +1,36 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Denmark (state)"
+  encoder "David Newton"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Denmark_(state).svg"
+}
+palette {
+  red "#c8102e"
+  white "#ffffff"
+}
+proportion hoist=56 fly=107
+
+charge polygon red {
+  point fly=0 hoist=0
+  point fly=107 hoist=0
+  point fly=62 hoist=24
+  point fly=58 hoist=28
+  point fly=62 hoist=32
+  point fly=107 hoist=56
+  point fly=0 hoist=56
+}
+
+charge rect white {
+  fly 8
+  hoist 62
+  at fly=28 hoist=31
+}
+
+charge rect white {
+  fly 62
+  hoist 8
+  at fly=31 hoist=28
+}

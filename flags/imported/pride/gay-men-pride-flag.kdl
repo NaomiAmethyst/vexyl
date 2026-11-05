@@ -1,0 +1,21 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Gay Men Pride Flag"
+  encoder "gayflagblog"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Gay_Men_Pride_Flag.svg"
+}
+palette {
+  teal "#078d70"
+  teal-2 "#26ceaa"
+  green "#99e8c2"
+  white "#ffffff"
+  blue "#7bade3"
+  blue-2 "#5049cb"
+  purple "#3e1a78"
+}
+proportion hoist=21 fly=35
+
+bars teal teal-2 green white blue blue-2 purple

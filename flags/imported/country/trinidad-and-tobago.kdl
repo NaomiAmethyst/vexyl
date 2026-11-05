@@ -1,0 +1,30 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Trinidad and Tobago"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Trinidad_and_Tobago.svg"
+}
+palette {
+  red "#da1a35"
+  white "#ffffff"
+  black "#000000"
+}
+proportion hoist=18 fly=30
+
+field red
+
+charge polygon white {
+  point fly=0 hoist=0
+  point fly=20.8247 hoist=18
+  point fly=30 hoist=18
+  point fly=9.1753 hoist=0
+}
+
+charge polygon black {
+  point fly=1.5292 hoist=0
+  point fly=22.3539 hoist=18
+  point fly=28.4708 hoist=18
+  point fly=7.6461 hoist=0
+}

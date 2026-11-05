@@ -1,0 +1,22 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Philadelphia Pride Flag"
+  encoder "Philadelphia City Council and Tierney"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Philadelphia_Pride_Flag.svg"
+}
+palette {
+  black "#000000"
+  brown "#784f17"
+  red "#e40303"
+  orange "#ff8c00"
+  yellow "#ffed00"
+  green "#008026"
+  blue "#004dff"
+  pink "#750787"
+}
+proportion hoist=480 fly=777
+
+bars black brown red orange yellow green blue pink

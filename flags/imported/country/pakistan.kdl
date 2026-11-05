@@ -1,0 +1,35 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Pakistan"
+  encoder "User:Zscout370"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Pakistan.svg"
+}
+palette {
+  white "#ffffff"
+  green "#01411c"
+}
+proportion hoist=80 fly=120
+
+bars white green {
+  along hoist
+  ratio 30 90
+}
+
+charge disc white {
+  radius 24
+  at fly=75 hoist=40
+}
+
+charge disc green {
+  radius 22
+  at fly=81.1347 hoist=34.5469
+}
+
+charge star white {
+  radius 8
+  rotate -23.6335
+  at fly=86.9585 hoist=29.3702
+}

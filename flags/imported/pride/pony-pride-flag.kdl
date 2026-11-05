@@ -1,0 +1,39 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Pony Pride Flag"
+  encoder "Carrie (MysticStorm) and Tanos"
+  license "CC-BY-3.0"
+  source "https://commons.wikimedia.org/wiki/File:Pony_Pride_Flag.svg"
+}
+palette {
+  black "#000000"
+  white "#ffffff"
+  blue "#0054a5"
+  green "#006f3a"
+}
+proportion hoist=414 fly=690
+
+bars black white blue white black {
+  ratio 159 24 48 24 159
+}
+
+charge disc white {
+  radius 157
+  at fly=345 hoist=207
+}
+
+charge disc green {
+  radius 147
+  at fly=345 hoist=207
+}
+
+charge svg {
+  at center
+  fly 690
+  hoist 414
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 414"><path d="M360 118            a4 4 -7.5 1 0 -23.8 3.1          a52 75 -7.5 1 1 -64.4 8.5          a4 4 -7.5 1 0 -23.8 3.1          a72 95 -7.5 1 0 112 -14.7          Z" fill="#ffffff" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m-111  51.9 l-0.3 8.0" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m-109  77 l1.7 7.8" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m-103 100 l3.4 7.3" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m-93  121 l5.1 6.1" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m8 36 l3.1 7.4" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m14 61 l0.6 8.0" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m14 86 l-1.4 7.9" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M360 118 m8 110 l-3.4 7.3" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157            a4 4 -7.5 1 0 -23.8 3.1          a52 75 -7.5 1 1 -64.4 8.5          a4 4 -7.5 1 0 -23.8 3.1          a72 95 -7.5 1 0 112 -14.7          Z" fill="#ffffff" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m-111  51.9 l-0.3 8.0" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m-109  77 l1.7 7.8" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m-103 100 l3.4 7.3" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m-93  121 l5.1 6.1" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m8 36 l3.1 7.4" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m14 61 l0.6 8.0" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m14 86 l-1.4 7.9" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/><path d="M421 157 m8 110 l-3.4 7.3" stroke="#000000" stroke-linecap="round" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/></svg>
+"""#
+}

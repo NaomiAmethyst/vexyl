@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Luxembourg"
+  encoder "Drawn by User:SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Luxembourg.svg"
+}
+palette {
+  red "#ef3340"
+  white "#ffffff"
+  blue "#00a3e0"
+}
+proportion hoist=3 fly=5
+
+bars red white blue

@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Nigeria"
+  encoder "Jon Harald Søby."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Nigeria.svg"
+}
+palette {
+  green "#008751"
+  white "#ffffff"
+}
+proportion hoist=3 fly=6
+
+bars green white green {
+  along hoist
+}

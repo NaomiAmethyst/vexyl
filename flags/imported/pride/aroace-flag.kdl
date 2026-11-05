@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Aroace flag"
+  encoder "Original: Jace \"Aroaes\" Vector: Rummskartoffel"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Aroace_flag.svg"
+}
+palette {
+  orange "#e28c00"
+  yellow "#eccd00"
+  white "#ffffff"
+  blue "#62aedc"
+  blue-2 "#203856"
+}
+proportion hoist=15 fly=25
+
+bars orange yellow white blue blue-2

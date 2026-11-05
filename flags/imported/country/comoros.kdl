@@ -1,0 +1,40 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Comoros"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Comoros.svg"
+}
+palette {
+  yellow "#ffd100"
+  white "#ffffff"
+  red "#ef3340"
+  blue "#003da5"
+  green "#009639"
+}
+proportion hoist=36 fly=60
+
+bars yellow white red blue
+
+chevrons green {
+  depth 30
+}
+
+charge disc white {
+  radius 8.5
+  cut {
+    disc {
+      radius 8.25
+      at fly=13.5039 hoist=18
+    }
+  }
+  at fly=10.248 hoist=18
+}
+
+charge star white {
+  radius 1.7501
+  rotate -0.0131
+  at fly=12.5194 hoist=12.5
+  repeat line count=4 hoist=3.75
+}

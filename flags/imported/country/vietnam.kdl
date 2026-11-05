@@ -1,0 +1,20 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Vietnam"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Vietnam.svg"
+}
+palette {
+  red "#da251d"
+  yellow "#ffff00"
+}
+proportion hoist=20 fly=30
+
+field red
+
+charge star yellow {
+  radius 6.0003
+  at fly=15 hoist=10
+}

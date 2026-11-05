@@ -1,0 +1,201 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the Philippines"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Philippines.svg"
+}
+palette {
+  blue "#0038a8"
+  red "#ce1126"
+  white "#ffffff"
+  yellow "#fcd116"
+}
+proportion hoist=90 fly=180
+
+charge polygon blue {
+  point fly=0 hoist=0
+  point fly=180 hoist=0
+  point fly=180 hoist=45
+  point fly=28 hoist=89
+}
+
+charge polygon red {
+  point fly=28 hoist=45
+  point fly=180 hoist=45
+  point fly=180 hoist=90
+  point fly=0 hoist=90
+}
+
+chevrons white {
+  depth 77.942
+}
+
+charge disc yellow {
+  radius 9
+  at fly=28 hoist=45
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=24.836 hoist=29.091
+  point fly=25.781 hoist=28.145
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=26.831 hoist=27.169
+  point fly=28 hoist=26
+  point fly=29.169 hoist=27.169
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=30.219 hoist=28.145
+  point fly=31.164 hoist=29.091
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=31.164 hoist=60.909
+  point fly=30.219 hoist=61.855
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=29.169 hoist=62.831
+  point fly=28 hoist=64
+  point fly=26.831 hoist=62.831
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=25.781 hoist=61.855
+  point fly=24.836 hoist=60.909
+}
+
+charge svg {
+  at center
+  fly 180
+  hoist 90
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 90"><path d="m0 0-3.164-15.909.945-.946zl-1.169-17.831L0-19l1.169 1.169zl2.219-16.855.945.946z" fill="#fcd116" transform="matrix(0 1 -1 0 28 45)"/></svg>
+"""#
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=12.091 hoist=48.164
+  point fly=11.145 hoist=47.219
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=10.169 hoist=46.169
+  point fly=9 hoist=45
+  point fly=10.169 hoist=43.831
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=11.145 hoist=42.781
+  point fly=12.091 hoist=41.836
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=37.0121 hoist=31.5134
+  point fly=38.3492 hoist=31.5126
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=39.7818 hoist=31.565
+  point fly=41.435 hoist=31.565
+  point fly=41.435 hoist=33.2182
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=41.4874 hoist=34.6508
+  point fly=41.4866 hoist=35.9879
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=18.9879 hoist=58.4866
+  point fly=17.6508 hoist=58.4874
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=16.2182 hoist=58.435
+  point fly=14.565 hoist=58.435
+  point fly=14.565 hoist=56.7818
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=14.5126 hoist=55.3492
+  point fly=14.5134 hoist=54.0121
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=41.4866 hoist=54.0121
+  point fly=41.4874 hoist=55.3492
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=41.435 hoist=56.7818
+  point fly=41.435 hoist=58.435
+  point fly=39.7818 hoist=58.435
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=38.3492 hoist=58.4874
+  point fly=37.0121 hoist=58.4866
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=14.5134 hoist=35.9879
+  point fly=14.5126 hoist=34.6508
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=14.565 hoist=33.2182
+  point fly=14.565 hoist=31.565
+  point fly=16.2182 hoist=31.565
+}
+
+charge polygon yellow {
+  point fly=28 hoist=45
+  point fly=17.6508 hoist=31.5126
+  point fly=18.9879 hoist=31.5134
+}
+
+charge star yellow {
+  radius 4.9999
+  inner 2
+  rotate 18
+  at fly=63.942 hoist=45
+}
+
+charge star yellow {
+  radius 4.9999
+  inner 2
+  rotate -6
+  at fly=7.0005 hoist=77.8752
+}
+
+charge star yellow {
+  radius 4.9999
+  inner 2
+  rotate -30
+  at fly=7.0005 hoist=12.1248
+}

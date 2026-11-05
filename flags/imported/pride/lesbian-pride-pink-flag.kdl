@@ -1,0 +1,21 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Lesbian Pride pink flag"
+  encoder "AnonMoos (SVG file)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Lesbian_Pride_pink_flag.svg"
+}
+palette {
+  pink "#a40061"
+  pink-2 "#b75592"
+  pink-3 "#d063a6"
+  white "#ededeb"
+  pink-4 "#e4accf"
+  red "#c54e54"
+  red-2 "#8a1e04"
+}
+proportion hoist=945 fly=1575
+
+bars pink pink-2 pink-3 white pink-4 red red-2

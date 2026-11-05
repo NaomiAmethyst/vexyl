@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of France"
+  encoder "https://commons.wikimedia.org/wiki/File:Flag_of_France.svg, https://diffusion.shom.fr/pro/downloadable/download/sample/s"
+  license "LicenseRef-Public-Domain"
+  source "https://en.wikipedia.org/wiki/File:Flag_of_France.svg"
+}
+palette {
+  blue "#002654"
+  white "#ffffff"
+  red "#ce1126"
+}
+proportion hoist=600 fly=900
+
+bars blue white red {
+  along hoist
+}

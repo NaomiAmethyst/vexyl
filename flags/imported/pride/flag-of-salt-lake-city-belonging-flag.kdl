@@ -1,0 +1,93 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Salt Lake City - Belonging flag"
+  encoder "Arianna Meinking, Ella Kennedy-Yoon, and Erin Mendenhall"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Salt_Lake_City_-_Belonging_flag.svg"
+}
+palette {
+  pink "#890084"
+  blue "#2049ab"
+  green "#008a40"
+  yellow "#fbf000"
+  orange "#ff9918"
+  red "#e40303"
+  black "#000000"
+  brown "#815221"
+  blue-2 "#54aedc"
+  pink-2 "#ff9db8"
+  white "#ffffff"
+}
+proportion hoist=3810 fly=6000
+
+charge rect pink {
+  fly 6000
+  hoist 3810
+  at fly=3219.6122 hoist=1905
+}
+
+charge rect blue {
+  fly 6000
+  hoist 3175
+  at fly=3220.7199 hoist=1587.5
+}
+
+charge rect green {
+  fly 6000
+  hoist 2540
+  at fly=3220.7199 hoist=1270
+}
+
+charge rect yellow {
+  fly 6000
+  hoist 1905
+  at fly=3220.7199 hoist=952.5
+}
+
+charge rect orange {
+  fly 6000
+  hoist 1270
+  at fly=3220.7199 hoist=635
+}
+
+charge rect red {
+  fly 6000
+  hoist 635
+  at fly=3220.7199 hoist=317.5
+}
+
+chevrons black {
+  depth 3084.7139
+  angle 45.0148
+}
+
+chevrons brown {
+  depth 2604.7088
+  angle 45.0121
+}
+
+chevrons blue-2 {
+  depth 2132.7213
+  angle 44.8948
+}
+
+chevrons pink-2 {
+  depth 1536.7427
+  angle 45.1007
+}
+
+chevrons white {
+  depth 1020.8491
+  angle 44.8187
+}
+
+charge svg {
+  at center
+  fly 6000
+  hoist 3810
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6000 3810"><path d="m 61.616026,3.4891921 c 0.464713,-0.095904 0.921198,-0.093076 1.370163,0 5.178273,5.8619658 15.865165,6.5071602 12.514553,20.4461499 4.393973,-2.310232 8.787947,-3.462428 13.18192,-4.535714 -3.145746,3.402163 -6.211686,6.90291 -10.394344,9.024181 13.27829,3.656487 8.787512,12.167166 11.292038,20.457961 -0.01719,0.750927 -0.191911,1.405374 -0.566965,1.937129 -10.509705,3.335764 -13.970211,10.1967 -24.143229,0.614211 -0.115459,4.870896 -0.940393,9.523491 -2.693079,13.890625 C 60.683119,60.999179 59.828416,56.371816 59.531249,51.480357 50.163294,60.711041 44.703352,54.002176 35.482514,50.960638 35.112767,50.574434 34.815969,50.115279 34.679315,49.495982 37.632611,40.61634 32.869606,31.776965 46.349329,28.660045 42.233873,26.370369 38.997276,22.796207 35.671503,19.35238 c 4.805245,0.844525 9.274158,2.305661 13.32366,4.535715 C 45.460696,11.616077 55.613583,9.0196019 61.616026,3.4891921 Z" stroke="none" stroke-linecap="butt" stroke-width="0.436079" fill="#ffffff" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" stroke-miterlimit="4" transform="matrix(26.876818 0 0 26.889001 175.79004 8.152818)"/><path d="m 61.893601,24.331037 c -0.849053,2.485317 -1.854444,4.919734 -0.850448,8.00837 -3.621703,-2.791034 -5.477962,-2.737742 -7.559521,-3.047432 1.155505,1.893135 2.261007,3.797287 5.976747,5.126302 -3.768363,1.176058 -4.73834,3.201627 -6.11849,5.102678 2.185799,0.133281 4.479342,-0.195194 7.282471,-2.707614 -0.399493,3.191695 0.278912,5.559116 1.387359,7.59768 1.706764,-1.805438 1.988388,-4.385408 1.653646,-7.30036 2.911928,2.044708 5.181236,2.465955 7.252417,2.386672 -1.491613,-2.566843 -3.836705,-4.115019 -6.707398,-5.035863 4.112364,-0.590736 4.827867,-2.936517 6.44754,-4.815143 -2.550157,0.248677 -5.109396,0.41198 -7.443085,2.695454 1.267491,-3.612539 -0.07721,-5.783871 -1.321238,-8.010744 z" stroke="none" stroke-linecap="butt" stroke-width="0" fill="#f3b44d" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" fill-opacity="1" stroke-miterlimit="4" transform="matrix(26.876818 0 0 26.889001 175.79004 8.152818)"/></svg>
+"""#
+}

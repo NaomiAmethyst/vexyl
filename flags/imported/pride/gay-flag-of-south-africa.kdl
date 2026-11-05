@@ -1,0 +1,49 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Gay Flag of South Africa"
+  encoder "Htonl"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Gay_Flag_of_South_Africa.svg"
+}
+palette {
+  red "#e40303"
+  orange "#ff8c00"
+  yellow "#ffed00"
+  green "#008026"
+  blue "#004dff"
+  pink "#750787"
+  white "#ffffff"
+  black "#000000"
+}
+proportion hoist=480 fly=720
+
+bars red orange yellow green blue pink
+
+charge polygon white {
+  point fly=144.222 hoist=0
+  point fly=384.222 hoist=160
+  point fly=720 hoist=160
+  point fly=720 hoist=192
+  point fly=374.533 hoist=192
+  point fly=86.533 hoist=0
+}
+
+charge polygon white {
+  point fly=144.222 hoist=480
+  point fly=384.222 hoist=320
+  point fly=720 hoist=320
+  point fly=720 hoist=288
+  point fly=374.533 hoist=288
+  point fly=86.533 hoist=480
+}
+
+charge polygon black {
+  point fly=0 hoist=57.689
+  point fly=273.467 hoist=240
+  point fly=0 hoist=422.311
+  point fly=0 hoist=383.852
+  point fly=215.778 hoist=240
+  point fly=0 hoist=96.148
+}

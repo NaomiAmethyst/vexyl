@@ -1,0 +1,46 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Panama"
+  encoder "Zscout370 et al."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Panama.svg"
+}
+palette {
+  white "#ffffff"
+  red "#da121a"
+  blue "#072357"
+}
+proportion hoist=8 fly=12
+
+charge polygon white {
+  point fly=0 hoist=4
+  point fly=0 hoist=0
+  point fly=6 hoist=0
+  point fly=12 hoist=4
+  point fly=12 hoist=8
+  point fly=6 hoist=8
+}
+
+charge rect red {
+  fly 6
+  hoist 4
+  at fly=9 hoist=2
+}
+
+charge star red {
+  radius 1.1056
+  at fly=9 hoist=6.1056
+}
+
+charge rect blue {
+  fly 6
+  hoist 4
+  at fly=3 hoist=6
+}
+
+charge star blue {
+  radius 1.1056
+  at fly=3 hoist=2.1056
+}

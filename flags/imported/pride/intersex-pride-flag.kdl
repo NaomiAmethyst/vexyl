@@ -1,0 +1,22 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Intersex Pride Flag"
+  encoder "Morgan Carpenter (SVG file simplification by AnonMoos)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Intersex_Pride_Flag.svg"
+}
+palette {
+  yellow "#ffd800"
+  purple "#7902aa"
+}
+proportion hoist=600 fly=900
+
+field yellow
+
+charge ring purple {
+  radius 173.8125
+  inner 120.1875
+  at fly=450 hoist=300
+}

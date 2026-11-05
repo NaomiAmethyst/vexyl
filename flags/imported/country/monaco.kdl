@@ -1,0 +1,16 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Monaco"
+  encoder "Drawn by User:SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Monaco.svg"
+}
+palette {
+  red "#ce1126"
+  white "#ffffff"
+}
+proportion hoist=800 fly=1000
+
+bars red white

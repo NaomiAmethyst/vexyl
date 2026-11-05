@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Mauritius"
+  encoder "Zscout370"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Mauritius.svg"
+}
+palette {
+  red "#d01c1f"
+  blue "#2d3359"
+  orange "#f7b718"
+  green "#008658"
+}
+proportion hoist=600 fly=900
+
+bars red blue orange green

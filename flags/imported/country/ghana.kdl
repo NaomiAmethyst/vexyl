@@ -1,0 +1,23 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Ghana"
+  encoder "Theodosia Okoh"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Ghana.svg"
+}
+palette {
+  red "#ce1126"
+  yellow "#fcd116"
+  green "#006b3f"
+  black "#000000"
+}
+proportion hoist=600 fly=900
+
+bars red yellow green
+
+charge star black {
+  radius 110.5582
+  at fly=450 hoist=310.556
+}

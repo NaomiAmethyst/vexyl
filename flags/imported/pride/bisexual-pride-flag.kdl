@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Bisexual Pride Flag"
+  encoder "Michael Page"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Bisexual_Pride_Flag.svg"
+}
+palette {
+  pink "#d60270"
+  pink-2 "#9b4f96"
+  blue "#0038a8"
+}
+proportion hoist=15 fly=25
+
+bars pink pink-2 blue {
+  ratio 6 3 6
+}

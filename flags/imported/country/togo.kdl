@@ -1,0 +1,36 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Togo"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Togo.svg"
+}
+palette {
+  green "#006a4e"
+  yellow "#ffce00"
+  pink "#d21034"
+  white "#ffffff"
+}
+proportion hoist=500 fly=809.016
+
+bars green yellow green {
+  ratio 100 100 300
+}
+
+charge rect pink {
+  fly 300
+  hoist 300
+  at fly=150 hoist=150
+}
+
+charge rect yellow {
+  fly 809.016
+  hoist 100
+  at fly=404.508 hoist=350
+}
+
+charge star white {
+  radius 95.0001
+  at fly=150 hoist=150.0001
+}

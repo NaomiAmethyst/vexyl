@@ -1,0 +1,22 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Palestine"
+  encoder "Orionist, previous versions by Makaristos, Mysid, etc."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Palestine.svg"
+}
+palette {
+  black "#000000"
+  white "#ffffff"
+  green "#009639"
+  red "#ed2e38"
+}
+proportion hoist=3 fly=6
+
+bars black white green
+
+chevrons red {
+  depth 2
+}

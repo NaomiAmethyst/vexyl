@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Gabon"
+  encoder "Léon Augé and Pierre Claver Eyeghe"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Gabon.svg"
+}
+palette {
+  green "#009e60"
+  yellow "#fcd116"
+  blue "#3a75c4"
+}
+proportion hoist=750 fly=1000
+
+bars green yellow blue

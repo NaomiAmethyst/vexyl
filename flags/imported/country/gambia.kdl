@@ -1,0 +1,20 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of The Gambia"
+  encoder "Vzb83 iThe source code of the previous SVG was invalid due to 39 errors."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_The_Gambia.svg"
+}
+palette {
+  red "#ce1126"
+  white "#ffffff"
+  blue "#0c1c8c"
+  green "#3a7728"
+}
+proportion hoist=18 fly=27
+
+bars red white blue white green {
+  ratio 6 1 4 1 6
+}

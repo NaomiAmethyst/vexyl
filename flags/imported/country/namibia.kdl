@@ -1,0 +1,52 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Namibia"
+  encoder "SVG by Vzb83~commonswiki et al."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Namibia.svg"
+}
+palette {
+  blue "#002f6c"
+  green "#009a44"
+  white "#ffffff"
+  red "#c8102e"
+  yellow "#ffcd00"
+}
+proportion hoist=60 fly=90
+
+charge polygon blue {
+  point fly=0 hoist=60
+  point fly=0 hoist=0
+  point fly=90 hoist=0
+}
+
+charge polygon green {
+  point fly=90 hoist=0
+  point fly=90 hoist=60
+  point fly=0 hoist=60
+}
+
+band white {
+  along bend-sinister
+  width 20
+}
+
+band red {
+  along bend-sinister
+  width 15
+}
+
+charge star yellow {
+  radius 10
+  inner 6.0001
+  points 12
+  at fly=18 hoist=16.3413
+}
+
+charge ring blue {
+  radius 6
+  inner 5
+  at fly=18 hoist=16.341
+}

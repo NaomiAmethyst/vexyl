@@ -1,0 +1,31 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Switzerland (Pantone)"
+  encoder "Unknown Vector graphics: Flag_of_Switzerland.svg: User:Marc Mongenet Credits: User:-xfi- User:Zscout370 derivative work:"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Switzerland_(Pantone).svg"
+}
+palette {
+  red "#da291c"
+  white "#ffffff"
+}
+proportion hoist=32 fly=32
+
+field red
+
+charge polygon white {
+  point fly=13 hoist=6
+  point fly=19 hoist=6
+  point fly=19 hoist=13
+  point fly=26 hoist=13
+  point fly=26 hoist=19
+  point fly=19 hoist=19
+  point fly=19 hoist=26
+  point fly=13 hoist=26
+  point fly=13 hoist=19
+  point fly=6 hoist=19
+  point fly=6 hoist=13
+  point fly=13 hoist=13
+}

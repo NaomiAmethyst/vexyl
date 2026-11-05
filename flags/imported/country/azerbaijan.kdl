@@ -1,0 +1,35 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Azerbaijan"
+  encoder "SKopp and others"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Azerbaijan.svg"
+}
+palette {
+  teal "#00b5e2"
+  red "#ef3340"
+  green "#509e2f"
+  white "#ffffff"
+}
+proportion hoist=600 fly=1200
+
+bars teal red green
+
+charge disc white {
+  radius 90
+  at fly=570 hoist=300
+}
+
+charge disc red {
+  radius 75
+  at fly=590 hoist=300
+}
+
+charge star white {
+  radius 49.9998
+  inner 25
+  points 8
+  at fly=670 hoist=300
+}

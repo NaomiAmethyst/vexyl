@@ -1,0 +1,21 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Palau"
+  encoder "Original: John Blau Skebong Vector: Nightstallion"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Palau.svg"
+}
+palette {
+  blue "#0099ff"
+  yellow "#ffff00"
+}
+proportion hoist=500 fly=800
+
+field blue
+
+charge disc yellow {
+  radius 150
+  at fly=350 hoist=250
+}

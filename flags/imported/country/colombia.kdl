@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Colombia"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Colombia.svg"
+}
+palette {
+  yellow "#ffcd00"
+  blue "#003087"
+  red "#c8102e"
+}
+proportion hoist=600 fly=900
+
+bars yellow blue red {
+  ratio 300 150 150
+}

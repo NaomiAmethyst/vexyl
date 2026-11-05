@@ -1,0 +1,63 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Intersex-inclusive pride flag"
+  encoder "Nikki"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Intersex-inclusive_pride_flag.svg"
+}
+palette {
+  red "#e22016"
+  orange "#f28917"
+  yellow "#efe524"
+  green "#78b82a"
+  blue "#2c58a4"
+  purple "#6d2380"
+  black "#000000"
+  brown "#945516"
+  teal "#7bcce5"
+  pink "#f4aec8"
+  white "#ffffff"
+  yellow-2 "#fdd817"
+  purple-2 "#66338b"
+}
+proportion hoist=762 fly=1200
+
+bars red orange yellow green blue purple
+
+chevrons black {
+  depth 668
+  angle 47.1846
+}
+
+chevrons brown {
+  depth 594
+  angle 47.1846
+}
+
+chevrons teal {
+  depth 521
+  angle 47.1846
+}
+
+chevrons pink {
+  depth 448
+  angle 47.1846
+}
+
+chevrons white {
+  depth 374
+  angle 47.2656
+}
+
+chevrons yellow-2 {
+  depth 301
+  angle 47.2833
+}
+
+charge ring purple-2 {
+  radius 89.5
+  inner 70.5
+  at fly=111 hoist=381
+}

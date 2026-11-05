@@ -1,0 +1,16 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Haiti (civil)"
+  encoder "Wrestlingring"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Haiti_(civil).svg"
+}
+palette {
+  blue "#00209f"
+  pink "#d21034"
+}
+proportion hoist=600 fly=1000
+
+bars blue pink

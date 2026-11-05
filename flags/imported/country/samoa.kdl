@@ -1,0 +1,47 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Samoa"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Samoa.svg"
+}
+palette {
+  red "#ce1126"
+  blue "#002b7f"
+  white "#ffffff"
+}
+proportion hoist=144 fly=288
+
+field red
+
+charge rect blue {
+  fly 144
+  hoist 72
+  at fly=72 hoist=36
+}
+
+charge star white {
+  radius 10.5146
+  at fly=72 hoist=60.4935
+}
+
+charge star white {
+  radius 8.4117
+  at fly=50 hoist=29.4117
+}
+
+charge star white {
+  radius 8.4117
+  at fly=72 hoist=11.4117
+}
+
+charge star white {
+  radius 7.886
+  at fly=94.5 hoist=25.886
+}
+
+charge star white {
+  radius 5.2573
+  at fly=83 hoist=41.7467
+}

@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Bulgaria"
+  encoder "SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Bulgaria.svg"
+}
+palette {
+  white "#ffffff"
+  green "#00966e"
+  red "#d62612"
+}
+proportion hoist=3 fly=5
+
+bars white green red

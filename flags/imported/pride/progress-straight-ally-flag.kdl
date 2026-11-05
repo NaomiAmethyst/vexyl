@@ -1,0 +1,112 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Progress Straight Ally Flag"
+  encoder "FireDragonValo"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Progress_Straight_Ally_Flag.svg"
+}
+palette {
+  black "#000000"
+  white "#ffffff"
+  pink "#750787"
+  blue "#004dff"
+  green "#008026"
+  yellow "#ffed00"
+  orange "#ff8c00"
+  red "#e40303"
+  brown "#613915"
+  teal "#74d7ee"
+  pink-2 "#ffafc8"
+}
+proportion hoist=432 fly=648
+
+bars black white black white black white
+
+charge polygon pink {
+  point fly=54 hoist=360
+  point fly=270 hoist=144
+  point fly=270 hoist=360
+  point fly=216 hoist=432
+  point fly=0 hoist=432
+}
+
+charge polygon pink {
+  point fly=594 hoist=360
+  point fly=378 hoist=144
+  point fly=378 hoist=360
+  point fly=432 hoist=432
+  point fly=648 hoist=432
+}
+
+charge polygon blue {
+  point fly=108 hoist=288
+  point fly=324 hoist=216
+  point fly=540 hoist=288
+  point fly=594 hoist=360
+  point fly=378 hoist=360
+  point fly=324 hoist=288
+  point fly=270 hoist=360
+  point fly=54 hoist=360
+}
+
+charge polygon green {
+  point fly=162 hoist=216
+  point fly=324 hoist=144
+  point fly=486 hoist=216
+  point fly=540 hoist=288
+  point fly=108 hoist=288
+}
+
+charge polygon yellow {
+  point fly=216 hoist=144
+  point fly=324 hoist=72
+  point fly=432 hoist=144
+  point fly=486 hoist=216
+  point fly=162 hoist=216
+}
+
+charge polygon orange {
+  point fly=270 hoist=72
+  point fly=324 hoist=36
+  point fly=378 hoist=72
+  point fly=432 hoist=144
+  point fly=216 hoist=144
+}
+
+charge polygon red {
+  point fly=270 hoist=72
+  point fly=324 hoist=0
+  point fly=378 hoist=72
+}
+
+charge polygon black {
+  point fly=108 hoist=432
+  point fly=324 hoist=144
+  point fly=540 hoist=432
+}
+
+charge polygon brown {
+  point fly=135 hoist=432
+  point fly=324 hoist=180
+  point fly=513 hoist=432
+}
+
+charge polygon teal {
+  point fly=162 hoist=432
+  point fly=324 hoist=216
+  point fly=486 hoist=432
+}
+
+charge polygon pink-2 {
+  point fly=189 hoist=432
+  point fly=324 hoist=252
+  point fly=459 hoist=432
+}
+
+charge polygon white {
+  point fly=216 hoist=432
+  point fly=324 hoist=288
+  point fly=432 hoist=432
+}

@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Grey asexuality flag"
+  encoder "Kautr"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Grey_asexuality_flag.svg"
+}
+palette {
+  purple "#740195"
+  grey "#b2b2b2"
+  white "#ffffff"
+}
+proportion hoist=15 fly=25
+
+bars purple grey white grey purple

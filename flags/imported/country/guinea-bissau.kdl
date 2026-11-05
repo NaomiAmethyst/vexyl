@@ -1,0 +1,83 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Guinea-Bissau"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Guinea-Bissau.svg"
+}
+palette {
+  yellow "#fcd116"
+  green "#009e49"
+  red "#ce1126"
+  black "#000000"
+}
+proportion hoist=6 fly=12
+
+bars yellow green
+
+charge rect red {
+  fly 4
+  hoist 6
+  at fly=2 hoist=3
+}
+
+charge polygon black {
+  point fly=2 hoist=2
+  point fly=1.691 hoist=2.9511
+  point fly=2.1665 hoist=3.1056
+}
+
+charge polygon black {
+  point fly=2 hoist=2
+  point fly=2.309 hoist=2.9511
+  point fly=1.8335 hoist=3.1056
+}
+
+charge polygon black {
+  point fly=2.9511 hoist=2.691
+  point fly=1.9511 hoist=2.691
+  point fly=1.9511 hoist=3.191
+}
+
+charge polygon black {
+  point fly=2.9511 hoist=2.691
+  point fly=2.142 hoist=3.2788
+  point fly=1.8481 hoist=2.8743
+}
+
+charge polygon black {
+  point fly=2.5878 hoist=3.809
+  point fly=2.2788 hoist=2.858
+  point fly=1.8032 hoist=3.0125
+}
+
+charge polygon black {
+  point fly=2.5878 hoist=3.809
+  point fly=1.7788 hoist=3.2212
+  point fly=2.0727 hoist=2.8167
+}
+
+charge polygon black {
+  point fly=1.4122 hoist=3.809
+  point fly=2.2212 hoist=3.2212
+  point fly=1.9273 hoist=2.8167
+}
+
+charge polygon black {
+  point fly=1.4122 hoist=3.809
+  point fly=1.7212 hoist=2.858
+  point fly=2.1968 hoist=3.0125
+}
+
+charge polygon black {
+  point fly=1.0489 hoist=2.691
+  point fly=1.858 hoist=3.2788
+  point fly=2.1519 hoist=2.8743
+}
+
+charge polygon black {
+  point fly=1.0489 hoist=2.691
+  point fly=2.0489 hoist=2.691
+  point fly=2.0489 hoist=3.191
+}

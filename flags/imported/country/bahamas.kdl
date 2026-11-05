@@ -1,0 +1,27 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of The Bahamas"
+  encoder "Government of Bahamas"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Bahamas.svg"
+}
+palette {
+  teal "#00778b"
+  orange "#ffc72c"
+  black "#000000"
+}
+proportion hoist=3 fly=6
+
+field teal
+
+charge rect orange {
+  fly 5
+  hoist 1
+  at fly=3.5 hoist=1.5
+}
+
+chevrons black {
+  depth 2.5981
+}

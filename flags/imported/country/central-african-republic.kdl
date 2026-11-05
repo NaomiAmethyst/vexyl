@@ -1,0 +1,46 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the Central African Republic"
+  encoder "Barthélemy Boganda"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Central_African_Republic.svg"
+}
+palette {
+  blue "#003082"
+  white "#ffffff"
+  yellow "#ffce00"
+  green "#289728"
+  pink "#d21034"
+}
+proportion hoist=8 fly=12
+
+bars blue white {
+  ratio 2 6
+}
+
+charge polygon yellow {
+  point fly=6 hoist=4
+  point fly=12 hoist=6
+  point fly=12 hoist=8
+  point fly=0 hoist=8
+  point fly=0 hoist=6
+}
+
+charge star yellow {
+  radius 0.9
+  at fly=2 hoist=1.0859
+}
+
+charge rect green {
+  fly 12
+  hoist 2
+  at fly=6 hoist=5
+}
+
+charge rect pink {
+  fly 2
+  hoist 8
+  at fly=6 hoist=4
+}

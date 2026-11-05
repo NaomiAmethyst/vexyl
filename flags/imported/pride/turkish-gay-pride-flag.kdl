@@ -1,0 +1,36 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Turkish Gay Pride Flag"
+  encoder "HectorTroi"
+  license "CC-BY-SA-4.0"
+  source "https://commons.wikimedia.org/wiki/File:Turkish_Gay_Pride_Flag.svg"
+}
+palette {
+  red "#e40303"
+  orange "#ff8c00"
+  yellow "#ffed00"
+  green "#008026"
+  blue "#004dff"
+  pink "#750787"
+  white "#ffffff"
+}
+proportion hoist=800 fly=1200
+
+bars red orange yellow green blue pink
+
+charge svg {
+  at center
+  fly 1200
+  hoist 800
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><path d="M 424.79102 200 A 200 200 0 0 0 225 400 A 200 200 0 0 0 425 600 A 200 200 0 0 0 594.00586 506.94531 A 160 160 0 0 1 475 560 A 160 160 0 0 1 315 400 A 160 160 0 0 1 475 240 A 160 160 0 0 1 594.00391 293.05078 A 200 200 0 0 0 425 200 A 200 200 0 0 0 424.79102 200 z " fill="#ffffff" transform="matrix(1 0 0 1 0 0)"/></svg>
+"""#
+}
+
+charge star white {
+  radius 100.0002
+  rotate -18
+  at fly=683.3332 hoist=400
+}

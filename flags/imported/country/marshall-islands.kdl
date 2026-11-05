@@ -1,0 +1,89 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the Marshall Islands"
+  encoder "No machine-readable author provided. SKopp assumed (based on copyright claims)."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Marshall_Islands.svg"
+}
+palette {
+  white "#ffffff"
+  orange "#dd7500"
+  blue "#003893"
+}
+proportion hoist=250 fly=475
+
+field white
+
+charge polygon orange {
+  point fly=0 hoist=242
+  point fly=0 hoist=0
+  point fly=475 hoist=0
+  point fly=475 hoist=53
+}
+
+charge polygon blue {
+  point fly=0 hoist=238
+  point fly=0 hoist=0
+  point fly=475 hoist=0
+  point fly=475 hoist=4
+}
+
+charge polygon blue {
+  point fly=0 hoist=246
+  point fly=0 hoist=250
+  point fly=475 hoist=250
+  point fly=475 hoist=102
+}
+
+charge polygon white {
+  point fly=91.28 hoist=13.78
+  point fly=94.48 hoist=66.99
+  point fly=105.64 hoist=37.67
+  point fly=100.65 hoist=68.64
+  point fly=119.03 hoist=43.21
+  point fly=106.19 hoist=71.84
+  point fly=130.52 hoist=52.03
+  point fly=110.72 hoist=76.36
+  point fly=139.34 hoist=63.53
+  point fly=113.91 hoist=81.9
+  point fly=144.89 hoist=76.91
+  point fly=115.57 hoist=88.08
+  point fly=168.78 hoist=91.28
+  point fly=115.57 hoist=94.48
+  point fly=144.89 hoist=105.64
+  point fly=113.91 hoist=100.65
+  point fly=139.34 hoist=119.03
+  point fly=110.72 hoist=106.19
+  point fly=130.52 hoist=130.52
+  point fly=106.19 hoist=110.72
+  point fly=119.03 hoist=139.34
+  point fly=100.65 hoist=113.91
+  point fly=105.64 hoist=144.89
+  point fly=94.48 hoist=115.57
+  point fly=91.28 hoist=168.78
+  point fly=88.08 hoist=115.57
+  point fly=76.91 hoist=144.89
+  point fly=81.9 hoist=113.91
+  point fly=63.53 hoist=139.34
+  point fly=76.36 hoist=110.72
+  point fly=52.03 hoist=130.52
+  point fly=71.84 hoist=106.19
+  point fly=43.21 hoist=119.03
+  point fly=68.64 hoist=100.65
+  point fly=37.67 hoist=105.64
+  point fly=66.99 hoist=94.48
+  point fly=13.78 hoist=91.28
+  point fly=66.99 hoist=88.08
+  point fly=37.67 hoist=76.91
+  point fly=68.64 hoist=81.9
+  point fly=43.21 hoist=63.53
+  point fly=71.84 hoist=76.36
+  point fly=52.03 hoist=52.03
+  point fly=76.36 hoist=71.84
+  point fly=63.53 hoist=43.21
+  point fly=81.9 hoist=68.64
+  point fly=76.91 hoist=37.67
+  point fly=88.08 hoist=66.99
+}

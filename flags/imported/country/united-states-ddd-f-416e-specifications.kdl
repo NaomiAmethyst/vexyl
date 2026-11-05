@@ -1,0 +1,96 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the United States (DDD-F-416E specifications)"
+  encoder "Vector file created by Dbenbenn, Zscout370, Jacobolus, Indolences, and Technion."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_United_States_(DDD-F-416E_specifications).svg"
+}
+palette {
+  pink "#bf0a30"
+  white "#ffffff"
+  blue "#00205b"
+}
+proportion hoist=3900 fly=7410
+
+field pink
+
+charge rect white {
+  fly 7410
+  hoist 300
+  at fly=3705 hoist=450
+  repeat line count=6 hoist=600
+}
+
+charge rect blue {
+  fly 2964
+  hoist 2100
+  at fly=1482 hoist=1050
+}
+
+charge star white {
+  radius 120
+  at fly=247 hoist=210
+  repeat line count=5 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=494 hoist=420
+  repeat line count=4 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=741 hoist=210
+  repeat line count=5 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=988 hoist=420
+  repeat line count=4 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=1235 hoist=210
+  repeat line count=5 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=1482 hoist=420
+  repeat line count=4 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=1729 hoist=210
+  repeat line count=5 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=1976 hoist=420
+  repeat line count=4 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=2223 hoist=210
+  repeat line count=5 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=2470 hoist=420
+  repeat line count=4 hoist=420
+}
+
+charge star white {
+  radius 120
+  at fly=2717 hoist=210
+  repeat line count=5 hoist=420
+}

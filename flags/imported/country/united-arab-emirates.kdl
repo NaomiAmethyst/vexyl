@@ -1,0 +1,24 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the United Arab Emirates"
+  encoder "Abdulla Mohammed Al Maainah"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Arab_Emirates.svg"
+}
+palette {
+  green "#00843d"
+  white "#ffffff"
+  black "#000000"
+  red "#c8102e"
+}
+proportion hoist=6 fly=12
+
+bars green white black
+
+charge rect red {
+  fly 3
+  hoist 6
+  at fly=1.5 hoist=3
+}

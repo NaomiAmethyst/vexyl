@@ -1,0 +1,50 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Leather, Latex, and BDSM pride - Light"
+  encoder "Icey at English Wikipedia"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Leather,_Latex,_and_BDSM_pride_-_Light.svg"
+}
+palette {
+  black "#000000"
+  blue "#2a2a7f"
+  white "#ffffff"
+}
+proportion hoist=18 fly=27
+
+field black
+
+charge rect blue {
+  fly 27
+  hoist 2
+  at fly=13.5 hoist=3
+}
+
+charge rect blue {
+  fly 27
+  hoist 6
+  at fly=13.5 hoist=9
+}
+
+charge rect blue {
+  fly 27
+  hoist 2
+  at fly=13.5 hoist=15
+}
+
+charge rect white {
+  fly 27
+  hoist 2
+  at fly=13.5 hoist=9
+}
+
+charge svg {
+  at center
+  fly 27
+  hoist 18
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 18"><path d="M58 17C52 7 42 0 30 0 13 0 0 13 0 30c0 33 18 38 58 76 40-38 58-43 58-76 0-17-13-30-30-30-12 0-22 7-28 17z" transform="matrix(0.052245 -0.040818 0.041496 0.053112 1.364139 4.273747)" stroke="#000000" stroke-width=".25" fill="#e70039"/></svg>
+"""#
+}

@@ -1,0 +1,22 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Queer Flag"
+  encoder "pastelmemer"
+  license "CC-BY-SA-4.0"
+  source "https://commons.wikimedia.org/wiki/File:Queer_Flag.svg"
+}
+palette {
+  black "#000000"
+  teal "#99d9ea"
+  blue "#00a2e8"
+  green "#b5e61d"
+  white "#ffffff"
+  yellow "#ffc90e"
+  red "#fd6666"
+  pink "#ffaec9"
+}
+proportion hoist=2700 fly=4500
+
+bars black teal blue green white yellow red pink black

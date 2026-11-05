@@ -1,0 +1,54 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Tel Aviv LGBTQ+ Progress Solidarity Flag"
+  encoder "FireDragonValo"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Tel_Aviv_LGBTQ%2B_Progress_Solidarity_Flag.svg"
+}
+palette {
+  red "#e50000"
+  orange "#ff8d00"
+  yellow "#ffee00"
+  green "#028121"
+  blue "#004cff"
+  pink "#770088"
+  brown "#613915"
+  teal "#74d7ee"
+  pink-2 "#ffafc8"
+  white "#ffffff"
+}
+proportion hoist=325 fly=512
+
+bars red orange yellow green blue pink {
+  ratio 32.6464 32.4212 162.6691 32.5338 32.5338 32.195
+}
+
+charge svg {
+  at center
+  fly 512
+  hoist 325
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 325"><path d="m 40.94231,0 c 0,108.33334 0,216.66667 0,325.00001 13.65882,0 27.31765,0 40.97648,0 54.15859,-54.16667 108.31718,-108.33334 162.47576,-162.5 C 190.23597,108.33334 136.07738,54.16667 81.91879,0 68.25996,0 54.60113,0 40.94231,0 Z" stroke-width="0.0853172" fill="#000000" transform="matrix(1 0 0 1 0 0)"/></svg>
+"""#
+}
+
+chevrons brown {
+  depth 203.4342
+  angle 45.0015
+}
+
+chevrons teal {
+  depth 163.1578
+}
+
+chevrons pink-2 {
+  depth 121.1739
+  angle 45.0902
+}
+
+chevrons white {
+  depth 81.1526
+  angle 44.8081
+}

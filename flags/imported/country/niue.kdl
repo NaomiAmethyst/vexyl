@@ -1,0 +1,104 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Niue"
+  encoder "SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Niue.svg"
+}
+palette {
+  blue "#012169"
+  white "#ffffff"
+  red "#c8102e"
+  yellow "#fedd00"
+}
+proportion hoist=60 fly=120
+
+field blue
+
+charge polygon white {
+  point fly=-1.3416 hoist=2.6833
+  point fly=58.6584 hoist=32.6833
+  point fly=61.3416 hoist=27.3167
+  point fly=1.3416 hoist=-2.6833
+}
+
+charge polygon white {
+  point fly=58.6584 hoist=-2.6833
+  point fly=-1.3416 hoist=27.3167
+  point fly=1.3416 hoist=32.6833
+  point fly=61.3416 hoist=2.6833
+}
+
+charge svg {
+  at center
+  fly 120
+  hoist 60
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60"><defs><clipPath id="t"><path d="M0,0V15H70V30H60zM0,30V40H30V0H60z"></path></clipPath></defs><path d="M0,0L60,30M60,0L0,30" stroke="#c8102e" stroke-width="4" clip-path="url(#t)" transform="matrix(1 0 0 1 0 0)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 10
+  hoist 40
+  at fly=30 hoist=20
+}
+
+charge rect white {
+  fly 70
+  hoist 10
+  at fly=35 hoist=15
+}
+
+charge rect red {
+  fly 6
+  hoist 40
+  at fly=30 hoist=20
+}
+
+charge rect red {
+  fly 70
+  hoist 6
+  at fly=35 hoist=15
+}
+
+charge polygon yellow {
+  point fly=60 hoist=0
+  point fly=120 hoist=0
+  point fly=120 hoist=60
+  point fly=0 hoist=60
+  point fly=0 hoist=30
+  point fly=60 hoist=30
+}
+
+charge disc blue {
+  radius 5.1039
+  at fly=30 hoist=15
+}
+
+charge star yellow {
+  radius 5.1039
+  at fly=30 hoist=15
+}
+
+charge star yellow {
+  radius 3
+  at fly=12.5 hoist=15.29
+}
+
+charge star yellow {
+  radius 3
+  at fly=47.5 hoist=15.29
+}
+
+charge star yellow {
+  radius 3
+  at fly=30 hoist=25.29
+}
+
+charge star yellow {
+  radius 3
+  at fly=30 hoist=5.29
+}

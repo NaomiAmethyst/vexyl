@@ -1,0 +1,62 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Grenada"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Grenada.svg"
+}
+palette {
+  red "#ce1126"
+  teal "#007a5e"
+  yellow "#fcd116"
+}
+proportion hoist=300 fly=500
+
+field red
+
+charge rect teal {
+  fly 416
+  hoist 216
+  at fly=250 hoist=150
+}
+
+charge polygon yellow {
+  point fly=42 hoist=42
+  point fly=458 hoist=42
+  point fly=42 hoist=258
+  point fly=458 hoist=258
+}
+
+charge disc red {
+  radius 36
+  at fly=250 hoist=150
+}
+
+charge svg {
+  at center
+  fly 500
+  hoist 300
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300"><path d="M67.944 150.113c4.262 8.515 12.757 17.893 20.313 21.321.367-8.513-2.341-19.515-6.224-28.33z" fill="#ce1126" transform="matrix(1 0 0 1 0 0)"/><path d="M60.284 121.487c6.35 13.695-17.533 45.856 21.453 53.976-4.736-6.643-7.33-17.752-6.04-26.456 8.095 3.448 16.212 11.464 19.402 18.972 13.444-37.484-26.456-33.922-34.815-46.492z" fill="#fcd116" transform="matrix(1 0 0 1 0 0)"/></svg>
+"""#
+}
+
+charge star yellow {
+  radius 19.5
+  rotate 0.0012
+  at fly=149.9996 hoist=279
+  repeat line count=3 fly=100
+}
+
+charge star yellow {
+  radius 19.5
+  rotate 0.0012
+  at fly=349.9996 hoist=21
+  repeat line count=3 fly=-100
+}
+
+charge star yellow {
+  radius 32.9999
+  at fly=250.0004 hoist=149.9996
+}

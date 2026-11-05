@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Neutrois Flag"
+  encoder "Jynto"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Neutrois_Flag.svg"
+}
+palette {
+  white "#ffffff"
+  green "#1f9f00"
+  black "#000000"
+}
+proportion hoist=480 fly=800
+
+bars white green black

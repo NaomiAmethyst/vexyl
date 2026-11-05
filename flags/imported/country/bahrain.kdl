@@ -1,0 +1,32 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Bahrain"
+  encoder "Source: Drawn by SKopp, rewritten by Zscout370"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Bahrain.svg"
+}
+palette {
+  white "#ffffff"
+  red "#da291c"
+}
+proportion hoist=60 fly=100
+
+field white
+
+charge polygon red {
+  point fly=25 hoist=0
+  point fly=100 hoist=0
+  point fly=100 hoist=60
+  point fly=25 hoist=60
+  point fly=40 hoist=54
+  point fly=25 hoist=48
+  point fly=40 hoist=42
+  point fly=25 hoist=36
+  point fly=40 hoist=30
+  point fly=25 hoist=24
+  point fly=40 hoist=18
+  point fly=25 hoist=12
+  point fly=40 hoist=6
+}

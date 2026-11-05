@@ -1,0 +1,20 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Bigender Flag"
+  encoder "JavacBenny"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Bigender_Flag.svg"
+}
+palette {
+  pink "#c479a2"
+  pink-2 "#eda5cd"
+  purple "#d5c7e8"
+  white "#ffffff"
+  blue "#9ac7e8"
+  blue-2 "#6d82d1"
+}
+proportion hoist=308 fly=512
+
+bars pink pink-2 purple white purple blue blue-2

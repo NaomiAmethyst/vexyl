@@ -1,0 +1,157 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the Cook Islands"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Cook_Islands.svg"
+}
+palette {
+  blue "#012169"
+  white "#ffffff"
+  red "#c8102e"
+}
+proportion hoist=4800 fly=9600
+
+field blue
+
+charge polygon white {
+  point fly=-107.3313 hoist=214.6625
+  point fly=4692.6687 hoist=2614.6625
+  point fly=4907.3313 hoist=2185.3375
+  point fly=107.3313 hoist=-214.6625
+}
+
+charge polygon white {
+  point fly=107.3313 hoist=2614.6625
+  point fly=4907.3313 hoist=214.6625
+  point fly=4692.6687 hoist=-214.6625
+  point fly=-107.3313 hoist=2185.3375
+}
+
+charge svg {
+  at center
+  fly 9600
+  hoist 4800
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9600 4800"><defs><clipPath id="c"><path d="m0 0v1.5h8V4zm6 0H3v4h-5z"></path></clipPath></defs><path d="m0 0 6 3M0 3l6-3" stroke="#c8102e" stroke-width=".4" fill="#012169" clip-path="url(#c)" transform="matrix(800 0 0 800 0 0)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 800
+  hoist 3200
+  at fly=2400 hoist=1600
+}
+
+charge rect white {
+  fly 5600
+  hoist 800
+  at fly=2800 hoist=1200
+}
+
+charge rect red {
+  fly 480
+  hoist 3200
+  at fly=2400 hoist=1600
+}
+
+charge rect red {
+  fly 5600
+  hoist 480
+  at fly=2800 hoist=1200
+}
+
+charge polygon blue {
+  point fly=0 hoist=2400
+  point fly=4800 hoist=2400
+  point fly=4800 hoist=0
+  point fly=9600 hoist=0
+  point fly=9600 hoist=4800
+  point fly=0 hoist=4800
+}
+
+charge star white {
+  radius 359.8388
+  at fly=7200 hoist=768
+}
+
+charge star white {
+  radius 359.8388
+  rotate 24
+  at fly=7863.7942 hoist=909.0938
+}
+
+charge star white {
+  radius 359.8388
+  rotate -24
+  at fly=8412.8124 hoist=1307.9789
+}
+
+charge star white {
+  radius 359.8388
+  at fly=8752.1242 hoist=1895.6843
+}
+
+charge star white {
+  radius 359.8388
+  rotate 24
+  at fly=8823.0597 hoist=2570.5905
+}
+
+charge star white {
+  radius 359.8388
+  rotate -24
+  at fly=8613.3535 hoist=3216
+}
+
+charge star white {
+  radius 359.8388
+  at fly=8159.2655 hoist=3720.3157
+}
+
+charge star white {
+  radius 359.8388
+  rotate 24
+  at fly=7539.3119 hoist=3996.3369
+}
+
+charge star white {
+  radius 359.8388
+  rotate -24
+  at fly=6860.6881 hoist=3996.3369
+}
+
+charge star white {
+  radius 359.8388
+  at fly=6240.7345 hoist=3720.3157
+}
+
+charge star white {
+  radius 359.8388
+  rotate 24
+  at fly=5786.6465 hoist=3216
+}
+
+charge star white {
+  radius 359.8388
+  rotate -24
+  at fly=5576.9403 hoist=2570.5905
+}
+
+charge star white {
+  radius 359.8388
+  at fly=5647.8758 hoist=1895.6843
+}
+
+charge star white {
+  radius 359.8388
+  rotate 24
+  at fly=5987.1876 hoist=1307.9789
+}
+
+charge star white {
+  radius 359.8388
+  rotate -24
+  at fly=6536.2058 hoist=909.0938
+}

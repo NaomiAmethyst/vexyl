@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Genderqueer flag-pride"
+  encoder "Original: Marilyn Roxie Vector: McLennonSon"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Genderqueer_Pride_Flag.svg"
+}
+palette {
+  purple "#b57edc"
+  white "#ffffff"
+  green "#4a8123"
+}
+proportion hoist=480 fly=800
+
+bars purple white green

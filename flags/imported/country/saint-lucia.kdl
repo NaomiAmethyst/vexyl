@@ -1,0 +1,37 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Saint Lucia"
+  encoder "Dunstan St Omer"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Saint_Lucia.svg"
+}
+palette {
+  blue "#66ccff"
+  white "#ffffff"
+  black "#000000"
+  yellow "#fcd116"
+}
+proportion hoist=6 fly=12
+
+field blue
+
+charge polygon white {
+  point fly=6 hoist=0.5279
+  point fly=8 hoist=5.4721
+  point fly=6 hoist=5
+  point fly=4 hoist=5.4721
+}
+
+charge polygon black {
+  point fly=6 hoist=1.1946
+  point fly=7.5394 hoist=5
+  point fly=4.4606 hoist=5
+}
+
+charge polygon yellow {
+  point fly=6 hoist=3
+  point fly=8 hoist=5.4721
+  point fly=4 hoist=5.4721
+}

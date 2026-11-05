@@ -1,0 +1,29 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Bosnia and Herzegovina"
+  encoder "Mladen Kolobarić"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Bosnia_and_Herzegovina.svg"
+}
+palette {
+  blue "#002395"
+  yellow "#fecb00"
+  white "#ffffff"
+}
+proportion hoist=8 fly=16
+
+field blue
+
+charge polygon yellow {
+  point fly=4.24 hoist=0
+  point fly=12.24 hoist=0
+  point fly=12.24 hoist=8
+}
+
+charge star white {
+  radius 0.76
+  at fly=2.8 hoist=-0.09
+  repeat line count=9 fly=1 hoist=1
+}

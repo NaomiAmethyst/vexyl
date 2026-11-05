@@ -1,0 +1,102 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Liberia"
+  encoder "Government of Liberia"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Liberia.svg"
+}
+palette {
+  pink "#bf0a30"
+  white "#ffffff"
+  blue "#00205b"
+}
+proportion hoist=110 fly=209
+
+field pink
+
+charge rect white {
+  fly 209
+  hoist 10
+  at fly=104.5 hoist=15
+}
+
+charge rect white {
+  fly 209
+  hoist 10
+  at fly=104.5 hoist=35
+}
+
+charge rect blue {
+  fly 50
+  hoist 55
+  at fly=25 hoist=27.5
+}
+
+charge rect white {
+  fly 209
+  hoist 10
+  at fly=104.5 hoist=55
+  repeat line count=3 hoist=20
+}
+
+charge polygon white {
+  point fly=25 hoist=10
+  point fly=20.3647 hoist=24.2658
+  point fly=27.4977 hoist=26.5835
+}
+
+charge polygon white {
+  point fly=25 hoist=10
+  point fly=29.6353 hoist=24.2658
+  point fly=22.5023 hoist=26.5835
+}
+
+charge polygon white {
+  point fly=39.2658 hoist=20.3647
+  point fly=24.2658 hoist=20.3647
+  point fly=24.2658 hoist=27.8647
+}
+
+charge polygon white {
+  point fly=39.2658 hoist=20.3647
+  point fly=27.1306 hoist=29.1815
+  point fly=22.7222 hoist=23.1139
+}
+
+charge polygon white {
+  point fly=16.1832 hoist=37.1353
+  point fly=28.3185 hoist=28.3185
+  point fly=23.9101 hoist=22.2508
+}
+
+charge polygon white {
+  point fly=16.1832 hoist=37.1353
+  point fly=20.8185 hoist=22.8694
+  point fly=27.9514 hoist=25.187
+}
+
+charge polygon white {
+  point fly=33.8168 hoist=37.1353
+  point fly=29.1815 hoist=22.8694
+  point fly=22.0486 hoist=25.187
+}
+
+charge polygon white {
+  point fly=33.8168 hoist=37.1353
+  point fly=21.6815 hoist=28.3185
+  point fly=26.0899 hoist=22.2508
+}
+
+charge polygon white {
+  point fly=10.7342 hoist=20.3647
+  point fly=22.8694 hoist=29.1815
+  point fly=27.2778 hoist=23.1139
+}
+
+charge polygon white {
+  point fly=10.7342 hoist=20.3647
+  point fly=25.7342 hoist=20.3647
+  point fly=25.7342 hoist=27.8647
+}

@@ -1,0 +1,39 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Qatar"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Qatar.svg"
+}
+palette {
+  pink "#8a1538"
+  white "#ffffff"
+}
+proportion hoist=18 fly=75
+
+field pink
+
+charge polygon white {
+  point fly=22 hoist=18
+  point fly=0 hoist=18
+  point fly=0 hoist=0
+  point fly=22 hoist=0
+  point fly=28 hoist=1
+  point fly=22 hoist=2
+  point fly=28 hoist=3
+  point fly=22 hoist=4
+  point fly=28 hoist=5
+  point fly=22 hoist=6
+  point fly=28 hoist=7
+  point fly=22 hoist=8
+  point fly=28 hoist=9
+  point fly=22 hoist=10
+  point fly=28 hoist=11
+  point fly=22 hoist=12
+  point fly=28 hoist=13
+  point fly=22 hoist=14
+  point fly=28 hoist=15
+  point fly=22 hoist=16
+  point fly=28 hoist=17
+}

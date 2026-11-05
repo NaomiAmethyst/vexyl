@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Agender pride flag"
+  encoder "Salem Fontana"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Agender_pride_flag.svg"
+}
+palette {
+  black "#000000"
+  grey "#b9b9b9"
+  white "#ffffff"
+  green "#b8f483"
+}
+proportion hoist=560 fly=800
+
+bars black grey white green white grey black

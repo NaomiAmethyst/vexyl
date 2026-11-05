@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Aromantic Flag"
+  encoder "Cameron Whimsey"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Aromantic_Pride_Flag.svg"
+}
+palette {
+  green "#3da542"
+  green-2 "#a7d379"
+  white "#ffffff"
+  grey "#a9a9a9"
+  black "#000000"
+}
+proportion hoist=480 fly=800
+
+bars green green-2 white grey black

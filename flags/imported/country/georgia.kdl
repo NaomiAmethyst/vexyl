@@ -1,0 +1,30 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Georgia"
+  encoder "Last update by MapGrid SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Georgia.svg"
+}
+palette {
+  white "#ffffff"
+  red "#ff0000"
+}
+proportion hoist=20 fly=30
+
+field white
+
+cross red {
+  fly 13 4 13
+  hoist 8 4 8
+}
+
+charge svg {
+  at center
+  fly 30
+  hoist 20
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(1 0 0 1 0 0)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(0 1 -1 0 10.5 -2.5)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(1 0 0 1 17 0)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(0 1 -1 0 27.5 -2.5)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(1 0 0 1 0 12)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(0 1 -1 0 10.5 9.5)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(1 0 0 1 17 12)"/><path d="m5.7968 1.954a5.4 5.4 0 0 0 1.4064 0 10.4 10.4 0 0 0 0 4.092 5.4 5.4 0 0 0-1.4064 0 10.4 10.4 0 0 0 0-4.092z" fill="#ff0000" transform="matrix(0 1 -1 0 27.5 9.5)"/></svg>
+"""#
+}

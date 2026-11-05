@@ -1,0 +1,91 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Australia (converted)"
+  encoder "Unknown (Vector graphics image by Ian Fieggen) (only minor code changes by uploader.)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Australia_(converted).svg"
+}
+palette {
+  blue "#012169"
+  white "#ffffff"
+  pink "#e4002b"
+}
+proportion hoist=5040 fly=10080
+
+field blue
+
+charge svg {
+  at center
+  fly 10080
+  hoist 5040
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10080 5040"><defs><clipPath id="c2"><path d="M0,0V1.5H6V3H6zM6,0H3V3H0V3z"></path></clipPath><clipPath id="c1"><path d="M0,0H6V3H0z"></path></clipPath></defs><path d="M0,0 6,3M6,0 0,3" stroke="#ffffff" stroke-width="0.6" clip-path="url(#c1)" transform="matrix(840 0 0 840 0 0)"/><path d="M0,0 6,3M6,0 0,3" stroke="#e4002b" stroke-width="0.4" clip-path="url(#c2)" transform="matrix(840 0 0 840 0 0)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 840
+  hoist 2520
+  at fly=2520 hoist=1260
+}
+
+charge rect white {
+  fly 5040
+  hoist 840
+  at fly=2520 hoist=1260
+}
+
+charge rect pink {
+  fly 504
+  hoist 2520
+  at fly=2520 hoist=1260
+}
+
+charge rect pink {
+  fly 5040
+  hoist 504
+  at fly=2520 hoist=1260
+}
+
+charge star white {
+  radius 756
+  inner 336
+  points 7
+  at fly=2520 hoist=3780
+}
+
+charge star white {
+  radius 360
+  inner 160
+  points 7
+  at fly=7560 hoist=4200
+}
+
+charge star white {
+  radius 360
+  inner 160
+  points 7
+  at fly=6300 hoist=2205
+}
+
+charge star white {
+  radius 360
+  inner 160
+  points 7
+  at fly=7560 hoist=840
+}
+
+charge star white {
+  radius 360
+  inner 160
+  points 7
+  at fly=8680 hoist=1869
+}
+
+charge star white {
+  radius 210
+  inner 93.3333
+  at fly=8064 hoist=2730
+}

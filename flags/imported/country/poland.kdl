@@ -1,0 +1,15 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Poland"
+  license "LicenseRef-Public-Domain"
+  source "https://en.wikipedia.org/wiki/File:Flag_of_Poland.svg"
+}
+palette {
+  white "#ffffff"
+  pink "#dc143c"
+}
+proportion hoist=10 fly=16
+
+bars white pink

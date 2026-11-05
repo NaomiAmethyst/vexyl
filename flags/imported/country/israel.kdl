@@ -1,0 +1,27 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Israel"
+  encoder "Israel Belkind and Fanny Abramovitch (original) “The Provisional Council of State Proclamation of the Flag of the State "
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Israel.svg"
+}
+palette {
+  white "#ffffff"
+  blue "#0038b8"
+}
+proportion hoist=800 fly=1100
+
+bars white blue white blue white {
+  ratio 75 125 400 125 75
+}
+
+charge svg {
+  at center
+  fly 1100
+  hoist 800
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800"><path d="M 423.81566,472.85253 H 676.18435 L 550.00001,254.29492 Z m 126.18435,72.85255 126.1843,-218.55765 H 423.81566 Z" stroke="#0038b8" stroke-width="27.5" fill="none" transform="matrix(1 0 0 1 0 0)"/></svg>
+"""#
+}

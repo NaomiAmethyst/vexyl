@@ -1,0 +1,32 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Singapore"
+  encoder "Original: Government of Singapore Vector: Zscout370"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Singapore.svg"
+}
+palette {
+  red "#ed2939"
+  white "#ffffff"
+}
+proportion hoist=36 fly=54
+
+bars red white
+
+charge disc white {
+  radius 6.625
+  at fly=11.405 hoist=9
+}
+
+charge disc red {
+  radius 7.25
+  at fly=15.03 hoist=9
+}
+
+charge star white {
+  radius 1.725
+  at fly=15.03 hoist=9
+  repeat ring count=5 radius=3.8
+}

@@ -1,0 +1,33 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of São Tomé and Príncipe"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_S%C3%A3o_Tom%C3%A9_and_Pr%C3%ADncipe.svg"
+}
+palette {
+  green "#009739"
+  yellow "#ffd100"
+  red "#ef3340"
+  black "#000000"
+}
+proportion hoist=84 fly=168
+
+bars green yellow green {
+  ratio 24 36 24
+}
+
+chevrons red {
+  depth 42
+}
+
+charge star black {
+  radius 14.3725
+  at fly=84 hoist=43.3724
+}
+
+charge star black {
+  radius 14.3725
+  at fly=126 hoist=43.3724
+}

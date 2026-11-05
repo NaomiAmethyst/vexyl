@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Pansexuality Pride Flag"
+  encoder "This SVG version: KiwiNeko14. Original idea: Tumblr blog PansexualFlag."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Pansexuality_Pride_Flag.svg"
+}
+palette {
+  pink "#ff218c"
+  yellow "#ffd800"
+  blue "#21b1ff"
+}
+proportion hoist=3 fly=5
+
+bars pink yellow blue

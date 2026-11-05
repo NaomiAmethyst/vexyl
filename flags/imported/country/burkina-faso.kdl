@@ -1,0 +1,77 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Burkina Faso"
+  encoder "Drawn by SKopp, rewritten by Gabbe and Андрей Перцев"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Burkina_Faso.svg"
+}
+palette {
+  red "#ef2b2d"
+  green "#009e49"
+  yellow "#fcd116"
+}
+proportion hoist=600 fly=900
+
+bars red green
+
+charge polygon yellow {
+  point fly=450 hoist=200
+  point fly=419.0983 hoist=295.1057
+  point fly=466.6511 hoist=310.5565
+}
+
+charge polygon yellow {
+  point fly=450 hoist=200
+  point fly=480.9017 hoist=295.1057
+  point fly=433.3489 hoist=310.5565
+}
+
+charge polygon yellow {
+  point fly=545.1057 hoist=269.0983
+  point fly=445.1057 hoist=269.0983
+  point fly=445.1057 hoist=319.0983
+}
+
+charge polygon yellow {
+  point fly=545.1057 hoist=269.0983
+  point fly=464.204 hoist=327.8768
+  point fly=434.8147 hoist=287.426
+}
+
+charge polygon yellow {
+  point fly=508.7785 hoist=380.9017
+  point fly=477.8768 hoist=285.796
+  point fly=430.324 hoist=301.2469
+}
+
+charge polygon yellow {
+  point fly=508.7785 hoist=380.9017
+  point fly=427.8768 hoist=322.1232
+  point fly=457.2661 hoist=281.6723
+}
+
+charge polygon yellow {
+  point fly=391.2215 hoist=380.9017
+  point fly=472.1232 hoist=322.1232
+  point fly=442.7339 hoist=281.6723
+}
+
+charge polygon yellow {
+  point fly=391.2215 hoist=380.9017
+  point fly=422.1232 hoist=285.796
+  point fly=469.676 hoist=301.2469
+}
+
+charge polygon yellow {
+  point fly=354.8943 hoist=269.0983
+  point fly=435.796 hoist=327.8768
+  point fly=465.1853 hoist=287.426
+}
+
+charge polygon yellow {
+  point fly=354.8943 hoist=269.0983
+  point fly=454.8943 hoist=269.0983
+  point fly=454.8943 hoist=319.0983
+}

@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Demiboy Flag"
+  encoder "Trichromat"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Demiboy_Flag.svg"
+}
+palette {
+  grey "#7f7f7f"
+  grey-2 "#c4c4c4"
+  teal "#9ad9eb"
+  white "#ffffff"
+}
+proportion hoist=560 fly=800
+
+bars grey grey-2 teal white teal grey-2 grey

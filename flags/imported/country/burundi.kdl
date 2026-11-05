@@ -1,0 +1,38 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Burundi"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Burundi.svg"
+}
+palette {
+  red "#c8102e"
+  white "#ffffff"
+}
+proportion hoist=60 fly=100
+
+field red
+
+charge svg {
+  at center
+  fly 100
+  hoist 60
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60"><defs><clipPath id="f"><path d="m-50-30H50v60H-50z"></path></clipPath></defs><path d="m-55-33v66L55-33v66z" stroke="#ffffff" stroke-width="8" fill="#43b02a" clip-path="url(#f)" transform="matrix(1 0 0 1 50 30)"/></svg>
+"""#
+}
+
+charge disc white {
+  radius 17
+  at fly=50 hoist=30
+}
+
+charge svg {
+  at center
+  fly 100
+  hoist 60
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60"><path d="m0-12.44 1.051 1.82h2.101L2.102-8.8l1.05 1.82H1.051L0-5.16-1.051-6.98h-2.101l1.05-1.82-1.05-1.82h2.101z" stroke="#43b02a" stroke-width="0.36" fill="#c8102e" transform="matrix(1 0 0 1 50 30)"/><path d="m0-12.44 1.051 1.82h2.101L2.102-8.8l1.05 1.82H1.051L0-5.16-1.051-6.98h-2.101l1.05-1.82-1.05-1.82h2.101z" stroke="#43b02a" stroke-width="0.36" fill="#c8102e" transform="matrix(-0.5 0.866025 -0.866025 -0.5 50 30)"/><path d="m0-12.44 1.051 1.82h2.101L2.102-8.8l1.05 1.82H1.051L0-5.16-1.051-6.98h-2.101l1.05-1.82-1.05-1.82h2.101z" stroke="#43b02a" stroke-width="0.36" fill="#c8102e" transform="matrix(-0.5 -0.866025 0.866025 -0.5 50 30)"/></svg>
+"""#
+}

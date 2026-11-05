@@ -1,0 +1,33 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Rwanda"
+  encoder "Original: Unknown Vector: Zscout370"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Rwanda.svg"
+}
+palette {
+  blue "#00a3e0"
+  yellow "#fad201"
+  green "#20603d"
+  yellow-2 "#e5be01"
+}
+proportion hoist=1040 fly=1560
+
+bars blue yellow green {
+  ratio 520 260 260
+}
+
+charge star yellow-2 {
+  radius 167.9997
+  inner 52.001
+  points 24
+  at fly=1280 hoist=272
+}
+
+charge ring blue {
+  radius 52
+  inner 46
+  at fly=1280 hoist=272
+}

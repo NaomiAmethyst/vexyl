@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Acefluxflag"
+  encoder "Pride Flags For Us (PFFU)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Acefluxflag.svg"
+}
+palette {
+  pink "#c81d51"
+  pink-2 "#c12779"
+  pink-3 "#c0279a"
+  pink-4 "#a828ac"
+  purple "#8c26af"
+}
+proportion hoist=3000 fly=5000
+
+bars pink pink-2 pink-3 pink-4 purple

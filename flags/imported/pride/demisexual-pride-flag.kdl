@@ -1,0 +1,24 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Demisexual Pride Flag"
+  encoder "Original: Vimopu Vector: AnonMoos"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Demisexual_Pride_Flag.svg"
+}
+palette {
+  white "#ffffff"
+  pink "#6e0070"
+  grey "#d2d2d2"
+  black "#000000"
+}
+proportion hoist=480 fly=800
+
+bars white pink grey {
+  ratio 200 80 200
+}
+
+chevrons black {
+  depth 306
+}

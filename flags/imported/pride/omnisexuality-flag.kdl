@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Omnisexuality flag"
+  encoder "pastelroswell"
+  license "CC-BY-SA-4.0"
+  source "https://commons.wikimedia.org/wiki/File:Omnisexuality_flag.svg"
+}
+palette {
+  pink "#ff9bcd"
+  pink-2 "#ff53be"
+  purple "#250046"
+  blue "#675fff"
+  blue-2 "#8ca5ff"
+}
+proportion hoist=15 fly=25
+
+bars pink pink-2 purple blue blue-2

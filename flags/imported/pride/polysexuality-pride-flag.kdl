@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Polysexuality Pride Flag"
+  encoder "McLennonSon"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Polysexuality_Pride_Flag.svg"
+}
+palette {
+  pink "#f61cb9"
+  green "#07d569"
+  blue "#1c92f6"
+}
+proportion hoist=480 fly=800
+
+bars pink green blue

@@ -1,0 +1,70 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Belarusian Pride Flag (White-Red-White)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Belarusian_Pride_Flag_(White-Red-White).svg"
+}
+palette {
+  white "#ffffff"
+  pink "#750787"
+  blue "#004dff"
+  green "#008026"
+  yellow "#ffed00"
+  orange "#ff8c00"
+  red "#e40303"
+  brown "#784f17"
+  black "#000000"
+}
+proportion hoist=600 fly=1200
+
+field white
+
+charge rect pink {
+  fly 642.8571
+  hoist 200
+  at fly=621.4286 hoist=300
+}
+
+charge rect blue {
+  fly 514.2858
+  hoist 200
+  at fly=557.1429 hoist=300
+}
+
+charge rect green {
+  fly 385.7143
+  hoist 200
+  at fly=492.8572 hoist=300
+}
+
+charge rect yellow {
+  fly 257.1428
+  hoist 200
+  at fly=428.5714 hoist=300
+}
+
+charge rect orange {
+  fly 128.5714
+  hoist 200
+  at fly=364.2857 hoist=300
+}
+
+charge rect red {
+  fly 300
+  hoist 200
+  at fly=150 hoist=300
+}
+
+charge rect brown {
+  fly 257.1428
+  hoist 200
+  at fly=1071.4286 hoist=300
+}
+
+charge rect black {
+  fly 128.5714
+  hoist 200
+  at fly=1007.1429 hoist=300
+}

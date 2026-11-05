@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Transmasc Flag"
+  encoder "Rowan Ackerman"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Transmasc_Flag.svg"
+}
+palette {
+  pink "#ff8abd"
+  teal "#cdf5fe"
+  teal-2 "#9aebff"
+  teal-3 "#74dfff"
+}
+proportion hoist=142.875 fly=238.125
+
+bars pink teal teal-2 teal-3 teal-2 teal pink

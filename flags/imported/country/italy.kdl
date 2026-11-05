@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Italy"
+  license "LicenseRef-Public-Domain"
+  source "https://en.wikipedia.org/wiki/File:Flag_of_Italy.svg"
+}
+palette {
+  green "#009246"
+  white "#ffffff"
+  red "#ce2b37"
+}
+proportion hoist=2 fly=3
+
+bars green white red {
+  along hoist
+}

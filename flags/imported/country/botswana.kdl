@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Botswana"
+  encoder "SKopp, Gabbe, Madden"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Botswana.svg"
+}
+palette {
+  blue "#6da9d2"
+  white "#ffffff"
+  black "#000000"
+}
+proportion hoist=24 fly=36
+
+bars blue white black white blue {
+  ratio 9 1 4 1 9
+}

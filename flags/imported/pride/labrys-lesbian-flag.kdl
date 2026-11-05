@@ -1,0 +1,31 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Labrys Lesbian Flag"
+  encoder "Thespoondragon"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Labrys_Lesbian_Flag.svg"
+}
+palette {
+  pink "#993399"
+  black "#000000"
+}
+proportion hoist=158.8 fly=264.6
+
+field pink
+
+charge polygon black {
+  point fly=132.3 hoist=140.27
+  point fly=62.163 hoist=18.52
+  point fly=202.433 hoist=18.52
+}
+
+charge svg {
+  at center
+  fly 264.6
+  hoist 158.8
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264.6 158.8"><path d="m490.18 201.76-6.4219 257.68c-.00004 4.929 32.492 4.929 32.492 0l-6.0449-257.68z" transform="matrix(0.26636 0 0 0.26488 -0.929506 0.13464)" stroke="#ffffff" stroke-linecap="round" stroke-width="3.7783" fill-rule="evenodd" fill="#ffffff" stroke-linejoin="round"/><path d="M417.25 89.424s-23.809 30.567-25.373 76.195c1.5644 45.628 25.373 76.195 25.373 76.195s35.114-84.994 72.922-40.051h20.025c37.808-44.944 72.922 40.051 72.922 40.051s23.809-30.567 25.373-76.195c-1.5644-45.628-25.373-76.195-25.373-76.195s-35.114 84.994-72.922 40.051c-4.6268-6.686-15.399-6.686-20.025 0-37.808 44.944-72.922-40.051-72.922-40.051z" transform="matrix(0.26636 0 0 0.26488 -0.929506 0.13464)" stroke="#ffffff" stroke-linecap="round" stroke-width="5" fill="#ffffff" stroke-linejoin="round"/></svg>
+"""#
+}

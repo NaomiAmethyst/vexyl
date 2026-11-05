@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Maverique flag"
+  encoder "Nikki"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Maverique_flag.svg"
+}
+palette {
+  yellow "#fff344"
+  white "#ffffff"
+  orange "#f49622"
+}
+proportion hoist=3 fly=5
+
+bars yellow white orange

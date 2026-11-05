@@ -1,0 +1,255 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the Federated States of Micronesia"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Federated_States_of_Micronesia.svg"
+}
+palette {
+  blue "#75b2dd"
+  white "#ffffff"
+}
+proportion hoist=20 fly=38
+
+field blue
+
+charge polygon white {
+  point fly=19 hoist=2
+  point fly=18.382 hoist=3.9021
+  point fly=19.333 hoist=4.2111
+}
+
+charge polygon white {
+  point fly=19 hoist=2
+  point fly=19.618 hoist=3.9021
+  point fly=18.667 hoist=4.2111
+}
+
+charge polygon white {
+  point fly=20.9021 hoist=3.382
+  point fly=18.9021 hoist=3.382
+  point fly=18.9021 hoist=4.382
+}
+
+charge polygon white {
+  point fly=20.9021 hoist=3.382
+  point fly=19.2841 hoist=4.5575
+  point fly=18.6963 hoist=3.7485
+}
+
+charge polygon white {
+  point fly=20.1756 hoist=5.618
+  point fly=19.5575 hoist=3.7159
+  point fly=18.6065 hoist=4.0249
+}
+
+charge polygon white {
+  point fly=20.1756 hoist=5.618
+  point fly=18.5575 hoist=4.4425
+  point fly=19.1453 hoist=3.6334
+}
+
+charge polygon white {
+  point fly=17.8244 hoist=5.618
+  point fly=19.4425 hoist=4.4425
+  point fly=18.8547 hoist=3.6334
+}
+
+charge polygon white {
+  point fly=17.8244 hoist=5.618
+  point fly=18.4425 hoist=3.7159
+  point fly=19.3935 hoist=4.0249
+}
+
+charge polygon white {
+  point fly=17.0979 hoist=3.382
+  point fly=18.7159 hoist=4.5575
+  point fly=19.3037 hoist=3.7485
+}
+
+charge polygon white {
+  point fly=17.0979 hoist=3.382
+  point fly=19.0979 hoist=3.382
+  point fly=19.0979 hoist=4.382
+}
+
+charge polygon white {
+  point fly=27 hoist=10
+  point fly=25.0979 hoist=9.382
+  point fly=24.7889 hoist=10.333
+}
+
+charge polygon white {
+  point fly=27 hoist=10
+  point fly=25.0979 hoist=10.618
+  point fly=24.7889 hoist=9.667
+}
+
+charge polygon white {
+  point fly=25.618 hoist=11.9021
+  point fly=25.618 hoist=9.9021
+  point fly=24.618 hoist=9.9021
+}
+
+charge polygon white {
+  point fly=25.618 hoist=11.9021
+  point fly=24.4425 hoist=10.2841
+  point fly=25.2515 hoist=9.6963
+}
+
+charge polygon white {
+  point fly=23.382 hoist=11.1756
+  point fly=25.2841 hoist=10.5575
+  point fly=24.9751 hoist=9.6065
+}
+
+charge polygon white {
+  point fly=23.382 hoist=11.1756
+  point fly=24.5575 hoist=9.5575
+  point fly=25.3666 hoist=10.1453
+}
+
+charge polygon white {
+  point fly=23.382 hoist=8.8244
+  point fly=24.5575 hoist=10.4425
+  point fly=25.3666 hoist=9.8547
+}
+
+charge polygon white {
+  point fly=23.382 hoist=8.8244
+  point fly=25.2841 hoist=9.4425
+  point fly=24.9751 hoist=10.3935
+}
+
+charge polygon white {
+  point fly=25.618 hoist=8.0979
+  point fly=24.4425 hoist=9.7159
+  point fly=25.2515 hoist=10.3037
+}
+
+charge polygon white {
+  point fly=25.618 hoist=8.0979
+  point fly=25.618 hoist=10.0979
+  point fly=24.618 hoist=10.0979
+}
+
+charge polygon white {
+  point fly=19 hoist=18
+  point fly=19.618 hoist=16.0979
+  point fly=18.667 hoist=15.7889
+}
+
+charge polygon white {
+  point fly=19 hoist=18
+  point fly=18.382 hoist=16.0979
+  point fly=19.333 hoist=15.7889
+}
+
+charge polygon white {
+  point fly=17.0979 hoist=16.618
+  point fly=19.0979 hoist=16.618
+  point fly=19.0979 hoist=15.618
+}
+
+charge polygon white {
+  point fly=17.0979 hoist=16.618
+  point fly=18.7159 hoist=15.4425
+  point fly=19.3037 hoist=16.2515
+}
+
+charge polygon white {
+  point fly=17.8244 hoist=14.382
+  point fly=18.4425 hoist=16.2841
+  point fly=19.3935 hoist=15.9751
+}
+
+charge polygon white {
+  point fly=17.8244 hoist=14.382
+  point fly=19.4425 hoist=15.5575
+  point fly=18.8547 hoist=16.3666
+}
+
+charge polygon white {
+  point fly=20.1756 hoist=14.382
+  point fly=18.5575 hoist=15.5575
+  point fly=19.1453 hoist=16.3666
+}
+
+charge polygon white {
+  point fly=20.1756 hoist=14.382
+  point fly=19.5575 hoist=16.2841
+  point fly=18.6065 hoist=15.9751
+}
+
+charge polygon white {
+  point fly=20.9021 hoist=16.618
+  point fly=19.2841 hoist=15.4425
+  point fly=18.6963 hoist=16.2515
+}
+
+charge polygon white {
+  point fly=20.9021 hoist=16.618
+  point fly=18.9021 hoist=16.618
+  point fly=18.9021 hoist=15.618
+}
+
+charge polygon white {
+  point fly=11 hoist=10
+  point fly=12.9021 hoist=10.618
+  point fly=13.2111 hoist=9.667
+}
+
+charge polygon white {
+  point fly=11 hoist=10
+  point fly=12.9021 hoist=9.382
+  point fly=13.2111 hoist=10.333
+}
+
+charge polygon white {
+  point fly=12.382 hoist=8.0979
+  point fly=12.382 hoist=10.0979
+  point fly=13.382 hoist=10.0979
+}
+
+charge polygon white {
+  point fly=12.382 hoist=8.0979
+  point fly=13.5575 hoist=9.7159
+  point fly=12.7485 hoist=10.3037
+}
+
+charge polygon white {
+  point fly=14.618 hoist=8.8244
+  point fly=12.7159 hoist=9.4425
+  point fly=13.0249 hoist=10.3935
+}
+
+charge polygon white {
+  point fly=14.618 hoist=8.8244
+  point fly=13.4425 hoist=10.4425
+  point fly=12.6334 hoist=9.8547
+}
+
+charge polygon white {
+  point fly=14.618 hoist=11.1756
+  point fly=13.4425 hoist=9.5575
+  point fly=12.6334 hoist=10.1453
+}
+
+charge polygon white {
+  point fly=14.618 hoist=11.1756
+  point fly=12.7159 hoist=10.5575
+  point fly=13.0249 hoist=9.6065
+}
+
+charge polygon white {
+  point fly=12.382 hoist=11.9021
+  point fly=13.5575 hoist=10.2841
+  point fly=12.7485 hoist=9.6963
+}
+
+charge polygon white {
+  point fly=12.382 hoist=11.9021
+  point fly=12.382 hoist=9.9021
+  point fly=13.382 hoist=9.9021
+}

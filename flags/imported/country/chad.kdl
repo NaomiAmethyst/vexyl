@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Chad"
+  encoder "SKopp & others (see upload log)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Chad.svg"
+}
+palette {
+  blue "#002664"
+  yellow "#fecb00"
+  pink "#c60c30"
+}
+proportion hoist=600 fly=900
+
+bars blue yellow pink {
+  along hoist
+}

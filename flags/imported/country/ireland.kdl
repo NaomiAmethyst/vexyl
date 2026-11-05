@@ -1,0 +1,19 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Ireland"
+  encoder "Éire"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Ireland.svg"
+}
+palette {
+  green "#169b62"
+  white "#ffffff"
+  orange "#ff883e"
+}
+proportion hoist=600 fly=1200
+
+bars green white orange {
+  along hoist
+}

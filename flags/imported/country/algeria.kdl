@@ -1,0 +1,36 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Algeria"
+  encoder "Original: National Liberation Front of Algeria Vector: SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Algeria.svg"
+}
+palette {
+  green "#006633"
+  white "#ffffff"
+  pink "#d21034"
+}
+proportion hoist=600 fly=900
+
+bars green white {
+  along hoist
+}
+
+charge disc pink {
+  radius 150
+  cut {
+    disc {
+      radius 120
+      at fly=486.2288 hoist=300
+    }
+  }
+  at fly=450 hoist=300
+}
+
+charge star pink {
+  radius 75
+  rotate 18
+  at fly=510.6763 hoist=300
+}

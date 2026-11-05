@@ -1,0 +1,16 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Argentina (civil)"
+  encoder "Manuel Belgrano (1770-1820)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Argentina_(civil).svg"
+}
+palette {
+  blue "#74acdf"
+  white "#ffffff"
+}
+proportion hoist=500 fly=800
+
+bars blue white blue

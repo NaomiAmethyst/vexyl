@@ -1,0 +1,46 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of the Sahrawi Arab Democratic Republic"
+  encoder "El Uali Mustafá Sayed from Polisario Front"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Sahrawi_Arab_Democratic_Republic.svg"
+}
+palette {
+  black "#000000"
+  white "#ffffff"
+  green "#007a3d"
+  red "#c4111b"
+}
+proportion hoist=300 fly=600
+
+bars black white green
+
+chevrons red {
+  depth 200
+}
+
+charge disc red {
+  radius 40
+  at fly=300 hoist=150
+}
+
+charge disc white {
+  radius 40
+  at fly=315 hoist=150
+}
+
+charge polygon red {
+  point fly=289.2629 hoist=174.2204
+  point fly=306.3193 hoist=162.0277
+  point fly=323.2422 hoist=174.4048
+  point fly=316.917 hoist=154.4155
+  point fly=333.9178 hoist=142.1455
+  point fly=312.9522 hoist=141.9842
+  point fly=306.5363 hoist=122.0238
+  point fly=299.9042 hoist=141.9134
+  point fly=278.9381 hoist=141.8473
+  point fly=295.8048 hoist=154.301
+  point fly=289.2629 hoist=174.2205
+}

@@ -1,0 +1,44 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Seychelles"
+  encoder "User:Vxb83"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Seychelles.svg"
+}
+palette {
+  white "#ffffff"
+  red "#d22730"
+  yellow "#fed141"
+  blue "#002f6c"
+  green "#007a33"
+}
+proportion hoist=3 fly=6
+
+field white
+
+charge polygon red {
+  point fly=0 hoist=3
+  point fly=0 hoist=0
+  point fly=6 hoist=0
+  point fly=6 hoist=1
+}
+
+charge polygon yellow {
+  point fly=0 hoist=3
+  point fly=0 hoist=0
+  point fly=4 hoist=0
+}
+
+charge polygon blue {
+  point fly=0 hoist=3
+  point fly=0 hoist=0
+  point fly=2 hoist=0
+}
+
+charge polygon green {
+  point fly=0 hoist=3
+  point fly=6 hoist=2
+  point fly=6 hoist=3
+}

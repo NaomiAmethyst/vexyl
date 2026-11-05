@@ -1,0 +1,26 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Artigas"
+  encoder "José Gervasio Artigas"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Artigas.svg"
+}
+palette {
+  blue "#003685"
+  white "#ffffff"
+  red "#b43232"
+}
+proportion hoist=600 fly=900
+
+bars blue white blue
+
+charge polygon red {
+  point fly=0 hoist=0
+  point fly=150 hoist=0
+  point fly=900 hoist=450
+  point fly=900 hoist=600
+  point fly=750 hoist=600
+  point fly=0 hoist=150
+}

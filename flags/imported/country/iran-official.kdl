@@ -1,0 +1,429 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Iran (official)"
+  encoder "SVG file: SiBr4Designer: Hamid NadimiConstruction: ISIRI"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Iran_(official).svg"
+}
+palette {
+  green "#239f40"
+  white "#ffffff"
+  red "#da0000"
+}
+proportion hoist=572.2 fly=1000
+
+bars green white red
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 0 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=33.3337 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=77.7788 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=33.3337 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=77.7788 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 0 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 88.89 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=122.2237 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=166.6687 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=122.2237 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=166.6687 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 88.89 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 177.78 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=211.1137 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=255.5587 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=211.1137 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=255.5587 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 177.78 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 266.67 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=300.0037 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=344.4487 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=300.0037 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=344.4487 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 266.67 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 355.56 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=388.8937 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=433.3387 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=388.8937 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=433.3387 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 355.56 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 444.45 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=477.7837 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=522.2287 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=477.7837 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=522.2287 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 444.45 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 533.34 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=566.6737 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=611.1187 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=566.6737 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=611.1187 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 533.34 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 622.23 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=655.5637 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=700.0087 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=655.5637 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=700.0087 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 622.23 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 711.12 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=744.4537 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=788.8987 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=744.4537 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=788.8987 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 711.12 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 800.01 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=833.3437 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=877.7887 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=833.3437 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=877.7887 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 800.01 390.327328)"/><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 888.9 159.6)"/></svg>
+"""#
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=922.2337 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=966.6787 hoist=190.7115
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=922.2337 hoist=381.4383
+}
+
+charge rect white {
+  fly 40.0005
+  hoist 8.889
+  at fly=966.6787 hoist=381.4383
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M3 .5h13M3.5 5V2.5h4v2h4v-2H9m-4 2h1m10 0h-2.5v-2h4m0-2.5v4.5h4V0m-2 0v4.5" stroke="#ffffff" fill="none" transform="matrix(4.4445 0 0 4.4445 888.9 390.327328)"/></svg>
+"""#
+}
+
+charge disc red {
+  radius 63.1879
+  cut {
+    disc {
+      radius 69.285
+      at fly=465.3529 hoist=274.8169
+    }
+  }
+  at fly=481.5085 hoist=283.9109
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M.618.661A.764.764 0 0 0 .422-.74 1 1 0 0 1 .618.661M0 1l-.05-1L0-.787a.31.31 0 0 0 .118.099V-.1l-.04.993zM-.02-.85L0-.831a.144.144 0 0 0 .252-.137A.136.136 0 0 1 0-.925" fill="#da0000" transform="matrix(69.285 0 0 69.285 500 286.1)"/></svg>
+"""#
+}
+
+charge disc red {
+  radius 63.1879
+  cut {
+    disc {
+      radius 69.285
+      at fly=534.6471 hoist=274.8169
+    }
+  }
+  at fly=518.4915 hoist=283.9109
+}
+
+charge svg {
+  at center
+  fly 1000
+  hoist 572.2
+  markup #"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 572.2"><path d="M.618.661A.764.764 0 0 0 .422-.74 1 1 0 0 1 .618.661M0 1l-.05-1L0-.787a.31.31 0 0 0 .118.099V-.1l-.04.993zM-.02-.85L0-.831a.144.144 0 0 0 .252-.137A.136.136 0 0 1 0-.925" fill="#da0000" transform="matrix(-69.285 0 0 69.285 500 286.1)"/></svg>
+"""#
+}

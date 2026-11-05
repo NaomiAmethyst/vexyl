@@ -1,0 +1,101 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Rubber Fetish Pride Flag"
+  encoder "RayneVanDunem"
+  license "CC-BY-SA-3.0"
+  source "https://commons.wikimedia.org/wiki/File:Rubber_Fetish_Pride_Flag.svg"
+}
+palette {
+  black "#000000"
+  yellow "#fcc800"
+  red "#d32011"
+}
+proportion hoist=3188.975 fly=5314.962
+
+field black
+
+charge polygon yellow {
+  point fly=3603.1625 hoist=2298.5738
+  point fly=3133.35 hoist=2537.9537
+  point fly=2829.88 hoist=2104.5538
+  point fly=2240.0888 hoist=1262.245
+  point fly=2240.0888 hoist=1262.24
+  point fly=0 hoist=1262.24
+  point fly=0 hoist=651.02
+  point fly=2558.2675 hoist=651.02
+  point fly=3330.5638 hoist=1753.9725
+  point fly=5314.9637 hoist=742.87
+  point fly=5314.9637 hoist=1428.5212
+  point fly=3608.05 hoist=2298.235
+}
+
+charge polygon black {
+  point fly=3603.16 hoist=2311.9225
+  point fly=3133.35 hoist=2551.3025
+  point fly=2829.88 hoist=2117.9025
+  point fly=2240.0887 hoist=1275.5938
+  point fly=2240.0887 hoist=1275.5888
+  point fly=0 hoist=1275.5888
+  point fly=0 hoist=1886.8088
+  point fly=1921.9062 hoist=1886.8088
+  point fly=1921.9062 hoist=1886.8125
+  point fly=2632.6688 hoist=2901.885
+  point fly=2833.6875 hoist=3188.9725
+  point fly=3228.1763 hoist=3188.975
+  point fly=3410.8388 hoist=3095.905
+  point fly=5314.9613 hoist=2125.705
+  point fly=5314.9613 hoist=1441.87
+  point fly=3608.05 hoist=2311.5837
+  point fly=5314.9625 hoist=1462.6537
+  point fly=5314.9625 hoist=1441.8688
+}
+
+charge polygon red {
+  point fly=0 hoist=1203.47
+  point fly=2276.98 hoist=1203.47
+  point fly=2276.98 hoist=1203.4737
+  point fly=3156.0675 hoist=2458.9412
+  point fly=5313.6025 hoist=1359.6212
+  point fly=5314.9625 hoist=1517.9987
+  point fly=3110.635 hoist=2641.1612
+  point fly=2203.1875 hoist=1345.1925
+  point fly=2203.1875 hoist=1345.1962
+  point fly=0 hoist=1345.2025
+  point fly=0 hoist=1203.47
+  point fly=0 hoist=1345.2025
+}
+
+charge polygon red {
+  point fly=5314.9625 hoist=2205.3337
+  point fly=3382.955 hoist=3189.7413
+  point fly=3072.0862 hoist=3187.72
+  point fly=5314.9613 hoist=2044.9175
+  point fly=5314.9613 hoist=2205.3337
+}
+
+charge polygon red {
+  point fly=1885.015 hoist=1956.4225
+  point fly=0 hoist=1956.4225
+  point fly=0 hoist=1814.69
+  point fly=1958.795 hoist=1814.69
+  point fly=2920.2 hoist=3187.7213
+  point fly=2747.1775 hoist=3187.7213
+  point fly=1885.0137 hoist=1956.4237
+}
+
+charge polygon red {
+  point fly=2600.9 hoist=592.4037
+  point fly=0 hoist=592.4037
+  point fly=0 hoist=734.1363
+  point fly=2527.12 hoist=734.1363
+  point fly=2527.12 hoist=734.1337
+  point fly=3312.0825 hoist=1855.1775
+  point fly=5314.9613 hoist=834.6562
+  point fly=5314.9613 hoist=675.5862
+  point fly=3357.5125 hoist=1672.9562
+  point fly=2600.9 hoist=592.4012
+  point fly=0 hoist=592.4037
+  point fly=0 hoist=734.1363
+}

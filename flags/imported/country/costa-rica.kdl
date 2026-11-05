@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Costa Rica"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Costa_Rica.svg"
+}
+palette {
+  blue "#001489"
+  white "#ffffff"
+  red "#da291c"
+}
+proportion hoist=6 fly=10
+
+bars blue white red white blue {
+  ratio 1 1 2 1 1
+}

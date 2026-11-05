@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Guinea"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Guinea.svg"
+}
+palette {
+  red "#ce1126"
+  yellow "#fcd116"
+  green "#009460"
+}
+proportion hoist=600 fly=900
+
+bars red yellow green {
+  along hoist
+}

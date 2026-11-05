@@ -1,0 +1,112 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Ethiopia"
+  encoder "Drawn by User:SKopp"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Ethiopia.svg"
+}
+palette {
+  green "#078930"
+  yellow "#fcdd09"
+  red "#da121a"
+  blue "#0f47af"
+}
+proportion hoist=600 fly=1200
+
+bars green yellow red
+
+charge disc blue {
+  radius 200
+  at fly=600 hoist=300
+}
+
+charge polygon yellow {
+  point fly=600 hoist=140
+  point fly=592.9903 hoist=161.5738
+  point fly=621.9027 hoist=250.5573
+  point fly=583.3546 hoist=250.5573
+  point fly=579.0223 hoist=263.8906
+  point fly=702.6268 hoist=263.8906
+  point fly=720.9785 hoist=250.5573
+  point fly=635.9222 hoist=250.5573
+}
+
+charge polygon yellow {
+  point fly=645.801 hoist=242.6314
+  point fly=696.7424 hoist=172.5166
+  point fly=691.3489 hoist=168.598
+  point fly=640.4075 hoist=238.7128
+}
+
+charge polygon yellow {
+  point fly=752.169 hoist=250.5573
+  point fly=729.485 hoist=250.5573
+  point fly=653.7911 hoist=305.5521
+  point fly=641.8791 hoist=268.8906
+  point fly=627.8596 hoist=268.8906
+  point fly=666.0555 hoist=386.4454
+  point fly=684.4072 hoist=399.7788
+  point fly=658.1234 hoist=318.8854
+}
+
+charge polygon yellow {
+  point fly=668.7141 hoist=325.8314
+  point fly=751.139 hoist=352.6129
+  point fly=753.1991 hoist=346.2725
+  point fly=670.7742 hoist=319.4911
+}
+
+charge polygon yellow {
+  point fly=694.0456 hoist=429.4427
+  point fly=687.0359 hoist=407.8689
+  point fly=611.342 hoist=352.8741
+  point fly=642.5281 hoist=330.2161
+  point fly=638.1959 hoist=316.8827
+  point fly=538.1978 hoist=389.5356
+  point fly=531.188 hoist=411.1094
+  point fly=600 hoist=361.1146
+}
+
+charge rect yellow {
+  fly 6.6667
+  hoist 86.6667
+  at fly=600 hoist=416.6667
+}
+
+charge polygon yellow {
+  point fly=505.9544 hoist=429.4427
+  point fly=524.3061 hoist=416.1094
+  point fly=553.2186 hoist=327.1259
+  point fly=584.4047 hoist=349.7839
+  point fly=595.7467 hoist=341.5435
+  point fly=495.7486 hoist=268.8906
+  point fly=473.0646 hoist=268.8906
+  point fly=541.8766 hoist=318.8854
+}
+
+charge polygon yellow {
+  point fly=529.2258 hoist=319.4911
+  point fly=446.8009 hoist=346.2725
+  point fly=448.861 hoist=352.6129
+  point fly=531.2859 hoist=325.8314
+}
+
+charge polygon yellow {
+  point fly=447.831 hoist=250.5573
+  point fly=466.1827 hoist=263.8906
+  point fly=559.7455 hoist=263.8906
+  point fly=547.8335 hoist=300.5521
+  point fly=559.1755 hoist=308.7926
+  point fly=597.3713 hoist=191.2377
+  point fly=590.3616 hoist=169.664
+  point fly=564.0778 hoist=250.5573
+}
+
+charge polygon yellow {
+  point fly=559.5925 hoist=238.7128
+  point fly=508.6511 hoist=168.598
+  point fly=503.2576 hoist=172.5166
+  point fly=554.199 hoist=242.6314
+}

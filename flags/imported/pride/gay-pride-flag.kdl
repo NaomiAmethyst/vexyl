@@ -1,0 +1,20 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Gay Pride Flag"
+  encoder "Guanaco and subsequent editors"
+  license "LicenseRef-Copyrighted-Free-Use"
+  source "https://commons.wikimedia.org/wiki/File:Gay_Pride_Flag.svg"
+}
+palette {
+  red "#e50000"
+  orange "#ff8d00"
+  yellow "#ffee00"
+  green "#028121"
+  blue "#004cff"
+  pink "#770088"
+}
+proportion hoist=480 fly=777
+
+bars red orange yellow green blue pink

@@ -1,0 +1,61 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Antigua and Barbuda"
+  encoder "Original: Sir Reginald Samuel Vector: David Benbennick"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Antigua_and_Barbuda.svg"
+}
+palette {
+  white "#ffffff"
+  black "#000000"
+  yellow "#fcd116"
+  blue "#0072c6"
+  red "#ce1126"
+}
+proportion hoist=92 fly=138
+
+field white
+
+charge polygon black {
+  point fly=0 hoist=0
+  point fly=138 hoist=0
+  point fly=129 hoist=46
+  point fly=9 hoist=46
+}
+
+charge polygon yellow {
+  point fly=69 hoist=46
+  point fly=39 hoist=36
+  point fly=54.288 hoist=33.074
+  point fly=41.284 hoist=24.519
+  point fly=56.528 hoist=27.666
+  point fly=47.787 hoist=14.787
+  point fly=60.666 hoist=23.528
+  point fly=57.519 hoist=8.284
+  point fly=66.074 hoist=21.288
+  point fly=69 hoist=6
+  point fly=71.926 hoist=21.288
+  point fly=80.481 hoist=8.284
+  point fly=77.334 hoist=23.528
+  point fly=90.213 hoist=14.787
+  point fly=81.472 hoist=27.666
+  point fly=96.716 hoist=24.519
+  point fly=83.712 hoist=33.074
+  point fly=99 hoist=36
+}
+
+charge rect blue {
+  fly 120
+  hoist 20
+  at fly=69 hoist=46
+}
+
+charge polygon red {
+  point fly=0 hoist=0
+  point fly=69 hoist=92
+  point fly=138 hoist=0
+  point fly=138 hoist=92
+  point fly=0 hoist=92
+}

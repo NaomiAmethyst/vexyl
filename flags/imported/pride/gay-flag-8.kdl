@@ -1,0 +1,22 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Gay flag 8"
+  encoder "Gilbert Baker (Vector graphics by Fibonacci)"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Gay_flag_8.svg"
+}
+palette {
+  pink "#ff69b4"
+  red "#ff0000"
+  orange "#ff8e00"
+  yellow "#ffff00"
+  green "#008e00"
+  teal "#00c0c0"
+  purple "#400098"
+  pink-2 "#8e008e"
+}
+proportion hoist=400 fly=600
+
+bars pink red orange yellow green teal purple pink-2

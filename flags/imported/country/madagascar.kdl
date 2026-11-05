@@ -1,0 +1,22 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Madagascar"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Madagascar.svg"
+}
+palette {
+  red "#f9423a"
+  green "#00843d"
+  white "#ffffff"
+}
+proportion hoist=600 fly=900
+
+bars red green
+
+charge rect white {
+  fly 300
+  hoist 600
+  at fly=150 hoist=300
+}

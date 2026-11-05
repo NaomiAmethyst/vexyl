@@ -1,0 +1,23 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "2017 rainbow flag"
+  encoder "Nikki"
+  license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:2017_rainbow_flag.svg"
+}
+palette {
+  purple "#cd66ff"
+  pink "#ff6599"
+  red "#ff0000"
+  orange "#ff9900"
+  yellow "#ffff01"
+  green "#009a00"
+  teal "#0099cb"
+  purple-2 "#340099"
+  pink-2 "#990099"
+}
+proportion hoist=27 fly=45
+
+bars purple pink red orange yellow green teal purple-2 pink-2

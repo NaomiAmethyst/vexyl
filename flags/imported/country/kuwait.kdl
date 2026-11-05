@@ -1,0 +1,24 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Kuwait"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Kuwait.svg"
+}
+palette {
+  green "#007a3d"
+  white "#ffffff"
+  red "#ce1126"
+  black "#000000"
+}
+proportion hoist=6 fly=12
+
+bars green white red
+
+charge polygon black {
+  point fly=0 hoist=0
+  point fly=3 hoist=2
+  point fly=3 hoist=4
+  point fly=0 hoist=6
+}

@@ -1,0 +1,21 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Denmark"
+  encoder "Madden and others"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Denmark.svg"
+}
+palette {
+  red "#c8102e"
+  white "#ffffff"
+}
+proportion hoist=28 fly=37
+
+field red
+
+cross white {
+  fly 12 4 21
+  hoist 12 4 12
+}

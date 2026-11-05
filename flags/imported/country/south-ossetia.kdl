@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of South Ossetia"
+  encoder "Various"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Ossetia.svg"
+}
+palette {
+  white "#ffffff"
+  red "#dd0000"
+  yellow "#ffce00"
+}
+proportion hoist=600 fly=1200
+
+bars white red yellow

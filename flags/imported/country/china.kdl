@@ -1,0 +1,45 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of China"
+  encoder "Zeng Liansong"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_People%27s_Republic_of_China.svg"
+}
+palette {
+  red "#ee1c25"
+  yellow "#ffff00"
+}
+proportion hoist=600 fly=900
+
+field red
+
+charge star yellow {
+  radius 90
+  at fly=150 hoist=150
+}
+
+charge star yellow {
+  radius 30
+  rotate 23.036
+  at fly=299.9971 hoist=59.9986
+}
+
+charge star yellow {
+  radius 30
+  rotate -26.13
+  at fly=360.0008 hoist=120.001
+}
+
+charge star yellow {
+  radius 30
+  rotate -2.055
+  at fly=359.9992 hoist=209.9983
+}
+
+charge star yellow {
+  radius 30
+  rotate 20.66
+  at fly=300.0023 hoist=270.0032
+}

@@ -1,0 +1,31 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of South Sudan"
+  encoder "Achim1999"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Sudan.svg"
+}
+palette {
+  black "#000000"
+  white "#ffffff"
+  red "#e22028"
+  green "#00914c"
+  teal "#00b6f2"
+  yellow "#ffe51a"
+}
+proportion hoist=570 fly=1140
+
+bars black white red white green {
+  ratio 170 30 170 30 170
+}
+
+chevrons teal {
+  depth 493.6345
+}
+
+charge star yellow {
+  radius 95
+  at fly=164.5448 hoist=285
+}

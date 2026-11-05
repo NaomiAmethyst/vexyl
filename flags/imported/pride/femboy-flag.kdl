@@ -1,0 +1,18 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Femboy flag"
+  encoder "Jay"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Femboy_flag.svg"
+}
+palette {
+  pink "#d460a7"
+  pink-2 "#e4adcd"
+  white "#ffffff"
+  blue "#57cef8"
+}
+proportion hoist=420 fly=700
+
+bars pink pink-2 white blue white pink-2 pink

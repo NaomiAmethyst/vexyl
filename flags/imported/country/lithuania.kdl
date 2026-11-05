@@ -1,0 +1,17 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Lithuania"
+  encoder "Original: Jonas Basanavičius, Tadas Daugirdas and Antanas Žmuidzinavičius Vector: SKopp The SVG code is valid. This flag"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Lithuania.svg"
+}
+palette {
+  orange "#fdb913"
+  green "#006a44"
+  red "#c1272d"
+}
+proportion hoist=600 fly=1000
+
+bars orange green red

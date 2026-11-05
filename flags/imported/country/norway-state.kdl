@@ -1,0 +1,57 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Norway, state"
+  encoder "No machine-readable author provided. Dbenbenn assumed (based on copyright claims)."
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Norway,_state.svg"
+}
+palette {
+  white "#ffffff"
+  pink "#ba0c2f"
+  blue "#00205b"
+}
+proportion hoist=16 fly=27
+outline {
+  polygon {
+    point fly=0 hoist=0
+    point fly=27 hoist=0
+    point fly=16 hoist=6
+    point fly=27 hoist=8
+    point fly=16 hoist=10
+    point fly=27 hoist=16
+    point fly=0 hoist=16
+  }
+}
+
+field white
+
+charge rect pink {
+  fly 6
+  hoist 6
+  at fly=3 hoist=3
+}
+
+charge rect pink {
+  fly 17
+  hoist 6
+  at fly=18.5 hoist=3
+}
+
+charge rect pink {
+  fly 17
+  hoist 6
+  at fly=18.5 hoist=13
+}
+
+charge rect pink {
+  fly 6
+  hoist 6
+  at fly=3 hoist=13
+}
+
+cross blue {
+  fly 7 2 18
+  hoist 7 2 7
+}

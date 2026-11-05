@@ -1,0 +1,51 @@
+// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the
+// flag's official construction, and it hasn't been checked against one.
+vexyl 1
+meta {
+  name "Flag of Iceland (state)"
+  encoder "Kjallakr"
+  license "LicenseRef-Public-Domain"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Iceland_(state).svg"
+}
+palette {
+  blue "#02529c"
+  white "#ffffff"
+  red "#dc1e35"
+}
+proportion hoist=18 fly=32
+outline {
+  polygon {
+    point fly=0 hoist=0
+    point fly=32 hoist=0
+    point fly=20 hoist=8
+    point fly=20 hoist=10
+    point fly=32 hoist=18
+    point fly=0 hoist=18
+  }
+}
+
+field blue
+
+charge rect white {
+  fly 25
+  hoist 4
+  at fly=12.5 hoist=9
+}
+
+charge rect white {
+  fly 4
+  hoist 18
+  at fly=9 hoist=9
+}
+
+charge rect red {
+  fly 25
+  hoist 2
+  at fly=12.5 hoist=9
+}
+
+charge rect red {
+  fly 2
+  hoist 18
+  at fly=9 hoist=9
+}
