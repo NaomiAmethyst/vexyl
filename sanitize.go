@@ -20,6 +20,10 @@ const (
 	maxSVGDepth    = 64
 )
 
+func (e *embeddedSVG) usesCurrentColor() bool {
+	return strings.Contains(strings.ToLower(e.attrs+e.body), "currentcolor")
+}
+
 // embeddedSVG is inline SVG that has passed sanitizeSVG.
 type embeddedSVG struct {
 	viewBox string

@@ -1,0 +1,119 @@
+// Per Art. 6 of the National Flag Act's enforcement decree, as fractions of the
+// hoist H = 96: taegeuk diameter H/2, each trigram H/4 long and H/6 wide, set H/8
+// from the taegeuk with its center on a diagonal and its length across it. Bars are
+// H/24 wide, with gaps and breaks of H/48.
+//
+// The decree's color table is an annex that wasn't available to check. These values
+// are Wikipedia's conversions from the CIE specification.
+vexyl 1
+meta {
+  name "South Korea"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
+  source "https://en.wikipedia.org/wiki/Flag_of_South_Korea"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Korea.svg"
+}
+palette {
+  white "#ffffff"
+  red "#cd2e3a"
+  blue "#0047a0"
+  black "#000000"
+}
+proportion hoist=96 fly=144
+
+field white
+
+emblem {
+  along bend
+
+  // The taegeuk: red above the diagonal and blue below, each swelling into the other.
+  charge disc blue {
+    radius 24
+  }
+  charge disc red {
+    radius 24
+    clip {
+      rect {
+        fly 48
+        hoist 24
+        at fly=0 hoist=-12
+      }
+    }
+  }
+  charge disc red {
+    radius 12
+    at fly=-12 hoist=0
+  }
+  charge disc blue {
+    radius 12
+    at fly=12 hoist=0
+  }
+
+  // Geon, upper hoist: three solid bars.
+  charge rect black {
+    fly 4
+    hoist 24
+    at fly=-50 hoist=0
+    repeat line count=3 fly=6
+  }
+
+  // Gon, lower fly: three broken bars.
+  charge rect black {
+    fly 4
+    hoist 24
+    at fly=38 hoist=0
+    repeat line count=3 fly=6
+    cut {
+      rect {
+        fly 20
+        hoist 2
+        at fly=44 hoist=0
+      }
+    }
+  }
+}
+
+emblem {
+  along bend-sinister
+
+  // Ri, lower hoist: solid, broken, solid.
+  charge rect black {
+    fly 4
+    hoist 24
+    at fly=-50 hoist=0
+    repeat line count=2 fly=12
+  }
+  charge rect black {
+    fly 4
+    hoist 24
+    at fly=-44 hoist=0
+    cut {
+      rect {
+        fly 8
+        hoist 2
+        at fly=-44 hoist=0
+      }
+    }
+  }
+
+  // Gam, upper fly: broken, solid, broken.
+  charge rect black {
+    fly 4
+    hoist 24
+    at fly=44 hoist=0
+  }
+  charge rect black {
+    fly 4
+    hoist 24
+    at fly=38 hoist=0
+    repeat line count=2 fly=12
+    cut {
+      rect {
+        fly 20
+        hoist 2
+        at fly=44 hoist=0
+      }
+    }
+  }
+}

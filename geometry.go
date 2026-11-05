@@ -5,6 +5,7 @@ package vexyl
 
 import (
 	"errors"
+	"fmt"
 	"math"
 )
 
@@ -19,8 +20,21 @@ func (a vec) rotate(deg float64) vec {
 	return vec{a.x*c - a.y*s, a.x*s + a.y*c}
 }
 
-// region is a rectangle with its origin at the current coordinate origin.
-type region struct{ w, h float64 }
+// region is a rectangle with its origin at the current coordinate origin. An
+// emblem's frame has no size, and its center is its origin; local is then how far
+// its content could need to reach to cover everything visible.
+type region struct {
+	w, h  float64
+	local float64
+}
+
+// bounds is the rectangle a mask has to cover.
+func (r region) bounds() (x, y, w, h float64) {
+	if r.local > 0 {
+		return -r.local, -r.local, 2 * r.local, 2 * r.local
+	}
+	return 0, 0, r.w, r.h
+}
 
 func (r region) center() vec     { return vec{r.w / 2, r.h / 2} }
 func (r region) reach() float64  { return math.Hypot(r.w, r.h) }
@@ -183,11 +197,16 @@ func chevronPolys(ch *Chevrons, r region) [][]vec {
 	default:
 		origin, u, v, edge = vec{0, r.h / 2}, vec{1, 0}, vec{0, 1}, r.h
 	}
+	reach := r.reach()
+	if ch.Apex != nil {
+		shift := *ch.Apex - edge/2
+		origin = origin.add(v.mul(shift))
+		reach += math.Abs(shift)
+	}
 	run := ch.Depth
 	if ch.Angle != 0 {
 		run = (edge / 2) / math.Tan(ch.Angle*math.Pi/180)
 	}
-	reach := r.reach()
 	slope := run / (edge / 2)
 	total := 0.0
 	for _, part := range ch.Ratio {
@@ -257,6 +276,8 @@ type geom struct {
 	r      float64
 	inner  float64
 	poly   []vec
+	// path is SVG path data, for shapes that polygons can't draw exactly.
+	path string
 }
 
 func position(s *Shape, r region) vec {
@@ -288,6 +309,8 @@ func shapeGeom(s *Shape, center vec, extra float64) geom {
 		return geom{poly: placeAll(starPoints(3, s.Radius, 0), place)}
 	case "star":
 		return geom{poly: placeAll(starPoints(s.Points, s.Radius, s.Inner), place)}
+	case "heart":
+		return geom{path: heartPath(s.Radius, s.Spread, place)}
 	case "cardioid":
 		return geom{poly: placeAll(cardioidPoints(s.Radius), place)}
 	case "polygon":
@@ -298,6 +321,27 @@ func shapeGeom(s *Shape, center vec, extra float64) geom {
 		return geom{poly: poly}
 	}
 	return geom{}
+}
+
+// heartPath draws a heart with its lobes either side of the origin and its tip
+// below, whose straight sides meet at a right angle and touch the lobes.
+func heartPath(radius, spread float64, place func(vec) vec) string {
+	half := spread / 2
+	edge := radius / math.Sqrt2
+	tip := place(vec{0, half + radius*math.Sqrt2})
+	right := place(vec{half + edge, edge})
+	left := place(vec{-half - edge, edge})
+	notch := place(vec{0, -math.Sqrt(radius*radius - half*half)})
+	// Each arc runs from 45 degrees below the lobe's side, around to the notch.
+	large := 0
+	if 225-math.Acos(half/radius)*180/math.Pi > 180 {
+		large = 1
+	}
+	r := num(radius)
+	return fmt.Sprintf("M%s %sL%s %sA%s %s 0 %d 0 %s %sA%s %s 0 %d 0 %s %sZ",
+		num(tip.x), num(tip.y), num(right.x), num(right.y),
+		r, r, large, num(notch.x), num(notch.y),
+		r, r, large, num(left.x), num(left.y))
 }
 
 func placeAll(points []vec, place func(vec) vec) []vec {

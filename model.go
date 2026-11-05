@@ -62,8 +62,8 @@ type Effects struct {
 
 func (e *Effects) effects() *Effects { return e }
 
-// Layer is one of Field, Bars, Chevrons, Band, Cross, Saltire, Charge, Group or
-// Canton.
+// Layer is one of Field, Bars, Chevrons, Band, Cross, Saltire, Charge, Emblem,
+// Group or Canton.
 type Layer interface {
 	effects() *Effects
 }
@@ -93,7 +93,9 @@ type Chevrons struct {
 	Depth  float64
 	// Angle is between each arm and the center line, or 0 for arms that meet
 	// the edge's corners.
-	Angle  float64
+	Angle float64
+	// Apex is how far along the edge the apex sits, or nil for the edge's middle.
+	Apex   *float64
 	Ratio  []float64
 	Rotate float64
 }
@@ -131,10 +133,22 @@ type Saltire struct {
 type Charge struct {
 	Effects
 	Shape Shape
-	// Color is empty for inline SVG, which has its own colors.
+	// Color is optional for inline SVG, where it's what currentColor means.
 	Color     string
 	Fimbriate *Edge
 	Repeat    *Repeat
+}
+
+// Emblem places charges in their own frame: its origin is at a position, and its
+// axes can run along one of the region's axes and be rotated further.
+type Emblem struct {
+	Effects
+	// At is the frame's origin, or nil for the center of the region.
+	At *Point
+	// Along is an axis of the region for the frame's fly direction, or empty.
+	Along   string
+	Rotate  float64
+	Charges []*Charge
 }
 
 // Group treats its layers as one, in its parent's region.
@@ -152,7 +166,8 @@ type Canton struct {
 
 // Shape is a shape used by a charge, clip or cut.
 type Shape struct {
-	// Kind is disc, ring, rect, plus, triangle, star, cardioid, polygon or svg.
+	// Kind is disc, ring, rect, plus, triangle, star, heart, cardioid, polygon or
+	// svg.
 	Kind string
 	// At is the position, or nil for the center of the region.
 	At     *Point
@@ -165,6 +180,8 @@ type Shape struct {
 	Points int
 	// Width is the width of a plus's arms.
 	Width float64
+	// Spread is the distance between a heart's lobes.
+	Spread float64
 	// Fly and Hoist are the size of a rect or inline SVG.
 	Fly, Hoist float64
 	// Vertices are a polygon's points.
@@ -179,7 +196,7 @@ type Shape struct {
 
 // Repeat paints a charge several times.
 type Repeat struct {
-	// Kind is ring or grid.
+	// Kind is ring, grid or line.
 	Kind string
 
 	// Count, Radius and Turn describe a ring.
@@ -190,4 +207,8 @@ type Repeat struct {
 	// Rows, Columns and Stagger describe a grid.
 	Rows, Columns int
 	Stagger       bool
+
+	// Count, Fly and Hoist describe a line, with Fly and Hoist the step between
+	// copies.
+	Fly, Hoist float64
 }

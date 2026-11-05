@@ -221,6 +221,8 @@ func (p *parser) layer(n *kdl.Node, depth int) Layer {
 		return p.saltire(n)
 	case "charge":
 		return p.charge(n)
+	case "emblem":
+		return p.emblem(n)
 	case "group":
 		l := &Group{Effects: newEffects()}
 		p.noValues(n)
@@ -356,11 +358,21 @@ func (p *parser) chevrons(n *kdl.Node) Layer {
 				p.errf(c, "must be between 0 and 90 degrees, exclusive")
 			}
 		},
+		"apex": func(c *kdl.Node) {
+			apex := p.number(c)
+			if apex < 0 {
+				p.errf(c, "can't be negative")
+			}
+			l.Apex = &apex
+		},
 		"ratio":  func(c *kdl.Node) { l.Ratio = p.positives(c) },
 		"rotate": func(c *kdl.Node) { l.Rotate = p.number(c) },
 	}))
 	if l.Depth == 0 {
 		p.errf(n, "needs a `depth`")
+	}
+	if l.Apex != nil && l.Angle == 0 {
+		p.errf(n, "an off-center `apex` needs an `angle`, since its arms can't meet both corners at one slope")
 	}
 	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
 	return l
@@ -448,10 +460,8 @@ func (p *parser) charge(n *kdl.Node) Layer {
 		return nil
 	}
 	l := &Charge{Effects: newEffects(), Shape: Shape{Kind: args[0].String()}}
-	if l.Shape.Kind == "svg" {
-		if len(args) != 1 {
-			p.errf(n, "inline SVG has its own colors and takes none")
-		}
+	if l.Shape.Kind == "svg" && len(args) == 1 {
+		// Inline SVG can bring its own colors.
 	} else if len(args) != 2 {
 		p.errf(n, "needs a shape and a color")
 		return nil
@@ -466,6 +476,8 @@ func (p *parser) charge(n *kdl.Node) Layer {
 		"repeat":    func(c *kdl.Node) { l.Repeat = p.repeat(c) },
 	}))
 	switch {
+	case l.Shape.embedded != nil && l.Color == "" && l.Shape.embedded.usesCurrentColor():
+		p.errf(n, "inline SVG uses currentColor, so it needs a palette color")
 	case l.Shape.Kind == "svg" && l.Fimbriate != nil:
 		p.errf(n, "inline SVG can't be fimbriated")
 	case l.Shape.Kind == "svg" && l.Repeat != nil:
@@ -474,6 +486,45 @@ func (p *parser) charge(n *kdl.Node) Layer {
 		p.errf(n, "a polygon can't be repeated")
 	case l.Repeat != nil && l.Repeat.Kind == "grid" && l.Shape.placed:
 		p.errf(n, "a grid repeat spreads across the region, so it can't have `at`")
+	}
+	return l
+}
+
+func (p *parser) emblem(n *kdl.Node) Layer {
+	l := &Emblem{Effects: newEffects()}
+	p.noValues(n)
+	placed := p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"at":     func(c *kdl.Node) { l.At = p.at(c) },
+		"along":  func(c *kdl.Node) { l.Along = p.oneOf(c, alongValues) },
+		"rotate": func(c *kdl.Node) { l.Rotate = p.number(c) },
+	})
+	seen := map[string]bool{}
+	if n.Children() != nil {
+		for _, c := range n.Children().Nodes {
+			if c.Name() == "charge" {
+				if charge, ok := p.layer(c, 1).(*Charge); ok {
+					if charge.Repeat != nil && charge.Repeat.Kind == "grid" {
+						p.errf(c, "a grid repeat needs a region, which an emblem doesn't have")
+					}
+					l.Charges = append(l.Charges, charge)
+				}
+				continue
+			}
+			handler, ok := placed[c.Name()]
+			if !ok {
+				p.errf(c, "an emblem can only hold charges")
+				continue
+			}
+			if seen[c.Name()] && c.Name() != "cut" {
+				p.errf(c, "given more than once")
+			}
+			seen[c.Name()] = true
+			p.plain(c)
+			handler(c)
+		}
+	}
+	if len(l.Charges) == 0 {
+		p.errf(n, "needs at least one charge")
 	}
 	return l
 }
@@ -501,6 +552,18 @@ func (p *parser) repeat(n *kdl.Node) *Repeat {
 		if r.Rows*r.Columns > maxCopies {
 			p.errf(n, "makes more than %d copies", maxCopies)
 		}
+	case "line":
+		p.only(n, 1, "count", "fly", "hoist")
+		r.Count = p.integer(n, p.prop(n, "count"), maxCopies)
+		if v := n.Prop("fly"); v.IsValid() {
+			r.Fly = p.numberValue(n, v)
+		}
+		if v := n.Prop("hoist"); v.IsValid() {
+			r.Hoist = p.numberValue(n, v)
+		}
+		if r.Fly == 0 && r.Hoist == 0 {
+			p.errf(n, "needs a step: fly= or hoist=")
+		}
 	default:
 		p.errf(n, "unknown repeat %q", r.Kind)
 	}
@@ -520,6 +583,9 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 	switch s.Kind {
 	case "disc", "triangle", "cardioid":
 		handlers["radius"] = radius
+	case "heart":
+		handlers["radius"] = radius
+		handlers["spread"] = func(c *kdl.Node) { s.Spread = p.positive(c, p.number(c)) }
 	case "ring":
 		handlers["radius"], handlers["inner"] = radius, inner
 	case "rect":
@@ -560,7 +626,7 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 }
 
 func (p *parser) checkShape(n *kdl.Node, s *Shape) {
-	if _, hasRadius := map[string]bool{"disc": true, "ring": true, "plus": true, "triangle": true, "star": true, "cardioid": true}[s.Kind]; hasRadius && s.Radius == 0 {
+	if _, hasRadius := map[string]bool{"disc": true, "ring": true, "plus": true, "triangle": true, "star": true, "heart": true, "cardioid": true}[s.Kind]; hasRadius && s.Radius == 0 {
 		p.errf(n, "needs a `radius`")
 	}
 	switch s.Kind {
@@ -582,6 +648,13 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 	case "rect":
 		if s.Fly == 0 || s.Hoist == 0 {
 			p.errf(n, "needs `fly` and `hoist`")
+		}
+	case "heart":
+		if s.Spread == 0 {
+			s.Spread = s.Radius * math.Sqrt2
+		}
+		if s.Spread >= 2*s.Radius && s.Radius > 0 {
+			p.errf(n, "`spread` must be less than twice `radius`, so that the lobes meet")
 		}
 	case "plus":
 		if s.Width == 0 || s.Width >= 2*s.Radius {

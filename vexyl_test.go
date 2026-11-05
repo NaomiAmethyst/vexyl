@@ -103,7 +103,7 @@ func hasPoint(poly []vec, want vec) bool {
 }
 
 func TestAxisNormalsPointAwayFromFirstBar(t *testing.T) {
-	r := region{30, 20}
+	r := region{w: 30, h: 20}
 	tests := []struct {
 		along string
 		first vec // a corner in the first bar
@@ -125,7 +125,7 @@ func TestAxisNormalsPointAwayFromFirstBar(t *testing.T) {
 }
 
 func TestBendsFollowCornersAtAnyProportion(t *testing.T) {
-	r := region{30, 20}
+	r := region{w: 30, h: 20}
 	poly := bandPoly(r, "bend-sinister", 0, 2, 0, true)
 	// The band's center line must run through the corners.
 	dir, normal := axis(r, "bend-sinister", 0)
@@ -141,7 +141,7 @@ func TestBendsFollowCornersAtAnyProportion(t *testing.T) {
 
 func TestBarRatios(t *testing.T) {
 	f := parse(t, header+`bars a b a { ratio 2 1 2; }`)
-	polys := barPolys(f.Layers[0].(*Bars), region{20, 10})
+	polys := barPolys(f.Layers[0].(*Bars), region{w: 20, h: 10})
 	for i, wantY := range []float64{0, 4, 6} {
 		if !hasPoint(polys[i], vec{0, wantY}) || !hasPoint(polys[i], vec{20, 10}) {
 			t.Errorf("bar %d: got %v, want a start at %v running to the far edge", i, polys[i], wantY)
@@ -151,7 +151,7 @@ func TestBarRatios(t *testing.T) {
 
 func TestDiagonalBarsCoverTheFlag(t *testing.T) {
 	f := parse(t, header+`bars a b { along bend-sinister; }`)
-	polys := barPolys(f.Layers[0].(*Bars), region{20, 10})
+	polys := barPolys(f.Layers[0].(*Bars), region{w: 20, h: 10})
 	if !hasPoint(polys[0], vec{0, 0}) || !hasPoint(polys[0], vec{20, 10}) {
 		t.Errorf("first bar doesn't reach both far corners: %v", polys[0])
 	}
@@ -163,7 +163,7 @@ func TestDiagonalBarsCoverTheFlag(t *testing.T) {
 
 func TestChevronDefaultMeetsCorners(t *testing.T) {
 	f := parse(t, header+`chevrons a { depth 5; }`)
-	polys := chevronPolys(f.Layers[0].(*Chevrons), region{20, 10})
+	polys := chevronPolys(f.Layers[0].(*Chevrons), region{w: 20, h: 10})
 	for _, want := range []vec{{5, 5}, {0, 0}, {0, 10}} {
 		if !hasPoint(polys[0], want) {
 			t.Errorf("triangle %v lacks %v", polys[0], want)
@@ -176,7 +176,7 @@ func TestChevronDefaultMeetsCorners(t *testing.T) {
 
 func TestChevronAnglesAndEdges(t *testing.T) {
 	f := parse(t, header+`chevrons a b { depth 8; angle 45; from fly; }`)
-	polys := chevronPolys(f.Layers[0].(*Chevrons), region{20, 10})
+	polys := chevronPolys(f.Layers[0].(*Chevrons), region{w: 20, h: 10})
 	// Outermost: apex 8 in from the fly, arms meeting the top 5 back from it.
 	for _, want := range []vec{{12, 5}, {17, 0}, {20, 0}, {20, 10}, {17, 10}} {
 		if !hasPoint(polys[0], want) {
@@ -191,7 +191,7 @@ func TestChevronAnglesAndEdges(t *testing.T) {
 func TestSteepChevronStaysConvex(t *testing.T) {
 	// A long run once produced a self-intersecting polygon.
 	f := parse(t, header+`chevrons a b { depth 18; }`)
-	for i, poly := range chevronPolys(f.Layers[0].(*Chevrons), region{20, 10}) {
+	for i, poly := range chevronPolys(f.Layers[0].(*Chevrons), region{w: 20, h: 10}) {
 		if !isConvex(poly) {
 			t.Errorf("polygon %d isn't convex: %v", i, poly)
 		}
@@ -220,12 +220,84 @@ meta { name "T"; }
 palette { a "#112233"; }
 proportion hoist=10 fly=16
 cross a { fly 5 2 9; hoist 4 2 4; }`)
-	polys := crossPolys(f.Layers[0].(*Cross), region{16, 10})
+	polys := crossPolys(f.Layers[0].(*Cross), region{w: 16, h: 10})
 	if !hasPoint(polys[0], vec{5, 0}) || !hasPoint(polys[0], vec{7, 10}) {
 		t.Errorf("vertical arm: %v", polys[0])
 	}
 	if !hasPoint(polys[1], vec{0, 4}) || !hasPoint(polys[1], vec{16, 6}) {
 		t.Errorf("horizontal arm: %v", polys[1])
+	}
+}
+
+// An off-center chevron with 45-degree arms: its apex on a bar boundary at 2, with
+// arms reaching the top at 2 back from it and the far corner at the bottom.
+func TestChevronApex(t *testing.T) {
+	f := parse(t, `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; }
+proportion hoist=6 fly=10
+chevrons a { depth 4; angle 45; apex 2; }`)
+	poly := chevronPolys(f.Layers[0].(*Chevrons), region{w: 10, h: 6})[0]
+	for _, want := range []vec{{4, 2}, {2, 0}, {0, 0}, {0, 6}} {
+		if !hasPoint(poly, want) {
+			t.Errorf("chevron %v lacks %v", poly, want)
+		}
+	}
+	if len(poly) != 4 {
+		t.Errorf("want 4 points, got %v", poly)
+	}
+}
+
+func TestChevronApexAlongTop(t *testing.T) {
+	f := parse(t, `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; }
+proportion hoist=6 fly=10
+chevrons a { from top; depth 4; angle 45; apex 3; }`)
+	poly := chevronPolys(f.Layers[0].(*Chevrons), region{w: 10, h: 6})[0]
+	if !hasPoint(poly, vec{3, 4}) {
+		t.Errorf("chevron %v should have its apex 3 from the hoist", poly)
+	}
+}
+
+func TestHeartGeometry(t *testing.T) {
+	// A lobe radius of 2 and spread of 2 put the tip at 1 + 2*sqrt(2).
+	f := parse(t, header+`charge heart a { radius 2; spread 2; at fly=5 hoist=5; }`)
+	s := f.Layers[0].(*Charge).Shape
+	g := shapeGeom(&s, position(&s, region{w: 20, h: 10}), 0)
+	tip := "M5 " + num(5+1+2*math.Sqrt2)
+	if !strings.HasPrefix(g.path, tip) {
+		t.Errorf("path %q doesn't start at the tip %q", g.path, tip)
+	}
+	// The notch is where the lobes meet: 1 either side, so sqrt(3) above them.
+	notch := "5 " + num(5-math.Sqrt(3))
+	if !strings.Contains(g.path, notch) {
+		t.Errorf("path %q lacks the notch %q", g.path, notch)
+	}
+}
+
+func TestHeartDefaultsToClassicSpread(t *testing.T) {
+	f := parse(t, header+`charge heart a { radius 2; }`)
+	if got := f.Layers[0].(*Charge).Shape.Spread; math.Abs(got-2*math.Sqrt2) > 1e-9 {
+		t.Errorf("spread = %v", got)
+	}
+}
+
+func TestHeartRotatesToPointAlongTheFly(t *testing.T) {
+	f := parse(t, header+`charge heart a { radius 2; spread 2; at fly=5 hoist=5; rotate -90; }`)
+	s := f.Layers[0].(*Charge).Shape
+	g := shapeGeom(&s, vec{5, 5}, 0)
+	want := "M" + num(5+1+2*math.Sqrt2) + " 5"
+	if !strings.HasPrefix(g.path, want) {
+		t.Errorf("path %q doesn't start at %q", g.path, want)
+	}
+}
+
+func TestSVGChargeColor(t *testing.T) {
+	const art = `{ fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect fill='currentColor'/></svg>"; }`
+	out := svgOf(t, parse(t, header+`charge svg b `+art))
+	if !strings.Contains(out, `<g color="#445566">`) || !strings.Contains(out, `fill="currentColor"`) {
+		t.Errorf("artwork doesn't take its palette color: %s", out)
 	}
 }
 
@@ -340,7 +412,12 @@ func TestRejected(t *testing.T) {
 		{"too many copies", header + `charge disc a { radius 1; repeat grid rows=1000 columns=1000; }`, "more than"},
 		{"polygon at", header + `charge polygon a { at center; point fly=0 hoist=0; }`, "unknown here"},
 		{"polygon size", header + `charge polygon a { point fly=0 hoist=0; }`, "at least 3"},
-		{"svg color", header + `charge svg a`, "takes none"},
+		{"svg unknown color", header + `charge svg nope { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>"; }`, "isn't in the palette"},
+		{"svg currentColor without color", header + `charge svg { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect fill='currentColor'/></svg>"; }`, "needs a palette color"},
+		{"apex without angle", header + `chevrons a { depth 1; apex 2; }`, "needs an `angle`"},
+		{"negative apex", header + `chevrons a { depth 1; angle 45; apex -2; }`, "can't be negative"},
+		{"heart radius", header + `charge heart a`, "needs a `radius`"},
+		{"heart spread", header + `charge heart a { radius 1; spread 2; }`, "must be less than"},
 		{"svg cut", header + `field a { cut { svg; }; }`, "can't be used"},
 		{"svg repeat", header + `charge svg { fly 1; hoist 1; repeat ring count=2 radius=1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>"; }`, "can't be repeated"},
 		{"infinite", header + `charge disc a { radius #inf; }`, "finite"},
@@ -350,6 +427,14 @@ func TestRejected(t *testing.T) {
 		{"duplicate property", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 hoist=2 fly=2\n", "hoist"},
 		{"no canton size", header + `canton { field a; }`, "needs `fly` and `hoist`"},
 		{"empty group", header + `group`, "at least one layer"},
+		{"empty emblem", header + `emblem { along bend; }`, "at least one charge"},
+		{"emblem with a field", header + `emblem { field a; charge disc a { radius 1; }; }`, "only hold charges"},
+		{"nested emblem", header + `emblem { emblem { charge disc a { radius 1; }; }; }`, "only hold charges"},
+		{"emblem grid", header + `emblem { charge disc a { radius 1; repeat grid rows=2 columns=2; }; }`, "needs a region"},
+		{"emblem bad axis", header + `emblem { along sideways; charge disc a { radius 1; }; }`, "must be one of"},
+		{"emblem arguments", header + `emblem 1 { charge disc a { radius 1; }; }`, "takes no arguments"},
+		{"line without step", header + `charge disc a { radius 1; repeat line count=2; }`, "needs a step"},
+		{"line unknown property", header + `charge disc a { radius 1; repeat line count=2 fly=1 radius=2; }`, "unknown property"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -452,6 +537,73 @@ func TestProgressChevronsRunWhiteToBlack(t *testing.T) {
 	ch := f.Layers[1].(*Chevrons)
 	if ch.Colors[0] != "white" || ch.Colors[len(ch.Colors)-1] != "black" {
 		t.Errorf("chevrons from the hoist: %v", ch.Colors)
+	}
+}
+
+func TestRepeatLine(t *testing.T) {
+	out := svgOf(t, parse(t, header+`charge disc a { radius 1; at fly=2 hoist=3; repeat line count=3 fly=4 hoist=-1; }`))
+	for _, want := range []string{`cx="2" cy="3"`, `cx="6" cy="2"`, `cx="10" cy="1"`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("no copy at %s: %s", want, out)
+		}
+	}
+}
+
+func TestEmblemFrame(t *testing.T) {
+	bend := math.Atan2(10, 20) * 180 / math.Pi
+	tests := []struct{ src, want string }{
+		{`emblem { charge disc a { radius 1; }; }`, `translate(10 5) rotate(0)`},
+		{`emblem { at fly=2 hoist=3; rotate 90; charge disc a { radius 1; }; }`, `translate(2 3) rotate(90)`},
+		{`emblem { along bend; charge disc a { radius 1; }; }`, `translate(10 5) rotate(` + num(bend) + `)`},
+		{`emblem { along bend-sinister; charge disc a { radius 1; }; }`, `translate(10 5) rotate(` + num(-bend) + `)`},
+		{`emblem { along hoist; rotate 10; charge disc a { radius 1; }; }`, `translate(10 5) rotate(100)`},
+	}
+	for _, tt := range tests {
+		if out := svgOf(t, parse(t, header+tt.src)); !strings.Contains(out, tt.want) {
+			t.Errorf("%s: no %q in %s", tt.src, tt.want, out)
+		}
+	}
+}
+
+func TestEmblemChargesDefaultToItsOrigin(t *testing.T) {
+	out := svgOf(t, parse(t, header+`emblem { at fly=2 hoist=3; charge disc a { radius 1; }; charge disc b { radius 1; at center; }; }`))
+	if got := strings.Count(out, `cx="0" cy="0"`); got != 2 {
+		t.Errorf("found %d charges at the frame's origin, want 2: %s", got, out)
+	}
+}
+
+// A cut in an emblem has negative local coordinates, and its mask has to cover
+// the whole visible flag, or the charge would be cut away outside it.
+func TestEmblemMaskCoversVisibleArea(t *testing.T) {
+	out := svgOf(t, parse(t, header+`emblem { at fly=0 hoist=0; charge disc a { radius 1; cut { disc { radius 1; }; }; }; }`))
+	reach := num(math.Hypot(20, 10))
+	if want := `x="-` + reach + `" y="-` + reach + `"`; !strings.Contains(out, want) {
+		t.Errorf("no %q in %s", want, out)
+	}
+}
+
+func TestSouthKoreaConstruction(t *testing.T) {
+	src, err := os.ReadFile("flags/south-korea.kdl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := parse(t, string(src))
+	var emblems []*Emblem
+	for _, l := range f.Layers {
+		if e, ok := l.(*Emblem); ok {
+			emblems = append(emblems, e)
+		}
+	}
+	if len(emblems) != 2 || emblems[0].Along != "bend" || emblems[1].Along != "bend-sinister" {
+		t.Fatalf("emblems should follow both diagonals: %+v", emblems)
+	}
+	// Each bar is the decree's 1/24 of the hoist across and 1/4 long.
+	for _, e := range emblems {
+		for _, c := range e.Charges {
+			if c.Shape.Kind == "rect" && (c.Shape.Fly != f.Hoist/24 || c.Shape.Hoist != f.Hoist/4) {
+				t.Errorf("bar is %v by %v", c.Shape.Fly, c.Shape.Hoist)
+			}
+		}
 	}
 }
 
@@ -635,6 +787,8 @@ func FuzzSanitize(f *testing.F) {
 func FuzzParse(f *testing.F) {
 	f.Add(header + `bars a b { ratio 1 2; }`)
 	f.Add(header + `charge star a { radius 1; repeat ring count=5 radius=2; }`)
+	f.Add(header + `emblem { along bend; charge rect a { fly 1; hoist 2; repeat line count=2 fly=3; cut { disc { radius 1; }; }; }; }`)
+	f.Add(header + `border a 1 outside` + "\n" + `field a`)
 	f.Fuzz(func(t *testing.T, src string) {
 		flag, err := Parse(strings.NewReader(src), "fuzz")
 		if err != nil {

@@ -38,6 +38,7 @@ untrusted.
 | ordinary | A band across its region: `band`, `cross`, `saltire` |
 | charge | A shape placed at a position: `charge` |
 | canton | A rectangular panel in the upper hoist corner |
+| emblem | Charges drawn together in their own frame, like a taegeuk |
 | fimbriation | A narrow contrasting edge around an ordinary or charge |
 | bend | The diagonal from the top of the hoist to the bottom of the fly |
 | bend sinister | The diagonal from the bottom of the hoist to the top of the fly |
@@ -225,7 +226,7 @@ lies beneath the flag between adjacent bars.
 ### 7.4 chevrons
 
 ```
-chevrons COLOR... { from EDGE; depth D; angle DEGREES; ratio N...; rotate DEGREES }
+chevrons COLOR... { from EDGE; depth D; angle DEGREES; apex N; ratio N...; rotate DEGREES }
 ```
 
 Chevrons nest outward from an edge. Colors are listed from that edge outward, so
@@ -236,6 +237,11 @@ measured along the center line, and `ratio` divides it. `angle` is the angle
 between each arm and the center line. By default, the outermost arms meet the
 corners of the edge.
 
+`apex` moves the center line along the edge, so the apex needn't be in the flag's
+middle. It's measured down from the top for `hoist` and `fly`, and from the hoist
+for `top` and `bottom`, and defaults to the edge's middle. An `apex` REQUIRES an
+`angle`, because one slope can't meet both corners from off-center.
+
 Each chevron is the previous one moved along the center line, so arms stay
 parallel. Space beyond the outermost chevron is left unpainted.
 
@@ -245,6 +251,9 @@ function paint_chevrons(ch, region, target):
     if ch.angle: run = (edge_length / 2) / tan(ch.angle)
     else:        run = ch.depth
     reach = length of region diagonal
+    if ch.apex is set:
+        origin = origin + axis_v * (ch.apex - edge_length / 2)
+        reach = reach + abs(ch.apex - edge_length / 2)
     slope = run / (edge_length / 2)
     apexes = running sums of ch.depth * ch.ratio[i] / sum(ch.ratio)
     for i from last color down to first:
@@ -343,6 +352,7 @@ is centered on its position, except where noted.
 | `plus` | `radius`, `width` | Equal-armed cross with arms of length `radius` from the center |
 | `triangle` | `radius` | Equilateral triangle, one point up |
 | `star` | `radius`, `points` (default 5), `inner` | Star with one point up |
+| `heart` | `radius`, `spread` | Tip down; the position is midway between the lobes' centers; see below |
 | `cardioid` | `radius` | Cusp at the position, lobe below it; see below |
 | `polygon` | `point fly=A hoist=B`, at least 3 | Points relative to the current region |
 
@@ -360,7 +370,23 @@ For `n < 5`, `inner` is REQUIRED.
 The outer points of a star lie at `angle = i * 360 / n` clockwise from up, with
 the inner points halfway between them.
 
-A cardioid's farthest point lies `radius` from the cusp:
+A heart is two discs of the given `radius`, with their centers `spread` apart, and
+two straight sides that meet at a right angle at its tip and touch the discs. The
+`spread` defaults to `radius * sqrt(2)`, the classic heart of a square with a
+semicircle on each of two sides, and it MUST be less than `2 * radius`.
+
+```
+half = spread / 2
+edge = radius / sqrt(2)
+tip   = at + (0, half + radius * sqrt(2))
+right = at + (half + edge, edge)        // where the side touches the disc
+left  = at + (-half - edge, edge)
+notch = at + (0, -sqrt(radius^2 - half^2))
+outline: tip, line to right, arc to notch, arc to left, line to tip
+```
+
+A cardioid is the mathematical curve, and it's narrower at the cusp than most
+hearts drawn on flags. A cardioid's farthest point lies `radius` from the cusp:
 
 ```
 r(t) = radius * (1 - cos(t)) / 2       // t from 0 to 360
@@ -396,6 +422,15 @@ for r in 1 .. R:
         paint charge at (region.width * c / (C + 1), region.height * r / (R + 1))
 ```
 
+**`repeat line count=N fly=A hoist=B`** places copies in a straight line, starting
+at the charge's position and stepping by `fly` and `hoist` each time. At least one
+step MUST be non-zero. A trigram's three bars are `repeat line count=3 fly=6`.
+
+```
+for i in 0 .. N-1:
+    paint charge at at + (A * i, B * i)
+```
+
 ### 8.3 SVG escape hatch
 
 Artwork that isn't geometry is inlined in the document, usually as a KDL raw
@@ -417,7 +452,12 @@ charge svg {
 
 The artwork is scaled to fit `fly` by `hoist`, preserving its aspect ratio, and is
 centered on its position. `fly`, `hoist` and `markup` are REQUIRED. It takes no
-palette color, `fimbriate` or `repeat`, and it can't be used in a `clip` or `cut`.
+`fimbriate` or `repeat`, and it can't be used in a `clip` or `cut`.
+
+A palette color is optional, as in `charge svg gold { ... }`. Artwork using
+`currentColor` draws in that color, which keeps a design's colors in its palette
+wherever the artwork allows. A document whose artwork uses `currentColor` MUST give
+a palette color, so that it can't pick up a color from wherever it's displayed.
 Using it for lettering or seals doesn't make them part of the format.
 
 The root MUST be an `svg` element in the SVG namespace, with a `viewBox` or with
@@ -460,7 +500,37 @@ A renderer MUST rewrite every `id` and reference with a prefix unique to the
 charge, or otherwise isolate the artwork, so that one piece of artwork can't refer
 to the flag's own definitions or another's.
 
-## 9. Groups, cantons and outlines
+## 9. Emblems, groups, cantons and outlines
+
+**`emblem { ... }`** draws charges together in their own frame, so that they can be
+measured from each other as a construction sheet does. Only `charge` and the
+properties below are allowed as children, and it takes the common properties in
+§6.1.
+
+| Child | Meaning |
+|---|---|
+| `at center` or `at fly=A hoist=B` | The frame's origin in the region; default center |
+| `along AXIS` | Makes the frame's fly direction follow an axis of the region |
+| `rotate DEGREES` | Turns the frame further |
+
+Inside it, `fly` and `hoist` measure along the frame's own axes from its origin, so
+they can be negative, and a charge's default position is the origin. Shapes in a
+child's `clip` and `cut` use the same frame. A `repeat grid` isn't allowed, because
+a frame has no size to spread across.
+
+```
+function emblem_transform(emblem, region):
+    origin = emblem.at or center(region)
+    angle = emblem.rotate
+    if emblem.along:
+        dir, normal = axis(region, emblem.along, 0)
+        angle = angle + atan2(dir.y, dir.x)
+    return translate(origin) then rotate(angle)
+```
+
+Painting is still clipped to the region. South Korea's taegeuk and trigrams are
+placed this way, along the flag's diagonals at any proportion.
+
 
 **`group { ... }`** holds layers and treats them as one for `opacity`, `blend`,
 `clip` and `cut`. Its children use the parent's region.
@@ -524,8 +594,6 @@ Numbers MUST be finite, and renderers MAY reject magnitudes above 1e12.
 
 ## 12. Open questions
 
-- **Rotated frames:** South Korea's trigrams suggest `group` needs `at` and
-  `rotate`. Without them, each bar's position must be calculated by hand.
 - **Cuts on repeats:** a cut applies after `repeat`, so a repeated crescent needs
   several cuts. It might be better to have a `cut` inside a charge travel with it.
 - **Cardioid anchor:** placing it by its cusp is exact but awkward for centering.

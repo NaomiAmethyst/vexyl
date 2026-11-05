@@ -49,7 +49,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	if outer != nil {
 		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.color(f.Border.Color)))
 	}
-	root := region{f.Fly, f.Hoist}
+	root := region{w: f.Fly, h: f.Hoist}
 	shape := geom{poly: rectPoly(0, 0, f.Fly, f.Hoist)}
 	if f.Outline != nil {
 		s := Shape{Kind: "polygon", Vertices: f.Outline}
@@ -151,9 +151,10 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 	}
 	if len(e.Cuts) > 0 {
 		id := r.id("mask")
-		r.line(`<mask id="%s" maskUnits="userSpaceOnUse" x="0" y="0" width="%s" height="%s">`, id, num(reg.w), num(reg.h))
+		x, y, w, h := reg.bounds()
+		r.line(`<mask id="%s" maskUnits="userSpaceOnUse" x="%s" y="%s" width="%s" height="%s">`, id, num(x), num(y), num(w), num(h))
 		r.depth++
-		r.geom(geom{poly: rectPoly(0, 0, reg.w, reg.h)}, `fill="#fff"`)
+		r.geom(geom{poly: rectPoly(x, y, x+w, y+h)}, `fill="#fff"`)
 		for i := range e.Cuts {
 			r.geom(shapeGeom(&e.Cuts[i], position(&e.Cuts[i], reg), 0), `fill="#000"`)
 		}
@@ -191,6 +192,8 @@ func (r *renderer) content(l Layer, reg region) {
 		})
 	case *Charge:
 		r.charge(l, reg)
+	case *Emblem:
+		r.emblem(l, reg)
 	case *Group:
 		r.layers(l.Layers, reg)
 	case *Canton:
@@ -202,17 +205,42 @@ func (r *renderer) content(l Layer, reg region) {
 		r.line(`</clipPath>`)
 		r.line(`<g clip-path="url(#%s)" style="isolation:isolate">`, id)
 		r.depth++
-		r.layers(l.Layers, region{l.Fly, l.Hoist})
+		r.layers(l.Layers, region{w: l.Fly, h: l.Hoist})
 		r.depth--
 		r.line(`</g>`)
 	}
+}
+
+func (r *renderer) emblem(e *Emblem, reg region) {
+	at := reg.center()
+	if e.At != nil {
+		at = vec{e.At.Fly, e.At.Hoist}
+	}
+	angle := e.Rotate
+	if e.Along != "" {
+		dir, _ := axis(reg, e.Along, 0)
+		angle += math.Atan2(dir.y, dir.x) * 180 / math.Pi
+	}
+	// Painting is still clipped to the region, so the frame only has to reach
+	// the region's farthest corner.
+	reach := 0.0
+	for _, corner := range reg.corners() {
+		reach = max(reach, math.Hypot(corner.x-at.x, corner.y-at.y))
+	}
+	r.line(`<g transform="translate(%s %s) rotate(%s)">`, num(at.x), num(at.y), num(angle))
+	r.depth++
+	for _, c := range e.Charges {
+		r.layer(c, region{local: reach})
+	}
+	r.depth--
+	r.line(`</g>`)
 }
 
 func (r *renderer) charge(c *Charge, reg region) {
 	s := &c.Shape
 	at := position(s, reg)
 	if s.Kind == "svg" {
-		r.embedded(s, at)
+		r.embedded(c, at)
 		return
 	}
 	var copies []geom
@@ -227,6 +255,11 @@ func (r *renderer) charge(c *Charge, reg region) {
 				turn = a
 			}
 			copies = append(copies, shapeGeom(s, at.add(vec{0, -c.Repeat.Radius}.rotate(a)), turn))
+		}
+	case c.Repeat.Kind == "line":
+		for i := range c.Repeat.Count {
+			step := vec{c.Repeat.Fly, c.Repeat.Hoist}.mul(float64(i))
+			copies = append(copies, shapeGeom(s, at.add(step), 0))
 		}
 	default:
 		for row := 1; row <= c.Repeat.Rows; row++ {
@@ -244,9 +277,17 @@ func (r *renderer) charge(c *Charge, reg region) {
 	r.paint(c.Color, c.Fimbriate, copies)
 }
 
-func (r *renderer) embedded(s *Shape, at vec) {
+func (r *renderer) embedded(c *Charge, at vec) {
+	s := &c.Shape
+	var attrs []string
+	if c.Color != "" {
+		attrs = append(attrs, fmt.Sprintf(`color="%s"`, r.color(c.Color)))
+	}
 	if s.Rotate != 0 {
-		r.line(`<g transform="rotate(%s %s %s)">`, num(s.Rotate), num(at.x), num(at.y))
+		attrs = append(attrs, fmt.Sprintf(`transform="rotate(%s %s %s)"`, num(s.Rotate), num(at.x), num(at.y)))
+	}
+	if len(attrs) > 0 {
+		r.line(`<g %s>`, strings.Join(attrs, " "))
 		r.depth++
 		defer func() {
 			r.depth--
@@ -278,6 +319,8 @@ func (r *renderer) geom(g geom, attrs string) {
 		attrs = " " + attrs
 	}
 	switch {
+	case g.path != "":
+		r.line(`<path d="%s"%s/>`, g.path, attrs)
 	case g.circle:
 		r.line(`<circle cx="%s" cy="%s" r="%s"%s/>`, num(g.c.x), num(g.c.y), num(g.r), attrs)
 	case g.ring:
