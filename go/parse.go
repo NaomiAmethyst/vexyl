@@ -181,7 +181,7 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 	list := func(dst *[]string) func(*kdl.Node) {
 		return func(c *kdl.Node) { *dst = append(*dst, p.str(c)) }
 	}
-	p.children(n, []string{"designer", "encoder", "source"}, map[string]func(*kdl.Node){
+	p.children(n, []string{"designer", "encoder", "source", "note", "law", "restriction"}, map[string]func(*kdl.Node){
 		"name":        str(&m.Name),
 		"description": str(&m.Description),
 		"version":     str(&m.Version),
@@ -189,6 +189,32 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 			m.Date = p.str(c)
 			if m.Date != "" && !validDate(m.Date) {
 				p.errf(c, "must be YYYY, YYYY-MM or YYYY-MM-DD, got %q", m.Date)
+			}
+		},
+		"until": func(c *kdl.Node) {
+			m.Until = p.str(c)
+			if m.Until != "" && !validDate(m.Until) {
+				p.errf(c, "must be YYYY, YYYY-MM or YYYY-MM-DD, got %q", m.Until)
+			}
+		},
+		"series": func(c *kdl.Node) {
+			m.Series = p.str(c)
+			if m.Series != "" && !seriesValue.MatchString(m.Series) {
+				p.errf(c, "must be lowercase words joined by hyphens, got %q", m.Series)
+			}
+		},
+		"note": list(&m.Notes),
+		"law": func(c *kdl.Node) {
+			if r := p.reference(c); r != nil {
+				m.Laws = append(m.Laws, *r)
+			}
+		},
+		"restriction": func(c *kdl.Node) {
+			if r := p.reference(c); r != nil {
+				if len(r.Sources) == 0 {
+					p.errf(c, "needs a `source`, since an unsourced legal claim can mislead")
+				}
+				m.Restrictions = append(m.Restrictions, *r)
 			}
 		},
 		"designer":      list(&m.Designers),
@@ -199,6 +225,9 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 	})
 	if m.Name == "" {
 		p.errf(n, "needs a `name`")
+	}
+	if m.Date != "" && m.Until != "" && m.Until < m.Date {
+		p.errf(n, "`until` comes before `date`")
 	}
 }
 

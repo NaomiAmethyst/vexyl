@@ -137,7 +137,22 @@ func info(paths []string, stdin io.Reader, stdout io.Writer) error {
 	if doc.Meta.Date != "" {
 		fmt.Fprintf(stdout, "date: %s\n", doc.Meta.Date)
 	}
+	if doc.Meta.Until != "" {
+		fmt.Fprintf(stdout, "until: %s\n", doc.Meta.Until)
+	}
+	if doc.Meta.Series != "" {
+		fmt.Fprintf(stdout, "series: %s\n", doc.Meta.Series)
+	}
 	fmt.Fprintf(stdout, "proportion: %v:%v\n", doc.Hoist, doc.Fly)
+	for _, note := range doc.Meta.Notes {
+		fmt.Fprintf(stdout, "note: %s\n", note)
+	}
+	for _, law := range doc.Meta.Laws {
+		fmt.Fprintf(stdout, "law: %s\n", law.Text)
+	}
+	for _, restriction := range doc.Meta.Restrictions {
+		fmt.Fprintf(stdout, "restriction: %s\n", restriction.Text)
+	}
 	fmt.Fprintln(stdout, "colors:")
 	for _, name := range slices.Sorted(maps.Keys(doc.Palette)) {
 		fmt.Fprintf(stdout, "  %s %s", name, doc.Palette[name])

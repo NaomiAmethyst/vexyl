@@ -13,6 +13,10 @@ meta {
   source "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
   source "https://en.wikipedia.org/wiki/Flag_of_South_Korea"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Korea.svg"
+  note "The decree's color table is an annex that wasn't available to check. These values are Wikipedia's conversions from the CIE specification."
+  law "Enforcement decree of the National Flag Act, Art. 6" {
+    source "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
+  }
 }
 palette {
   white "#ffffff"

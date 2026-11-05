@@ -7,6 +7,7 @@ meta {
   license "Apache-2.0"
   source "https://en.wikipedia.org/wiki/Transgender_flag"
   source "https://commons.wikimedia.org/wiki/File:Transgender_Pride_flag.svg"
+  note "No primary construction sheet was found. The equal stripes and colors follow the Commons drawing."
 }
 palette {
   blue "#5bcefa"

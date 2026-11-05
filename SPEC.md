@@ -98,6 +98,11 @@ would produce a wrong flag.
 | `description` | no | Prose description |
 | `version` | no | Names this version of the flag, such as `"50-star"` |
 | `date` | no | When this version took effect: `YYYY`, `YYYY-MM` or `YYYY-MM-DD` |
+| `until` | no | When this version stopped being current, in the same form |
+| `series` | no | A stable ID linking the versions of one flag, in lowercase words joined by hyphens |
+| `note` | no, repeatable | A remark for anyone reading or using the flag or this file |
+| `law` | no, repeatable | An instrument that defines or governs the flag, with any number of `source` children |
+| `restriction` | no, repeatable | A limit on using the flag, apart from copyright, with at least one `source` child |
 | `designer` | no, repeatable | Who designed the flag |
 | `design-rights` | no | Rights in the design, as free text or an SPDX ID |
 | `encoder` | no, repeatable | Who wrote this file |
@@ -105,6 +110,19 @@ would produce a wrong flag.
 | `source` | no, repeatable | URL of the specification or reference used |
 
 A design and its encoding can have different owners, so they are separate.
+
+Each version of a flag gets its own file, because successive versions can differ
+completely, while a `variant` is a form of one design. `series` links them, since a name
+isn't reliable: a flag can change its name while being the same flag, or keep its name while
+changing. A missing `until` means the version may still be current.
+
+`note`, `law` and `restriction` are records. Nothing enforces them, and they aren't legal
+advice. A `restriction` needs a source because an unsourced legal claim in a shared file
+could mislead people. `design-rights` is for rights in a design, such as copyright, while
+`restriction` is for rules about using a flag, such as an emblem law.
+
+Comments are for remarks about how a file is written. Anything a reader of the flag
+should see belongs in `note`, because parsers discard comments.
 
 ### 4.2 palette
 

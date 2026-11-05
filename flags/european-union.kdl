@@ -8,6 +8,7 @@ meta {
   license "Apache-2.0"
   source "https://cdn.fotw.info/flags/eu'eun.html"
   source "https://en.wikipedia.org/wiki/Flag_of_Europe"
+  note "The star radius of 1/18 of the hoist comes from the EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16."
 }
 palette {
   blue "#003399" {

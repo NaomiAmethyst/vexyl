@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" width="1000" height="600">
   <title>Bahrain</title>
-  <clipPath id="vx-19e848fa-flag1">
+  <clipPath id="vx-bb82eda0-flag1">
     <polygon points="0,0 100,0 100,60 0,60"/>
   </clipPath>
-  <g clip-path="url(#vx-19e848fa-flag1)">
+  <g clip-path="url(#vx-bb82eda0-flag1)">
     <polygon points="0,0 100,0 100,60 0,60" fill="#da291c"/>
-    <clipPath id="vx-19e848fa-panel2">
+    <clipPath id="vx-bb82eda0-panel2">
       <polygon points="0,0 25,0 40,6 25,12 40,18 25,24 40,30 25,36 40,42 25,48 40,54 25,60 0,60"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-19e848fa-panel2)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-bb82eda0-panel2)" style="isolation:isolate">
       <polygon points="0,0 40,0 40,60 0,60" fill="#ffffff"/>
     </g>
   </g>

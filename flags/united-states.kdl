@@ -5,6 +5,7 @@
 vexyl 1
 meta {
   name "United States"
+  series "united-states"
   version "50-star"
   date "1960-07-04"
   encoder "Naomi Persephone Amethyst"
@@ -12,6 +13,13 @@ meta {
   source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
   source "https://www.law.cornell.edu/uscode/text/4/7"
   source "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
+  note "The hex values are the State Department ECA bureau's for Old Glory Red and Blue. Government sources disagree on them."
+  law "Executive Order 10834" {
+    source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+  }
+  law "United States Flag Code" {
+    source "https://www.law.cornell.edu/uscode/text/4/chapter-1"
+  }
 }
 palette {
   red "#b31942"

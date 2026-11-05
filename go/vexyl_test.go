@@ -536,6 +536,11 @@ func TestRejected(t *testing.T) {
 		{"variant unknown turn", header + `variant v { from flip; }`, "must be one of"},
 		{"outline unknown", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\noutline flag\n", "unknown form"},
 		{"layers after adapt", header + "adapt { wider extend; }\nfield a\n", "out of order"},
+		{"bad until", "vexyl 1\nmeta { name \"T\"; until \"soon\"; }\n", "must be YYYY"},
+		{"until first", "vexyl 1\nmeta { name \"T\"; date \"2000\"; until \"1999\"; }\n", "comes before"},
+		{"bad series", "vexyl 1\nmeta { name \"T\"; series \"United States\"; }\n", "lowercase words"},
+		{"unsourced restriction", "vexyl 1\nmeta { name \"T\"; restriction \"No\"; }\n", "needs a `source`"},
+		{"law with no name", "vexyl 1\nmeta { name \"T\"; law; }\n", "needs one string"},
 		{"bad date", "vexyl 1\nmeta { name \"T\"; date \"last year\"; }\n", "must be YYYY"},
 		{"impossible date", "vexyl 1\nmeta { name \"T\"; date \"2026-02-30\"; }\n", "must be YYYY"},
 		{"cmyk count", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\" { cmyk 1 2; }; }\n", "4 values"},
@@ -1120,6 +1125,43 @@ proportion hoist=1 fly=1`)
 meta { name "T"; date "`+date+`"; }
 palette { a "#112233"; }
 proportion hoist=1 fly=1`)
+	}
+}
+
+func TestMetaRecords(t *testing.T) {
+	f := parse(t, `vexyl 1
+meta {
+  name "T"
+  series "united-states"
+  version "49-star"
+  date "1959-07-04"
+  until "1960-07-04"
+  note "First"
+  note "Second"
+  law "A Flag Code" {
+    source "https://example.test/a"
+    source "https://example.test/b"
+  }
+  law "An Unsourced Act"
+  restriction "Commercial use" {
+    source "https://example.test/c"
+  }
+}
+palette { a "#112233"; }
+proportion hoist=1 fly=1`)
+	m := f.Meta
+	if m.Series != "united-states" || m.Until != "1960-07-04" || !slices.Equal(m.Notes, []string{"First", "Second"}) {
+		t.Errorf("got %+v", m)
+	}
+	if len(m.Laws) != 2 || m.Laws[0].Text != "A Flag Code" || len(m.Laws[0].Sources) != 2 || len(m.Laws[1].Sources) != 0 {
+		t.Errorf("laws: %+v", m.Laws)
+	}
+	if len(m.Restrictions) != 1 || m.Restrictions[0].Sources[0] != "https://example.test/c" {
+		t.Errorf("restrictions: %+v", m.Restrictions)
+	}
+	// They're records, so they don't reach the drawing.
+	if out := svgOf(t, f); strings.Contains(out, "First") {
+		t.Errorf("note leaked into output: %s", out)
 	}
 }
 

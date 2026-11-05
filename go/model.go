@@ -56,12 +56,28 @@ type Meta struct {
 	// Version names this version of the flag, such as "50-star".
 	Version string
 	// Date is when this version took effect: YYYY, YYYY-MM or YYYY-MM-DD.
-	Date         string
+	Date string
+	// Until is when this version stopped being current, if it has.
+	Until string
+	// Series links the versions of one flag, whatever each is called.
+	Series string
+	// Notes are remarks for anyone reading or using the flag or this file.
+	Notes []string
+	// Laws are the instruments that define or govern the flag.
+	Laws []Reference
+	// Restrictions are limits on using the flag, apart from copyright.
+	Restrictions []Reference
 	Designers    []string
 	DesignRights string
 	Encoders     []string
 	License      string
 	Sources      []string
+}
+
+// Reference is a named or described thing, with where it comes from.
+type Reference struct {
+	Text    string
+	Sources []string
 }
 
 // ColorRef is a color's value in another system, such as Pantone or a named dye.

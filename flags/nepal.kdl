@@ -13,6 +13,10 @@ meta {
   license "Apache-2.0"
   source "https://crwflags.com/fotw/flags/np-law.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Nepal.svg"
+  note "The constitution names crimson and deep blue. These values are the conventional ones."
+  law "Constitution of Nepal, Schedule 1" {
+    source "https://crwflags.com/fotw/flags/np-law.html"
+  }
 }
 palette {
   crimson "#dc143c"

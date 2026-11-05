@@ -7,6 +7,8 @@ meta {
   encoder "Naomi Persephone Amethyst"
   license "Apache-2.0"
   source "https://en.wikipedia.org/wiki/Flag_of_Bangladesh"
+  note "The rules specify Procion dyes, so these hex values are conversions through Pantone, made by Wikipedia's editors."
+  law "Flag Rules 1972"
 }
 palette {
   green "#006747" {

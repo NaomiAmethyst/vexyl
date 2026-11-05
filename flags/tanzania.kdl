@@ -9,6 +9,7 @@ meta {
   license "Apache-2.0"
   source "https://www.fotw.info/flags/tz.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Tanzania.svg"
+  note "Band widths follow FOTW citing Album des Pavillons rather than a government document. It doesn't say which way they're measured, so they're taken across the band, as the Commons drawing does."
 }
 palette {
   green "#1eb53a"

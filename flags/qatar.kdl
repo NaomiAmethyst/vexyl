@@ -1,10 +1,10 @@
-// Sizes follow the drawing on Commons.
 vexyl 1
 meta {
   name "Qatar"
   encoder "Naomi Persephone Amethyst"
   license "Apache-2.0"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Qatar.svg"
+  note "Sizes follow the drawing on Commons, not a checked construction sheet."
 }
 palette {
   maroon "#8a1538"

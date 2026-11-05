@@ -14,6 +14,11 @@ meta {
   license "Apache-2.0"
   source "https://cdn.fotw.info/flags/tr.html"
   source "https://en.wikipedia.org/wiki/Flag_of_Turkey"
+  note "Positions are measured from a white hem at the hoist, 1/30 of the hoist wide, which this omits. It's unconfirmed whether the 3:2 length includes the hem, and adding it could move the charges 8 units toward the fly."
+  note "The ratios follow FOTW's and Wikipedia's accounts of the construction table, and the law's own table hasn't been checked. The law gives no color, so this one is conventional, and other manuals use Pantone 186."
+  law "Turkish Flag Law No. 2893" {
+    source "https://cdn.fotw.info/flags/tr_law.html"
+  }
 }
 palette {
   red "#e30a17"

@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	seriesValue  = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	pathValue    = regexp.MustCompile(`^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\-\s]+$`)
 	cornerValues = []string{"upper-hoist", "upper-fly", "lower-hoist", "lower-fly"}
 	rayFromNames = append([]string{"center", "hoist", "fly", "top", "bottom"}, cornerValues...)
@@ -447,6 +448,21 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 		}
 	}
 	flag.Variants[name] = v
+}
+
+// reference reads a text with any sources for it as children.
+func (p *parser) reference(n *kdl.Node) *Reference {
+	p.noProps(n)
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs one string")
+		return nil
+	}
+	r := &Reference{Text: args[0].String()}
+	p.children(n, []string{"source"}, map[string]func(*kdl.Node){
+		"source": func(c *kdl.Node) { r.Sources = append(r.Sources, p.str(c)) },
+	})
+	return r
 }
 
 // validDate accepts a year, a month or a day, which is as much as many flags' origins

@@ -15,6 +15,8 @@ meta {
   design-rights "Creative Commons license excluding commercial use; check the designer's terms"
   source "https://en.wikipedia.org/wiki/Progress_flag"
   source "https://commons.wikimedia.org/wiki/File:LGBTQ%2B_rainbow_flag_Quasar_%22Progress%22_variant.svg"
+  note "No official construction sheet was found, so the proportion and chevron sizes follow the Commons drawing, and its nearly 45-degree arms are treated as exactly 45."
+  note "This file's license covers the encoding, not the design. Check the designer's current terms before using the flag."
 }
 palette {
   red "#e40303"

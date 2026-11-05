@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9600 4800" width="1200" height="600">
   <title>Canada</title>
-  <clipPath id="vx-2eaef0a3-flag1">
+  <clipPath id="vx-e2632c6d-flag1">
     <polygon points="0,0 9600,0 9600,4800 0,4800"/>
   </clipPath>
-  <g clip-path="url(#vx-2eaef0a3-flag1)">
+  <g clip-path="url(#vx-e2632c6d-flag1)">
     <polygon points="0,0 0,4800 9600,4800 9600,0" fill="#d52b1e"/>
     <polygon points="2400,0 2400,4800 9600,4800 9600,0" fill="#ffffff"/>
     <polygon points="7200,0 7200,4800 9600,4800 9600,0" fill="#d52b1e"/>
