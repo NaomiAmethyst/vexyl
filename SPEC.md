@@ -105,6 +105,52 @@ Each child names a color: `gold "#fcd116"`. Values MUST be `#rrggbb`.
 
 Layers refer to colors only by name. A color used but not defined is an error.
 
+A child can instead define a linear gradient between other palette colors, which
+can then be used wherever a color is:
+
+```kdl
+palette {
+  pink "#ffb0ca"
+  butter "#f6f1ad"
+  sky "#9bdaec"
+  pastel gradient pink butter sky
+  dawn gradient pink sky along=hoist {
+    stops 0.25 1
+  }
+}
+```
+
+`along` is an axis from §7.2, and defaults to `fly`. `stops` gives each color's
+position from 0 to 1, in order, and defaults to even spacing. A gradient needs at
+least two colors, which MUST be solid colors from the palette, in any order. The
+colors blend in sRGB, without gamma correction.
+
+A gradient spans the bounding box of the shape it fills, with `t` running from 0 to
+1 across that box. On the `bend` axes, `t` runs between opposite corners and its
+lines of equal color run parallel to the other diagonal of the box, so they follow
+the box's proportions just as the axes follow the flag's:
+
+```
+function t(point, box, along):
+    u = (point.x - box.x) / box.width
+    v = (point.y - box.y) / box.height
+    case along:
+        fly:           return u
+        hoist:         return v
+        bend:          return (u + v) / 2
+        bend-sinister: return (u + 1 - v) / 2
+```
+
+What counts as the shape:
+
+- A bar is its own width and the part inside the region.
+- A chevron is the part inside the region, from its edge to its apex.
+- A `cross` or `saltire` is the whole region, because its arms are one shape.
+- Each copy from a `repeat` is its own shape.
+- A border or fimbriation is the shape that it edges.
+
+A gradient can't be the color of a `charge svg`, or a color in another gradient.
+
 ## 5. Regions
 
 Every layer paints within a region: a rectangle with an origin, a `width` and a

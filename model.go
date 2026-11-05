@@ -11,6 +11,8 @@ type Flag struct {
 	Meta    Meta
 	// Palette maps color names to #rrggbb values.
 	Palette map[string]string
+	// Gradients maps palette names to gradients, usable wherever a color is.
+	Gradients map[string]*Gradient
 	// Hoist and Fly are the flag's proportion, which is also its grid.
 	Hoist, Fly float64
 	// Outline is the flag's shape, or nil for a rectangular flag.
@@ -23,6 +25,16 @@ type Flag struct {
 	// idPrefix is unique to the source document, so that several flags can be
 	// inlined in one page without their definitions colliding.
 	idPrefix string
+}
+
+// Gradient is a linear blend between palette colors, across the shape it fills.
+type Gradient struct {
+	// Colors are the names of solid palette colors.
+	Colors []string
+	// Stops are each color's position from 0 to 1.
+	Stops []float64
+	// Along is fly, hoist, bend or bend-sinister.
+	Along string
 }
 
 // Meta describes a flag and credits the people behind it.

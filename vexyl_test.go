@@ -141,7 +141,7 @@ func TestBendsFollowCornersAtAnyProportion(t *testing.T) {
 
 func TestBarRatios(t *testing.T) {
 	f := parse(t, header+`bars a b a { ratio 2 1 2; }`)
-	polys := barPolys(f.Layers[0].(*Bars), region{w: 20, h: 10})
+	polys := barPolys(f.Layers[0].(*Bars), region{w: 20, h: 10}, nil)
 	for i, wantY := range []float64{0, 4, 6} {
 		if !hasPoint(polys[i], vec{0, wantY}) || !hasPoint(polys[i], vec{20, 10}) {
 			t.Errorf("bar %d: got %v, want a start at %v running to the far edge", i, polys[i], wantY)
@@ -151,7 +151,7 @@ func TestBarRatios(t *testing.T) {
 
 func TestDiagonalBarsCoverTheFlag(t *testing.T) {
 	f := parse(t, header+`bars a b { along bend-sinister; }`)
-	polys := barPolys(f.Layers[0].(*Bars), region{w: 20, h: 10})
+	polys := barPolys(f.Layers[0].(*Bars), region{w: 20, h: 10}, nil)
 	if !hasPoint(polys[0], vec{0, 0}) || !hasPoint(polys[0], vec{20, 10}) {
 		t.Errorf("first bar doesn't reach both far corners: %v", polys[0])
 	}
@@ -220,7 +220,7 @@ meta { name "T"; }
 palette { a "#112233"; }
 proportion hoist=10 fly=16
 cross a { fly 5 2 9; hoist 4 2 4; }`)
-	polys := crossPolys(f.Layers[0].(*Cross), region{w: 16, h: 10})
+	polys := crossPolys(f.Layers[0].(*Cross), region{w: 16, h: 10}, 0)
 	if !hasPoint(polys[0], vec{5, 0}) || !hasPoint(polys[0], vec{7, 10}) {
 		t.Errorf("vertical arm: %v", polys[0])
 	}
@@ -301,6 +301,88 @@ func TestSVGChargeColor(t *testing.T) {
 	}
 }
 
+const gradientHeader = `vexyl 1
+meta { name "T"; }
+palette {
+  a "#112233"
+  b "#445566"
+  c "#778899"
+  flow gradient a b c
+  drop gradient a b along=hoist { stops 0.25 1; }
+  bend gradient a b along=bend
+  rise gradient a b along=bend-sinister
+}
+proportion hoist=10 fly=20
+`
+
+func TestGradientDefinitions(t *testing.T) {
+	f := parse(t, gradientHeader)
+	if got := f.Gradients["flow"].Stops; !slices.Equal(got, []float64{0, 0.5, 1}) {
+		t.Errorf("even stops = %v", got)
+	}
+	tests := []struct{ name, want string }{
+		{"flow", `x1="0" y1="0" x2="1" y2="0"`},
+		{"drop", `x1="0" y1="0" x2="0" y2="1"`},
+		{"bend", `x1="0" y1="0" x2="1" y2="1"`},
+		{"rise", `x1="0" y1="1" x2="1" y2="0"`},
+	}
+	for _, tt := range tests {
+		out := svgOf(t, parse(t, gradientHeader+`field `+tt.name))
+		if !strings.Contains(out, tt.want) {
+			t.Errorf("%s: no %q in %s", tt.name, tt.want, out)
+		}
+	}
+	if out := svgOf(t, parse(t, gradientHeader+`field drop`)); !strings.Contains(out, `<stop offset="0.25" stop-color="#112233"/>`) {
+		t.Errorf("stop position lost: %s", out)
+	}
+}
+
+// A vertical gradient has to span each bar, so its polygon can't be the usual one
+// that runs on beneath the following bars.
+func TestGradientBarsAreTheirTrueWidth(t *testing.T) {
+	f := parse(t, gradientHeader+`bars a drop b drop`)
+	out := svgOf(t, f)
+	for _, want := range []string{`0,2.5 20,2.5 20,5 0,5`, `0,7.5 20,7.5 20,10 0,10`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("no gradient bar with points %q: %s", want, out)
+		}
+	}
+	// Solid bars still run on, to keep antialiasing from leaving seams.
+	if !strings.Contains(out, `0,0 20,0 20,10 0,10`) {
+		t.Errorf("first bar should reach the far edge: %s", out)
+	}
+	// One definition serves both bars.
+	if got := strings.Count(out, "<linearGradient"); got != 1 {
+		t.Errorf("%d definitions: %s", got, out)
+	}
+}
+
+func TestGradientSpansCrossAsOneShape(t *testing.T) {
+	out := svgOf(t, parse(t, gradientHeader+`cross flow { fly 9 2 9; hoist 4 2 4; }`))
+	if !strings.Contains(out, `gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(20 10)"`) {
+		t.Errorf("cross gradient isn't across the region: %s", out)
+	}
+}
+
+func TestGradientFimbriationAndBorder(t *testing.T) {
+	out := svgOf(t, parse(t, gradientHeader+`border flow 1 outside`+"\n"+`charge disc a { radius 1; fimbriate flow 0.5; }`))
+	if strings.Count(out, "<linearGradient") != 1 || !strings.Contains(out, `stroke="url(#`) {
+		t.Errorf("gradient isn't reused for the border and fimbriation: %s", out)
+	}
+}
+
+func TestGradientBandKeepsStrokeBeyondRegion(t *testing.T) {
+	// A fimbriated band mustn't stroke along the flag's edge, and the fill mustn't
+	// stretch a gradient over the part of the band outside the flag.
+	out := svgOf(t, parse(t, gradientHeader+`band flow { width 2; fimbriate a 1; }`))
+	if !strings.Contains(out, `stroke-width="2"`) {
+		t.Fatalf("no fimbriation: %s", out)
+	}
+	if !strings.Contains(out, `points="0,4 20,4 20,6 0,6" fill="url(#`) {
+		t.Errorf("fill isn't the band within the flag: %s", out)
+	}
+}
+
 func TestStarGeometry(t *testing.T) {
 	f := parse(t, header+`charge star a { radius 1; }`)
 	s := f.Layers[0].(*Charge).Shape
@@ -373,7 +455,11 @@ func TestDocExamples(t *testing.T) {
 		}
 		for _, m := range blocks {
 			example := string(m[1])
-			if !strings.HasPrefix(example, "vexyl ") {
+			switch {
+			case strings.HasPrefix(example, "vexyl "):
+			case strings.HasPrefix(example, "palette "):
+				example = "vexyl 1\nmeta { name \"T\"; }\n" + example + "proportion hoist=1 fly=1\n"
+			default:
 				example = header + example
 			}
 			if _, err := Parse(strings.NewReader(example), doc); err != nil {
@@ -414,6 +500,15 @@ func TestRejected(t *testing.T) {
 		{"polygon size", header + `charge polygon a { point fly=0 hoist=0; }`, "at least 3"},
 		{"svg unknown color", header + `charge svg nope { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>"; }`, "isn't in the palette"},
 		{"svg currentColor without color", header + `charge svg { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect fill='currentColor'/></svg>"; }`, "needs a palette color"},
+		{"gradient unknown color", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a b; }\n", `"b" isn't in the palette`},
+		{"gradient of one", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a; }\n", "at least 2 colors"},
+		{"gradient of gradients", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a; h gradient g a; }\n", "solid color is needed"},
+		{"gradient bad axis", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a along=up; }\n", "along must be"},
+		{"gradient bad property", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a up=1; }\n", "unknown property"},
+		{"gradient stop count", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a { stops 0; }; }\n", "2 colors but 1 stops"},
+		{"gradient stop range", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a { stops 0 2; }; }\n", "between 0 and 1"},
+		{"gradient stop order", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a { stops 1 0; }; }\n", "backward"},
+		{"gradient on svg", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a; }\nproportion hoist=1 fly=1\ncharge svg g { fly 1; hoist 1; markup \"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>\"; }", "solid color is needed"},
 		{"apex without angle", header + `chevrons a { depth 1; apex 2; }`, "needs an `angle`"},
 		{"negative apex", header + `chevrons a { depth 1; angle 45; apex -2; }`, "can't be negative"},
 		{"heart radius", header + `charge heart a`, "needs a `radius`"},

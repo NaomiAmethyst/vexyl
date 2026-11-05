@@ -149,8 +149,9 @@ func clipConvex(poly []vec, r region) []vec {
 
 // barPolys returns one polygon per bar. Each runs from its bar's start to the
 // far side of the region, so the next bar paints over it and antialiasing can't
-// leave a seam showing what's beneath.
-func barPolys(b *Bars, r region) [][]vec {
+// leave a seam showing what's beneath. A gradient spans the shape it fills, so a
+// bar for which exact returns true stays its true width.
+func barPolys(b *Bars, r region, exact func(i int) bool) [][]vec {
 	dir, normal := axis(r, b.Along, b.Rotate)
 	c := r.center()
 	lo, hi := math.Inf(1), math.Inf(-1)
@@ -165,9 +166,14 @@ func barPolys(b *Bars, r region) [][]vec {
 	reach := r.reach()
 	polys := make([][]vec, 0, len(b.Ratio))
 	t := lo
-	for _, part := range b.Ratio {
-		polys = append(polys, clipConvex(stripPoly(c, dir, normal, t, hi, reach), r))
-		t += (hi - lo) * part / total
+	for i, part := range b.Ratio {
+		next := t + (hi-lo)*part/total
+		end := hi
+		if exact != nil && exact(i) {
+			end = next
+		}
+		polys = append(polys, clipConvex(stripPoly(c, dir, normal, t, end, reach), r))
+		t = next
 	}
 	return polys
 }
@@ -249,19 +255,15 @@ func bandPoly(r region, along string, rotation, width, offset float64, stroked b
 	return clipConvex(poly, r)
 }
 
-// crossPolys returns a cross's vertical and horizontal arms.
-func crossPolys(c *Cross, r region) [][]vec {
+// crossPolys returns a cross's vertical and horizontal arms, with their ends
+// extended by a distance.
+func crossPolys(c *Cross, r region, extend float64) [][]vec {
 	a, w, b := c.FlyParts[0], c.FlyParts[1], c.FlyParts[2]
 	x0 := r.w * a / (a + w + b)
 	x1 := r.w * (a + w) / (a + w + b)
 	d, h, e := c.HoistPart[0], c.HoistPart[1], c.HoistPart[2]
 	y0 := r.h * d / (d + h + e)
 	y1 := r.h * (d + h) / (d + h + e)
-	extend := 0.0
-	if c.Fimbriate != nil {
-		// Keep the arms' ends, and their stroke, beyond the region's edge.
-		extend = c.Fimbriate.Width * 2
-	}
 	return [][]vec{
 		rectPoly(x0, -extend, x1, r.h+extend),
 		rectPoly(-extend, y0, r.w+extend, y1),

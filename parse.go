@@ -58,10 +58,14 @@ func Parse(r io.Reader, name string) (*Flag, error) {
 }
 
 type parser struct {
-	errs     []error
-	palette  map[string]string
-	embeds   int
-	idPrefix string
+	errs      []error
+	palette   map[string]string
+	gradients map[string]*Gradient
+	// gradientNames lets a gradient's stops recognize other gradients, since
+	// they're defined one at a time.
+	gradientNames []string
+	embeds        int
+	idPrefix      string
 }
 
 func (p *parser) errf(n *kdl.Node, format string, args ...any) {
@@ -157,13 +161,23 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 	p.noValues(n)
 	flag.Palette = map[string]string{}
+	flag.Gradients = map[string]*Gradient{}
 	p.palette = flag.Palette
+	p.gradients = flag.Gradients
 	if n.Children() == nil {
 		return
 	}
+	// Gradients can name colors defined after them, so they're read second.
+	var gradients []*kdl.Node
+	seen := map[string]bool{}
 	for _, c := range n.Children().Nodes {
-		if _, dup := flag.Palette[c.Name()]; dup {
+		if seen[c.Name()] {
 			p.errf(c, "color defined twice")
+			continue
+		}
+		seen[c.Name()] = true
+		if args := c.Arguments(); len(args) > 0 && args[0].Kind() == kdl.String && args[0].String() == "gradient" {
+			gradients = append(gradients, c)
 			continue
 		}
 		value := p.str(c)
@@ -172,6 +186,66 @@ func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 		}
 		flag.Palette[c.Name()] = value
 	}
+	for _, c := range gradients {
+		p.gradientNames = append(p.gradientNames, c.Name())
+	}
+	for _, c := range gradients {
+		flag.Gradients[c.Name()] = p.gradient(c)
+	}
+}
+
+// gradient reads `name gradient COLOR... along=AXIS { stops N... }`.
+func (p *parser) gradient(n *kdl.Node) *Gradient {
+	p.plain(n)
+	g := &Gradient{Along: "fly"}
+	for _, a := range n.Arguments()[1:] {
+		if a.Kind() != kdl.String {
+			p.errf(n, "a gradient's colors must be palette names")
+			continue
+		}
+		g.Colors = append(g.Colors, p.solidColor(n, a.String()))
+	}
+	if len(g.Colors) < 2 {
+		p.errf(n, "a gradient needs at least 2 colors")
+	}
+	for _, key := range n.PropertyOrder() {
+		if key != "along" {
+			p.errf(n, "unknown property %q", key)
+		}
+	}
+	if v := n.Prop("along"); v.IsValid() {
+		if v.Kind() != kdl.String || !slices.Contains(alongValues, v.String()) {
+			p.errf(n, "along must be one of %v", alongValues)
+		} else {
+			g.Along = v.String()
+		}
+	}
+	p.children(n, nil, map[string]func(*kdl.Node){
+		"stops": func(c *kdl.Node) { g.Stops = p.stops(c, len(g.Colors)) },
+	})
+	if g.Stops == nil {
+		g.Stops = make([]float64, len(g.Colors))
+		for i := range g.Stops {
+			g.Stops[i] = float64(i) / float64(max(len(g.Colors)-1, 1))
+		}
+	}
+	return g
+}
+
+func (p *parser) stops(n *kdl.Node, count int) []float64 {
+	stops := p.numbers(n)
+	if len(stops) != count {
+		p.errf(n, "has %d colors but %d stops", count, len(stops))
+	}
+	for i, s := range stops {
+		if s < 0 || s > 1 {
+			p.errf(n, "stops must be between 0 and 1")
+		}
+		if i > 0 && s < stops[i-1] {
+			p.errf(n, "stops can't run backward")
+		}
+	}
+	return stops
 }
 
 func (p *parser) proportion(n *kdl.Node, flag *Flag) {
@@ -468,6 +542,8 @@ func (p *parser) charge(n *kdl.Node) Layer {
 	} else if args[1].Kind() != kdl.String {
 		p.errf(n, "color must be a palette name")
 		return nil
+	} else if l.Shape.Kind == "svg" {
+		l.Color = p.solidColor(n, args[1].String())
 	} else {
 		l.Color = p.paletteColor(n, args[1].String())
 	}
@@ -834,9 +910,28 @@ func (p *parser) colorArgs(n *kdl.Node) []string {
 }
 
 func (p *parser) paletteColor(n *kdl.Node, name string) string {
-	if _, ok := p.palette[name]; !ok {
-		p.errf(n, "color %q isn't in the palette", name)
+	if _, ok := p.gradients[name]; ok {
+		return name
 	}
+	return p.solidColor(n, name)
+}
+
+// solidColor is for the places a gradient has no meaning.
+func (p *parser) solidColor(n *kdl.Node, name string) string {
+	if _, ok := p.palette[name]; ok {
+		return name
+	}
+	if _, ok := p.gradients[name]; ok {
+		p.errf(n, "%q is a gradient, and a solid color is needed here", name)
+		return name
+	}
+	for _, c := range p.gradientNames {
+		if c == name {
+			p.errf(n, "%q is a gradient, and a solid color is needed here", name)
+			return name
+		}
+	}
+	p.errf(n, "color %q isn't in the palette", name)
 	return name
 }
 

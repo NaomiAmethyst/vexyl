@@ -1,0 +1,44 @@
+// An invented flag exercising gradients on each kind of layer.
+vexyl 1
+meta {
+  name "Gradient Test"
+}
+palette {
+  pink "#ffb0ca"
+  butter "#f6f1ad"
+  sky "#9bdaec"
+  charcoal "#7f7f7f"
+  white "#ffffff"
+  pastel gradient pink butter sky
+  dusk gradient pink charcoal along=hoist {
+    stops 0.25 1
+  }
+  corner gradient sky pink along=bend
+  rising gradient charcoal butter along=bend-sinister
+}
+proportion hoist=21 fly=35
+
+bars charcoal pastel white dusk white pastel charcoal
+chevrons rising corner {
+  depth 10
+  ratio 2 1
+}
+saltire dusk {
+  width 1
+  fimbriate white 0.25
+}
+canton {
+  fly 6
+  hoist 6
+  field corner
+}
+charge star pastel {
+  radius 2
+  at fly=28 hoist=4
+  fimbriate dusk 0.2
+}
+charge heart rising {
+  radius 2
+  at fly=28 hoist=16
+  repeat line count=2 fly=-6
+}

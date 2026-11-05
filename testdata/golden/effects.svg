@@ -19,8 +19,8 @@
     <g opacity="0.6">
       <polygon points="-15.27735,-9.583975 44.72265,30.416025 45.27735,29.583975 -14.72265,-10.416025" fill="#1b1035" stroke="#1b1035" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
       <polygon points="-15.27735,29.583975 44.72265,-10.416025 45.27735,-9.583975 -14.72265,30.416025" fill="#1b1035" stroke="#1b1035" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
-      <polygon points="-15.27735,-9.583975 44.72265,30.416025 45.27735,29.583975 -14.72265,-10.416025" fill="#ffffff"/>
-      <polygon points="-15.27735,29.583975 44.72265,-10.416025 45.27735,-9.583975 -14.72265,30.416025" fill="#ffffff"/>
+      <polygon points="0,0 0,0.600925 29.098612,20 30,20 30,19.399075 0.901388,0" fill="#ffffff"/>
+      <polygon points="0,20 0,19.399075 29.098612,0 30,0 30,0.600925 0.901388,20" fill="#ffffff"/>
     </g>
     <mask id="vx-4499d673-mask2" maskUnits="userSpaceOnUse" x="0" y="0" width="30" height="20">
       <polygon points="0,0 30,0 30,20 0,20" fill="#fff"/>

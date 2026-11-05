@@ -47,7 +47,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	}
 
 	if outer != nil {
-		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.color(f.Border.Color)))
+		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.fill(f.Border.Color, nil)))
 	}
 	root := region{w: f.Fly, h: f.Hoist}
 	shape := geom{poly: rectPoly(0, 0, f.Fly, f.Hoist)}
@@ -68,7 +68,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	if f.Border != nil && !f.BorderOutside {
 		// Half of the stroke falls outside the outline, and the clip removes it.
 		r.geom(shape, fmt.Sprintf(`fill="none" stroke="%s" stroke-width="%s" stroke-linejoin="miter" stroke-miterlimit="10"`,
-			r.color(f.Border.Color), num(2*f.Border.Width)))
+			r.fill(f.Border.Color, nil), num(2*f.Border.Width)))
 	}
 	r.depth--
 	r.line(`</g>`)
@@ -87,10 +87,11 @@ func bounds(poly []vec) (x, y, width, height float64) {
 }
 
 type renderer struct {
-	flag   *Flag
-	out    bytes.Buffer
-	depth  int
-	nextID int
+	flag      *Flag
+	out       bytes.Buffer
+	depth     int
+	nextID    int
+	gradients map[string]string
 }
 
 func (r *renderer) line(format string, args ...any) {
@@ -100,6 +101,49 @@ func (r *renderer) line(format string, args ...any) {
 }
 
 func (r *renderer) color(name string) string { return strings.ToLower(r.flag.Palette[name]) }
+
+// fill is the paint value for a palette name. A gradient spans the box given, or
+// the bounding box of each shape it's used on if that's nil.
+func (r *renderer) fill(name string, box *[4]float64) string {
+	g, isGradient := r.flag.Gradients[name]
+	if !isGradient {
+		return r.color(name)
+	}
+	if box == nil {
+		if id, ok := r.gradients[name]; ok {
+			return "url(#" + id + ")"
+		}
+	}
+	id := r.id("gradient")
+	x1, y1, x2, y2 := 0, 0, 1, 0
+	switch g.Along {
+	case "hoist":
+		x2, y2 = 0, 1
+	case "bend":
+		y2 = 1
+	case "bend-sinister":
+		y1 = 1
+	}
+	units := ""
+	if box != nil {
+		units = fmt.Sprintf(` gradientUnits="userSpaceOnUse" gradientTransform="translate(%s %s) scale(%s %s)"`,
+			num(box[0]), num(box[1]), num(box[2]), num(box[3]))
+	}
+	r.line(`<linearGradient id="%s" x1="%d" y1="%d" x2="%d" y2="%d"%s>`, id, x1, y1, x2, y2, units)
+	r.depth++
+	for i, c := range g.Colors {
+		r.line(`<stop offset="%s" stop-color="%s"/>`, num(g.Stops[i]), r.color(c))
+	}
+	r.depth--
+	r.line(`</linearGradient>`)
+	if box == nil {
+		if r.gradients == nil {
+			r.gradients = map[string]string{}
+		}
+		r.gradients[name] = id
+	}
+	return "url(#" + id + ")"
+}
 
 func (r *renderer) id(kind string) string {
 	r.nextID++
@@ -168,27 +212,56 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 func (r *renderer) content(l Layer, reg region) {
 	switch l := l.(type) {
 	case *Field:
-		r.paint(l.Color, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
+		r.paint(l.Color, nil, nil, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
 	case *Bars:
-		for i, poly := range barPolys(l, reg) {
-			r.paint(l.Colors[i], nil, []geom{{poly: poly}})
+		exact := func(i int) bool {
+			_, isGradient := r.flag.Gradients[l.Colors[i]]
+			return isGradient
+		}
+		for i, poly := range barPolys(l, reg, exact) {
+			if len(poly) > 0 {
+				r.paint(l.Colors[i], nil, nil, nil, []geom{{poly: poly}})
+			}
 		}
 	case *Chevrons:
 		polys := chevronPolys(l, reg)
 		for i, poly := range polys {
-			r.paint(l.Colors[len(polys)-1-i], nil, []geom{{poly: poly}})
+			if len(poly) > 0 {
+				r.paint(l.Colors[len(polys)-1-i], nil, nil, nil, []geom{{poly: poly}})
+			}
 		}
 	case *Band:
-		poly := bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, l.Fimbriate != nil)
-		r.paint(l.Color, l.Fimbriate, []geom{{poly: poly}})
+		// The fimbriation's stroke mustn't follow the region's edge, so it uses the
+		// band's unclipped shape. A clipped polygon can be empty.
+		stroke := []geom{{poly: bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, true)}}
+		if poly := bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, false); len(poly) > 0 {
+			r.paint(l.Color, nil, l.Fimbriate, stroke, []geom{{poly: poly}})
+		} else {
+			r.paint(l.Color, nil, l.Fimbriate, stroke, nil)
+		}
 	case *Cross:
-		polys := crossPolys(l, reg)
-		r.paint(l.Color, l.Fimbriate, []geom{{poly: polys[0]}, {poly: polys[1]}})
+		// A gradient spans a cross as one shape, so it's given the whole region.
+		box := &[4]float64{0, 0, reg.w, reg.h}
+		var stroke []geom
+		if l.Fimbriate != nil {
+			// Keep the arms' ends, and their stroke, beyond the region's edge.
+			polys := crossPolys(l, reg, l.Fimbriate.Width*2)
+			stroke = []geom{{poly: polys[0]}, {poly: polys[1]}}
+		}
+		polys := crossPolys(l, reg, 0)
+		r.paint(l.Color, box, l.Fimbriate, stroke, []geom{{poly: polys[0]}, {poly: polys[1]}})
 	case *Saltire:
-		stroked := l.Fimbriate != nil
-		r.paint(l.Color, l.Fimbriate, []geom{
-			{poly: bandPoly(reg, "bend", 0, l.Width, 0, stroked)},
-			{poly: bandPoly(reg, "bend-sinister", 0, l.Width, 0, stroked)},
+		box := &[4]float64{0, 0, reg.w, reg.h}
+		var stroke []geom
+		if l.Fimbriate != nil {
+			stroke = []geom{
+				{poly: bandPoly(reg, "bend", 0, l.Width, 0, true)},
+				{poly: bandPoly(reg, "bend-sinister", 0, l.Width, 0, true)},
+			}
+		}
+		r.paint(l.Color, box, l.Fimbriate, stroke, []geom{
+			{poly: bandPoly(reg, "bend", 0, l.Width, 0, false)},
+			{poly: bandPoly(reg, "bend-sinister", 0, l.Width, 0, false)},
 		})
 	case *Charge:
 		r.charge(l, reg)
@@ -274,7 +347,7 @@ func (r *renderer) charge(c *Charge, reg region) {
 			}
 		}
 	}
-	r.paint(c.Color, c.Fimbriate, copies)
+	r.paint(c.Color, nil, c.Fimbriate, copies, copies)
 }
 
 func (r *renderer) embedded(c *Charge, at vec) {
@@ -301,16 +374,21 @@ func (r *renderer) embedded(c *Charge, at vec) {
 
 // paint fills shapes, after painting any fimbriation beneath all of them. Each
 // shape's stroke lies beneath the others' fills, so arms read as a single shape.
-func (r *renderer) paint(color string, fimbriate *Edge, shapes []geom) {
+// A gradient spans box, or each shape's own bounds if box is nil.
+func (r *renderer) paint(color string, box *[4]float64, fimbriate *Edge, stroke, shapes []geom) {
 	if fimbriate != nil {
-		edge := r.color(fimbriate.Color)
-		for _, g := range shapes {
+		edge := r.fill(fimbriate.Color, box)
+		for _, g := range stroke {
 			r.geom(g, fmt.Sprintf(`fill="%s" stroke="%s" stroke-width="%s" stroke-linejoin="miter" stroke-miterlimit="10"`,
 				edge, edge, num(2*fimbriate.Width)))
 		}
 	}
+	if len(shapes) == 0 {
+		return
+	}
+	fill := r.fill(color, box)
 	for _, g := range shapes {
-		r.geom(g, fmt.Sprintf(`fill="%s"`, r.color(color)))
+		r.geom(g, fmt.Sprintf(`fill="%s"`, fill))
 	}
 }
 
