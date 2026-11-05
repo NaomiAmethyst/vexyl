@@ -2103,7 +2103,7 @@ def needs(value, needed):
 
 def paint(reader, s, needed, op_opacity=None):
     attrs = {}
-    for k in PRESENTATION:
+    for k in sorted(PRESENTATION):
         if k in s and k != "opacity" and k not in ("display", "visibility"):
             v = s[k]
             if k in ("fill", "stroke", "clip-path", "mask"):
@@ -2125,7 +2125,7 @@ def render_op(reader, op, needed):
         attrs["transform"] = matrix(op.ctm)
         inner = "".join(render_def_child(reader, c, needed, op.style) for c in op.elem)
         return f"<g{attr_text(attrs)}>{inner}</g>"
-    attrs = {k: op.elem.get(k) for k in ALLOWED_ATTRS if op.elem.get(k) is not None}
+    attrs = {k: op.elem.get(k) for k in sorted(ALLOWED_ATTRS) if op.elem.get(k) is not None}
     attrs.update(paint(reader, op.style, needed, op.opacity))
     attrs["transform"] = matrix(op.ctm)
     return f"<{op.tag}{attr_text(attrs)}/>"
@@ -2146,7 +2146,7 @@ def render_def_child(reader, e, needed, parent, in_clip=False):
             # A clipPath can only hold shapes directly, so the transform moves onto one.
             if local(target.tag) == "g" or local(target.tag) not in DEF_ELEMENTS:
                 raise Unsupported("use of a group in a clip")
-            attrs = {k: target.get(k) for k in ALLOWED_ATTRS if target.get(k) is not None}
+            attrs = {k: target.get(k) for k in sorted(ALLOWED_ATTRS) if target.get(k) is not None}
             attrs["transform"] = matrix(multiply(t, parse_transform(target.get("transform"))))
             return f"<{local(target.tag)}{attr_text(attrs)}/>"
         return f'<g transform="{matrix(t)}">' + render_def_child(reader, target, needed, s) + "</g>"
@@ -2155,7 +2155,7 @@ def render_def_child(reader, e, needed, parent, in_clip=False):
     if tag not in DEF_ELEMENTS:
         raise Unsupported(f"element {tag}")
     s = reader.styled(e, parent) if tag not in ("stop",) else parse_stop(reader, e)
-    attrs = {k: e.get(k) for k in ALLOWED_ATTRS if e.get(k) is not None}
+    attrs = {k: e.get(k) for k in sorted(ALLOWED_ATTRS) if e.get(k) is not None}
     attrs.update(paint(reader, s, needed, number(s.get("opacity"), 1.0)) if tag not in ("defs",) else {})
     inner = "".join(render_def_child(reader, c, needed, s) for c in e)
     return f"<{tag}{attr_text(attrs)}>{inner}</{tag}>"
@@ -2180,7 +2180,7 @@ def render_def(reader, target, needed):
         raise Unsupported(f"element {tag}")
     ref = target.get("id")
     attrs = {"id": ref}
-    attrs.update({k: target.get(k) for k in ALLOWED_ATTRS if target.get(k) is not None})
+    attrs.update({k: target.get(k) for k in sorted(ALLOWED_ATTRS) if target.get(k) is not None})
     href = (target.get("href") or target.get(XLINK) or "").lstrip("#")
     if href:
         attrs["href"] = "#" + href

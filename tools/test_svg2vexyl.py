@@ -3,6 +3,9 @@
 # Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import math
+import os
+import subprocess
+import sys
 import unittest
 
 import svg2vexyl as S
@@ -13,6 +16,18 @@ HEAD = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1
 
 def convert(body):
     return S.convert((HEAD + body + "</svg>").encode(), "Test")
+
+
+class Stability(unittest.TestCase):
+    def test_output_does_not_depend_on_the_hash_seed(self):
+        source = HEAD + ('<rect width="30" height="20" fill="#f00"/>' + "".join(
+            f'<path d="M{i} 1C{i} 2 {i+1} 2 {i+1} 1z" fill="#00f" stroke="#fff" stroke-width="3" stroke-linejoin="round" opacity="0.5"/>'
+            for i in range(ARTWORK))) + "</svg>"
+        code = "import sys, svg2vexyl as S; print(S.tidy(S.convert(sys.argv[1].encode(), 'Test')[0]))"
+        here = os.path.dirname(os.path.abspath(__file__))
+        outputs = {subprocess.run([sys.executable, "-c", code, source], capture_output=True, text=True, check=True, cwd=here,
+                                  env={**os.environ, "PYTHONHASHSEED": str(seed)}).stdout for seed in (1, 2, 3)}
+        self.assertEqual(len(outputs), 1)
 
 
 class Tidying(unittest.TestCase):
