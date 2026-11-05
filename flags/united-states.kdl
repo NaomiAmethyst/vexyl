@@ -1,0 +1,31 @@
+// The 1:1.9 flag, scaled so that each stripe is one grid unit. Canton 0.5385 by 0.76,
+// and star diameter 0.0616 of the hoist, as Wikipedia lists the specification under
+// Executive Order 10834. Government sources disagree on hex values; these are the
+// State Department ECA bureau's for Old Glory Red and Blue.
+vexyl 1
+meta {
+  name "United States"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+  source "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
+}
+palette {
+  red "#b31942"
+  white "#ffffff"
+  blue "#0a3161"
+}
+proportion hoist=13 fly=24.7
+
+bars red white {
+  count 13
+}
+canton {
+  fly 9.88
+  hoist 7
+  field blue
+  charge star white {
+    radius 0.4004
+    repeat grid rows=9 columns=11 stagger=#true
+  }
+}

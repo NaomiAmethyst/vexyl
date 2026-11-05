@@ -1,0 +1,85 @@
+// An invented flag exercising what the real test flags don't: saltires, rings,
+// plus, triangle and cardioid shapes, chevrons from other edges, rotation, turned
+// repeats, clips, group cuts, opacity and blending.
+vexyl 1
+meta {
+  name "Effects Test"
+  description "Invented <test> flag & nothing more"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+  pink "#f0a0c8"
+}
+proportion hoist=20 fly=30
+
+bars night violet {
+  along hoist
+  rotate 10
+  count 6
+}
+chevrons pink {
+  from fly
+  depth 4
+  opacity 0.5
+}
+chevrons gold violet {
+  from top
+  depth 3
+  ratio 2 1
+  angle 60
+}
+saltire white {
+  width 1
+  fimbriate night 0.25
+  opacity 0.6
+}
+group {
+  blend screen
+  cut {
+    disc {
+      radius 1.5
+    }
+  }
+  charge ring gold {
+    radius 6
+    inner 5
+  }
+  charge plus white {
+    radius 4
+    width 2
+    rotate 45
+    fimbriate night 0.2
+  }
+}
+charge triangle gold {
+  radius 1
+  at fly=15 hoist=3
+  repeat ring count=6 radius=2 turn=#true
+}
+charge cardioid pink {
+  radius 3
+  at fly=5 hoist=14
+  rotate 180
+}
+charge star white {
+  radius 3
+  points 8
+  inner 1
+  at fly=25 hoist=14
+  clip {
+    rect {
+      fly 6
+      hoist 3
+      at fly=25 hoist=13
+    }
+  }
+}
+band gold {
+  along bend
+  width 0.5
+  offset 3
+  blend multiply
+}

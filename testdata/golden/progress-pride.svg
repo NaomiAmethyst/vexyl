@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6000 3810" width="944.88189" height="600">
+  <title>Progress Pride Flag</title>
+  <clipPath id="vx-705f89a9-flag1">
+    <polygon points="0,0 6000,0 6000,3810 0,3810"/>
+  </clipPath>
+  <g clip-path="url(#vx-705f89a9-flag1)">
+    <polygon points="0,0 6000,0 6000,3810 0,3810" fill="#e40303"/>
+    <polygon points="0,635 6000,635 6000,3810 0,3810" fill="#ff8c00"/>
+    <polygon points="0,1270 6000,1270 6000,3810 0,3810" fill="#ffed00"/>
+    <polygon points="0,1905 6000,1905 6000,3810 0,3810" fill="#008026"/>
+    <polygon points="0,2540 6000,2540 6000,3810 0,3810" fill="#004dff"/>
+    <polygon points="0,3175 6000,3175 6000,3810 0,3810" fill="#750787"/>
+    <polygon points="0,3810 0,0 959,0 2864,1905 959,3810" fill="#000000"/>
+    <polygon points="0,3810 0,0 479,0 2384,1905 479,3810" fill="#613915"/>
+    <polygon points="0,3810 0,0 7,0 1912,1905 7,3810" fill="#74d7ee"/>
+    <polygon points="0,485 1420,1905 0,3325" fill="#ffafc8"/>
+    <polygon points="0,954 951,1905 0,2856" fill="#ffffff"/>
+  </g>
+</svg>

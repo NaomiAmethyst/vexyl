@@ -1,0 +1,20 @@
+// No primary construction sheet found; the 2:1:2 stripes and colors follow Commons.
+vexyl 1
+meta {
+  name "Bisexual Pride Flag"
+  designer "Michael Page"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://en.wikipedia.org/wiki/Bisexual_pride_flag"
+  source "https://commons.wikimedia.org/wiki/File:Bisexual_Pride_Flag.svg"
+}
+palette {
+  magenta "#d60270"
+  lavender "#9b4f96"
+  royal "#0038a8"
+}
+proportion hoist=3 fly=5
+
+bars magenta lavender royal {
+  ratio 2 1 2
+}

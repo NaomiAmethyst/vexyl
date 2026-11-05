@@ -1,0 +1,40 @@
+// No official construction sheet was found, so the proportion and
+// chevron sizes follow the Commons drawing, and its nearly 45-degree arms are
+// treated as exactly 45.
+//
+// Rights: the designer licenses this design under a Creative Commons license that
+// excludes commercial use, and has said small organizations can use it
+// commercially. This file's Apache-2.0 license covers the encoding, not the design.
+// Check the designer's current terms before using the flag or this file's output.
+vexyl 1
+meta {
+  name "Progress Pride Flag"
+  designer "Daniel Quasar"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  design-rights "Creative Commons license excluding commercial use; check the designer's terms"
+  source "https://en.wikipedia.org/wiki/Progress_flag"
+  source "https://commons.wikimedia.org/wiki/File:LGBTQ%2B_rainbow_flag_Quasar_%22Progress%22_variant.svg"
+}
+palette {
+  red "#e40303"
+  orange "#ff8c00"
+  yellow "#ffed00"
+  green "#008026"
+  indigo "#004dff"
+  violet "#750787"
+  black "#000000"
+  brown "#613915"
+  sky "#74d7ee"
+  pink "#ffafc8"
+  white "#ffffff"
+}
+proportion hoist=3810 fly=6000
+
+bars red orange yellow green indigo violet
+chevrons white pink sky brown black {
+  from hoist
+  depth 2864
+  ratio 951 469 492 472 480
+  angle 45
+}

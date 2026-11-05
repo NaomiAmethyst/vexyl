@@ -1,0 +1,858 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
+
+package vexyl
+
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"io"
+	"math"
+	"regexp"
+	"slices"
+
+	kdl "github.com/calico32/kdl-go"
+)
+
+// FormatVersion is the format version this package reads.
+const FormatVersion = 1
+
+const (
+	maxDepth  = 32
+	maxCopies = 10000
+)
+
+var (
+	colorValue = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+
+	alongValues = []string{"fly", "hoist", "bend", "bend-sinister"}
+	fromValues  = []string{"hoist", "fly", "top", "bottom"}
+	blendValues = []string{"normal", "multiply", "screen", "overlay", "darken", "lighten"}
+)
+
+// Parse reads a Vexyl document. The name is used in error messages. Every
+// problem found is reported, joined into the returned error.
+func Parse(r io.Reader, name string) (*Flag, error) {
+	src, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := kdl.Parse(bytes.NewReader(src),
+		kdl.WithVersion(kdl.Version2),
+		kdl.WithSourceName(name),
+		kdl.WithDuplicateProperties(kdl.DupError))
+	if err != nil {
+		return nil, err
+	}
+	sum := sha256.Sum256(src)
+	p := &parser{idPrefix: "vx-" + hex.EncodeToString(sum[:4]) + "-"}
+	flag := p.document(doc)
+	flag.idPrefix = p.idPrefix
+	if len(p.errs) > 0 {
+		return nil, errors.Join(p.errs...)
+	}
+	return flag, nil
+}
+
+type parser struct {
+	errs     []error
+	palette  map[string]string
+	embeds   int
+	idPrefix string
+}
+
+func (p *parser) errf(n *kdl.Node, format string, args ...any) {
+	p.errs = append(p.errs, fmt.Errorf("%s: %s: %s", n.Location(), n.Name(), fmt.Sprintf(format, args...)))
+}
+
+// document walks the top level, whose nodes have a fixed order.
+func (p *parser) document(doc *kdl.Document) *Flag {
+	flag := &Flag{}
+	const (
+		stageVersion = iota
+		stageMeta
+		stagePalette
+		stageProportion
+		stageOutline
+		stageBorder
+		stageLayers
+	)
+	stages := map[string]int{
+		"vexyl": stageVersion, "meta": stageMeta, "palette": stagePalette,
+		"proportion": stageProportion, "outline": stageOutline, "border": stageBorder,
+	}
+	stage := -1
+	for _, n := range doc.Nodes {
+		s, named := stages[n.Name()]
+		if !named {
+			s = stageLayers
+		}
+		if s < stage || (s == stage && s != stageLayers) {
+			p.errf(n, "out of order or repeated")
+			continue
+		}
+		if s > stageVersion && stage < stageVersion {
+			p.errs = append(p.errs, fmt.Errorf("%s: document must start with `vexyl %d`", n.Location(), FormatVersion))
+			return flag
+		}
+		stage = s
+		switch n.Name() {
+		case "vexyl":
+			p.plain(n)
+			flag.Version = int(p.number(n))
+			if flag.Version != FormatVersion {
+				p.errf(n, "unsupported format version; this renderer reads %d", FormatVersion)
+				return flag
+			}
+		case "meta":
+			p.meta(n, &flag.Meta)
+		case "palette":
+			p.paletteNode(n, flag)
+		case "proportion":
+			p.proportion(n, flag)
+		case "outline":
+			p.outline(n, flag)
+		case "border":
+			p.border(n, flag)
+		default:
+			if flag.Fly == 0 && flag.Hoist == 0 {
+				p.errf(n, "layers must follow `proportion`")
+				return flag
+			}
+			if l := p.layer(n, 1); l != nil {
+				flag.Layers = append(flag.Layers, l)
+			}
+		}
+	}
+	if stage < stageProportion {
+		p.errs = append(p.errs, errors.New("document needs `vexyl`, `meta`, `palette` and `proportion`"))
+	}
+	return flag
+}
+
+func (p *parser) meta(n *kdl.Node, m *Meta) {
+	str := func(dst *string) func(*kdl.Node) {
+		return func(c *kdl.Node) { *dst = p.str(c) }
+	}
+	list := func(dst *[]string) func(*kdl.Node) {
+		return func(c *kdl.Node) { *dst = append(*dst, p.str(c)) }
+	}
+	p.children(n, []string{"designer", "encoder", "source"}, map[string]func(*kdl.Node){
+		"name":          str(&m.Name),
+		"description":   str(&m.Description),
+		"designer":      list(&m.Designers),
+		"design-rights": str(&m.DesignRights),
+		"encoder":       list(&m.Encoders),
+		"license":       str(&m.License),
+		"source":        list(&m.Sources),
+	})
+	if m.Name == "" {
+		p.errf(n, "needs a `name`")
+	}
+}
+
+func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
+	p.noValues(n)
+	flag.Palette = map[string]string{}
+	p.palette = flag.Palette
+	if n.Children() == nil {
+		return
+	}
+	for _, c := range n.Children().Nodes {
+		if _, dup := flag.Palette[c.Name()]; dup {
+			p.errf(c, "color defined twice")
+			continue
+		}
+		value := p.str(c)
+		if !colorValue.MatchString(value) {
+			p.errf(c, "color must be #rrggbb, got %q", value)
+		}
+		flag.Palette[c.Name()] = value
+	}
+}
+
+func (p *parser) proportion(n *kdl.Node, flag *Flag) {
+	p.plain(n)
+	p.only(n, 0, "hoist", "fly")
+	flag.Hoist = p.positive(n, p.prop(n, "hoist"))
+	flag.Fly = p.positive(n, p.prop(n, "fly"))
+	p.noChildren(n)
+}
+
+func (p *parser) outline(n *kdl.Node, flag *Flag) {
+	p.noValues(n)
+	p.children(n, nil, map[string]func(*kdl.Node){
+		"polygon": func(c *kdl.Node) {
+			s := Shape{Kind: "polygon"}
+			p.shapeBody(c, &s, nil)
+			flag.Outline = s.Vertices
+		},
+	})
+	if flag.Outline == nil {
+		p.errf(n, "needs a `polygon`")
+	}
+}
+
+func (p *parser) layer(n *kdl.Node, depth int) Layer {
+	if depth > maxDepth {
+		p.errf(n, "nested more than %d levels deep", maxDepth)
+		return nil
+	}
+	p.plain(n)
+	switch n.Name() {
+	case "field":
+		l := &Field{Effects: newEffects()}
+		l.Color = p.colorArg(n)
+		p.noProps(n)
+		p.children(n, []string{"cut"}, p.withEffects(&l.Effects, nil))
+		return l
+	case "bars":
+		return p.bars(n)
+	case "chevrons":
+		return p.chevrons(n)
+	case "band":
+		return p.band(n)
+	case "cross":
+		return p.cross(n)
+	case "saltire":
+		return p.saltire(n)
+	case "charge":
+		return p.charge(n)
+	case "group":
+		l := &Group{Effects: newEffects()}
+		p.noValues(n)
+		p.container(n, depth, &l.Effects, &l.Layers, nil)
+		if len(l.Layers) == 0 {
+			p.errf(n, "needs at least one layer")
+		}
+		return l
+	case "canton":
+		l := &Canton{Effects: newEffects()}
+		p.noValues(n)
+		p.container(n, depth, &l.Effects, &l.Layers, map[string]func(*kdl.Node){
+			"fly":   func(c *kdl.Node) { l.Fly = p.positive(c, p.number(c)) },
+			"hoist": func(c *kdl.Node) { l.Hoist = p.positive(c, p.number(c)) },
+		})
+		if l.Fly == 0 || l.Hoist == 0 {
+			p.errf(n, "needs `fly` and `hoist`")
+		}
+		return l
+	}
+	p.errf(n, "unknown layer")
+	return nil
+}
+
+// container reads a group or canton, whose children mix settings and layers.
+func (p *parser) container(n *kdl.Node, depth int, e *Effects, layers *[]Layer, settings map[string]func(*kdl.Node)) {
+	handlers := p.withEffects(e, settings)
+	seen := map[string]bool{}
+	if n.Children() == nil {
+		return
+	}
+	for _, c := range n.Children().Nodes {
+		handler, isSetting := handlers[c.Name()]
+		if !isSetting {
+			if l := p.layer(c, depth+1); l != nil {
+				*layers = append(*layers, l)
+			}
+			continue
+		}
+		if seen[c.Name()] && c.Name() != "cut" {
+			p.errf(c, "given more than once")
+		}
+		seen[c.Name()] = true
+		p.plain(c)
+		handler(c)
+	}
+}
+
+func newEffects() Effects { return Effects{Opacity: 1, Blend: "normal"} }
+
+func (p *parser) withEffects(e *Effects, handlers map[string]func(*kdl.Node)) map[string]func(*kdl.Node) {
+	merged := map[string]func(*kdl.Node){
+		"opacity": func(c *kdl.Node) {
+			e.Opacity = p.number(c)
+			if e.Opacity < 0 || e.Opacity > 1 {
+				p.errf(c, "must be between 0 and 1")
+			}
+		},
+		"blend": func(c *kdl.Node) { e.Blend = p.oneOf(c, blendValues) },
+		"clip": func(c *kdl.Node) {
+			if s := p.maskShape(c); s != nil {
+				e.Clip = s
+			}
+		},
+		"cut": func(c *kdl.Node) {
+			if s := p.maskShape(c); s != nil {
+				e.Cuts = append(e.Cuts, *s)
+			}
+		},
+	}
+	for name, handler := range handlers {
+		merged[name] = handler
+	}
+	return merged
+}
+
+// maskShape reads the single shape inside a clip or cut.
+func (p *parser) maskShape(n *kdl.Node) *Shape {
+	p.noValues(n)
+	if n.Children() == nil || len(n.Children().Nodes) != 1 {
+		p.errf(n, "needs exactly one shape")
+		return nil
+	}
+	c := n.Children().Nodes[0]
+	p.plain(c)
+	p.noValues(c)
+	if c.Name() == "svg" {
+		p.errf(c, "inline SVG can't be used as a clip or cut")
+		return nil
+	}
+	s := &Shape{Kind: c.Name()}
+	p.shapeBody(c, s, nil)
+	return s
+}
+
+func (p *parser) bars(n *kdl.Node) Layer {
+	l := &Bars{Effects: newEffects(), Along: "fly"}
+	l.Colors = p.colorArgs(n)
+	p.noProps(n)
+	count := 0
+	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"along":  func(c *kdl.Node) { l.Along = p.oneOf(c, alongValues) },
+		"ratio":  func(c *kdl.Node) { l.Ratio = p.positives(c) },
+		"rotate": func(c *kdl.Node) { l.Rotate = p.number(c) },
+		"count": func(c *kdl.Node) {
+			count = p.integer(c, p.number(c), maxCopies)
+		},
+	}))
+	if len(l.Colors) == 0 {
+		return l
+	}
+	if count > 0 {
+		cycle := l.Colors
+		l.Colors = make([]string, count)
+		for i := range l.Colors {
+			l.Colors[i] = cycle[i%len(cycle)]
+		}
+	}
+	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
+	return l
+}
+
+func (p *parser) chevrons(n *kdl.Node) Layer {
+	l := &Chevrons{Effects: newEffects(), From: "hoist"}
+	l.Colors = p.colorArgs(n)
+	p.noProps(n)
+	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"from":  func(c *kdl.Node) { l.From = p.oneOf(c, fromValues) },
+		"depth": func(c *kdl.Node) { l.Depth = p.positive(c, p.number(c)) },
+		"angle": func(c *kdl.Node) {
+			l.Angle = p.number(c)
+			if l.Angle <= 0 || l.Angle >= 90 {
+				p.errf(c, "must be between 0 and 90 degrees, exclusive")
+			}
+		},
+		"ratio":  func(c *kdl.Node) { l.Ratio = p.positives(c) },
+		"rotate": func(c *kdl.Node) { l.Rotate = p.number(c) },
+	}))
+	if l.Depth == 0 {
+		p.errf(n, "needs a `depth`")
+	}
+	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
+	return l
+}
+
+func (p *parser) ratio(n *kdl.Node, ratio []float64, count int) []float64 {
+	if ratio == nil {
+		ratio = make([]float64, count)
+		for i := range ratio {
+			ratio[i] = 1
+		}
+	}
+	if len(ratio) != count {
+		p.errf(n, "has %d colors but a ratio of %d values", count, len(ratio))
+	}
+	return ratio
+}
+
+func (p *parser) band(n *kdl.Node) Layer {
+	l := &Band{Effects: newEffects(), Along: "fly"}
+	l.Color = p.colorArg(n)
+	p.noProps(n)
+	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"along":     func(c *kdl.Node) { l.Along = p.oneOf(c, alongValues) },
+		"width":     func(c *kdl.Node) { l.Width = p.positive(c, p.number(c)) },
+		"offset":    func(c *kdl.Node) { l.Offset = p.number(c) },
+		"rotate":    func(c *kdl.Node) { l.Rotate = p.number(c) },
+		"fimbriate": func(c *kdl.Node) { l.Fimbriate = p.edge(c) },
+	}))
+	if l.Width == 0 {
+		p.errf(n, "needs a `width`")
+	}
+	return l
+}
+
+func (p *parser) cross(n *kdl.Node) Layer {
+	l := &Cross{Effects: newEffects()}
+	l.Color = p.colorArg(n)
+	p.noProps(n)
+	var seenFly, seenHoist bool
+	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"fly":       func(c *kdl.Node) { l.FlyParts = p.triple(c); seenFly = true },
+		"hoist":     func(c *kdl.Node) { l.HoistPart = p.triple(c); seenHoist = true },
+		"fimbriate": func(c *kdl.Node) { l.Fimbriate = p.edge(c) },
+	}))
+	if !seenFly || !seenHoist {
+		p.errf(n, "needs `fly` and `hoist`")
+	}
+	return l
+}
+
+// triple reads the distance before an arm, its width and the distance after.
+func (p *parser) triple(n *kdl.Node) [3]float64 {
+	v := p.numbers(n)
+	if len(v) != 3 {
+		p.errf(n, "needs 3 values: before the arm, its width, and after it")
+		return [3]float64{0, 1, 0}
+	}
+	if v[0] < 0 || v[1] <= 0 || v[2] < 0 {
+		p.errf(n, "the arm's width must be positive and its distances not negative")
+		return [3]float64{0, 1, 0}
+	}
+	return [3]float64{v[0], v[1], v[2]}
+}
+
+func (p *parser) saltire(n *kdl.Node) Layer {
+	l := &Saltire{Effects: newEffects()}
+	l.Color = p.colorArg(n)
+	p.noProps(n)
+	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"width":     func(c *kdl.Node) { l.Width = p.positive(c, p.number(c)) },
+		"fimbriate": func(c *kdl.Node) { l.Fimbriate = p.edge(c) },
+	}))
+	if l.Width == 0 {
+		p.errf(n, "needs a `width`")
+	}
+	return l
+}
+
+func (p *parser) charge(n *kdl.Node) Layer {
+	args := n.Arguments()
+	p.noProps(n)
+	if len(args) == 0 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs a shape")
+		return nil
+	}
+	l := &Charge{Effects: newEffects(), Shape: Shape{Kind: args[0].String()}}
+	if l.Shape.Kind == "svg" {
+		if len(args) != 1 {
+			p.errf(n, "inline SVG has its own colors and takes none")
+		}
+	} else if len(args) != 2 {
+		p.errf(n, "needs a shape and a color")
+		return nil
+	} else if args[1].Kind() != kdl.String {
+		p.errf(n, "color must be a palette name")
+		return nil
+	} else {
+		l.Color = p.paletteColor(n, args[1].String())
+	}
+	p.shapeBody(n, &l.Shape, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
+		"fimbriate": func(c *kdl.Node) { l.Fimbriate = p.edge(c) },
+		"repeat":    func(c *kdl.Node) { l.Repeat = p.repeat(c) },
+	}))
+	switch {
+	case l.Shape.Kind == "svg" && l.Fimbriate != nil:
+		p.errf(n, "inline SVG can't be fimbriated")
+	case l.Shape.Kind == "svg" && l.Repeat != nil:
+		p.errf(n, "inline SVG can't be repeated")
+	case l.Shape.Kind == "polygon" && l.Repeat != nil:
+		p.errf(n, "a polygon can't be repeated")
+	case l.Repeat != nil && l.Repeat.Kind == "grid" && l.Shape.placed:
+		p.errf(n, "a grid repeat spreads across the region, so it can't have `at`")
+	}
+	return l
+}
+
+func (p *parser) repeat(n *kdl.Node) *Repeat {
+	p.plain(n)
+	p.noChildren(n)
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs a kind: ring or grid")
+		return nil
+	}
+	r := &Repeat{Kind: args[0].String()}
+	switch r.Kind {
+	case "ring":
+		p.only(n, 1, "count", "radius", "turn")
+		r.Count = p.integer(n, p.prop(n, "count"), maxCopies)
+		r.Radius = p.positive(n, p.prop(n, "radius"))
+		r.Turn = p.boolProp(n, "turn")
+	case "grid":
+		p.only(n, 1, "rows", "columns", "stagger")
+		r.Rows = p.integer(n, p.prop(n, "rows"), maxCopies)
+		r.Columns = p.integer(n, p.prop(n, "columns"), maxCopies)
+		r.Stagger = p.boolProp(n, "stagger")
+		if r.Rows*r.Columns > maxCopies {
+			p.errf(n, "makes more than %d copies", maxCopies)
+		}
+	default:
+		p.errf(n, "unknown repeat %q", r.Kind)
+	}
+	return r
+}
+
+// shapeBody reads a shape's children, along with any extra handlers.
+func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Node)) {
+	handlers := map[string]func(*kdl.Node){
+		"at":     func(c *kdl.Node) { s.At, s.placed = p.at(c), true },
+		"rotate": func(c *kdl.Node) { s.Rotate = p.number(c) },
+	}
+	radius := func(c *kdl.Node) { s.Radius = p.positive(c, p.number(c)) }
+	inner := func(c *kdl.Node) { s.Inner = p.positive(c, p.number(c)) }
+	sizeFly := func(c *kdl.Node) { s.Fly = p.positive(c, p.number(c)) }
+	sizeHoist := func(c *kdl.Node) { s.Hoist = p.positive(c, p.number(c)) }
+	switch s.Kind {
+	case "disc", "triangle", "cardioid":
+		handlers["radius"] = radius
+	case "ring":
+		handlers["radius"], handlers["inner"] = radius, inner
+	case "rect":
+		handlers["fly"], handlers["hoist"] = sizeFly, sizeHoist
+	case "plus":
+		handlers["radius"] = radius
+		handlers["width"] = func(c *kdl.Node) { s.Width = p.positive(c, p.number(c)) }
+	case "star":
+		s.Points = 5
+		handlers["radius"], handlers["inner"] = radius, inner
+		handlers["points"] = func(c *kdl.Node) {
+			s.Points = p.integer(c, p.number(c), maxCopies)
+			if s.Points > 0 && s.Points < 3 {
+				p.errf(c, "needs at least 3 points")
+			}
+		}
+	case "polygon":
+		delete(handlers, "at")
+		delete(handlers, "rotate")
+		handlers["point"] = func(c *kdl.Node) {
+			p.plain(c)
+			p.only(c, 0, "fly", "hoist")
+			p.noChildren(c)
+			s.Vertices = append(s.Vertices, Point{p.prop(c, "fly"), p.prop(c, "hoist")})
+		}
+	case "svg":
+		handlers["fly"], handlers["hoist"] = sizeFly, sizeHoist
+		handlers["markup"] = func(c *kdl.Node) { s.Markup = p.str(c) }
+	default:
+		p.errf(n, "unknown shape %q", s.Kind)
+		return
+	}
+	for name, handler := range extra {
+		handlers[name] = handler
+	}
+	p.children(n, []string{"cut", "point"}, handlers)
+	p.checkShape(n, s)
+}
+
+func (p *parser) checkShape(n *kdl.Node, s *Shape) {
+	if _, hasRadius := map[string]bool{"disc": true, "ring": true, "plus": true, "triangle": true, "star": true, "cardioid": true}[s.Kind]; hasRadius && s.Radius == 0 {
+		p.errf(n, "needs a `radius`")
+	}
+	switch s.Kind {
+	case "ring":
+		if s.Inner == 0 || s.Inner >= s.Radius {
+			p.errf(n, "needs an `inner` smaller than its `radius`")
+		}
+	case "star":
+		if s.Inner >= s.Radius && s.Radius > 0 {
+			p.errf(n, "`inner` must be smaller than `radius`")
+		}
+		if s.Inner == 0 && s.Points < 5 {
+			p.errf(n, "needs an `inner` with fewer than 5 points")
+		}
+		if s.Inner == 0 {
+			n := float64(s.Points)
+			s.Inner = s.Radius * math.Cos(2*math.Pi/n) / math.Cos(math.Pi/n)
+		}
+	case "rect":
+		if s.Fly == 0 || s.Hoist == 0 {
+			p.errf(n, "needs `fly` and `hoist`")
+		}
+	case "plus":
+		if s.Width == 0 || s.Width >= 2*s.Radius {
+			p.errf(n, "needs a `width` less than twice its `radius`")
+		}
+	case "polygon":
+		if len(s.Vertices) < 3 {
+			p.errf(n, "needs at least 3 `point`s")
+		}
+	case "svg":
+		if s.Fly == 0 || s.Hoist == 0 {
+			p.errf(n, "needs `fly` and `hoist`")
+		}
+		if s.Markup == "" {
+			p.errf(n, "needs `markup`")
+			return
+		}
+		p.embeds++
+		embedded, err := sanitizeSVG(s.Markup, fmt.Sprintf("%ssvg%d-", p.idPrefix, p.embeds))
+		if err != nil {
+			p.errf(n, "%v", err)
+			return
+		}
+		s.embedded = embedded
+	}
+}
+
+func (p *parser) at(n *kdl.Node) *Point {
+	p.plain(n)
+	p.noChildren(n)
+	if args := n.Arguments(); len(args) > 0 {
+		if len(args) != 1 || args[0].Kind() != kdl.String || args[0].String() != "center" || len(n.Properties()) > 0 {
+			p.errf(n, "must be `center` or `fly=A hoist=B`")
+		}
+		return nil
+	}
+	p.only(n, 0, "fly", "hoist")
+	return &Point{p.prop(n, "fly"), p.prop(n, "hoist")}
+}
+
+// border reads `border COLOR W`, with an optional side of inside or outside.
+func (p *parser) border(n *kdl.Node, flag *Flag) {
+	args := n.Arguments()
+	if len(args) == 3 {
+		if args[2].Kind() != kdl.String || (args[2].String() != "inside" && args[2].String() != "outside") {
+			p.errf(n, "side must be inside or outside")
+			return
+		}
+		flag.BorderOutside = args[2].String() == "outside"
+		args = args[:2]
+	}
+	flag.Border = p.edgeArgs(n, args)
+	if flag.Border == nil || flag.Border.Width <= 0 || !flag.BorderOutside {
+		return
+	}
+	if _, err := offsetPolygon(flag.boundary(), flag.Border.Width); err != nil {
+		p.errf(n, "%v", err)
+	}
+}
+
+func (p *parser) edge(n *kdl.Node) *Edge {
+	return p.edgeArgs(n, n.Arguments())
+}
+
+func (p *parser) edgeArgs(n *kdl.Node, args []kdl.Value) *Edge {
+	p.plain(n)
+	p.noProps(n)
+	p.noChildren(n)
+	if len(args) != 2 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs a color and a width")
+		return nil
+	}
+	return &Edge{p.paletteColor(n, args[0].String()), p.positive(n, p.numberValue(n, args[1]))}
+}
+
+// children dispatches n's children to handlers, rejecting unknown nodes and
+// repeats of anything not listed as repeatable.
+func (p *parser) children(n *kdl.Node, repeatable []string, handlers map[string]func(*kdl.Node)) {
+	if n.Children() == nil {
+		return
+	}
+	seen := map[string]bool{}
+	for _, c := range n.Children().Nodes {
+		handler, ok := handlers[c.Name()]
+		if !ok {
+			p.errf(c, "unknown here")
+			continue
+		}
+		if seen[c.Name()] && !slices.Contains(repeatable, c.Name()) {
+			p.errf(c, "given more than once")
+		}
+		seen[c.Name()] = true
+		p.plain(c)
+		handler(c)
+	}
+}
+
+func (p *parser) plain(n *kdl.Node) {
+	if _, annotated := n.TypeAnnotation(); annotated {
+		p.errf(n, "type annotations aren't used by this format")
+	}
+}
+
+func (p *parser) noValues(n *kdl.Node) {
+	if len(n.Arguments()) > 0 {
+		p.errf(n, "takes no arguments")
+	}
+	p.noProps(n)
+}
+
+func (p *parser) noProps(n *kdl.Node) {
+	if len(n.Properties()) > 0 {
+		p.errf(n, "takes no properties")
+	}
+}
+
+func (p *parser) noChildren(n *kdl.Node) {
+	if n.Children() != nil && len(n.Children().Nodes) > 0 {
+		p.errf(n, "takes no children")
+	}
+}
+
+// only checks n's argument count and rejects any property not listed.
+func (p *parser) only(n *kdl.Node, args int, props ...string) {
+	if len(n.Arguments()) != args {
+		p.errf(n, "takes %d arguments, got %d", args, len(n.Arguments()))
+	}
+	for _, key := range n.PropertyOrder() {
+		if !slices.Contains(props, key) {
+			p.errf(n, "unknown property %q", key)
+		}
+	}
+}
+
+func (p *parser) str(n *kdl.Node) string {
+	p.noProps(n)
+	p.noChildren(n)
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs one string")
+		return ""
+	}
+	return args[0].String()
+}
+
+func (p *parser) oneOf(n *kdl.Node, allowed []string) string {
+	value := p.str(n)
+	if value != "" && !slices.Contains(allowed, value) {
+		p.errf(n, "must be one of %v, got %q", allowed, value)
+	}
+	return value
+}
+
+func (p *parser) colorArg(n *kdl.Node) string {
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs one color")
+		return ""
+	}
+	return p.paletteColor(n, args[0].String())
+}
+
+func (p *parser) colorArgs(n *kdl.Node) []string {
+	args := n.Arguments()
+	if len(args) == 0 {
+		p.errf(n, "needs at least one color")
+	}
+	colors := make([]string, 0, len(args))
+	for _, a := range args {
+		if a.Kind() != kdl.String {
+			p.errf(n, "colors must be palette names")
+			continue
+		}
+		colors = append(colors, p.paletteColor(n, a.String()))
+	}
+	return colors
+}
+
+func (p *parser) paletteColor(n *kdl.Node, name string) string {
+	if _, ok := p.palette[name]; !ok {
+		p.errf(n, "color %q isn't in the palette", name)
+	}
+	return name
+}
+
+func (p *parser) numberValue(n *kdl.Node, v kdl.Value) float64 {
+	var f float64
+	switch v.Kind() {
+	case kdl.Int:
+		f = float64(v.Int())
+	case kdl.Float:
+		f = v.Float()
+	case kdl.BigFloat:
+		// The KDL parser keeps decimal literals at arbitrary precision.
+		f, _ = v.BigFloat().Float64()
+	default:
+		p.errf(n, "needs a number")
+		return 0
+	}
+	if math.IsNaN(f) || math.IsInf(f, 0) || math.Abs(f) > 1e12 {
+		p.errf(n, "needs a finite number of a reasonable size")
+		return 0
+	}
+	return f
+}
+
+func (p *parser) number(n *kdl.Node) float64 {
+	p.noProps(n)
+	p.noChildren(n)
+	args := n.Arguments()
+	if len(args) != 1 {
+		p.errf(n, "needs one number")
+		return 0
+	}
+	return p.numberValue(n, args[0])
+}
+
+func (p *parser) numbers(n *kdl.Node) []float64 {
+	p.noProps(n)
+	p.noChildren(n)
+	values := make([]float64, 0, len(n.Arguments()))
+	for _, a := range n.Arguments() {
+		values = append(values, p.numberValue(n, a))
+	}
+	return values
+}
+
+func (p *parser) positives(n *kdl.Node) []float64 {
+	values := p.numbers(n)
+	for _, v := range values {
+		p.positive(n, v)
+	}
+	return values
+}
+
+func (p *parser) positive(n *kdl.Node, v float64) float64 {
+	if v <= 0 {
+		p.errf(n, "needs a positive number")
+	}
+	return v
+}
+
+func (p *parser) integer(n *kdl.Node, v float64, limit int) int {
+	if v != math.Trunc(v) || v < 1 {
+		p.errf(n, "needs a positive whole number")
+		return 0
+	}
+	if v > float64(limit) {
+		p.errf(n, "can't be more than %d", limit)
+		return 0
+	}
+	return int(v)
+}
+
+func (p *parser) prop(n *kdl.Node, key string) float64 {
+	v := n.Prop(key)
+	if !v.IsValid() {
+		p.errf(n, "needs %s=", key)
+		return 0
+	}
+	return p.numberValue(n, v)
+}
+
+func (p *parser) boolProp(n *kdl.Node, key string) bool {
+	v := n.Prop(key)
+	if !v.IsValid() {
+		return false
+	}
+	if v.Kind() != kdl.Bool {
+		p.errf(n, "%s must be #true or #false", key)
+		return false
+	}
+	return v.Bool()
+}

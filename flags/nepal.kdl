@@ -1,0 +1,72 @@
+// Built from Schedule 1 of the 2015 constitution, with AB = 60 and AC = 80. The
+// schedule gives only a construction, so its derived lengths are rounded here:
+//   AB 60, AC 80, E and F at hoist 37.5736, AH 15
+//   L at hoist 18.7868, M at 23.4835, T at 29.0446, U at 58.7868
+//   MN 8.1434, LN 12.8401, MQ 11.9503, TN 2.5823, TS 7.7231, TM 5.5611
+// The outline runs C, G, E, B, A. With its border, the flag reaches the known
+// 1:1.219. The constitution names crimson and deep blue; these values are the
+// conventional ones.
+vexyl 1
+meta {
+  name "Nepal"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://crwflags.com/fotw/flags/np-law.html"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Nepal.svg"
+}
+palette {
+  crimson "#dc143c"
+  blue "#003893"
+  white "#ffffff"
+}
+proportion hoist=80 fly=60
+outline {
+  polygon {
+    point fly=0 hoist=0
+    point fly=60 hoist=37.5736
+    point fly=17.5736 hoist=37.5736
+    point fly=60 hoist=80
+    point fly=0 hoist=80
+  }
+}
+border blue 2.5823 outside
+
+field crimson
+
+// The moon: a crescent, a disc, and the upper eight of sixteen rays.
+charge disc white {
+  radius 11.9503
+  at fly=15 hoist=23.4835
+  cut {
+    disc {
+      radius 12.8401
+      at fly=15 hoist=18.7868
+    }
+  }
+}
+charge disc white {
+  radius 5.5611
+  at fly=15 hoist=29.0446
+}
+charge star white {
+  radius 7.7231
+  inner 5.5611
+  points 16
+  rotate 11.25
+  at fly=15 hoist=29.0446
+  clip {
+    rect {
+      fly 15.4462
+      hoist 7.7231
+      at fly=15 hoist=25.183
+    }
+  }
+}
+
+// The sun: twelve rays, with two points on the line through H and I.
+charge star white {
+  radius 12.8401
+  inner 8.1434
+  points 12
+  at fly=15 hoist=58.7868
+}

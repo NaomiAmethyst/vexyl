@@ -1,0 +1,21 @@
+// Per the Flag Rules 1972: 10:6, with a disc of radius 1/5 of the length, centered
+// 9/20 along it. The rules specify Procion dyes, so these hex values are conversions
+// through Pantone 342 C and 485 C, made by Wikipedia's editors.
+vexyl 1
+meta {
+  name "Bangladesh"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://en.wikipedia.org/wiki/Flag_of_Bangladesh"
+}
+palette {
+  green "#006747"
+  red "#da291c"
+}
+proportion hoist=6 fly=10
+
+field green
+charge disc red {
+  radius 2
+  at fly=4.5 hoist=3
+}

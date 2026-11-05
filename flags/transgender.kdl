@@ -1,0 +1,18 @@
+// No primary construction sheet found; equal stripes and colors follow Commons.
+vexyl 1
+meta {
+  name "Transgender Pride Flag"
+  designer "Monica Helms"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://en.wikipedia.org/wiki/Transgender_flag"
+  source "https://commons.wikimedia.org/wiki/File:Transgender_Pride_flag.svg"
+}
+palette {
+  blue "#5bcefa"
+  pink "#f5a9b8"
+  white "#ffffff"
+}
+proportion hoist=3 fly=5
+
+bars blue pink white pink blue

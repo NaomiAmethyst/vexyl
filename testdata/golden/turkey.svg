@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" width="900" height="600">
+  <title>Turkey</title>
+  <clipPath id="vx-a97142c3-flag1">
+    <polygon points="0,0 360,0 360,240 0,240"/>
+  </clipPath>
+  <g clip-path="url(#vx-a97142c3-flag1)">
+    <polygon points="0,0 360,0 360,240 0,240" fill="#e30a17"/>
+    <mask id="vx-a97142c3-mask2" maskUnits="userSpaceOnUse" x="0" y="0" width="360" height="240">
+      <polygon points="0,0 360,0 360,240 0,240" fill="#fff"/>
+      <circle cx="135" cy="120" r="48" fill="#000"/>
+    </mask>
+    <g mask="url(#vx-a97142c3-mask2)">
+      <circle cx="120" cy="120" r="60" fill="#ffffff"/>
+    </g>
+    <polygon points="167,120 187.72949,113.26458 187.72949,91.468305 200.54102,109.101862 221.27051,102.366442 208.45898,120 221.27051,137.633558 200.54102,130.898138 187.72949,148.531695 187.72949,126.73542" fill="#ffffff"/>
+  </g>
+</svg>
