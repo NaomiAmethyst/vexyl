@@ -20,6 +20,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -108,12 +109,26 @@ def one(job):
     kdl, svg = f"{out}/kdl/{key}.kdl", f"{out}/svg/{key}.svg"
     os.makedirs(os.path.dirname(kdl), exist_ok=True)
     os.makedirs(os.path.dirname(svg), exist_ok=True)
+    # Restated simply, a flag has to look the same, or it keeps its exact values.
+    tidied = S.tidy(text)
+    checked = compare(tidied, source, key, kdl, svg, out, vexyl)
+    exact = compare(text, source, key, kdl, svg, out, vexyl) if tidied != text and worse(checked) else None
+    if exact is None:
+        return dict(result, tidied=tidied != text, **checked)
+    return dict(result, tidied=False, **exact)
+
+
+def worse(checked):
+    return checked["status"] not in ("match", "close") or checked.get("thick", 0) >= 0.05
+
+
+def compare(text, source, key, kdl, svg, out, vexyl):
     open(kdl, "w").write(text)
     done = subprocess.run([vexyl, "render", "-o", svg, kdl], capture_output=True, text=True)
     if done.returncode:
         message = re.sub(r"^\S+:\d+:\d+:\s*", "", done.stderr.strip().split("\n")[0])
-        return dict(result, status="rejected", reason=message[:90])
-    png = f"{out}/png-{os.getpid()}-{key.replace('/', '-')}"
+        return dict(status="rejected", reason=message[:90])
+    png = f"{out}/png-{os.getpid()}-{threading.get_ident()}-{key.replace('/', '-')}"
     try:
         a, b = rasterize(source, png + "-a.png"), rasterize(svg, png + "-b.png")
     finally:
@@ -121,14 +136,14 @@ def one(job):
             if os.path.exists(png + suffix):
                 os.remove(png + suffix)
     if a is None or b is None:
-        return dict(result, status="unrenderable source" if a is None else "rejected", reason="resvg failed")
+        return dict(status="unrenderable source" if a is None else "rejected", reason="resvg failed")
     h, w = min(a.shape[0], b.shape[0]), min(a.shape[1], b.shape[1])
     if max(abs(a.shape[0]-b.shape[0]), abs(a.shape[1]-b.shape[1])) > 2:
-        return dict(result, status="mismatch", reason=f"sizes {a.shape[:2]} and {b.shape[:2]}", thick=100.0, diff=100.0)
+        return dict(status="mismatch", reason=f"sizes {a.shape[:2]} and {b.shape[:2]}", thick=100.0, diff=100.0)
     d = np.abs(a[:h, :w]-b[:h, :w]).sum(2) > 48
     e = d[1:-1, 1:-1] & d[:-2, 1:-1] & d[2:, 1:-1] & d[1:-1, :-2] & d[1:-1, 2:]
     thick = float(e.mean()*100)
-    return dict(result, status="match" if thick < 0.05 else "close" if thick < 0.5 else "mismatch",
+    return dict(status="match" if thick < 0.05 else "close" if thick < 0.5 else "mismatch",
                 thick=round(thick, 3), diff=round(float(d.mean()*100), 3))
 
 

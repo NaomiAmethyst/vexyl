@@ -16,6 +16,7 @@ is officially constructed.
 """
 
 import argparse
+import fractions
 import math
 import re
 import sys
@@ -450,6 +451,8 @@ class Op:
         self.ellipse = None  # (cx, cy, half fly, half hoist, rotation)
         self.counterchange = None  # a saltire's width, when it shows on one side of each diagonal
         self.lines = False   # polygons that came from stroked lines
+        self.diagonals = None  # (fly, hoist, width), for a stroke along a corner box's diagonals
+        self.half = False    # those diagonals, cut to show on one side of each
         self.ring = None     # (cx, cy, r, inner)
         self.crescents = []  # (cx, cy, r, cut cx, cut cy, cut r)
         self.fill = None
@@ -774,7 +777,7 @@ class Reader:
             except Unsupported:
                 polys = None
             if polys:
-                self.mark_counterchange(cut, polys)
+                self.mark_diagonals(cut, polys)
                 cut.polys, cut.lines = polys, False
                 return cut
         for k in ("clip-path", "mask"):
@@ -833,21 +836,32 @@ class Reader:
                 op.reason = "path with overlapping subpaths"
         return op
 
-    def mark_counterchange(self, op, polys):
-        """A stroke along the flag's diagonals, cut to half its area, is a saltire that shows on
-        one side of each."""
-        if not op.lines or len(op.polys) != 2:
+    def mark_diagonals(self, op, polys):
+        """Notes when a stroke along the diagonals of a corner box has been cut to half its area,
+        as the Union Flag's red saltire is, since then it shows on one side of each."""
+        if not op.diagonals:
             return
-        tol = max(self.w, self.h) * 1e-3
-        wanted = [((0, 0), (self.w, self.h)), ((self.w, 0), (0, self.h))]
-        for pair in wanted:
-            middle = ((pair[0][0]+pair[1][0])/2, (pair[0][1]+pair[1][1])/2)
-            if not any(math.dist(middle, (sum(p[0] for p in q)/4, sum(p[1] for p in q)/4)) < tol
-                       and abs(math.dist(q[0], q[1]) - math.dist(*pair)) < tol for q in op.polys):
-                return
         whole = sum(abs(signed_area(q)) for q in op.polys)
-        if abs(sum(abs(signed_area(q)) for q in polys) - whole/2) < 0.1 * whole / 2 + tol:
-            op.counterchange = math.dist(op.polys[0][1], op.polys[0][2]) / 2
+        op.half = 0.4 * whole < sum(abs(signed_area(q)) for q in polys) < 0.6 * whole
+        w, h, width = op.diagonals
+        tol = max(self.w, self.h) * 1e-3
+        if op.half and abs(w-self.w) < tol and abs(h-self.h) < tol:
+            op.counterchange = width / 2
+
+    def diagonals_of(self, polys):
+        """Returns (fly, hoist, width) of a box in the flag's upper hoist, if these are its diagonals."""
+        if len(polys) != 2 or any(len(q) != 4 for q in polys):
+            return None
+        ends = [(((q[0][0]+q[3][0])/2, (q[0][1]+q[3][1])/2), ((q[1][0]+q[2][0])/2, (q[1][1]+q[2][1])/2)) for q in polys]
+        points = [p for pair in ends for p in pair]
+        w, h = max(p[0] for p in points), max(p[1] for p in points)
+        tol = max(self.w, self.h) * 1e-3
+        wanted = {((0, 0), (w, h)), ((w, 0), (0, h))}
+        for a, b in wanted:
+            if not any((math.dist(a, x) < tol and math.dist(b, y) < tol) or (math.dist(a, y) < tol and math.dist(b, x) < tol)
+                       for x, y in ends):
+                return None
+        return (w, h, math.dist(polys[0][0], polys[0][3])) if w > tol and h > tol else None
 
     def closed(self, e, tag):
         if tag in ("rect", "circle", "ellipse", "polygon"):
@@ -917,6 +931,7 @@ class Reader:
         if polys:
             op.polys, op.fill = polys, stroke
             op.lines = True
+            op.diagonals = None if pattern else self.diagonals_of(polys)
 
     def solid(self, op, e, tag, s, ctm, stroked=False):
         evenodd = s.get("fill-rule", "nonzero") == "evenodd"
@@ -1250,6 +1265,11 @@ class Writer:
             name = color_name(hex_value)
         taken = set(self.palette.values())
         candidate, n = name, 1
+        # Another shade of a color in use is named for how it differs.
+        if candidate in taken and not isinstance(hex_value, tuple):
+            first = next(v for v, c in self.palette.items() if c == name and not isinstance(v, tuple))
+            shade = "light" if sum(int(hex_value[i:i+2], 16) for i in (1, 3, 5)) > sum(int(first[i:i+2], 16) for i in (1, 3, 5)) else "dark"
+            candidate = name = f"{shade}-{name}"
         while candidate in taken:
             n += 1
             candidate = f"{name}-{n}"
@@ -1413,7 +1433,7 @@ class Writer:
                 self.reasons.append("artwork" if artwork else op.reason or "unknown")
                 i += 1
                 continue
-            consumed = self.single(op) if op.counterchange else \
+            consumed = self.single(op) if op.counterchange else self.union_canton(ops, i) or \
                 self.quarters(ops, i) or self.strips(ops, i) or self.cross(ops, i) or self.single(op)
             i += consumed
         self.flush()
@@ -1560,6 +1580,58 @@ class Writer:
             return i - start
         return 0
 
+    def union_canton(self, ops, start):
+        """The Union Flag drawn in the corner, as white diagonals, red ones cut to show on one
+        side, and a red cross edged in white, is a canton with those layers."""
+        white = ops[start]
+        if not white.diagonals or white.half or white.opacity < 0.9995:
+            return 0
+        w, h, width = white.diagonals
+        if w > 0.95*self.w and h > 0.95*self.h:
+            return 0
+        tol = max(self.w, self.h) * 1e-3
+        i = start + 1
+        red = None
+        if i < len(ops) and ops[i].diagonals and ops[i].half \
+                and abs(ops[i].diagonals[0]-w) < tol and abs(ops[i].diagonals[1]-h) < tol:
+            red = ops[i]
+            i += 1
+
+        def arms(k):
+            """Reads a cross drawn as one shape with two arms, or two shapes, centered on the box."""
+            if k >= len(ops) or not ops[k].polys:
+                return None
+            count = 1
+            polys = ops[k].polys
+            if len(polys) == 1 and k+1 < len(ops) and ops[k+1].polys and len(ops[k+1].polys) == 1 and ops[k+1].fill == ops[k].fill:
+                polys, count = polys + ops[k+1].polys, 2
+            if len(polys) != 2 or any(len(q) != 4 for q in polys) or ops[k].opacity < 0.9995:
+                return None
+            boxes = [bounds(q) for q in polys]
+            for q, b in zip(polys, boxes):
+                if not all(min(abs(p[0]-b[0]), abs(p[0]-b[2])) < tol and min(abs(p[1]-b[1]), abs(p[1]-b[3])) < tol for p in q):
+                    return None
+            tall = min(boxes, key=lambda b: b[2]-b[0])
+            wide = max(boxes, key=lambda b: b[2]-b[0])
+            if abs((tall[0]+tall[2])/2-w/2) > tol or abs((wide[1]+wide[3])/2-h/2) > tol \
+                    or tall[1] > tol or tall[3] < h-tol or wide[0] > tol or wide[2] < w-tol:
+                return None
+            return ops[k].fill, tall[0], tall[2], wide[1], wide[3], count
+        under = arms(i)
+        over = arms(i + under[5]) if under else None
+        if not over or over[0] == under[0]:
+            return 0
+        body = [f"fly {fmt(w)}", f"hoist {fmt(h)}",
+                f"saltire {self.color(white.fill)} {{", f"  width {fmt(width)}", "}"]
+        if red:
+            body += [f"saltire {self.color(red.fill)} {{", f"  width {fmt(red.diagonals[2]/2)}", "  counterchange", "}"]
+        body += [f"cross {self.color(over[0])} {{",
+                 f"  fly {fmt(over[1])} {fmt(over[2]-over[1])} {fmt(w-over[2])}",
+                 f"  hoist {fmt(over[3])} {fmt(over[4]-over[3])} {fmt(h-over[4])}",
+                 f"  fimbriate {self.color(under[0])} {fmt(over[1]-under[1])}", "}"]
+        self.add("canton", body)
+        return i + under[5] + over[5] - start
+
     def cross(self, ops, start):
         if start + 1 >= len(ops):
             first = ops[start]
@@ -1683,7 +1755,7 @@ class Writer:
         if star:
             cx, cy, radius, inner, points, rotation = star
             body = [f"radius {fmt(radius)}"]
-            if points != 5 or abs(inner - radius * math.cos(2*math.pi/points)/math.cos(math.pi/points)) > radius*1e-3:
+            if points != 5 or abs(inner - radius * math.cos(2*math.pi/points)/math.cos(math.pi/points)) > radius*0.01:
                 body.append(f"inner {fmt(inner)}")
             if points != 5:
                 body.append(f"points {points}")
@@ -1967,6 +2039,9 @@ def color_name(hex_value):
     else:
         hue = (r-g)/(hi-lo) + 4
     hue *= 60
+    # Deep crimsons lean toward blue, but nobody calls them pink.
+    if hue >= 330 and light < 0.55:
+        return "red"
     for limit, name in ((15, "red"), (45, "orange"), (70, "yellow"), (165, "green"), (195, "teal"),
                         (250, "blue"), (290, "purple"), (350, "pink"), (361, "red")):
         if hue < limit:
@@ -2148,8 +2223,7 @@ def convert(source, name, url=None, encoder=None, license_id=None, note=None, se
         raise Unsupported("nothing drawn")
     writer = Writer(reader)
     writer.convert(reader.ops)
-    lines = ["// Imported mechanically by tools/svg2vexyl.py. This describes a drawing, not the",
-             "// flag's official construction, and it hasn't been checked against one."]
+    lines = ["// Drawn from its source by tools/svg2vexyl.py, and not checked against an official construction."]
     if note:
         lines.append("// " + note)
     lines += ["vexyl 1", "meta {", f"  name {kdl_string(name)}"]
@@ -2328,13 +2402,17 @@ def charge_body(layer, origin):
     return body
 
 
-def charge_text(layer, ats, origin, repeat=None, size=None):
+def charge_text(layer, ats, origin, repeat=None, size=None, region=None):
     body = charge_body(layer, origin)
     for at in ats:
-        body.append(f"at fly={fmt(at[0]-origin[0])} hoist={fmt(at[1]-origin[1])}")
+        x, y = at[0]-origin[0], at[1]-origin[1]
+        if region and len(ats) == 1 and abs(x-region[0]/2) < 1e-3*region[0] and abs(y-region[1]/2) < 1e-3*region[1]:
+            body.append("at center")
+        else:
+            body.append(f"at fly={fmt(x)} hoist={fmt(y)}")
     # An emblem drawn nearly centered is meant to stay in the middle at other proportions.
     box = layer.get("box")
-    if size and box and len(ats) == 1 and box[2]-box[0] < 0.9*size[0] and box[3]-box[1] < 0.9*size[1] \
+    if size and box and body[-1] != "at center" and len(ats) == 1 and box[2]-box[0] < 0.9*size[0] and box[3]-box[1] < 0.9*size[1] \
             and abs(ats[0][0]-size[0]/2) < CENTERED*size[0] and abs(ats[0][1]-size[1]/2) < CENTERED*size[1]:
         body.append("anchor center")
     body += list(layer["effect"])
@@ -2370,7 +2448,7 @@ def charge_run(layer, points, w, h, origin, top=False):
             if abs(step[1]) > 1e-9:
                 parts.append(f"hoist={fmt(step[1])}")
             return [charge_text(layer, [points[0]], origin, "repeat line " + " ".join(parts))]
-    return [charge_text(layer, points, origin, size=(w, h) if top else None)]
+    return [charge_text(layer, points, origin, size=(w, h) if top else None, region=(w, h))]
 
 
 def grid_of(points, w, h):
@@ -2472,6 +2550,94 @@ def outline_lines(poly, w, h):
                 and abs(points[1][1]+points[2][1]-h) <= tol:
             return ["outline pennant {", f"  tip {fmt(points[2][1]-points[1][1])}", "}"]
     return ["outline {", "  polygon {"] + [f"    point fly={fmt(p[0])} hoist={fmt(p[1])}" for p in poly] + ["  }", "}"]
+
+
+# What a flag's lengths are called, in a line of their own or as properties.
+LENGTHS = re.compile(r"^(\s*)(fly|hoist|radius|inner|hollow|depth|tongue|width|base|flat|tip|apex|offset|gap|junction|lines"
+                     r"|disc)((?: [-+\d.]+)+)$")
+FIMBRIATION = re.compile(r"^(\s*fimbriate \S+) ([-+\d.]+)$")
+PROPERTY = re.compile(r"\b(fly|hoist|radius)=([-+\d.]+)")
+PROPERTY_LINE = re.compile(r"^\s*(at|point|repeat) ")
+GRID_SIZES = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 20, 21, 24, 26, 28, 30, 32, 36, 40, 42, 48, 50, 52, 54, 56, 60,
+              64, 66, 72, 78, 80, 84, 90, 96, 100, 120, 144, 150, 180, 200, 240, 300, 360)
+
+
+def tidy(text):
+    """Restates a converted flag as a specification would: on the smallest grid that keeps its
+    structure in whole numbers, with its other sizes at simple values."""
+    found = re.search(r"^proportion hoist=([\d.]+) fly=([\d.]+)$", text, re.M)
+    if not found:
+        return text
+    h, w = float(found[1]), float(found[2])
+    ratio = fractions.Fraction(w/h).limit_denominator(60)
+    if abs(float(ratio) - w/h) > 1e-4 * w/h:
+        # Its proportion is no simple ratio, so a hoist of 1 says as much as anything can.
+        ratio = None
+    head, _, rest = text.partition(found[0])
+    body = []
+    in_markup = False
+    for line in rest.split("\n"):
+        if line.endswith('#"""') and not in_markup:
+            in_markup = True
+        elif line.startswith('"""#'):
+            in_markup = False
+        body.append((line, in_markup))
+
+    def structure():
+        """Sizes that a designer would have picked: of stripes, panels, crosses and bands."""
+        out, inside = [], None
+        for line, markup in body:
+            if markup:
+                continue
+            start = re.match(r"\s*(charge \S+|\S+)", line)
+            word = start[1] if start else ""
+            if line.endswith("{"):
+                inside = word
+            kept = inside and not inside.startswith(("charge polygon", "charge path", "charge svg", "polygon", "outline"))
+            if kept and LENGTHS.match(line) and LENGTHS.match(line)[2] in ("fly", "hoist", "width"):
+                out += [float(x) for x in LENGTHS.match(line)[3].split()]
+        return out
+
+    lengths = [x for x in structure() if x > 0]
+    unit = h / ratio.denominator if ratio else h
+    tol = 3e-4 * h
+    grid = None
+    if ratio:
+        for size in GRID_SIZES:
+            cell = unit / size
+            if all(abs(x/cell - round(x/cell)) * cell < tol for x in lengths):
+                grid = cell
+                break
+    # Stripes that don't fit a grid can still sit in a simple flag.
+    if grid is None:
+        grid = unit if ratio else h
+    hoist = h / grid
+    fly = hoist * float(ratio) if ratio else w / grid
+
+    def number(x):
+        v = x / grid
+        for denominator in (1, 2, 4, 8, 16, 3, 6, 12, 5, 10, 20):
+            snapped = round(v * denominator) / denominator
+            if abs(snapped - v) * grid < tol:
+                return fmt(snapped)
+        return fmt(v)
+
+    out = []
+    for line, markup in body:
+        if markup:
+            out.append(line)
+            continue
+        match = LENGTHS.match(line)
+        if match:
+            out.append(match[1] + match[2] + "".join(" " + number(float(x)) for x in match[3].split()))
+        elif FIMBRIATION.match(line):
+            match = FIMBRIATION.match(line)
+            out.append(f"{match[1]} {number(float(match[2]))}")
+        elif PROPERTY_LINE.match(line):
+            out.append(PROPERTY.sub(lambda m: f"{m[1]}={number(float(m[2]))}", line))
+        else:
+            out.append(line)
+    return head + f"proportion hoist={fmt(hoist)} fly={fmt(fly)}" + "\n".join(out)
 
 
 def kdl_string(text):

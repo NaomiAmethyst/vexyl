@@ -15,6 +15,55 @@ def convert(body):
     return S.convert((HEAD + body + "</svg>").encode(), "Test")
 
 
+class Tidying(unittest.TestCase):
+    def flag(self, body):
+        return S.tidy('vexyl 1\nproportion hoist=600 fly=900\n\n' + body)
+
+    def test_proportion_reduces(self):
+        self.assertIn("proportion hoist=2 fly=3", self.flag("field red\n"))
+
+    def test_grid_keeps_stripes_whole(self):
+        text = self.flag("panel {\n  side hoist\n  width 300\n  field blue\n}\n")
+        self.assertIn("proportion hoist=2 fly=3", text)
+        self.assertIn("width 1\n", text)
+
+    def test_grid_grows_to_fit(self):
+        text = self.flag("panel {\n  side hoist\n  width 100\n  field blue\n}\n")
+        self.assertIn("proportion hoist=6 fly=9", text)
+        self.assertIn("width 1\n", text)
+
+    def test_sizes_snap_to_simple_values(self):
+        text = self.flag("charge star white {\n  radius 112.51\n  at fly=150 hoist=300\n}\n")
+        self.assertIn("radius 0.375", text)
+        self.assertIn("at fly=0.5 hoist=1", text)
+
+    def test_counts_and_angles_stay(self):
+        text = self.flag("charge star white {\n  radius 30\n  points 7\n  rotate 300\n  repeat ring count=300 radius=150\n}\n")
+        self.assertIn("points 7", text)
+        self.assertIn("rotate 300", text)
+        self.assertIn("count=300 radius=0.5", text)
+
+    def test_fimbriation_scales(self):
+        self.assertIn("fimbriate white 0.5", self.flag("band red {\n  width 150\n  fimbriate white 75\n}\n"))
+
+    def test_markup_and_path_data_stay(self):
+        body = 'charge svg {\n  at center\n  fly 300\n  hoist 300\n  markup #"""\n<rect width="300" fly="300"/>\n"""#\n}\n'
+        text = self.flag(body)
+        self.assertIn('<rect width="300" fly="300"/>', text)
+        self.assertIn("fly 1\n", text)
+        text = self.flag('charge path white {\n  d "M0 0L300 300"\n  box "0 0 300 300"\n  fly 300\n  hoist 300\n}\n')
+        self.assertIn('d "M0 0L300 300"', text)
+        self.assertIn('box "0 0 300 300"', text)
+
+    def test_odd_proportion_uses_a_hoist_of_one(self):
+        text = S.tidy("proportion hoist=1000 fly=1618.7\n\nfield red\n")
+        self.assertIn("proportion hoist=1 fly=1.6187", text)
+
+    def test_real_crimson_is_red(self):
+        self.assertEqual(S.color_name("#bf0a30"), "red")
+        self.assertEqual(S.color_name("#ff69b4"), "pink")
+
+
 class Recognition(unittest.TestCase):
     def native(self, body, *wanted):
         text, stats = convert(body)
@@ -46,7 +95,7 @@ class Recognition(unittest.TestCase):
     def test_pentagram_is_a_star(self):
         self.native('<rect width="30" height="20" fill="#f00"/>'
                     '<path d="M15 5 17.939 14.045 10.245 8.455H19.755L12.061 14.045z" fill="#ff0"/>',
-                    "charge star yellow", "at fly=15 hoist=10")
+                    "charge star yellow", "at center")
 
     def test_two_arcs_are_a_crescent(self):
         self.native('<rect width="30" height="20" fill="#f00"/>'
@@ -65,7 +114,7 @@ class Recognition(unittest.TestCase):
     def test_panels_take_in_their_charges(self):
         self.native('<rect width="30" height="20" fill="#f00"/><rect width="10" height="10" fill="#00f"/>'
                     '<circle cx="5" cy="5" r="1" fill="#fff"/><circle cx="20" cy="15" r="1" fill="#fff"/>',
-                    "canton {", "fly 10", "field blue", "  charge disc white {", "    at fly=5 hoist=5")
+                    "canton {", "fly 10", "field blue", "  charge disc white {", "    at center")
 
     def test_side_panel(self):
         self.native('<rect width="30" height="20" fill="#ff0"/><rect width="10" height="10" y="10" fill="#f00"/>'
@@ -192,6 +241,20 @@ class Recognition(unittest.TestCase):
         self.assertIn("counterchange", text)
         self.assertNotIn("charge svg", text)
 
+    def test_union_flag_in_a_corner_is_a_canton(self):
+        text, stats = S.convert(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60"><clipPath id="t">'
+                                b'<path d="M0,0V15H70V30H60zM0,30V40H30V0H60z"/></clipPath>'
+                                b'<rect width="120" height="60" fill="#012169"/><g stroke="#c8102e" stroke-width="6">'
+                                b'<path d="M0,0L60,30M60,0L0,30" stroke="#fff"/>'
+                                b'<path d="M0,0L60,30M60,0L0,30" clip-path="url(#t)" stroke-width="4"/>'
+                                b'<path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/>'
+                                b'<path d="M30,0V30M0,15H60"/></g></svg>', "Test")
+        self.assertEqual(stats["inline"], 0, text)
+        self.assertIn("canton {", text)
+        self.assertIn("counterchange", text)
+        self.assertIn("fimbriate white 2", text)
+        self.assertNotIn("charge polygon", text)
+
     def test_dashed_line_is_stripes(self):
         text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 10H30" stroke="#fff" stroke-width="20" stroke-dasharray="5"/>')
         self.assertNotIn("charge svg", text)
@@ -313,7 +376,7 @@ class Recognition(unittest.TestCase):
     def test_nested_svg_has_its_own_coordinates(self):
         self.native('<rect width="30" height="20" fill="#f00"/><svg x="10" y="5" width="10" height="10" viewBox="0 0 100 100">'
                     '<circle cx="50" cy="50" r="50" fill="#fff"/></svg>',
-                    "charge disc white", "radius 5", "at fly=15 hoist=10")
+                    "charge disc white", "radius 5", "at center")
 
     def test_chevron(self):
         self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0 15 10 0 20z" fill="#00f"/>',
