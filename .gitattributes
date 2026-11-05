@@ -1,2 +1,1 @@
-flags/imported/** linguist-generated=true
 go/testdata/golden/** linguist-generated=true

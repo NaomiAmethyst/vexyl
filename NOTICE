@@ -3,5 +3,4 @@ Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 The code and hand-written flag files are licensed under the Apache License 2.0;
 see LICENSE. The specification, SPEC.md, is licensed under CC BY-SA 4.0; see
-LICENSE-SPEC. Files in flags/imported/ derive from Wikimedia Commons, and each
-states its own license and author.
+LICENSE-SPEC.

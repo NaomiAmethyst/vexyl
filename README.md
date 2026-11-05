@@ -76,13 +76,12 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
   [`go/cmd/vexyl`](go/cmd/vexyl).
 - [`flags/`](flags) holds flags written by hand and checked against official
   sources where possible, with notes on what each relies on.
-- [`flags/imported/`](flags/imported) holds country and pride flags converted
-  mechanically from Wikimedia Commons. They exist to stress test the format; see
-  [its README](flags/imported/README.md).
+- [`vexyl-flags`](https://github.com/NaomiAmethyst/vexyl-flags), a separate repo, holds
+  about 2,000 flags converted from Wikimedia Commons, and is how the format is stress tested.
 - [`docs/missing-from-spec.md`](docs/missing-from-spec.md) is the survey of real flags
   behind the format's vocabulary.
 - [`tools/`](tools) holds the importer. `svg2vexyl.py` converts one SVG file, and
-  `fetch_flags.py` and `import_flags.py` gather a corpus and check each result.
+  `fetch_flags.py` and `import_flags.py` gather a corpus and check each result with resvg.
 
 Run the tests with `make check`, and the fuzzers with `make fuzz`. Golden output
 lives in `go/testdata/golden`; after an intended change, rewrite it by running
@@ -96,8 +95,6 @@ Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>.
   [CC BY-SA 4.0](LICENSE-SPEC).
 - The code and hand-written flag files are licensed under the
   [Apache License 2.0](LICENSE).
-- Files in `flags/imported/` derive from Wikimedia Commons, and each states its own
-  license and author.
 
 These licenses cover this project's work. They grant no rights in the flag designs
 themselves, which belong to their own designers and may have their own terms or

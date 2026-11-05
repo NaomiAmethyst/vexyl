@@ -5,8 +5,9 @@
 
 The drawing is flattened into a list of painted shapes, with its transforms, <use>
 references and CSS resolved. Each shape that's recognized becomes flag vocabulary:
-a field, bars, a cross, chevrons, a disc, a star, a rectangle or a polygon. Runs of
-anything else go into inline SVG, which is a faithful copy rather than a description.
+a field, bars, panels, crosses, saltires, chevrons, piles, quarters, crescents, suns and
+so on. Single shapes it can't name become paths, and long runs of detailed shapes, such as
+seals, go into inline SVG, which is a faithful copy rather than a description.
 
 This is a mechanical conversion. It says what a drawing looks like, not how the flag
 is officially constructed.
@@ -23,6 +24,8 @@ import xml.etree.ElementTree as ET
 SVG = "{http://www.w3.org/2000/svg}"
 XLINK = "{http://www.w3.org/1999/xlink}href"
 EPS = 1e-6
+# This many detailed shapes in a row are treated as artwork, like a seal, and stay together.
+ARTWORK_RUN = 8
 
 # Everything that can't be carried into a flag is raised as this, with a short reason
 # that reports can count.
@@ -39,6 +42,8 @@ CSS_COLORS = {
     "gold": "#ffd700", "pink": "#ffc0cb", "brown": "#a52a2a", "crimson": "#dc143c",
     "forestgreen": "#228b22", "darkgreen": "#006400", "darkblue": "#00008b",
     "darkred": "#8b0000", "royalblue": "#4169e1", "skyblue": "#87ceeb",
+    "whitesmoke": "#f5f5f5", "darkgoldenrod": "#b8860b", "goldenrod": "#daa520", "firebrick": "#b22222",
+    "indigo": "#4b0082", "violet": "#ee82ee", "tan": "#d2b48c", "khaki": "#f0e68c", "steelblue": "#4682b4",
 }
 
 INHERITED = ("fill", "fill-rule", "fill-opacity", "stroke", "stroke-width",
@@ -262,6 +267,8 @@ class Op:
         self.fill = None
         self.opacity = 1.0
         self.reason = None   # why this can't be native
+        self.path = None     # (d, box, evenodd), in flag coordinates
+        self.stroke = None   # (color, width), for a stroke drawn over the shape
 
 
 class Reader:
@@ -281,12 +288,32 @@ class Reader:
     def viewport(self):
         r = self.root
         vb = r.get("viewBox")
+        self.start = None
         if vb:
             v = [float(x) for x in re.split(r"[\s,]+", vb.strip())]
             self.x0, self.y0, self.w, self.h = v[:4]
+            if self.w <= 0 or self.h <= 0:
+                raise Unsupported("no usable size")
+            self.start = (1, 0, 0, 1, -self.x0, -self.y0)
+            width, height = plain_length(r.get("width")), plain_length(r.get("height"))
+            if width and height and abs(width/height - self.w/self.h) > 1e-3*self.w/self.h:
+                # The picture's true shape isn't its grid's. Keep the grid's width, and fit
+                # the drawing into that shape as the viewer would.
+                aspect = (r.get("preserveAspectRatio") or "xMidYMid meet").split()
+                canvas_h = self.w * height / width
+                sy = canvas_h / self.h
+                if aspect[0] == "none":
+                    sx = 1.0
+                    tx, ty = 0.0, 0.0
+                else:
+                    sx = sy = (max if aspect[-1] == "slice" else min)(1.0, sy)
+                    tx, ty = (self.w - self.w*sx)/2, (canvas_h - self.h*sy)/2
+                self.start = (sx, 0, 0, sy, tx - self.x0*sx, ty - self.y0*sy)
+                self.h = canvas_h
         else:
             self.x0, self.y0 = 0.0, 0.0
             self.w, self.h = number(r.get("width")), number(r.get("height"))
+            self.start = (1, 0, 0, 1, 0, 0)
         if self.w <= 0 or self.h <= 0:
             raise Unsupported("no usable size")
 
@@ -328,6 +355,7 @@ class Reader:
             for c in e:
                 self.walk(c, ctm, s, o, stack)
         elif tag == "svg":
+            ctm = multiply(ctm, nested_viewport(e))
             for c in e:
                 self.walk(c, ctm, s, opacity, stack)
         elif tag == "use":
@@ -340,6 +368,7 @@ class Reader:
             ctm2 = multiply(ctm, (1, 0, 0, 1, number(e.get("x")), number(e.get("y"))))
             o = opacity * number(s.get("opacity"), 1.0)
             if local(target.tag) == "symbol":
+                ctm2 = multiply(ctm2, nested_viewport(target, e))
                 for c in target:
                     self.walk(c, ctm2, s, o, stack + (ref,))
             else:
@@ -488,7 +517,7 @@ class Reader:
         has_stroke = stroke != "none" and number(s.get("stroke-width"), 1.0) > 0
         if has_stroke:
             # A fill has no area on a two-point line, whatever it's set to.
-            if fill == "none" or self.lines_only(e, tag):
+            if self.lines_only(e, tag) or (fill == "none" and tag == "circle"):
                 if tag == "circle" and stroke is not None and s.get("stroke-dasharray", "none") == "none":
                     self.stroked_circle(op, e, s, ctm, stroke)
                 elif tag in ("path", "line", "polyline") and stroke is not None \
@@ -497,7 +526,19 @@ class Reader:
                     self.stroked_lines(op, e, tag, s, ctm, stroke)
                 op.reason = "stroked outline"
                 return op
-            op.reason = "filled and stroked"
+            scale = uniform_scale(ctm)
+            plain = (s.get("stroke-dasharray", "none") == "none" and s.get("stroke-linecap", "butt") == "butt"
+                     and s.get("stroke-linejoin", "miter") == "miter" and number(s.get("stroke-opacity"), 1.0) >= 0.9995
+                     and fill_opacity >= 0.9995)
+            if stroke is None or scale is None or not plain or (fill is None):
+                op.reason = "filled and stroked" if fill != "none" else "stroked outline"
+                return op
+            op.fill = fill
+            op.stroke = (stroke, number(s.get("stroke-width"), 1.0) * scale)
+            self.solid(op, e, tag, s, ctm, stroked=True)
+            if not (op.polys or op.disc or op.crescents or op.path):
+                op.reason = "filled and stroked" if fill != "none" else "stroked outline"
+                op.stroke = None
             return op
         if fill is None and "url(" in fill_raw and fill_opacity >= 0.9995:
             fill = self.gradient(fill_raw)
@@ -511,7 +552,7 @@ class Reader:
         op.fill = fill
         op.opacity *= fill_opacity
         self.solid(op, e, tag, s, ctm)
-        if not op.polys and not op.disc:
+        if not op.polys and not op.disc and not op.path and not op.crescents:
             op.reason = {"ellipse": "ellipse", "circle": "skewed circle", "rect": "rounded rectangle"}.get(tag, "curved path" if tag == "path" else tag)
             if tag == "path" and not parse_path(e.get("d"))[1]:
                 op.reason = "path with overlapping subpaths"
@@ -564,11 +605,17 @@ class Reader:
             op.polys, op.fill = polys, stroke
             op.lines = True
 
-    def solid(self, op, e, tag, s, ctm):
+    def solid(self, op, e, tag, s, ctm, stroked=False):
+        evenodd = s.get("fill-rule", "nonzero") == "evenodd"
         if tag == "rect":
             x, y = number(e.get("x")), number(e.get("y"))
             w, h = number(e.get("width")), number(e.get("height"))
-            if number(e.get("rx")) or number(e.get("ry")):
+            rx, ry = number(e.get("rx")), number(e.get("ry"))
+            if rx or ry:
+                rx, ry = rx or ry, ry or rx
+                d = (f"M{x+rx} {y}H{x+w-rx}A{rx} {ry} 0 0 1 {x+w} {y+ry}V{y+h-ry}A{rx} {ry} 0 0 1 {x+w-rx} {y+h}"
+                     f"H{x+rx}A{rx} {ry} 0 0 1 {x} {y+h-ry}V{y+ry}A{rx} {ry} 0 0 1 {x+rx} {y}Z")
+                op.path = flatten_path(d, ctm, evenodd)
                 return
             op.polys = [[apply(ctm, p) for p in ((x, y), (x+w, y), (x+w, y+h), (x, y+h))]]
         elif tag == "circle":
@@ -576,13 +623,24 @@ class Reader:
             if scale is not None:
                 c = apply(ctm, (number(e.get("cx")), number(e.get("cy"))))
                 op.disc = (c[0], c[1], number(e.get("r")) * scale)
+            else:
+                r = number(e.get("r"))
+                cx, cy = number(e.get("cx")), number(e.get("cy"))
+                op.path = flatten_path(f"M{cx-r} {cy}A{r} {r} 0 1 0 {cx+r} {cy}A{r} {r} 0 1 0 {cx-r} {cy}Z", ctm, evenodd)
+        elif tag == "ellipse":
+            rx, ry = number(e.get("rx")), number(e.get("ry"))
+            cx, cy = number(e.get("cx")), number(e.get("cy"))
+            op.path = flatten_path(f"M{cx-rx} {cy}A{rx} {ry} 0 1 0 {cx+rx} {cy}A{rx} {ry} 0 1 0 {cx-rx} {cy}Z", ctm, evenodd)
         elif tag in ("polygon", "polyline"):
             v = [float(x) for x in re.findall(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?", e.get("points") or "")]
-            if len(v) >= 6:
+            if len(v) >= 6 and not (stroked and tag == "polyline"):
                 op.polys = [[apply(ctm, p) for p in zip(v[::2], v[1::2])]]
         elif tag == "path":
-            self.solid_path(op, e.get("d"), ctm)
-
+            subs, curved = parse_path(e.get("d"))
+            if not stroked or (not curved and all(closed for _, closed in subs)):
+                self.solid_path(op, e.get("d"), ctm)
+            if not (op.polys or op.disc or op.crescents):
+                op.path = flatten_path(e.get("d"), ctm, evenodd)
 
     def solid_path(self, op, d, ctm):
         """Reads a filled path whose subpaths are all polygons, discs or crescents."""
@@ -726,8 +784,118 @@ def inside(p, poly):
     return hit
 
 
+def crosses_itself(poly):
+    """Does a polygon's outline cross itself, like a bowtie?"""
+    def turn(a, b, c):
+        return (b[0]-a[0])*(c[1]-a[1]) - (b[1]-a[1])*(c[0]-a[0])
+    n = len(poly)
+    for i in range(n):
+        a, b = poly[i], poly[(i+1) % n]
+        for j in range(i+2, n):
+            if (j+1) % n == i:
+                continue
+            c, d = poly[j], poly[(j+1) % n]
+            if turn(a, b, c)*turn(a, b, d) < 0 and turn(c, d, a)*turn(c, d, b) < 0:
+                return True
+    return False
+
+
 def area(poly):
     return abs(sum(a[0]*b[1]-b[0]*a[1] for a, b in zip(poly, poly[1:] + poly[:1])))/2
+
+
+def flatten_path(d, ctm, evenodd=False):
+    """Rewrites a path in flag coordinates, returning (d, box, evenodd), or None if an
+    arc can't survive the transform."""
+    out, points = [], []
+    x, y, sx, sy, px, py = 0.0, 0.0, 0.0, 0.0, None, None
+    scale = uniform_scale(ctm)
+    axis_aligned = abs(ctm[1]) < 1e-9 and abs(ctm[2]) < 1e-9
+    flipped = ctm[0]*ctm[3] - ctm[1]*ctm[2] < 0
+    def put(letter, *pairs):
+        coords = []
+        for pair in pairs:
+            q = apply(ctm, pair)
+            points.append(q)
+            coords.append(f"{fmt(q[0])} {fmt(q[1])}")
+        out.append(letter + " ".join(coords))
+    for cmd, v in path_commands(d):
+        rel = cmd.islower()
+        c = cmd.upper()
+        base = (x, y) if rel else (0.0, 0.0)
+        if c == "Z":
+            out.append("Z")
+            x, y = sx, sy
+            continue
+        if c == "M":
+            x, y = base[0]+v[0], base[1]+v[1]
+            sx, sy = x, y
+            put("M", (x, y))
+        elif c == "L":
+            x, y = base[0]+v[0], base[1]+v[1]
+            put("L", (x, y))
+        elif c == "H":
+            x = base[0]+v[0]
+            put("L", (x, y))
+        elif c == "V":
+            y = base[1]+v[0]
+            put("L", (x, y))
+        elif c in "CSQT":
+            pairs = [(base[0]+v[i], base[1]+v[i+1]) for i in range(0, len(v), 2)]
+            put(c, *pairs)
+            x, y = pairs[-1]
+        elif c == "A":
+            rx, ry, rot, large, sweep = v[0], v[1], v[2], int(v[3]), int(v[4])
+            end = (base[0]+v[5], base[1]+v[6])
+            if scale is not None:
+                angle = math.degrees(math.atan2(ctm[1], ctm[0]))
+                rx, ry = rx*scale, ry*scale
+                rot = -rot + angle if flipped else rot + angle
+            elif axis_aligned and rot == 0:
+                rx, ry = rx*abs(ctm[0]), ry*abs(ctm[3])
+            else:
+                return None
+            if flipped:
+                sweep = 1 - sweep
+            q = apply(ctm, end)
+            # An arc's reach beyond its ends is covered by its radius on either side.
+            points.extend([(q[0]-rx, q[1]-ry), (q[0]+rx, q[1]+ry)])
+            out.append(f"A{fmt(rx)} {fmt(ry)} {fmt(rot)} {large} {sweep} {fmt(q[0])} {fmt(q[1])}")
+            x, y = end
+    if not points:
+        return None
+    return "".join(out), bounds(points), evenodd
+
+
+def nested_viewport(e, sized_by=None):
+    """A nested svg or symbol's own coordinates, within where it's placed."""
+    x, y = (0.0, 0.0) if sized_by is not None else (number(e.get("x")), number(e.get("y")))
+    place = (1, 0, 0, 1, x, y)
+    vb = e.get("viewBox")
+    if not vb:
+        return place
+    v = [float(n) for n in re.split(r"[\s,]+", vb.strip())]
+    source = sized_by if sized_by is not None else e
+    width, height = plain_length(source.get("width")), plain_length(source.get("height"))
+    if not width or not height or v[2] <= 0 or v[3] <= 0:
+        return multiply(place, (1, 0, 0, 1, -v[0], -v[1]))
+    aspect = (e.get("preserveAspectRatio") or "xMidYMid meet").split()
+    sx, sy = width/v[2], height/v[3]
+    tx, ty = 0.0, 0.0
+    if aspect[0] != "none":
+        sx = sy = min(sx, sy)
+        tx, ty = (width - v[2]*sx)/2, (height - v[3]*sy)/2
+    return multiply(place, (sx, 0, 0, sy, tx - v[0]*sx, ty - v[1]*sy))
+
+
+def plain_length(value):
+    """Reads a length that's an actual size, rather than a percentage."""
+    if value is None or value.strip().endswith("%"):
+        return None
+    try:
+        return number(value)
+    except Unsupported:
+        return None
 
 
 def fmt(v):
@@ -797,7 +965,7 @@ class Writer:
         if not ops:
             return ops
         op = ops[0]
-        if not op.polys or len(op.polys) != 1 or op.fill in (None, "none") or op.opacity < 0.9995:
+        if not op.polys or len(op.polys) != 1 or op.fill in (None, "none") or op.opacity < 0.9995 or op.stroke:
             return ops
         poly = op.polys[0]
         if self.rect_of(poly) or len(poly) < 3:
@@ -821,6 +989,32 @@ class Writer:
         self.add(f"field {self.color(op.fill)}")
         return ops[1:]
 
+    def named_polygon(self, poly):
+        """Is this polygon one the vocabulary has a name for?"""
+        return bool(self.rect_of(poly) or regular_star(poly) or self.band(poly) or self.chevron(poly)
+                    or self.lozenge(poly) or self.pile(poly))
+
+    def is_art(self, op):
+        """Detailed shapes, which belong together as artwork when there are many."""
+        if op.path or op.stroke:
+            return True
+        if op.tag == "g" or op.fill in (None, "none"):
+            return not (op.polys or op.disc or op.ring or op.crescents)
+        if op.polys:
+            return not all(self.named_polygon(p) for p in op.polys)
+        return False
+
+    def demote_artwork(self, ops):
+        run = []
+        for op in ops + [None]:
+            if op is not None and self.is_art(op):
+                run.append(op)
+                continue
+            if len(run) >= ARTWORK_RUN:
+                for art in run:
+                    art.artwork = True
+            run = []
+
     def convert(self, ops):
         if self.r.clip_outline:
             self.outline = self.r.clip_outline
@@ -834,25 +1028,22 @@ class Writer:
                     ops = ops[1:]
         else:
             ops = self.take_outline(ops)
+        self.demote_artwork(ops)
         i, n = 0, len(ops)
         while i < n:
             op = ops[i]
-            # Everything fully hidden by what comes later would otherwise be noise.
-            if not (op.polys or op.disc or op.ring or op.crescents) or op.fill in (None, "none"):
-                if op.fill == "none" and op.tag != "g" and "stroke" not in op.style:
+            artwork = getattr(op, "artwork", False)
+            nameable = op.polys or op.disc or op.ring or op.crescents or op.path
+            if artwork or not nameable or (op.fill is None) or (op.fill == "none" and not op.stroke):
+                if op.fill == "none" and op.tag != "g" and "stroke" not in op.style and not artwork:
                     i += 1
                     continue
                 self.pending_svg.append(op)
-                self.reasons.append(op.reason or "unknown")
+                self.reasons.append("artwork" if artwork else op.reason or "unknown")
                 i += 1
                 continue
-            consumed = self.strips(ops, i) or self.cross(ops, i) or self.single(op)
-            if consumed:
-                i += consumed
-            else:
-                self.pending_svg.append(op)
-                self.reasons.append(op.reason or "unknown")
-                i += 1
+            consumed = self.quarters(ops, i) or self.strips(ops, i) or self.cross(ops, i) or self.single(op)
+            i += consumed
         self.flush()
 
     def effect(self, op):
@@ -860,11 +1051,12 @@ class Writer:
             return []
         return [f"opacity {fmt(op.opacity)}"]
 
-    def charge(self, shape, fill, params, center, effect):
+    def charge(self, shape, fill, params, center, effect, box=None):
         """Queues a charge, so that runs of like charges can become repeats."""
         self.flush()
         self.stats["native"] += 1
-        self.layers.append(dict(shape=shape, fill=fill, params=tuple(params), at=center, effect=tuple(effect)))
+        self.layers.append(dict(kind="charge", shape=shape, fill=fill, params=tuple(params), at=center,
+                                effect=tuple(effect), box=box))
 
     def add(self, line, body=()):
         self.flush()
@@ -875,7 +1067,7 @@ class Writer:
             self.layers.append(line)
 
     def strip_box(self, op, axis):
-        if not op.polys or len(op.polys) != 1 or op.opacity < 0.9995:
+        if op.stroke or not op.polys or len(op.polys) != 1 or op.opacity < 0.9995 or getattr(op, "artwork", False):
             return None
         box = self.rect_of(op.polys[0])
         if box is None or not self.covers(box, axis):
@@ -915,22 +1107,102 @@ class Writer:
         body = []
         widths = [b[1]-b[0] for b in bands]
         if max(widths) - min(widths) > size*1e-3:
-            body.append("ratio " + " ".join(fmt(x) for x in widths))
+            body.append("ratio " + " ".join(fmt(x) for x in simple_ratio(widths)))
         if axis == "hoist":
             body.insert(0, "along hoist")
-        self.add("bars " + " ".join(self.color(c) for c in colors), body)
+        names = [self.color(c) for c in colors]
+        # Alternating colors read better with a count than listed out.
+        if len(names) >= 5 and "ratio" not in "".join(body) and all(names[k] == names[k % 2] for k in range(len(names))):
+            body.append(f"count {len(names)}")
+            names = names[:2]
+        self.add("bars " + " ".join(names), body)
         return i - start
+
+    def quarters(self, ops, start):
+        """A field with rectangles in its corners, sharing a center, is quartered. Or
+        triangles from the center to the edges, per saltire."""
+        base = ops[start]
+        if base.stroke or not base.polys or len(base.polys) != 1 or base.opacity < 0.9995:
+            return 0
+        box = self.rect_of(base.polys[0])
+        if box is None or not (self.covers(box, "fly") and self.covers(box, "hoist")):
+            return 0
+        tol = max(self.w, self.h) * 1e-3
+        taken = {}
+        center = None
+        i = start + 1
+        while i < len(ops) and i - start <= 4:
+            op = ops[i]
+            if op.stroke or not op.polys or op.fill in (None, "none") or op.opacity < 0.9995 or len(op.polys) > 2:
+                break
+            good = True
+            for poly in op.polys:
+                r = self.rect_of(poly)
+                if r is None or self.covers(r, "fly") or self.covers(r, "hoist"):
+                    good = False
+                    break
+                touch = ("upper" if r[1] <= tol else "lower" if r[3] >= self.h-tol else None,
+                         "hoist" if r[0] <= tol else "fly" if r[2] >= self.w-tol else None)
+                if None in touch or touch in taken:
+                    good = False
+                    break
+                inner = (r[2] if touch[1] == "hoist" else r[0], r[3] if touch[0] == "upper" else r[1])
+                if center is None:
+                    center = inner
+                elif math.dist(center, inner) > tol:
+                    good = False
+                    break
+                taken[touch] = op.fill
+            if not good:
+                break
+            i += 1
+        if len(taken) >= 2 and center:
+            colors = [taken.get((u, h), base.fill) for u in ("upper", "lower") for h in ("hoist", "fly")]
+            body = []
+            if math.dist(center, (self.w/2, self.h/2)) > tol:
+                body.append(f"split fly={fmt(center[0])} hoist={fmt(center[1])}")
+            self.add("quarters " + " ".join(self.color(c) for c in colors), body)
+            return i - start
+        # Per saltire: triangles from the center out to two corners.
+        c = (self.w/2, self.h/2)
+        corners = [(0, 0), (self.w, 0), (self.w, self.h), (0, self.h)]
+        found = {}
+        i = start + 1
+        while i < len(ops) and i - start <= 4:
+            op = ops[i]
+            if op.stroke or not op.polys or len(op.polys) != 1 or len(op.polys[0]) != 3 or op.fill in (None, "none"):
+                break
+            poly = op.polys[0]
+            side = None
+            for k in range(4):
+                want = [c, corners[k], corners[(k+1) % 4]]
+                if all(any(math.dist(p, q) < tol for q in poly) for p in want):
+                    side = k
+            if side is None:
+                break
+            found[side] = op.fill
+            i += 1
+        if len(found) >= 2:
+            colors = [found.get(k, base.fill) for k in range(4)]
+            self.add("quarters " + " ".join(self.color(x) for x in colors), ["diagonal"])
+            return i - start
+        return 0
 
     def cross(self, ops, start):
         if start + 1 >= len(ops):
+            first = ops[start]
+            if first.polys and len(first.polys) == 2 and not first.stroke and self.cross_from(first.polys, first):
+                return 1
             return 0
         first = ops[start]
+        if first.stroke:
+            return 0
         if first.polys and len(first.polys) == 2:
             pair = [first.polys[0], first.polys[1]]
             count = 1
         else:
             second = ops[start + 1]
-            if first.fill != second.fill or not first.polys or not second.polys or len(first.polys) != 1 or len(second.polys) != 1:
+            if second.stroke or first.fill != second.fill or not first.polys or not second.polys or len(first.polys) != 1 or len(second.polys) != 1:
                 return 0
             pair = [first.polys[0], second.polys[0]]
             count = 2
@@ -964,26 +1236,52 @@ class Writer:
         return True
 
     def single(self, op):
-        fill = self.color(op.fill)
+        """Writes a shape: its fill, then its stroke on top if it has one."""
         effect = self.effect(op)
+        filled = op.fill not in (None, "none")
+        fill = self.color(op.fill) if filled else None
+        edge = self.color(op.stroke[0]) if op.stroke else None
+        width = op.stroke[1] if op.stroke else 0
         if op.disc:
             cx, cy, r = op.disc
-            self.charge("disc", fill, [f"radius {fmt(r)}"], (cx, cy), effect)
+            box = (cx-r, cy-r, cx+r, cy+r)
+            if filled:
+                self.charge("disc", fill, [f"radius {fmt(r)}"], (cx, cy), effect, box)
+            if edge:
+                self.charge("ring", edge, [f"radius {fmt(r+width/2)}", f"inner {fmt(max(r-width/2, 1e-4))}"], (cx, cy), effect, box)
             return 1
         if op.ring:
             cx, cy, r, inner = op.ring
-            self.charge("ring", fill, [f"radius {fmt(r)}", f"inner {fmt(inner)}"], (cx, cy), effect)
+            self.charge("ring", self.color(op.fill), [f"radius {fmt(r)}", f"inner {fmt(inner)}"], (cx, cy), effect, (cx-r, cy-r, cx+r, cy+r))
+            return 1
+        if op.path:
+            d, box, evenodd = op.path
+            size = [f"fly {fmt(max(box[2]-box[0], 1e-3))}", f"hoist {fmt(max(box[3]-box[1], 1e-3))}"]
+            data = [f'd "{d}"', f'box "{fmt(box[0])} {fmt(box[1])} {fmt(max(box[2]-box[0], 1e-3))} {fmt(max(box[3]-box[1], 1e-3))}"'] + size
+            if evenodd:
+                data.append("evenodd")
+            center = ((box[0]+box[2])/2, (box[1]+box[3])/2)
+            if filled:
+                self.charge("path", fill, data, center, effect, box)
+            if edge:
+                self.charge("path", edge, data + [f"hollow {fmt(width)}"], center, effect, box)
             return 1
         for cx, cy, r, cut_x, cut_y, cut_r in op.crescents:
-            self.charge("disc", fill, [
-                f"radius {fmt(r)}",
-                "cut {", "  disc {", f"    radius {fmt(cut_r)}",
-                f"    at fly={fmt(cut_x)} hoist={fmt(cut_y)}", "  }", "}"], (cx, cy), effect)
+            offset = math.dist((cx, cy), (cut_x, cut_y))
+            angle = math.degrees(math.atan2(cut_y-cy, cut_x-cx))
+            params = [f"radius {fmt(r)}", f"inner {fmt(cut_r)}", f"offset {fmt(offset)}"]
+            if abs(angle) > 1e-3:
+                params.append(f"rotate {fmt(angle)}")
+            self.charge("crescent", fill, params, (cx, cy), effect, (cx-r, cy-r, cx+r, cy+r))
         polys = op.polys or []
-        if len(polys) == 2 and self.cross_from(polys, op):
+        if len(polys) == 2 and not op.stroke and self.cross_from(polys, op):
             return 1
         for poly in polys:
-            self.polygon(poly, fill, effect, op)
+            if filled:
+                self.polygon(poly, fill, effect, op)
+            if edge:
+                self.charge("polygon", edge, [f"point fly={fmt(p[0])} hoist={fmt(p[1])}" for p in poly] + [f"hollow {fmt(width)}"],
+                            None, effect, bounds(poly))
         return 1
 
     def polygon(self, poly, fill, effect, op):
@@ -991,8 +1289,7 @@ class Writer:
             poly = poly[:-1]
         box = self.rect_of(poly)
         if box:
-            self.charge("rect", fill, [f"fly {fmt(box[2]-box[0])}", f"hoist {fmt(box[3]-box[1])}"],
-                        ((box[0]+box[2])/2, (box[1]+box[3])/2), effect)
+            self.rectangle(box, fill, effect)
             return
         star = regular_star(poly)
         if star:
@@ -1004,12 +1301,15 @@ class Writer:
                 body.append(f"points {points}")
             if abs(rotation) > 1e-3:
                 body.append(f"rotate {fmt(rotation)}")
-            self.charge("star", fill, body, (cx, cy), effect)
+            self.charge("star", fill, body, (cx, cy), effect, (cx-radius, cy-radius, cx+radius, cy+radius))
+            self.layers[-1]["star"] = (radius, inner, points, rotation)
             return
         band = self.band(poly)
         if band and not effect:
             along, width = band
-            self.add(f"band {fill}", [f"along {along}", f"width {fmt(width)}"])
+            self.flush()
+            self.stats["native"] += 1
+            self.layers.append(dict(kind="band", fill=fill, along=along, width=width))
             return
         chevron = self.chevron(poly)
         if chevron and not effect:
@@ -1021,7 +1321,97 @@ class Writer:
                 body.append(f"apex {fmt(apex)}")
             self.add(f"chevrons {fill}", body)
             return
-        self.add(f"charge polygon {fill}", [f"point fly={fmt(p[0])} hoist={fmt(p[1])}" for p in poly] + effect)
+        lozenge = self.lozenge(poly)
+        if lozenge:
+            cx, cy, fly, hoist = lozenge
+            self.charge("lozenge", fill, [f"fly {fmt(fly)}", f"hoist {fmt(hoist)}"], (cx, cy), effect,
+                        (cx-fly/2, cy-hoist/2, cx+fly/2, cy+hoist/2))
+            return
+        pile = self.pile(poly)
+        if pile and not effect:
+            self.add(f"pile {fill}", pile)
+            return
+        self.charge("polygon", fill, [f"point fly={fmt(p[0])} hoist={fmt(p[1])}" for p in poly], None, effect, bounds(poly))
+
+    def rectangle(self, box, fill, effect):
+        """A rectangle on an edge or in a corner is a panel, which can hold what's on it."""
+        tol = max(self.w, self.h) * 1e-3
+        # A rectangle can be drawn well past the flag, but only what's on it counts.
+        x0, y0, x1, y1 = max(box[0], 0.0), max(box[1], 0.0), min(box[2], self.w), min(box[3], self.h)
+        box = (x0, y0, x1, y1)
+        if x1-x0 <= tol*1e-2 or y1-y0 <= tol*1e-2:
+            return
+        left, right, top, bottom = x0 <= tol, x1 >= self.w-tol, y0 <= tol, y1 >= self.h-tol
+        place = None
+        if not effect:
+            if top and bottom and left and not right:
+                place = dict(side="hoist", width=x1-x0)
+            elif top and bottom and right and not left:
+                place = dict(side="fly", width=x1-x0)
+            elif left and right and top and not bottom:
+                place = dict(side="top", width=y1-y0)
+            elif left and right and bottom and not top:
+                place = dict(side="bottom", width=y1-y0)
+            elif (top or bottom) and (left or right):
+                place = dict(corner=("upper" if top else "lower") + "-" + ("hoist" if left else "fly"))
+        if place:
+            self.flush()
+            self.stats["native"] += 1
+            self.layers.append(dict(kind="panel", fill=fill, box=box, **place))
+            return
+        self.charge("rect", fill, [f"fly {fmt(x1-x0)}", f"hoist {fmt(y1-y0)}"], ((x0+x1)/2, (y0+y1)/2), effect, box)
+
+    def lozenge(self, poly):
+        """Recognizes an upright rhombus: returns its center and sizes."""
+        if len(poly) == 5 and math.dist(poly[0], poly[4]) < EPS:
+            poly = poly[:4]
+        if len(poly) != 4:
+            return None
+        cx = sum(p[0] for p in poly)/4
+        cy = sum(p[1] for p in poly)/4
+        tol = max(self.w, self.h) * 2e-3
+        xs = sorted(poly, key=lambda p: p[0])
+        ys = sorted(poly, key=lambda p: p[1])
+        left, right, top, bottom = xs[0], xs[3], ys[0], ys[3]
+        if len({left, right, top, bottom}) != 4:
+            return None
+        if abs(left[1]-cy) > tol or abs(right[1]-cy) > tol or abs(top[0]-cx) > tol or abs(bottom[0]-cx) > tol:
+            return None
+        if abs(cx-(left[0]+right[0])/2) > tol or abs(cy-(top[1]+bottom[1])/2) > tol:
+            return None
+        return cx, cy, right[0]-left[0], bottom[1]-top[1]
+
+    def pile(self, poly):
+        """Recognizes a triangle or trapezoid standing on one edge of the flag."""
+        if len(poly) not in (3, 4) or crosses_itself(poly):
+            return None
+        tol = max(self.w, self.h) * 1e-3
+        for edge, onedge, along, into, length in (
+                ("hoist", lambda p: p[0] <= tol, lambda p: p[1], lambda p: p[0], self.h),
+                ("fly", lambda p: p[0] >= self.w-tol, lambda p: p[1], lambda p: self.w-p[0], self.h),
+                ("top", lambda p: p[1] <= tol, lambda p: p[0], lambda p: p[1], self.w),
+                ("bottom", lambda p: p[1] >= self.h-tol, lambda p: p[0], lambda p: self.h-p[1], self.w)):
+            base = [p for p in poly if onedge(p)]
+            rest = [p for p in poly if not onedge(p)]
+            if len(base) != 2 or not rest or len(rest) > 2:
+                continue
+            a, b = sorted(along(p) for p in base)
+            whole = a <= tol and b >= length-tol
+            body = [] if edge == "hoist" else [f"from {edge}"]
+            if not whole:
+                body.append(f"base {fmt(a)} {fmt(b)}")
+            if len(rest) == 1:
+                tip = rest[0]
+                if abs(along(tip)-(a+b)/2) <= tol:
+                    body.append(f"depth {fmt(into(tip))}")
+                else:
+                    body.append(f"tip {fmt(along(tip))} {fmt(into(tip))}")
+                return body
+            lo, hi = sorted(along(p) for p in rest)
+            if abs(into(rest[0])-into(rest[1])) > tol or abs((lo+hi)/2-(a+b)/2) > tol:
+                continue
+            return body + [f"depth {fmt(into(rest[0]))}", f"flat {fmt(hi-lo)}"]
+        return None
 
     def band(self, poly):
         """Recognizes a straight band centered on a corner-to-corner diagonal."""
@@ -1061,11 +1451,13 @@ class Writer:
         if len(rest) not in (2, 3, 4):
             return None
         # Going around from the apex, it must reach the top and bottom edges or the
-        # hoist, and then only run along the flag's edges.
+        # hoist, and then only run along the flag's edges, with the hoist as its back.
         for p in rest:
             on_edge = p[0] <= tol or p[1] <= tol or p[1] >= self.h - tol
             if not on_edge:
                 return None
+        if sum(1 for p in rest if p[0] <= tol) < 2:
+            return None
         first, last = rest[0], rest[-1]
         slopes = []
         for p in (first, last):
@@ -1349,12 +1741,12 @@ def render_stop(e):
     return f"<stop{attr_text(attrs)}/>"
 
 
-def convert(source, name, url=None, encoder=None, license_id=None, note=None):
+def convert(source, name, url=None, encoder=None, license_id=None, note=None, series=None):
     root = ET.fromstring(source)
     if local(root.tag) != "svg":
         raise Unsupported("not svg")
     reader = Reader(root)
-    start = (1, 0, 0, 1, -reader.x0, -reader.y0)
+    start = reader.start
     style = {}
     if root.get("style"):
         style.update(parse_style(root.get("style")))
@@ -1373,6 +1765,8 @@ def convert(source, name, url=None, encoder=None, license_id=None, note=None):
     if note:
         lines.append("// " + note)
     lines += ["vexyl 1", "meta {", f"  name {kdl_string(name)}"]
+    if series:
+        lines.append(f"  series {kdl_string(series)}")
     if encoder:
         lines.append(f"  encoder {kdl_string(encoder)}")
     if license_id:
@@ -1380,7 +1774,7 @@ def convert(source, name, url=None, encoder=None, license_id=None, note=None):
     if url:
         lines.append(f"  source {kdl_string(url)}")
     lines.append("}")
-    body = "\n\n".join(render_layers(writer.layers))
+    body = "\n\n".join(render_layers(writer.layers, reader.w, reader.h))
     lines.append("palette {")
     for value, color in writer.palette.items():
         if not isinstance(value, tuple):
@@ -1399,67 +1793,219 @@ def convert(source, name, url=None, encoder=None, license_id=None, note=None):
     lines.append("}")
     lines.append(f"proportion hoist={fmt(reader.h)} fly={fmt(reader.w)}")
     if writer.outline:
-        lines += ["outline {", "  polygon {"]
-        lines += [f"    point fly={fmt(p[0])} hoist={fmt(p[1])}" for p in writer.outline]
-        lines += ["  }", "}"]
+        lines += outline_lines(writer.outline, reader.w, reader.h)
     lines.append("")
     lines.append(body)
     writer.stats["reasons"] = writer.reasons
     return "\n".join(lines) + "\n", writer.stats
 
 
-def render_layers(layers):
-    """Writes layers out, merging runs of like charges into repeats."""
+def simple_ratio(widths):
+    """Scales widths so a whole-number ratio reads as one, if it nearly is."""
+    smallest = min(widths)
+    for divisor in (1, 2, 3, 4, 5, 6, 8, 10, 12):
+        scaled = [w/smallest*divisor for w in widths]
+        if all(abs(x-round(x)) < 0.01 for x in scaled):
+            return [float(round(x)) for x in scaled]
+    return widths
+
+
+def render_layers(layers, w, h):
+    """Writes layers out: panels take in the charges on them, saltires and fimbriation are
+    gathered from their parts, and runs of like charges become repeats."""
+    return write_layers(merge_ordinaries(layers), w, h)
+
+
+def merge_ordinaries(layers):
+    out = []
+    for layer in layers:
+        if isinstance(layer, dict) and layer["kind"] == "band" and out and isinstance(out[-1], dict):
+            prev = out[-1]
+            same_width = abs(prev.get("width", -1)-layer["width"]) < 1e-3*layer["width"]
+            if prev["kind"] == "band" and prev["fill"] == layer["fill"] and same_width and prev["along"] != layer["along"]:
+                out[-1] = dict(kind="saltire", fill=layer["fill"], width=layer["width"])
+                continue
+            if prev["kind"] == "band" and prev["along"] == layer["along"] and prev["width"] > layer["width"]:
+                out[-1] = dict(layer, fimbriate=(prev["fill"], (prev["width"]-layer["width"])/2))
+                continue
+        if isinstance(layer, dict) and layer["kind"] == "saltire":
+            out.append(layer)
+            continue
+        out.append(layer)
+    # A wider saltire straight beneath another is its fimbriation.
+    merged = []
+    for layer in out:
+        if merged and isinstance(layer, dict) and layer["kind"] == "saltire" and isinstance(merged[-1], dict) \
+                and merged[-1]["kind"] == "saltire" and merged[-1]["width"] > layer["width"]:
+            merged[-1] = dict(layer, fimbriate=(merged[-1]["fill"], (merged[-1]["width"]-layer["width"])/2))
+            continue
+        merged.append(layer)
+    return merged
+
+
+def write_layers(layers, w, h, origin=(0.0, 0.0)):
     out, i = [], 0
     while i < len(layers):
         layer = layers[i]
         if isinstance(layer, str):
             out.append(layer)
             i += 1
-            continue
-        key = (layer["shape"], layer["fill"], layer["params"], layer["effect"])
-        j = i
-        while j < len(layers) and not isinstance(layers[j], str) and \
-                (layers[j]["shape"], layers[j]["fill"], layers[j]["params"], layers[j]["effect"]) == key:
-            j += 1
-        out.extend(charge_run(layer, [c["at"] for c in layers[i:j]]))
-        i = j
+        elif layer["kind"] in ("band", "saltire"):
+            body = []
+            if layer["kind"] == "band":
+                body.append(f"along {layer['along']}")
+            body.append(f"width {fmt(layer['width'])}")
+            if "fimbriate" in layer:
+                body.append(f"fimbriate {layer['fimbriate'][0]} {fmt(layer['fimbriate'][1])}")
+            out.append(f"{layer['kind']} {layer['fill']} {{\n" + "".join(f"  {b}\n" for b in body) + "}")
+            i += 1
+        elif layer["kind"] == "panel":
+            x0, y0, x1, y1 = layer["box"]
+            j = i + 1
+            inside_it = []
+            margin = max(x1-x0, y1-y0) * 1e-3
+            while j < len(layers) and isinstance(layers[j], dict) and layers[j]["kind"] == "charge":
+                b = layers[j].get("box")
+                if not b or b[0] < x0-margin or b[1] < y0-margin or b[2] > x1+margin or b[3] > y1+margin:
+                    break
+                inside_it.append(layers[j])
+                j += 1
+            out.append(panel_text(layer, inside_it))
+            i = j
+        else:
+            key = (layer["shape"], layer["fill"], layer["params"], layer["effect"])
+            j = i
+            while j < len(layers) and isinstance(layers[j], dict) and layers[j]["kind"] == "charge" and \
+                    (layers[j]["shape"], layers[j]["fill"], layers[j]["params"], layers[j]["effect"]) == key:
+                j += 1
+            run = layers[i:j]
+            i = j
+            # A disc on top of a star at the same place is a sun.
+            if len(run) == 1 and run[0]["shape"] == "star" and i < len(layers) and isinstance(layers[i], dict) \
+                    and layers[i]["kind"] == "charge" and layers[i]["shape"] == "disc" and layers[i]["fill"] == run[0]["fill"]:
+                sun = sun_text(run[0], layers[i])
+                if sun:
+                    out.append(sun)
+                    i += 1
+                    continue
+            out.extend(charge_run(run[0], [c["at"] for c in run], w, h, origin))
     return out
 
 
-def charge_text(layer, at, repeat=None):
-    body = list(layer["params"]) + [f"at fly={fmt(at[0])} hoist={fmt(at[1])}"] + list(layer["effect"])
+def sun_text(star, disc):
+    radius, inner, points, rotation = star["star"]
+    r = float(disc["params"][0].split()[1])
+    if math.dist(star["at"], disc["at"]) > radius*1e-3 or r > inner*(1+1e-3):
+        return None
+    body = [f"radius {fmt(radius)}", f"disc {fmt(r)}", f"points {points}"]
+    if inner - r > radius*1e-3:
+        body.append(f"gap {fmt(inner-r)}")
+    if abs(rotation) > 1e-3:
+        body.append(f"rotate {fmt(rotation)}")
+    body.append(f"at fly={fmt(star['at'][0])} hoist={fmt(star['at'][1])}")
+    return f"charge sun {star['fill']} {{\n" + "".join(f"  {b}\n" for b in body) + "}"
+
+
+def panel_text(panel, charges):
+    x0, y0, x1, y1 = panel["box"]
+    w, h = x1-x0, y1-y0
+    if "side" in panel:
+        head, body = "panel", [f"side {panel['side']}", f"width {fmt(panel['width'])}"]
+    elif panel["corner"] == "upper-hoist":
+        head, body = "canton", [f"fly {fmt(w)}", f"hoist {fmt(h)}"]
+    else:
+        head, body = "panel", [f"corner {panel['corner']}", f"fly {fmt(w)}", f"hoist {fmt(h)}"]
+    body.append(f"field {panel['fill']}")
+    inner = []
+    if charges:
+        inner = write_layers(charges, w, h, (x0, y0))
+    text = head + " {\n" + "".join(f"  {b}\n" for b in body)
+    for block in inner:
+        text += "".join(f"  {line}\n" for line in block.splitlines())
+    return text + "}"
+
+
+def charge_body(layer, origin):
+    """A charge's parameters, with any points moved into the region it's in."""
+    body = []
+    for line in layer["params"]:
+        m = re.fullmatch(r"point fly=(\S+) hoist=(\S+)", line)
+        if m:
+            body.append(f"point fly={fmt(float(m[1])-origin[0])} hoist={fmt(float(m[2])-origin[1])}")
+        else:
+            body.append(line)
+    return body
+
+
+def charge_text(layer, ats, origin, repeat=None):
+    body = charge_body(layer, origin)
+    for at in ats:
+        body.append(f"at fly={fmt(at[0]-origin[0])} hoist={fmt(at[1]-origin[1])}")
+    body += list(layer["effect"])
     if repeat:
         body.append(repeat)
     return f"charge {layer['shape']} {layer['fill']} {{\n" + "".join(f"  {b}\n" for b in body) + "}"
 
 
-def charge_run(layer, points):
+def charge_run(layer, points, w, h, origin):
+    if layer["shape"] == "polygon":
+        return [charge_text(layer, [], origin)]
+    local = [(p[0]-origin[0], p[1]-origin[1]) for p in points]
+    grid = grid_of(local, w, h)
+    if grid:
+        rows, columns, stagger = grid
+        extra = " stagger=#true" if stagger else ""
+        return [charge_text(layer, [], origin, f"repeat grid rows={rows} columns={columns}{extra}")]
     ring = ring_of(points)
     if ring:
         center, radius = ring
-        return [charge_text(layer, center, f"repeat ring count={len(points)} radius={fmt(radius)}")]
-    out, i = [], 0
-    while i < len(points):
-        k = i + 1
-        if k < len(points):
-            step = (points[k][0]-points[i][0], points[k][1]-points[i][1])
-            size = max(math.hypot(*step), 1e-9)
-            while k + 1 < len(points) and math.dist((points[k+1][0]-points[k][0], points[k+1][1]-points[k][1]), step) < 1e-3*size:
-                k += 1
-        count = k - i + 1 if k < len(points) else 1
-        if count >= 3:
-            parts = [f"count={count}"]
+        return [charge_text(layer, [center], origin, f"repeat ring count={len(points)} radius={fmt(radius)}")]
+    arc = arc_of(points)
+    if arc:
+        center, radius, start, end = arc
+        return [charge_text(layer, [center], origin, f"repeat arc count={len(points)} radius={fmt(radius)} from={fmt(start)} to={fmt(end)}")]
+    if len(points) >= 3:
+        step = (points[1][0]-points[0][0], points[1][1]-points[0][1])
+        size = max(math.hypot(*step), 1e-9)
+        if all(math.dist((b[0]-a[0], b[1]-a[1]), step) < 1e-3*size for a, b in zip(points, points[1:])):
+            parts = [f"count={len(points)}"]
             if abs(step[0]) > 1e-9:
                 parts.append(f"fly={fmt(step[0])}")
             if abs(step[1]) > 1e-9:
                 parts.append(f"hoist={fmt(step[1])}")
-            out.append(charge_text(layer, points[i], "repeat line " + " ".join(parts)))
-            i += count
-        else:
-            out.append(charge_text(layer, points[i]))
-            i += 1
-    return out
+            return [charge_text(layer, [points[0]], origin, "repeat line " + " ".join(parts))]
+    return [charge_text(layer, points, origin)]
+
+
+def grid_of(points, w, h):
+    """Finds points spread evenly across a region, full or staggered."""
+    if len(points) < 4:
+        return None
+    tol = max(w, h) * 2e-3
+    def levels(values):
+        out = []
+        for v in sorted(values):
+            if not out or v-out[-1] > tol:
+                out.append(v)
+        return out
+    xs, ys = levels(p[0] for p in points), levels(p[1] for p in points)
+    columns, rows = len(xs), len(ys)
+    if columns < 2 or rows < 2:
+        return None
+    if any(abs(x-w*(i+1)/(columns+1)) > tol for i, x in enumerate(xs)) or any(abs(y-h*(i+1)/(rows+1)) > tol for i, y in enumerate(ys)):
+        return None
+    cells = set()
+    for p in points:
+        c = min(range(columns), key=lambda i: abs(xs[i]-p[0]))
+        r = min(range(rows), key=lambda i: abs(ys[i]-p[1]))
+        cells.add((r, c))
+    if len(cells) != len(points):
+        return None
+    if len(cells) == rows*columns:
+        return rows, columns, False
+    if cells == {(r, c) for r in range(rows) for c in range(columns) if (r+c) % 2 == 0}:
+        return rows, columns, True
+    return None
 
 
 def ring_of(points):
@@ -1479,6 +2025,57 @@ def ring_of(points):
         if abs(off) > 0.3:
             return None
     return (cx, cy), radius
+
+
+def arc_of(points):
+    """Finds points evenly spaced along part of a circle."""
+    n = len(points)
+    if n < 4:
+        return None
+    ordered = sorted(points, key=lambda p: p[0])
+    (x1, y1), (x2, y2), (x3, y3) = ordered[0], ordered[n//2], ordered[-1]
+    det = x1*(y2-y3) - y1*(x2-x3) + x2*y3 - x3*y2
+    if abs(det) < 1e-9:
+        return None
+    b = (x1*x1+y1*y1)*(y3-y2) + (x2*x2+y2*y2)*(y1-y3) + (x3*x3+y3*y3)*(y2-y1)
+    c = (x1*x1+y1*y1)*(x2-x3) + (x2*x2+y2*y2)*(x3-x1) + (x3*x3+y3*y3)*(x1-x2)
+    cx, cy = -b/(2*det), -c/(2*det)
+    radius = math.dist(points[0], (cx, cy))
+    if any(abs(math.dist(p, (cx, cy))-radius) > 3e-3*radius for p in points):
+        return None
+    angles = sorted(math.degrees(math.atan2(p[0]-cx, -(p[1]-cy))) for p in points)
+    steps = [b2-a for a, b2 in zip(angles, angles[1:])]
+    mean = sum(steps)/len(steps)
+    if mean < 2 or any(abs(s-mean) > 0.5 for s in steps):
+        return None
+    return (cx, cy), radius, angles[0], angles[-1]
+
+
+def outline_lines(poly, w, h):
+    """Names a swallowtail, tongued or pennant outline, if that's what it is."""
+    tol = max(w, h) * 2e-3
+    near = lambda a, b: math.dist(a, b) <= tol
+    points = list(poly)
+    if len(points) > 1 and near(points[0], points[-1]):
+        points = points[:-1]
+    # Start from the top of the hoist, going clockwise.
+    if any(near(p, (0, 0)) for p in points):
+        k = next(i for i, p in enumerate(points) if near(p, (0, 0)))
+        points = points[k:] + points[:k]
+        if len(points) > 1 and points[1][0] <= tol:
+            points = [points[0]] + points[1:][::-1]
+        if len(points) == 5 and near(points[1], (w, 0)) and near(points[3], (w, h)) and near(points[4], (0, h)) \
+                and abs(points[2][1]-h/2) <= tol:
+            return ["outline swallowtail {", f"  depth {fmt(w-points[2][0])}", "}"]
+        if len(points) == 7 and near(points[1], (w, 0)) and near(points[3], (w, h/2)) and near(points[5], (w, h)) and near(points[6], (0, h)) \
+                and abs(points[2][0]-points[4][0]) <= tol and abs(points[2][1]+points[4][1]-h) <= tol:
+            return ["outline tongued {", f"  depth {fmt(w-points[2][0])}", f"  tongue {fmt(points[4][1]-points[2][1])}", "}"]
+        if len(points) == 3 and near(points[1], (w, h/2)) and near(points[2], (0, h)):
+            return ["outline pennant"]
+        if len(points) == 4 and abs(points[1][0]-w) <= tol and abs(points[2][0]-w) <= tol and near(points[3], (0, h)) \
+                and abs(points[1][1]+points[2][1]-h) <= tol:
+            return ["outline pennant {", f"  tip {fmt(points[2][1]-points[1][1])}", "}"]
+    return ["outline {", "  polygon {"] + [f"    point fly={fmt(p[0])} hoist={fmt(p[1])}" for p in poly] + ["  }", "}"]
 
 
 def kdl_string(text):

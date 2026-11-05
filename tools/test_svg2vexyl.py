@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
+import math
 import unittest
 
 import svg2vexyl as S
 
+ARTWORK = S.ARTWORK_RUN
 HEAD = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 30 20">'
 
 
@@ -24,7 +26,7 @@ class Recognition(unittest.TestCase):
     def test_stacked_rectangles_become_bars(self):
         self.native('<rect width="30" height="20" fill="#00f"/><rect width="30" height="15" fill="#fff"/>'
                     '<rect width="30" height="5" fill="#f00"/>',
-                    "bars red white blue", "ratio 5 10 5")
+                    "bars red white blue", "ratio 1 2 1")
 
     def test_half_and_half_is_vertical_bars(self):
         self.native('<rect width="30" height="20" fill="#fff"/><rect width="15" height="20" fill="#080"/>',
@@ -49,7 +51,7 @@ class Recognition(unittest.TestCase):
     def test_two_arcs_are_a_crescent(self):
         self.native('<rect width="30" height="20" fill="#f00"/>'
                     '<path d="M12 6A5 5 0 1 0 12 14 4 4 0 1 1 12 6z" fill="#fff"/>',
-                    "charge disc white", "cut {")
+                    "charge crescent white", "inner 4", "offset")
 
     def test_stroked_circle_is_a_ring(self):
         self.native('<rect width="30" height="20" fill="#fd0"/>'
@@ -59,6 +61,112 @@ class Recognition(unittest.TestCase):
     def test_even_charges_become_a_line_and_a_ring(self):
         stars = "".join(f'<circle cx="{x}" cy="5" r="1" fill="#fff"/>' for x in (5, 10, 15))
         self.native('<rect width="30" height="20" fill="#00f"/>' + stars, "repeat line count=3 fly=5")
+
+    def test_panels_take_in_their_charges(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><rect width="10" height="10" fill="#00f"/>'
+                    '<circle cx="5" cy="5" r="1" fill="#fff"/><circle cx="20" cy="15" r="1" fill="#fff"/>',
+                    "canton {", "fly 10", "field blue", "  charge disc white {", "    at fly=5 hoist=5")
+
+    def test_side_panel(self):
+        self.native('<rect width="30" height="20" fill="#ff0"/><rect width="10" height="10" y="10" fill="#f00"/>'
+                    '<rect width="5" height="20" fill="#080"/>',
+                    "panel {", "side hoist", "width 5")
+
+    def test_staggered_stars_become_a_grid(self):
+        stars = "".join(f'<circle cx="{5*(c+1)}" cy="{5*(r+1)}" r="1" fill="#fff"/>'
+                        for r in range(3) for c in range(5) if (r+c) % 2 == 0)
+        self.native('<rect width="30" height="20" fill="#f00"/><rect width="30" height="20" fill="#00f"/>' + stars,
+                    "repeat grid rows=3 columns=5 stagger=#true")
+
+    def test_irregular_charges_share_one_block(self):
+        self.native('<rect width="30" height="20" fill="#00f"/><circle cx="5" cy="4" r="1" fill="#fff"/>'
+                    '<circle cx="20" cy="15" r="1" fill="#fff"/>',
+                    "at fly=5 hoist=4\n  at fly=20 hoist=15")
+
+    def test_quarters(self):
+        self.native('<rect width="30" height="20" fill="#fff"/><rect x="15" width="15" height="10" fill="#f00"/>'
+                    '<rect y="10" width="15" height="10" fill="#00f"/>',
+                    "quarters white red blue white")
+
+    def test_quarters_per_saltire(self):
+        self.native('<rect width="30" height="20" fill="#ff0"/><path d="M0 0 15 10 0 20z"/>'
+                    '<path d="M0 20 15 10 30 20z" fill="#f00"/><path d="M30 20 15 10 30 0z" fill="#00f"/>',
+                    "quarters yellow blue red black", "diagonal")
+
+    def test_saltire_with_fimbriation(self):
+        self.native('<rect width="30" height="20" fill="#00f"/>'
+                    '<path d="M0 0 30 20M30 0 0 20" stroke="#fff" stroke-width="4"/>'
+                    '<path d="M0 0 30 20M30 0 0 20" stroke="#f00" stroke-width="2"/>',
+                    "saltire red", "width 2", "fimbriate white 1")
+
+    def test_lozenge(self):
+        self.native('<rect width="30" height="20" fill="#080"/><path d="M15 2 25 10 15 18 5 10z" fill="#ff0"/>',
+                    "charge lozenge yellow", "fly 20", "hoist 16")
+
+    def test_pile_from_an_edge(self):
+        self.native('<rect width="30" height="20" fill="#00f"/><path d="M8 0H24V20z" fill="#ff0"/>',
+                    "pile yellow", "from top", "base 8 24", "tip 24 20")
+
+    def test_pile_cut_flat(self):
+        self.native('<rect width="30" height="20" fill="#080"/><polygon points="0,0 6,6 6,14 0,20"/>',
+                    "pile black", "depth 6", "flat 8")
+
+    def test_sun(self):
+        points = " ".join(f"{15+(4 if i%2==0 else 2)*math.sin(i*math.pi/4):.4f},{10-(4 if i%2==0 else 2)*math.cos(i*math.pi/4):.4f}" for i in range(8))
+        self.native(f'<rect width="30" height="20" fill="#00f"/><polygon points="{points}" fill="#ff0"/>'
+                    '<circle cx="15" cy="10" r="2" fill="#ff0"/>',
+                    "charge sun yellow", "disc 2", "points 4")
+
+    def test_curves_in_one_color_are_a_path(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff"/>',
+                    "charge path white", 'd "M0 0C5 5 10 5 15 0Z"', 'box "0 0 15 5"')
+
+    def test_ellipse_is_a_path(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><ellipse cx="15" cy="10" rx="4" ry="2" fill="#fff"/>',
+                    "charge path white", "A4 2 0 1 0")
+
+    def test_fill_and_stroke_are_two_charges(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff" stroke="#000" stroke-width="2"/>',
+                           "charge path white", "charge path black", "hollow 2")
+        self.assertEqual(text.count('d "M0 0'), 2)
+
+    def test_stroked_star_is_hollow_polygon(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><polygon points="5,5 25,5 15,18" fill="none" stroke="#000" stroke-width="2"/>',
+                    "charge polygon black", "hollow 2")
+
+    def test_transformed_path_lands_in_flag_coordinates(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><g transform="translate(10 5) scale(2)"><path d="M0 0C1 1 2 1 3 0z" fill="#fff"/></g>',
+                    'd "M10 5C12 7 14 7 16 5Z"')
+
+    def test_long_runs_of_detail_stay_together_as_artwork(self):
+        art = "".join(f'<path d="M{i} 0C{i} 5 {i+1} 5 {i+1} 0z" fill="#{i%3}{i%5}f"/>' for i in range(ARTWORK))
+        text, stats = convert('<rect width="30" height="20" fill="#f00"/>' + art)
+        self.assertEqual(stats["inline"], 1)
+        self.assertEqual(set(stats["reasons"]), {"artwork"})
+        self.assertNotIn("charge path", text)
+
+    def test_named_outlines(self):
+        self.native('<path d="M0 0H30L24 10 30 20H0z" fill="#f00"/>', "outline swallowtail {", "depth 6")
+        self.native('<path d="M0 0H30L20 8 30 10 20 12 30 20H0z" fill="#f00"/>', "outline tongued {", "depth 10", "tongue 4")
+
+    def test_rhombus_touching_the_hoist_is_not_a_chevron(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 10 15 0 30 10 15 20z" fill="#fff"/>',
+                           "charge lozenge white")
+        self.assertNotIn("chevrons", text)
+
+    def test_rectangle_past_the_edge_is_clamped(self):
+        self.native('<rect width="30" height="20" fill="#00f"/><rect y="10" x="-50" width="100" height="100" fill="#080"/>',
+                    "bars blue green")
+
+    def test_stretched_viewbox_keeps_its_true_shape(self):
+        text, _ = S.convert(b'<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="550" viewBox="0 0 75 18" preserveAspectRatio="none">'
+                            b'<rect width="75" height="18" fill="#fff"/></svg>', "Test")
+        self.assertIn("proportion hoist=29.4643 fly=75", text)
+
+    def test_nested_svg_has_its_own_coordinates(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><svg x="10" y="5" width="10" height="10" viewBox="0 0 100 100">'
+                    '<circle cx="50" cy="50" r="50" fill="#fff"/></svg>',
+                    "charge disc white", "radius 5", "at fly=15 hoist=10")
 
     def test_chevron(self):
         self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0 15 10 0 20z" fill="#00f"/>',
@@ -75,7 +183,7 @@ class Recognition(unittest.TestCase):
     def test_swallowtail_is_an_outline(self):
         self.native('<path d="M0 0H30L20 10 30 20H0z" fill="#f00"/>'
                     '<rect x="5" y="5" width="5" height="5" fill="#fff"/>',
-                    "outline {", "field red")
+                    "outline swallowtail {", "depth 10", "field red")
 
     def test_triangle_reaching_every_side_is_not_an_outline(self):
         text, _ = convert('<path d="M0 20V0H30z" fill="#080"/><path d="M30 0V20H0z" fill="#00f"/>')
@@ -89,7 +197,7 @@ class Recognition(unittest.TestCase):
     def test_clip_to_a_polygon_is_an_outline(self):
         self.native('<clipPath id="c"><path d="M0 0H30L20 10 30 20H0z"/></clipPath>'
                     '<g clip-path="url(#c)"><rect width="30" height="20" fill="#f00"/></g>',
-                    "outline {", "field red")
+                    "outline swallowtail {", "field red")
 
     def test_clip_of_the_whole_flag_is_ignored(self):
         self.native('<clipPath id="c"><path d="M0 0H30V20H0z"/></clipPath>'
@@ -108,10 +216,10 @@ class Recognition(unittest.TestCase):
 
 
 class Fallbacks(unittest.TestCase):
-    def test_curves_stay_inline(self):
-        text, stats = convert('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff"/>')
+    def test_clipped_shapes_stay_inline(self):
+        text, stats = convert('<clipPath id="c"><circle cx="5" cy="5" r="3"/></clipPath><rect width="30" height="20" fill="#f00"/>'
+                              '<path clip-path="url(#c)" d="M0 0C5 5 10 5 15 0z" fill="#fff"/>')
         self.assertEqual(stats["inline"], 1)
-        self.assertEqual(stats["reasons"], ["curved path"])
         self.assertIn("charge svg", text)
 
     def test_arc_flags_without_separators(self):
