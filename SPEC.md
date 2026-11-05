@@ -645,5 +645,9 @@ Numbers MUST be finite, and renderers MAY reject magnitudes above 1e12.
 - **Cardioid anchor:** placing it by its cusp is exact but awkward for centering.
 - **Reverse sides:** left out for now. A later version could add `reverse { ... }`.
 - **Other divisions:** serrated edges (Qatar, Bahrain) and quartering (Panama)
-  aren't covered yet.
+  have no vocabulary of their own. Polygons and rectangles draw them exactly.
+- **Hollow charges:** a star drawn only as an outline (Morocco, Israel) has no native
+  form, and neither does an ellipse.
+- **Counterchange:** the Union Flag's red saltire uses a `clip` around the center.
+  It's exact, but a named way to say it might read better.
 - **Aspect-independent rendering:** one grid per flag for now.

@@ -1,0 +1,49 @@
+// The Union Flag at 1:2, on the usual 30 by 60 construction: a white saltire 6 wide
+// and a red one 4 wide, cut so that it shows only on one side of each white arm,
+// then a red cross 6 wide with a white edge of 2. There's no statutory construction
+// sheet that was found; this follows the common drawing on Commons, which it matches.
+vexyl 1
+meta {
+  name "United Kingdom"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Kingdom_(1-2).svg"
+}
+palette {
+  blue "#012169"
+  white "#ffffff"
+  red "#c8102e"
+}
+proportion hoist=30 fly=60
+
+field blue
+saltire white {
+  width 6
+}
+
+// Counterchange: four triangles around the center, joined at it, keep the red to the
+// clockwise side of each arm.
+saltire red {
+  width 4
+  clip {
+    polygon {
+      point fly=30 hoist=15
+      point fly=60 hoist=15
+      point fly=60 hoist=30
+      point fly=30 hoist=15
+      point fly=30 hoist=30
+      point fly=0 hoist=30
+      point fly=30 hoist=15
+      point fly=0 hoist=15
+      point fly=0 hoist=0
+      point fly=30 hoist=15
+      point fly=30 hoist=0
+      point fly=60 hoist=0
+    }
+  }
+}
+cross red {
+  fly 27 6 27
+  hoist 12 6 12
+  fimbriate white 2
+}

@@ -702,6 +702,29 @@ func TestSouthKoreaConstruction(t *testing.T) {
 	}
 }
 
+// Imported flags are mechanical conversions, so they get no golden files, but they
+// have to stay valid as the format changes.
+func TestImportedFlagsRender(t *testing.T) {
+	paths, _ := filepath.Glob("flags/imported/*/*.kdl")
+	for _, path := range paths {
+		src, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		f, err := Parse(bytes.NewReader(src), path)
+		if err != nil {
+			t.Errorf("%v", err)
+			continue
+		}
+		var out bytes.Buffer
+		if err := f.WriteSVG(&out, Options{}); err != nil {
+			t.Errorf("%s: %v", path, err)
+			continue
+		}
+		assertWellFormed(t, out.Bytes())
+	}
+}
+
 func TestDeepNestingRejected(t *testing.T) {
 	src := header + strings.Repeat("group {\n", maxDepth+1) + "field a\n" + strings.Repeat("}\n", maxDepth+1)
 	if _, err := Parse(strings.NewReader(src), "test"); err == nil || !strings.Contains(err.Error(), "nested") {

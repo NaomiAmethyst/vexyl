@@ -21,6 +21,7 @@ test:
 
 check: test
 	$(GO) vet ./...
+	python3 -m unittest discover -s tools
 	@test -z "$$(gofmt -l .)" || { gofmt -l .; exit 1; }
 
 fuzz:
