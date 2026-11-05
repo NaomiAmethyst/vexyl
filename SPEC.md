@@ -640,6 +640,9 @@ Numbers MUST be finite, and renderers MAY reject magnitudes above 1e12.
 
 ## 12. Open questions
 
+[`docs/missing-from-spec.md`](docs/missing-from-spec.md) lists what's still needed for
+most flags to read naturally, ranked by how many flags need it.
+
 - **Cuts on repeats:** a cut applies after `repeat`, so a repeated crescent needs
   several cuts. It might be better to have a `cut` inside a charge travel with it.
 - **Cardioid anchor:** placing it by its cusp is exact but awkward for centering.

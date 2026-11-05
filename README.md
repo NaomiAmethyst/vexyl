@@ -59,6 +59,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
 - [`flags/imported/`](flags/imported) holds country and pride flags converted
   mechanically from Wikimedia Commons. They exist to stress test the format; see
   [its README](flags/imported/README.md).
+- [`docs/missing-from-spec.md`](docs/missing-from-spec.md) lists what the format still
+  needs, ranked, with evidence.
 - [`tools/`](tools) holds the importer. `svg2vexyl.py` converts one SVG file, and
   `fetch_flags.py` and `import_flags.py` gather a corpus and check each result.
 
