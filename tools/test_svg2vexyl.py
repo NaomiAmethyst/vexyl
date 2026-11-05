@@ -121,9 +121,34 @@ class Recognition(unittest.TestCase):
         self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff"/>',
                     "charge path white", 'd "M0 0C5 5 10 5 15 0Z"', 'box "0 0 15 5"')
 
-    def test_ellipse_is_a_path(self):
+    def test_ellipse_is_named(self):
         self.native('<rect width="30" height="20" fill="#f00"/><ellipse cx="15" cy="10" rx="4" ry="2" fill="#fff"/>',
-                    "charge path white", "A4 2 0 1 0")
+                    "charge ellipse white", "fly 8", "hoist 4")
+
+    def test_turned_ellipse_keeps_its_rotation(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><ellipse rx="4" ry="2" transform="translate(15 10) rotate(30)" fill="#fff"/>',
+                    "charge ellipse white", "rotate 30")
+
+    def test_stretched_circle_is_an_ellipse(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><circle r="2" transform="translate(15 10) scale(2 1)" fill="#fff"/>',
+                    "charge ellipse white", "fly 8", "hoist 4")
+
+    def test_skewed_ellipse_is_still_an_ellipse(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><ellipse rx="4" ry="2" transform="translate(15 10) skewX(30)" fill="#fff"/>',
+                    "charge ellipse white", "rotate")
+
+    def test_tall_ellipse_is_not_turned(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><ellipse cx="15" cy="10" rx="2" ry="4" fill="#fff"/>',
+                           "charge ellipse white", "fly 4", "hoist 8")
+        self.assertNotIn("rotate", text)
+
+    def test_ellipse_with_equal_sizes_is_a_disc(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><ellipse cx="15" cy="10" rx="3" ry="3" fill="#fff"/>',
+                    "charge disc white", "radius 3")
+
+    def test_fill_and_stroke_on_an_ellipse_are_two_charges(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><ellipse cx="15" cy="10" rx="4" ry="2" fill="#fff" stroke="#000" stroke-width="1"/>',
+                    "charge ellipse white", "charge ellipse black", "hollow 1")
 
     def test_fill_and_stroke_are_two_charges(self):
         text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff" stroke="#000" stroke-width="2"/>',

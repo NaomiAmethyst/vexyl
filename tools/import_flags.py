@@ -44,7 +44,7 @@ EXCLUDE = re.compile(r"hitler|nazi|nsdap|swastika|schutzstaffel|sturmabteilung|k
                      r"national-democratic-party|new-templars|odal-rune|reichskolonialbund|nskk|ordnungspolizei|"
                      r"wassersportflagge|flagge-drv|die-rechte|the-right-germany|free-german-workers-party|iii-path|"
                      r"(?<!\d-)(193[3-9]|194[0-4])(-\d|$)|"
-                     r"national-front-spain|"
+                     r"national-front-spain|nsjap|t-h-kai|confederate-states|"
                      r"/no-flag|/copyrighted-flag|nuvola-|quasar")
 # Only these years in a German flag's name start the period in question, and these are safe.
 PERIOD = re.compile(r"^(?!germany/|europe/[^/]*german|europe/[^/]*reich)")
@@ -201,11 +201,14 @@ def main():
                 why = "failed"
             elif r["license"] is None:
                 why = "unknown license"
+            path = f"{export}/{r['key']}.kdl"
             if why:
                 left_out[why] += 1
                 names.append((why, r["key"]))
+                # An earlier run might have exported it.
+                if os.path.exists(path):
+                    os.remove(path)
                 continue
-            path = f"{export}/{r['key']}.kdl"
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(f"{out}/kdl/{r['key']}.kdl") as f, open(path, "w") as g:
                 g.write(f.read())

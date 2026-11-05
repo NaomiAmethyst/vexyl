@@ -368,6 +368,8 @@ func shapeGeom(s *Shape, center vec, extra float64) geom {
 	case "lozenge":
 		x, y := s.Fly/2, s.Hoist/2
 		return geom{poly: placeAll([]vec{{0, -y}, {x, 0}, {0, y}, {-x, 0}}, place)}
+	case "ellipse":
+		return geom{path: ellipsePath(center, s.Fly/2, s.Hoist/2, rotation)}
 	case "path":
 		return pathGeom(s, center, rotation)
 	case "cardioid":

@@ -130,7 +130,7 @@ func (a *adapter) shape(s Shape, old, new float64, anchor string, explicit bool)
 	}
 	if anchor == "scale" {
 		switch s.Kind {
-		case "rect", "lozenge":
+		case "rect", "lozenge", "ellipse":
 			if a.axis == "fly" {
 				s.Fly *= k
 			} else {

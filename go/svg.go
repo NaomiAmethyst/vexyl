@@ -714,6 +714,13 @@ func circlePath(c vec, radius float64) string {
 		num(c.x-radius), num(c.y), rs, rs, num(c.x+radius), num(c.y), rs, rs, num(c.x-radius), num(c.y))
 }
 
+// ellipsePath draws an ellipse with the given half sizes, turned clockwise by a rotation.
+func ellipsePath(c vec, x, y, rotation float64) string {
+	a, b := c.sub(vec{x, 0}.rotate(rotation)), c.add(vec{x, 0}.rotate(rotation))
+	arc := fmt.Sprintf("A%s %s %s 1 0", num(x), num(y), num(rotation))
+	return fmt.Sprintf("M%s %s%s %s %s%s %s %sZ", num(a.x), num(a.y), arc, num(b.x), num(b.y), arc, num(a.x), num(a.y))
+}
+
 // num formats a coordinate to a fixed precision, so output is stable across
 // platforms and free of floating-point noise.
 func num(v float64) string {

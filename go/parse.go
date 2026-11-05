@@ -790,7 +790,7 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 		handlers["gap"] = func(c *kdl.Node) { s.Gap = p.positive(c, p.number(c)) }
 		handlers["points"] = func(c *kdl.Node) { s.Points = p.integer(c, p.number(c), maxCopies) }
 		handlers["spread"] = func(c *kdl.Node) { s.Spread = p.positive(c, p.number(c)) }
-	case "lozenge":
+	case "lozenge", "ellipse":
 		handlers["fly"], handlers["hoist"] = sizeFly, sizeHoist
 	case "path":
 		handlers["fly"], handlers["hoist"] = sizeFly, sizeHoist
@@ -904,7 +904,7 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 			n := float64(s.Points)
 			s.Inner = s.Radius * math.Cos(2*math.Pi/n) / math.Cos(math.Pi/n)
 		}
-	case "rect":
+	case "rect", "ellipse":
 		if s.Fly == 0 || s.Hoist == 0 {
 			p.errf(n, "needs `fly` and `hoist`")
 		}

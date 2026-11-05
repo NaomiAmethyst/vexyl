@@ -526,6 +526,7 @@ is centered on its position, except where noted.
 | Shape | Parameters | Geometry at rotation 0 |
 |---|---|---|
 | `disc` | `radius` | Circle |
+| `ellipse` | `fly`, `hoist` | Ellipse with those overall sizes |
 | `ring` | `radius`, `inner` | Circle with a concentric hole |
 | `rect` | `fly`, `hoist` | Rectangle with those sizes |
 | `plus` | `radius`, `width` | Equal-armed cross with arms of length `radius` from the center |
@@ -843,7 +844,7 @@ The rest of this section describes changing the fly. Changing the hoist works th
 way along the other axis.
 
 **Shapes never distort.** Discs stay round and stars stay regular under every rule. Only
-their positions move, except that a `rect`'s or `lozenge`'s size scales under `scale`, and
+their positions move, except that a `rect`'s, `lozenge`'s or `ellipse`'s size scales under `scale`, and
 a `polygon` moves by each of its points.
 
 **Each layer has an anchor,** which is where it stays. The rule sets it: `start` for

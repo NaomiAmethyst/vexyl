@@ -116,6 +116,25 @@ def uniform_scale(m):
     return sx
 
 
+def mapped_ellipse(cx, cy, rx, ry, m):
+    """Returns an ellipse after a transform as (cx, cy, half fly, half hoist, rotation). Any
+    transform leaves an ellipse an ellipse, unless it's flattened it to a line, which is None."""
+    if rx <= 0 or ry <= 0:
+        return None
+    a, b, c, d = m[0]*rx, m[2]*ry, m[1]*rx, m[3]*ry
+    p, q, r = a*a + b*b, a*c + b*d, c*c + d*d
+    mid, spread = (p+r)/2, math.hypot((p-r)/2, q)
+    major, minor = math.sqrt(mid+spread), math.sqrt(max(mid-spread, 0))
+    if minor < 1e-6 * major:
+        return None
+    rotation = math.degrees(math.atan2(2*q, p-r))/2
+    # Stay within a quarter turn, so an upright ellipse reads as tall rather than turned.
+    if abs(rotation) > 45 + 1e-9:
+        major, minor = minor, major
+        rotation -= math.copysign(90, rotation)
+    return (*apply(m, (cx, cy)), major, minor, rotation)
+
+
 def parse_color(value, inherited_color="#000000"):
     """Returns #rrggbb, 'none', or None for a paint that isn't a plain color."""
     if value is None:
@@ -262,6 +281,7 @@ class Op:
         self.elem, self.tag, self.attrs, self.style, self.ctm = elem, tag, attrs, style, ctm
         self.polys = None    # straight-edged polygons in flag coordinates
         self.disc = None     # (cx, cy, r)
+        self.ellipse = None  # (cx, cy, half fly, half hoist, rotation)
         self.ring = None     # (cx, cy, r, inner)
         self.crescents = []  # (cx, cy, r, cut cx, cut cy, cut r)
         self.fill = None
@@ -536,7 +556,7 @@ class Reader:
             op.fill = fill
             op.stroke = (stroke, number(s.get("stroke-width"), 1.0) * scale)
             self.solid(op, e, tag, s, ctm, stroked=True)
-            if not (op.polys or op.disc or op.crescents or op.path):
+            if not (op.polys or op.disc or op.ellipse or op.crescents or op.path):
                 op.reason = "filled and stroked" if fill != "none" else "stroked outline"
                 op.stroke = None
             return op
@@ -552,7 +572,7 @@ class Reader:
         op.fill = fill
         op.opacity *= fill_opacity
         self.solid(op, e, tag, s, ctm)
-        if not op.polys and not op.disc and not op.path and not op.crescents:
+        if not op.polys and not op.disc and not op.ellipse and not op.path and not op.crescents:
             op.reason = {"ellipse": "ellipse", "circle": "skewed circle", "rect": "rounded rectangle"}.get(tag, "curved path" if tag == "path" else tag)
             if tag == "path" and not parse_path(e.get("d"))[1]:
                 op.reason = "path with overlapping subpaths"
@@ -626,11 +646,13 @@ class Reader:
             else:
                 r = number(e.get("r"))
                 cx, cy = number(e.get("cx")), number(e.get("cy"))
-                op.path = flatten_path(f"M{cx-r} {cy}A{r} {r} 0 1 0 {cx+r} {cy}A{r} {r} 0 1 0 {cx-r} {cy}Z", ctm, evenodd)
+                op.ellipse = mapped_ellipse(cx, cy, r, r, ctm)
         elif tag == "ellipse":
             rx, ry = number(e.get("rx")), number(e.get("ry"))
             cx, cy = number(e.get("cx")), number(e.get("cy"))
-            op.path = flatten_path(f"M{cx-rx} {cy}A{rx} {ry} 0 1 0 {cx+rx} {cy}A{rx} {ry} 0 1 0 {cx-rx} {cy}Z", ctm, evenodd)
+            op.ellipse = mapped_ellipse(cx, cy, rx, ry, ctm)
+            if op.ellipse and abs(op.ellipse[2]-op.ellipse[3]) < 1e-6 * op.ellipse[2]:
+                op.disc, op.ellipse = op.ellipse[:3], None
         elif tag in ("polygon", "polyline"):
             v = [float(x) for x in re.findall(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?", e.get("points") or "")]
             if len(v) >= 6 and not (stroked and tag == "polyline"):
@@ -980,6 +1002,9 @@ class Writer:
         grown = [(p[0] + (p[0]-self.w/2)*1e-3, p[1] + (p[1]-self.h/2)*1e-3) for p in poly]
         for later in ops[1:]:
             points = [p for q in (later.polys or []) for p in q]
+            if later.ellipse:
+                cx, cy, x, y, _ = later.ellipse
+                points += circle_points(cx, cy, math.hypot(x, y))
             if later.disc or later.ring or later.crescents:
                 c = later.disc or later.ring or later.crescents[0]
                 points += circle_points(c[0], c[1], c[2])
@@ -999,7 +1024,7 @@ class Writer:
         if op.path or op.stroke:
             return True
         if op.tag == "g" or op.fill in (None, "none"):
-            return not (op.polys or op.disc or op.ring or op.crescents)
+            return not (op.polys or op.disc or op.ellipse or op.ring or op.crescents)
         if op.polys:
             return not all(self.named_polygon(p) for p in op.polys)
         return False
@@ -1033,7 +1058,7 @@ class Writer:
         while i < n:
             op = ops[i]
             artwork = getattr(op, "artwork", False)
-            nameable = op.polys or op.disc or op.ring or op.crescents or op.path
+            nameable = op.polys or op.disc or op.ellipse or op.ring or op.crescents or op.path
             if artwork or not nameable or (op.fill is None) or (op.fill == "none" and not op.stroke):
                 if op.fill == "none" and op.tag != "g" and "stroke" not in op.style and not artwork:
                     i += 1
@@ -1249,6 +1274,17 @@ class Writer:
                 self.charge("disc", fill, [f"radius {fmt(r)}"], (cx, cy), effect, box)
             if edge:
                 self.charge("ring", edge, [f"radius {fmt(r+width/2)}", f"inner {fmt(max(r-width/2, 1e-4))}"], (cx, cy), effect, box)
+            return 1
+        if op.ellipse:
+            cx, cy, x, y, rotation = op.ellipse
+            r = math.radians(rotation)
+            half = (math.hypot(x*math.cos(r), y*math.sin(r)), math.hypot(x*math.sin(r), y*math.cos(r)))
+            box = (cx-half[0], cy-half[1], cx+half[0], cy+half[1])
+            size = [f"fly {fmt(2*x)}", f"hoist {fmt(2*y)}"] + ([f"rotate {fmt(rotation)}"] if abs(rotation) > 1e-6 else [])
+            if filled:
+                self.charge("ellipse", fill, size, (cx, cy), effect, box)
+            if edge:
+                self.charge("ellipse", edge, size + [f"hollow {fmt(width)}"], (cx, cy), effect, box)
             return 1
         if op.ring:
             cx, cy, r, inner = op.ring

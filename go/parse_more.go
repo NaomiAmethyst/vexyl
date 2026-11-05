@@ -19,7 +19,7 @@ var (
 	cornerValues = []string{"upper-hoist", "upper-fly", "lower-hoist", "lower-fly"}
 	rayFromNames = append([]string{"center", "hoist", "fly", "top", "bottom"}, cornerValues...)
 	shapeKinds   = []string{"disc", "ring", "rect", "plus", "triangle", "star", "heart", "cardioid",
-		"polygon", "crescent", "sun", "lozenge", "path"}
+		"polygon", "crescent", "sun", "lozenge", "ellipse", "path"}
 	viewValues = []string{"none", "rotate", "transpose"}
 	modeValues = []string{"extend", "center", "scale", "hoist-extend", "hoist-center", "hoist-scale"}
 )

@@ -71,6 +71,18 @@ charge lozenge gold {
   at fly=3 hoist=4
   hollow 0.3
 }
+charge ellipse gold {
+  fly 3
+  hoist 1
+  at fly=8 hoist=4
+  rotate 30
+}
+charge ellipse white {
+  fly 2
+  hoist 3
+  at fly=3 hoist=14
+  hollow 0.2
+}
 charge lozenge white {
   at fly=8 hoist=14
   fly 2
