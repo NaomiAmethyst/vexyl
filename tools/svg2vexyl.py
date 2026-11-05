@@ -26,6 +26,8 @@ XLINK = "{http://www.w3.org/1999/xlink}href"
 EPS = 1e-6
 # This many detailed shapes in a row are treated as artwork, like a seal, and stay together.
 ARTWORK_RUN = 8
+ARTWORK_GAP = 64
+CENTERED = 0.015
 
 # Everything that can't be carried into a flag is raised as this, with a short reason
 # that reports can count.
@@ -133,6 +135,170 @@ def mapped_ellipse(cx, cy, rx, ry, m):
         major, minor = minor, major
         rotation -= math.copysign(90, rotation)
     return (*apply(m, (cx, cy)), major, minor, rotation)
+
+
+def near_uniform_scale(m, slack=0.03):
+    """Returns a transform's mean scale if it nearly preserves circles, which is close
+    enough for the width of a stroke, else None."""
+    sx, sy = math.hypot(m[0], m[1]), math.hypot(m[2], m[3])
+    dot = m[0]*m[2] + m[1]*m[3]
+    if abs(sx - sy) > slack * max(sx, 1e-9) or abs(dot) > slack * max(sx*sy, 1e-9):
+        return None
+    return (sx + sy) / 2
+
+
+def dash_pattern(value):
+    """Returns a stroke's dashes as lengths, or None if it has none, or they can't be used."""
+    if value in (None, "none"):
+        return None
+    lengths = [plain_length(x) for x in re.split(r"[\s,]+", value.strip())]
+    if any(x is None or x < 0 for x in lengths) or sum(lengths) <= 0:
+        return None
+    return lengths * 2 if len(lengths) % 2 else lengths
+
+
+def dashes_along(a, b, pattern):
+    """Splits a line into the pieces that a dash pattern draws."""
+    length = math.dist(a, b)
+    out, at, i = [], 0.0, 0
+    while at < length:
+        end = min(at + pattern[i % len(pattern)], length)
+        if i % 2 == 0 and end > at:
+            out.append((a[0] + (b[0]-a[0])*at/length, a[1] + (b[1]-a[1])*at/length,
+                        a[0] + (b[0]-a[0])*end/length, a[1] + (b[1]-a[1])*end/length))
+        at, i = end, i + 1
+    return [((x0, y0), (x1, y1)) for x0, y0, x1, y1 in out]
+
+
+def convex(poly):
+    signs = set()
+    n = len(poly)
+    for i in range(n):
+        a, b, c = poly[i], poly[(i+1) % n], poly[(i+2) % n]
+        turn = (b[0]-a[0])*(c[1]-b[1]) - (b[1]-a[1])*(c[0]-b[0])
+        if abs(turn) > 1e-9:
+            signs.add(turn > 0)
+    return len(signs) <= 1
+
+
+def clip_to_convex(subject, window):
+    """Cuts a polygon down to a convex window. A concave subject can come out with edges
+    that double back along the window, which have no area when filled."""
+    if signed_area(window) < 0:
+        window = window[::-1]
+    out = list(subject)
+    for a, b in zip(window, window[1:] + window[:1]):
+        def side(p):
+            return (b[0]-a[0])*(p[1]-a[1]) - (b[1]-a[1])*(p[0]-a[0])
+        points, out = out, []
+        for p, q in zip(points, points[1:] + points[:1]):
+            sp, sq = side(p), side(q)
+            if sp >= 0:
+                out.append(p)
+            if (sp >= 0) != (sq >= 0):
+                t = sp / (sp - sq)
+                out.append((p[0] + (q[0]-p[0])*t, p[1] + (q[1]-p[1])*t))
+        if not out:
+            return None
+    return out if len(out) >= 3 else None
+
+
+def simple_parts(poly, depth=0):
+    """Splits a polygon where its edges cross, into loops that each fill the same ground."""
+    n = len(poly)
+    for i in range(n):
+        a, b = poly[i], poly[(i+1) % n]
+        for k in range(i+2, n):
+            if i == 0 and k == n-1:
+                continue
+            c, d = poly[k], poly[(k+1) % n]
+            under = (b[0]-a[0])*(d[1]-c[1]) - (b[1]-a[1])*(d[0]-c[0])
+            if abs(under) < 1e-12:
+                continue
+            t = ((c[0]-a[0])*(d[1]-c[1]) - (c[1]-a[1])*(d[0]-c[0])) / under
+            u = ((c[0]-a[0])*(b[1]-a[1]) - (c[1]-a[1])*(b[0]-a[0])) / under
+            if 1e-9 < t < 1-1e-9 and 1e-9 < u < 1-1e-9 and depth < 8:
+                x = (a[0] + (b[0]-a[0])*t, a[1] + (b[1]-a[1])*t)
+                first = poly[:i+1] + [x] + poly[k+1:]
+                second = [x] + poly[i+1:k+1]
+                return simple_parts(first, depth+1) + simple_parts(second, depth+1)
+    return [poly]
+
+
+def winds(p, poly):
+    """Is a point inside a polygon by the nonzero rule, as a clip's fill is?"""
+    total = 0
+    for a, b in zip(poly, poly[1:] + poly[:1]):
+        if (a[1] <= p[1]) != (b[1] <= p[1]):
+            side = (b[0]-a[0])*(p[1]-a[1]) - (b[1]-a[1])*(p[0]-a[0])
+            if (b[1] > a[1]) == (side > 0):
+                total += 1 if b[1] > a[1] else -1
+    return total != 0
+
+
+def clip_polys(polys, clips):
+    """Cuts polygons by a clip made of polygons. Returns None if neither is convex, or the
+    pieces don't cover what the clip should leave."""
+    out = []
+    parts = [part for clip in clips for part in simple_parts(clip)]
+    for poly in polys:
+        for part in parts:
+            if convex(part):
+                piece = clip_to_convex(poly, part)
+            elif convex(poly):
+                piece = clip_to_convex(part, poly)
+            else:
+                return None
+            if piece and abs(signed_area(piece)) > 1e-9:
+                out.append(piece)
+        x0, y0, x1, y1 = bounds(poly)
+        samples = [(x0 + (x1-x0)*(i+.5)/30, y0 + (y1-y0)*(k+.5)/30) for i in range(30) for k in range(30)]
+        wanted = [p for p in samples if winds(p, poly)]
+        wrong = sum(any(winds(p, clip) for clip in clips) != any(winds(p, piece) for piece in out) for p in wanted)
+        if wrong > 0.02 * max(len(wanted), 1):
+            return None
+    return out
+
+
+def star_of_pieces(polys):
+    """Recognizes overlapping pieces that together make a regular star, and returns its outline.
+    Its tips are the farthest points from the middle, and the rest is measured from the pieces."""
+    points = [p for poly in polys for p in poly]
+    cx, cy = sum(p[0] for p in points)/len(points), sum(p[1] for p in points)/len(points)
+    radius = max(math.hypot(p[0]-cx, p[1]-cy) for p in points)
+    tips = []
+    for p in points:
+        if math.hypot(p[0]-cx, p[1]-cy) > 0.98*radius and not any(math.dist(p, q) < 0.02*radius for q in tips):
+            tips.append(p)
+    if len(tips) < 4 or len(polys) < len(tips):
+        return None
+    angles = sorted(math.atan2(p[1]-cy, p[0]-cx) for p in tips)
+    step = 2*math.pi/len(tips)
+    if any(abs(b-a-step) > 0.02 for a, b in zip(angles, angles[1:])):
+        return None
+
+    def covered(p):
+        return any(inside(p, poly) for poly in polys)
+    # Walk out along the line between two tips until leaving the pieces.
+    middle = angles[0] + step/2
+    inner = 0.0
+    for i in range(1, 201):
+        r = radius * i / 200
+        if not covered((cx + r*math.cos(middle), cy + r*math.sin(middle))):
+            break
+        inner = r
+    if inner < 0.1*radius or inner > 0.9*radius:
+        return None
+    star = []
+    for i in range(len(tips)):
+        a = angles[0] + i*step
+        star.append((cx + radius*math.cos(a), cy + radius*math.sin(a)))
+        star.append((cx + inner*math.cos(a+step/2), cy + inner*math.sin(a+step/2)))
+    # It only counts if the star and the pieces cover the same ground.
+    x0, y0, x1, y1 = bounds(points)
+    samples = [(x0 + (x1-x0)*(i+.5)/40, y0 + (y1-y0)*(k+.5)/40) for i in range(40) for k in range(40)]
+    wrong = sum(covered(p) != inside(p, star) for p in samples)
+    return star if wrong <= 0.02*len(samples) else None
 
 
 def parse_color(value, inherited_color="#000000"):
@@ -282,6 +448,8 @@ class Op:
         self.polys = None    # straight-edged polygons in flag coordinates
         self.disc = None     # (cx, cy, r)
         self.ellipse = None  # (cx, cy, half fly, half hoist, rotation)
+        self.counterchange = None  # a saltire's width, when it shows on one side of each diagonal
+        self.lines = False   # polygons that came from stroked lines
         self.ring = None     # (cx, cy, r, inner)
         self.crescents = []  # (cx, cy, r, cut cx, cut cy, cut r)
         self.fill = None
@@ -366,6 +534,8 @@ class Reader:
             if "mask" not in s and (self.full_clip(s.get("clip-path"), ctm) or self.polygon_clip(s.get("clip-path"), ctm)):
                 s = dict(s)
                 s.pop("clip-path")
+            if "mask" not in s and s.get("clip-path", "none") != "none" and self.clipped_group(e, ctm, s, opacity, stack):
+                return
             for k in ("clip-path", "mask"):
                 if k in s and s[k] != "none":
                     # A group's clip is passed to its children as an inline-only feature.
@@ -421,7 +591,10 @@ class Reader:
             return False
         t = multiply(t, parse_transform(shape.get("transform")))
         if local(shape.tag) == "rect":
-            x, y, w, h = (number(shape.get(k)) for k in ("x", "y", "width", "height"))
+            sizes = [plain_length(shape.get(k, "0")) for k in ("x", "y", "width", "height")]
+            if None in sizes:
+                return False
+            x, y, w, h = sizes
             pts = [(x, y), (x+w, y), (x+w, y+h), (x, y+h)]
         elif local(shape.tag) == "path":
             subs, curved = parse_path(shape.get("d"))
@@ -506,6 +679,71 @@ class Reader:
         self.clip_outline = [apply(ctm, p) for p in subs[0][0]]
         return True
 
+    def clip_shapes(self, value, ctm):
+        """Returns a clip as polygons in flag coordinates, if it's made only of those."""
+        m = REF.match(value or "")
+        clip = self.ids.get(m.group(1)) if m else None
+        if clip is None or local(clip.tag) != "clipPath" or clip.get("clipPathUnits", "userSpaceOnUse") != "userSpaceOnUse":
+            return None
+        t = multiply(ctm, parse_transform(clip.get("transform")))
+        polys = []
+        for shape in clip:
+            local_t = t
+            if local(shape.tag) == "use":
+                local_t = multiply(local_t, parse_transform(shape.get("transform")))
+                shape = self.ids.get((shape.get("href") or shape.get(XLINK) or "").lstrip("#"))
+                if shape is None:
+                    return None
+            if shape.get("clip-path") or shape.get("clip-rule", "nonzero") != "nonzero":
+                return None
+            local_t = multiply(local_t, parse_transform(shape.get("transform")))
+            tag = local(shape.tag)
+            if tag == "rect" and not (shape.get("rx") or shape.get("ry")):
+                x, y, w, h = (number(shape.get(k)) for k in ("x", "y", "width", "height"))
+                polys.append([apply(local_t, p) for p in ((x, y), (x+w, y), (x+w, y+h), (x, y+h))])
+            elif tag == "path":
+                subs, curved = parse_path(shape.get("d"))
+                if curved:
+                    return None
+                polys += [[apply(local_t, p) for p in points] for points, _ in subs if len(points) >= 3]
+            elif tag == "polygon":
+                v = [float(x) for x in re.findall(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?", shape.get("points") or "")]
+                polys.append([apply(local_t, p) for p in zip(v[::2], v[1::2])])
+            else:
+                return None
+        return polys or None
+
+    def clipped_group(self, e, ctm, s, opacity, stack):
+        """A clip over plain polygons can be applied to them, which leaves plain polygons."""
+        start = len(self.ops)
+        inner = dict(s)
+        inner.pop("clip-path")
+        try:
+            clips = self.clip_shapes(s.get("clip-path"), ctm)
+            if not clips:
+                return False
+            o = opacity * number(s.get("opacity"), 1.0)
+            for c in e:
+                self.walk(c, ctm, inner, o, stack)
+        except Unsupported:
+            del self.ops[start:]
+            return False
+        ops = self.ops[start:]
+        cut = [clip_polys(op.polys, clips) if self.clippable(op) else None for op in ops]
+        if not ops or any(c is None for c in cut):
+            del self.ops[start:]
+            return False
+        kept = []
+        for op, polys in zip(ops, cut):
+            if polys:
+                op.polys, op.lines = polys, False
+                kept.append(op)
+        self.ops[start:] = kept
+        return True
+
+    def clippable(self, op):
+        return bool(op.polys) and not op.stroke and isinstance(op.fill, str) and op.fill != "none"
+
     def complex_group(self, e, ctm, s, opacity, stack):
         """Clipped and masked groups stay as they are, as inline artwork."""
         op = Op(e, "g", {}, s, ctm)
@@ -526,6 +764,19 @@ class Reader:
         if self.full_clip(s.get("clip-path"), ctm):
             s = dict(s)
             s.pop("clip-path")
+        if s.get("clip-path", "none") != "none" and s.get("mask", "none") == "none":
+            whole = dict(s)
+            whole.pop("clip-path")
+            try:
+                clips = self.clip_shapes(s.get("clip-path"), ctm)
+                cut = self.shape(e, tag, whole, ctm, opacity)
+                polys = clip_polys(cut.polys, clips) if clips and self.clippable(cut) else None
+            except Unsupported:
+                polys = None
+            if polys:
+                self.mark_counterchange(cut, polys)
+                cut.polys, cut.lines = polys, False
+                return cut
         for k in ("clip-path", "mask"):
             if k in s and s[k] != "none":
                 op.reason = "clipped or masked shape"
@@ -541,14 +792,18 @@ class Reader:
                 if tag == "circle" and stroke is not None and s.get("stroke-dasharray", "none") == "none":
                     self.stroked_circle(op, e, s, ctm, stroke)
                 elif tag in ("path", "line", "polyline") and stroke is not None \
-                        and s.get("stroke-dasharray", "none") == "none" \
-                        and s.get("stroke-linecap", "butt") == "butt":
+                        and s.get("stroke-linecap", "butt") == "butt" \
+                        and number(s.get("stroke-dashoffset"), 0.0) == 0:
                     self.stroked_lines(op, e, tag, s, ctm, stroke)
                 op.reason = "stroked outline"
                 return op
-            scale = uniform_scale(ctm)
-            plain = (s.get("stroke-dasharray", "none") == "none" and s.get("stroke-linecap", "butt") == "butt"
-                     and s.get("stroke-linejoin", "miter") == "miter" and number(s.get("stroke-opacity"), 1.0) >= 0.9995
+            scale = near_uniform_scale(ctm)
+            # Any join looks alike on a thin stroke, and only an open line has caps.
+            thin = scale is not None and number(s.get("stroke-width"), 1.0) * scale < 0.01 * min(self.w, self.h)
+            plain = (s.get("stroke-dasharray", "none") == "none"
+                     and (s.get("stroke-linecap", "butt") == "butt" or self.closed(e, tag))
+                     and (s.get("stroke-linejoin", "miter") == "miter" or thin)
+                     and number(s.get("stroke-opacity"), 1.0) >= 0.9995
                      and fill_opacity >= 0.9995)
             if stroke is None or scale is None or not plain or (fill is None):
                 op.reason = "filled and stroked" if fill != "none" else "stroked outline"
@@ -578,6 +833,30 @@ class Reader:
                 op.reason = "path with overlapping subpaths"
         return op
 
+    def mark_counterchange(self, op, polys):
+        """A stroke along the flag's diagonals, cut to half its area, is a saltire that shows on
+        one side of each."""
+        if not op.lines or len(op.polys) != 2:
+            return
+        tol = max(self.w, self.h) * 1e-3
+        wanted = [((0, 0), (self.w, self.h)), ((self.w, 0), (0, self.h))]
+        for pair in wanted:
+            middle = ((pair[0][0]+pair[1][0])/2, (pair[0][1]+pair[1][1])/2)
+            if not any(math.dist(middle, (sum(p[0] for p in q)/4, sum(p[1] for p in q)/4)) < tol
+                       and abs(math.dist(q[0], q[1]) - math.dist(*pair)) < tol for q in op.polys):
+                return
+        whole = sum(abs(signed_area(q)) for q in op.polys)
+        if abs(sum(abs(signed_area(q)) for q in polys) - whole/2) < 0.1 * whole / 2 + tol:
+            op.counterchange = math.dist(op.polys[0][1], op.polys[0][2]) / 2
+
+    def closed(self, e, tag):
+        if tag in ("rect", "circle", "ellipse", "polygon"):
+            return True
+        if tag != "path":
+            return False
+        subs, _ = parse_path(e.get("d"))
+        return all(closed for _, closed in subs)
+
     def lines_only(self, e, tag):
         if tag == "line":
             return True
@@ -603,7 +882,10 @@ class Reader:
             return
         width = number(s.get("stroke-width"), 1.0) * scale / 2
         if tag == "line":
-            subs = [([(number(e.get("x1")), number(e.get("y1"))), (number(e.get("x2")), number(e.get("y2")))], False)]
+            def along(name, size):
+                value = (e.get(name) or "0").strip()
+                return float(value[:-1]) * size / 100 if value.endswith("%") else number(value)
+            subs = [([(along("x1", self.w), along("y1", self.h)), (along("x2", self.w), along("y2", self.h))], False)]
         elif tag == "polyline":
             pts = [float(x) for x in re.findall(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?", e.get("points") or "")]
             subs = [(list(zip(pts[::2], pts[1::2])), False)]
@@ -612,6 +894,12 @@ class Reader:
             if curved:
                 return
         polys = []
+        pattern = None
+        if s.get("stroke-dasharray", "none") != "none":
+            pattern = dash_pattern(s.get("stroke-dasharray"))
+            if pattern is None:
+                return
+            pattern = [x * scale for x in pattern]
         for points, closed in subs:
             if len(points) != 2 or closed:
                 return
@@ -620,7 +908,12 @@ class Reader:
             if l == 0:
                 continue
             nx, ny = -(b[1]-a[1])/l*width, (b[0]-a[0])/l*width
-            polys.append([(a[0]+nx, a[1]+ny), (b[0]+nx, b[1]+ny), (b[0]-nx, b[1]-ny), (a[0]-nx, a[1]-ny)])
+            for p, q in dashes_along(a, b, pattern) if pattern else [(a, b)]:
+                polys.append([(p[0]+nx, p[1]+ny), (q[0]+nx, q[1]+ny), (q[0]-nx, q[1]-ny), (p[0]-nx, p[1]-ny)])
+        if pattern:
+            # A wide stroke can reach far beyond the flag.
+            flag = [(0, 0), (self.w, 0), (self.w, self.h), (0, self.h)]
+            polys = [p for p in (clip_to_convex(q, flag) for q in polys) if p and abs(signed_area(p)) > 1e-9]
         if polys:
             op.polys, op.fill = polys, stroke
             op.lines = True
@@ -700,7 +993,9 @@ class Reader:
                     if all(inside(p, cut) or not inside(p, a) for p in b):
                         continue
                     return
-                if any(inside(p, a) for p in b):
+                # Shapes that only touch at a point don't overlap, though rounding can say they do.
+                touch = max(self.w, self.h) * 1e-6
+                if any(inside(p, a) and not any(math.dist(p, v) < touch for v in a) for p in b):
                     if k >= len(polys) + len(discs):
                         continue
                     return
@@ -820,6 +1115,10 @@ def crosses_itself(poly):
             if turn(a, b, c)*turn(a, b, d) < 0 and turn(c, d, a)*turn(c, d, b) < 0:
                 return True
     return False
+
+
+def signed_area(poly):
+    return sum(a[0]*b[1] - b[0]*a[1] for a, b in zip(poly, poly[1:] + poly[:1])) / 2
 
 
 def area(poly):
@@ -1019,6 +1318,35 @@ class Writer:
         return bool(self.rect_of(poly) or regular_star(poly) or self.band(poly) or self.chevron(poly)
                     or self.lozenge(poly) or self.pile(poly))
 
+    def merge_stars(self, ops):
+        """Joins the pieces of a star that's drawn in pieces."""
+        def piece(op):
+            return (op.polys and len(op.polys) == 1 and len(op.polys[0]) <= 6 and isinstance(op.fill, str)
+                    and op.fill != "none" and not op.stroke and op.tag != "g" and op.opacity >= 0.9995)
+        out, i = [], 0
+        while i < len(ops):
+            op = ops[i]
+            if piece(op):
+                j = i
+                while j < len(ops) and piece(ops[j]) and ops[j].fill == op.fill:
+                    j += 1
+                k = min(j, i + 48)
+                while k - i >= 4:
+                    star = star_of_pieces([o.polys[0] for o in ops[i:k]])
+                    if star:
+                        op.polys = [star]
+                        i = k - 1
+                        break
+                    k -= 1
+            out.append(op)
+            i += 1
+        return out
+
+    def plain_run(self, run):
+        """Straight-edged pieces in one color, like a sun's rays, are simple enough to keep."""
+        return (len({op.fill for op in run}) == 1 and all(op.polys and not op.stroke for op in run)
+                and sum(len(op.polys) for op in run) <= 64 and all(len(p) <= 6 for op in run for p in op.polys))
+
     def is_art(self, op):
         """Detailed shapes, which belong together as artwork when there are many."""
         if op.path or op.stroke:
@@ -1029,16 +1357,33 @@ class Writer:
             return not all(self.named_polygon(p) for p in op.polys)
         return False
 
+    def small(self, op):
+        """Is this a detail, rather than something spread across the flag like a stripe?"""
+        points = [p for poly in (op.polys or []) for p in poly]
+        if op.disc or op.ring or op.ellipse:
+            return True
+        if not points:
+            return True
+        box = bounds(points)
+        return box[2]-box[0] < 0.6*self.w and box[3]-box[1] < 0.6*self.h
+
     def demote_artwork(self, ops):
-        run = []
-        for op in ops + [None]:
+        runs, run = [], []
+        for i, op in enumerate(ops + [None]):
             if op is not None and self.is_art(op):
-                run.append(op)
+                run.append(i)
                 continue
-            if len(run) >= ARTWORK_RUN:
-                for art in run:
-                    art.artwork = True
+            if len(run) >= ARTWORK_RUN and not self.plain_run([ops[k] for k in run]):
+                runs.append((run[0], run[-1]))
             run = []
+        # A seal stays whole: details between its runs of detail belong to it too.
+        for (_, a), (b, _) in zip(runs, runs[1:]):
+            if b - a <= ARTWORK_GAP and all(self.small(op) for op in ops[a+1:b]):
+                for op in ops[a+1:b]:
+                    op.artwork = True
+        for a, b in runs:
+            for op in ops[a:b+1]:
+                op.artwork = True
 
     def convert(self, ops):
         if self.r.clip_outline:
@@ -1053,6 +1398,7 @@ class Writer:
                     ops = ops[1:]
         else:
             ops = self.take_outline(ops)
+        ops = self.merge_stars(ops)
         self.demote_artwork(ops)
         i, n = 0, len(ops)
         while i < n:
@@ -1067,7 +1413,8 @@ class Writer:
                 self.reasons.append("artwork" if artwork else op.reason or "unknown")
                 i += 1
                 continue
-            consumed = self.quarters(ops, i) or self.strips(ops, i) or self.cross(ops, i) or self.single(op)
+            consumed = self.single(op) if op.counterchange else \
+                self.quarters(ops, i) or self.strips(ops, i) or self.cross(ops, i) or self.single(op)
             i += consumed
         self.flush()
 
@@ -1267,6 +1614,11 @@ class Writer:
         fill = self.color(op.fill) if filled else None
         edge = self.color(op.stroke[0]) if op.stroke else None
         width = op.stroke[1] if op.stroke else 0
+        if op.counterchange:
+            self.flush()
+            self.stats["native"] += 1
+            self.layers.append(dict(kind="saltire", fill=fill, width=op.counterchange, counterchange=True))
+            return 1
         if op.disc:
             cx, cy, r = op.disc
             box = (cx-r, cy-r, cx+r, cy+r)
@@ -1849,7 +2201,7 @@ def simple_ratio(widths):
 def render_layers(layers, w, h):
     """Writes layers out: panels take in the charges on them, saltires and fimbriation are
     gathered from their parts, and runs of like charges become repeats."""
-    return write_layers(merge_ordinaries(layers), w, h)
+    return write_layers(merge_ordinaries(layers), w, h, top=True)
 
 
 def merge_ordinaries(layers):
@@ -1872,14 +2224,15 @@ def merge_ordinaries(layers):
     merged = []
     for layer in out:
         if merged and isinstance(layer, dict) and layer["kind"] == "saltire" and isinstance(merged[-1], dict) \
-                and merged[-1]["kind"] == "saltire" and merged[-1]["width"] > layer["width"]:
+                and merged[-1]["kind"] == "saltire" and merged[-1]["width"] > layer["width"] \
+                and not layer.get("counterchange"):
             merged[-1] = dict(layer, fimbriate=(merged[-1]["fill"], (merged[-1]["width"]-layer["width"])/2))
             continue
         merged.append(layer)
     return merged
 
 
-def write_layers(layers, w, h, origin=(0.0, 0.0)):
+def write_layers(layers, w, h, origin=(0.0, 0.0), top=False):
     out, i = [], 0
     while i < len(layers):
         layer = layers[i]
@@ -1893,6 +2246,8 @@ def write_layers(layers, w, h, origin=(0.0, 0.0)):
             body.append(f"width {fmt(layer['width'])}")
             if "fimbriate" in layer:
                 body.append(f"fimbriate {layer['fimbriate'][0]} {fmt(layer['fimbriate'][1])}")
+            if layer.get("counterchange"):
+                body.append("counterchange")
             out.append(f"{layer['kind']} {layer['fill']} {{\n" + "".join(f"  {b}\n" for b in body) + "}")
             i += 1
         elif layer["kind"] == "panel":
@@ -1924,7 +2279,7 @@ def write_layers(layers, w, h, origin=(0.0, 0.0)):
                     out.append(sun)
                     i += 1
                     continue
-            out.extend(charge_run(run[0], [c["at"] for c in run], w, h, origin))
+            out.extend(charge_run(run[0], [c["at"] for c in run], w, h, origin, top))
     return out
 
 
@@ -1973,17 +2328,22 @@ def charge_body(layer, origin):
     return body
 
 
-def charge_text(layer, ats, origin, repeat=None):
+def charge_text(layer, ats, origin, repeat=None, size=None):
     body = charge_body(layer, origin)
     for at in ats:
         body.append(f"at fly={fmt(at[0]-origin[0])} hoist={fmt(at[1]-origin[1])}")
+    # An emblem drawn nearly centered is meant to stay in the middle at other proportions.
+    box = layer.get("box")
+    if size and box and len(ats) == 1 and box[2]-box[0] < 0.9*size[0] and box[3]-box[1] < 0.9*size[1] \
+            and abs(ats[0][0]-size[0]/2) < CENTERED*size[0] and abs(ats[0][1]-size[1]/2) < CENTERED*size[1]:
+        body.append("anchor center")
     body += list(layer["effect"])
     if repeat:
         body.append(repeat)
     return f"charge {layer['shape']} {layer['fill']} {{\n" + "".join(f"  {b}\n" for b in body) + "}"
 
 
-def charge_run(layer, points, w, h, origin):
+def charge_run(layer, points, w, h, origin, top=False):
     if layer["shape"] == "polygon":
         return [charge_text(layer, [], origin)]
     local = [(p[0]-origin[0], p[1]-origin[1]) for p in points]
@@ -2003,14 +2363,14 @@ def charge_run(layer, points, w, h, origin):
     if len(points) >= 3:
         step = (points[1][0]-points[0][0], points[1][1]-points[0][1])
         size = max(math.hypot(*step), 1e-9)
-        if all(math.dist((b[0]-a[0], b[1]-a[1]), step) < 1e-3*size for a, b in zip(points, points[1:])):
+        if size > 1e-6 and all(math.dist((b[0]-a[0], b[1]-a[1]), step) < 1e-3*size for a, b in zip(points, points[1:])):
             parts = [f"count={len(points)}"]
             if abs(step[0]) > 1e-9:
                 parts.append(f"fly={fmt(step[0])}")
             if abs(step[1]) > 1e-9:
                 parts.append(f"hoist={fmt(step[1])}")
             return [charge_text(layer, [points[0]], origin, "repeat line " + " ".join(parts))]
-    return [charge_text(layer, points, origin)]
+    return [charge_text(layer, points, origin, size=(w, h) if top else None)]
 
 
 def grid_of(points, w, h):

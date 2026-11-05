@@ -121,6 +121,128 @@ class Recognition(unittest.TestCase):
         self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff"/>',
                     "charge path white", 'd "M0 0C5 5 10 5 15 0Z"', 'box "0 0 15 5"')
 
+    def test_star_in_wedges_is_a_star(self):
+        wedge = '<path id="a" d="M0-5V0h2.2" transform="rotate(18 0 -5)"/><use xlink:href="#a" transform="scale(-1 1)"/>'
+        # This is the common drawing, whose pieces overlap rather than meeting in the middle.
+        arms = "".join(f'<use xlink:href="#b" transform="rotate({72*i})"/>' for i in range(1, 5))
+        text = self.native(f'<rect width="30" height="20" fill="#f00"/><g fill="#fff" transform="translate(15 10)"><g id="b">{wedge}</g>{arms}</g>',
+                           "charge star white")
+        self.assertNotIn("polygon", text)
+
+    def test_wedges_that_are_not_a_star_stay_apart(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><path d="M15 10L20 10L20 15z" fill="#fff"/>'
+                    '<path d="M15 10L10 10L10 5z" fill="#fff"/><path d="M15 10L15 1L18 2z" fill="#fff"/>',
+                    "charge polygon white")
+
+    def test_clip_on_a_shape_cuts_its_polygon(self):
+        text = self.native('<clipPath id="c"><path d="M0 0H15V20H0z"/></clipPath><rect width="30" height="20" fill="#f00"/>'
+                           '<path d="M5 5L25 5L25 15L5 15z" fill="#fff" clip-path="url(#c)"/>', "charge rect white")
+        self.assertIn("fly 10", text)
+
+    def test_clip_on_a_group_cuts_its_polygons(self):
+        text = self.native('<clipPath id="c"><rect width="15" height="10"/></clipPath><rect width="30" height="20" fill="#f00"/>'
+                           '<g clip-path="url(#c)"><path d="M0 0L30 20L0 20z" fill="#00f"/></g>', "charge polygon")
+        self.assertNotIn("charge svg", text)
+
+    def test_self_crossing_clip_splits_into_its_loops(self):
+        # The common drawing of the Union Flag's clip crosses itself, and nonzero fills both loops.
+        self.assertEqual(len(S.simple_parts([(0, 0), (0, 10), (20, 10), (20, 20)])), 2)
+        clip = '<clipPath id="c"><path d="M0 0V10H20V20z"/></clipPath>'
+        text = self.native(clip + '<rect width="30" height="20" fill="#f00"/><path d="M0 0H20V20H0z" fill="#fff" clip-path="url(#c)"/>', "charge polygon white")
+        self.assertEqual(text.count("charge polygon"), 2)
+
+    def test_clip_given_as_a_percentage_stays_inline(self):
+        _, stats = convert('<clipPath id="c"><rect width="50%" height="10"/></clipPath><rect width="30" height="20" fill="#f00"/>'
+                           '<rect width="15" height="20" fill="#fff" clip-path="url(#c)"/>')
+        self.assertEqual(stats["inline"], 1)
+
+    def test_same_charge_twice_in_one_place(self):
+        star = '<path d="M15 5L16.2 8.4H19.8L16.9 10.6L18 14L15 12L12 14L13.1 10.6L10.2 8.4H13.8z" fill="#fff"/>'
+        self.assertNotIn("repeat", self.native('<rect width="30" height="20" fill="#f00"/>' + star*3))
+
+    def test_dashed_line_given_in_percentages(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><line x1="50%" x2="50%" y2="100%" style="stroke:#fff;stroke-dasharray:2,2;stroke-width:30"/>')
+        self.assertNotIn("charge svg", text)
+
+    def test_details_between_runs_of_artwork_stay_with_them(self):
+        curve = '<path d="M{0} 1C{0} 2 {1} 2 {1} 1z" fill="#{2}"/>'
+        run = "".join(curve.format(i, i+1, "00f" if i % 2 else "0f0") for i in range(ARTWORK))
+        middle = '<circle cx="15" cy="10" r="1" fill="#fff"/>'
+        text, stats = convert('<rect width="30" height="20" fill="#f00"/>' + run + middle + run)
+        self.assertEqual(text.count("charge svg"), 1)
+        self.assertNotIn("charge disc", text)
+
+    def test_stripe_between_runs_of_artwork_stays_apart(self):
+        curve = '<path d="M{0} 1C{0} 2 {1} 2 {1} 1z" fill="#{2}"/>'
+        run = "".join(curve.format(i, i+1, "00f" if i % 2 else "0f0") for i in range(ARTWORK))
+        text, _ = convert('<rect width="30" height="20" fill="#f00"/>' + run + '<rect y="10" width="30" height="5" fill="#fff"/>' + run)
+        self.assertEqual(text.count("charge svg"), 2)
+
+    def test_curved_clip_stays_inline(self):
+        text, stats = convert('<clipPath id="c"><circle cx="15" cy="10" r="5"/></clipPath><rect width="30" height="20" fill="#f00"/>'
+                              '<rect width="15" height="20" fill="#fff" clip-path="url(#c)"/>')
+        self.assertEqual(stats["reasons"], ["clipped or masked shape"], text)
+
+    def test_clipped_diagonals_are_a_counterchanged_saltire(self):
+        text, _ = S.convert(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><clipPath id="t">'
+                            b'<path d="M30 15H60V30zM30 15V30H0zM30 15H0V0zM30 15V0H60z"/></clipPath>'
+                            b'<rect width="60" height="30" fill="#00f"/>'
+                            b'<path d="M0 0L60 30M60 0L0 30" stroke="#fff" stroke-width="6"/>'
+                            b'<path d="M0 0L60 30M60 0L0 30" stroke="#f00" stroke-width="4" clip-path="url(#t)"/></svg>', "Test")
+        self.assertIn("counterchange", text)
+        self.assertNotIn("charge svg", text)
+
+    def test_dashed_line_is_stripes(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 10H30" stroke="#fff" stroke-width="20" stroke-dasharray="5"/>')
+        self.assertNotIn("charge svg", text)
+        self.assertNotIn("stroke", text)
+
+    def test_dashes_restart_on_each_line(self):
+        self.assertEqual(S.dashes_along((0, 0), (10, 0), [4, 2]), [((0, 0), (4, 0)), ((6, 0), (10, 0))])
+        self.assertEqual(S.dash_pattern("1"), [1.0, 1.0])
+        self.assertIsNone(S.dash_pattern("none"))
+
+    def test_near_uniform_scale_still_strokes(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff" stroke="#000" stroke-width="1" transform="scale(1 1.01)"/>',
+                    "charge path black", "hollow")
+
+    def test_round_join_on_a_thin_stroke_is_fine(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff" stroke="#000" stroke-width="0.1" stroke-linejoin="round"/>',
+                    "charge path black")
+
+    def test_round_join_on_a_thick_stroke_stays_inline(self):
+        _, stats = convert('<rect width="30" height="20" fill="#f00"/><path d="M0 0C5 5 10 5 15 0z" fill="#fff" stroke="#000" stroke-width="3" stroke-linejoin="round"/>')
+        self.assertEqual(stats["inline"], 1)
+
+    def test_rays_in_one_color_are_not_artwork(self):
+        rays = "".join(f'<path d="M15 10L{15+9*math.cos(i/2):.3f} {10+9*math.sin(i/2):.3f}L{15+9*math.cos(i/2+.1):.3f} {10+9*math.sin(i/2+.1):.3f}z" fill="#fff"/>' for i in range(12))
+        self.native('<rect width="30" height="20" fill="#f00"/>' + rays, "charge polygon white")
+
+    def test_shapes_touching_at_a_point_are_still_polygons(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><path d="M15 10L18 2L20 3zM15 10L10 18L8 17z" fill="#fff" transform="rotate(45 15 10)"/>',
+                    "charge polygon white")
+
+    def test_wide_dashes_stay_within_the_flag(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 0L30 20" stroke="#ff0" stroke-width="60" stroke-dasharray="6"/>')
+        self.assertNotIn("chevrons", text)
+
+    def test_stripe_is_not_anchored(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M0 8H30V12H0z" fill="#fff"/><path d="M0 2H30V3H0z" fill="#fff"/>')
+        self.assertNotIn("anchor", text)
+
+    def test_nearly_centered_charge_is_anchored(self):
+        self.native('<rect width="30" height="20" fill="#f00"/><path d="M12 8C13 12 16 12 17.8 8z" fill="#fff"/>',
+                    "charge path white", "anchor center")
+
+    def test_charge_centered_in_a_panel_is_not_anchored(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><rect width="30" height="10" fill="#fff"/><rect width="10" height="20" fill="#00f"/>'
+                           '<path d="M4 9C4.5 11 5.5 11 6 9z" fill="#fff"/>', "panel", "charge path white")
+        self.assertNotIn("anchor", text)
+
+    def test_charge_away_from_the_center_is_not_anchored(self):
+        text = self.native('<rect width="30" height="20" fill="#f00"/><path d="M1 1C2 3 3 3 4 1z" fill="#fff"/>', "charge path white")
+        self.assertNotIn("anchor", text)
+
     def test_ellipse_is_named(self):
         self.native('<rect width="30" height="20" fill="#f00"/><ellipse cx="15" cy="10" rx="4" ry="2" fill="#fff"/>',
                     "charge ellipse white", "fly 8", "hoist 4")
