@@ -93,11 +93,12 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 	stages := map[string]int{
 		"vexyl": stageVersion, "meta": stageMeta, "palette": stagePalette,
 		"proportion": stageProportion, "outline": stageOutline, "border": stageBorder,
-		"define": stageDefine, "reverse": stageTail, "adapt": stageTail, "variant": stageTail,
+		"define": stageDefine, "reverse": stageTail, "adapt": stageTail, "variant": stageTail, "fold": stageTail,
 	}
 	flag.Defines = map[string]*Define{}
 	p.defines = flag.Defines
 	flag.Variants = map[string]*Variant{}
+	flag.Folds = map[string]*Fold{}
 	stage := -1
 	for _, n := range doc.Nodes {
 		s, named := stages[n.Name()]
@@ -139,6 +140,8 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 			p.adapt(n, flag)
 		case "variant":
 			p.variant(n, flag)
+		case "fold":
+			p.fold(n, flag)
 		default:
 			if flag.Fly == 0 && flag.Hoist == 0 {
 				p.errf(n, "layers must follow `proportion`")
@@ -157,6 +160,17 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 			p.errs = append(p.errs, fmt.Errorf("variant %q has a `ratio`, but the flag has no `adapt` rules", name))
 		}
 	}
+	if flag.Fly > 0 && flag.Hoist > 0 && len(p.errs) == 0 {
+		for name, fold := range flag.Folds {
+			shape, err := flag.foldShape()
+			if err == nil {
+				_, err = foldFacets(shape, fold, 0)
+			}
+			if err != nil {
+				p.errs = append(p.errs, fmt.Errorf("fold %q: %w", name, err))
+			}
+		}
+	}
 	return flag
 }
 
@@ -168,8 +182,15 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 		return func(c *kdl.Node) { *dst = append(*dst, p.str(c)) }
 	}
 	p.children(n, []string{"designer", "encoder", "source"}, map[string]func(*kdl.Node){
-		"name":          str(&m.Name),
-		"description":   str(&m.Description),
+		"name":        str(&m.Name),
+		"description": str(&m.Description),
+		"version":     str(&m.Version),
+		"date": func(c *kdl.Node) {
+			m.Date = p.str(c)
+			if m.Date != "" && !validDate(m.Date) {
+				p.errf(c, "must be YYYY, YYYY-MM or YYYY-MM-DD, got %q", m.Date)
+			}
+		},
 		"designer":      list(&m.Designers),
 		"design-rights": str(&m.DesignRights),
 		"encoder":       list(&m.Encoders),
@@ -207,7 +228,7 @@ func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 			gradients = append(gradients, c)
 			continue
 		}
-		value := p.str(c)
+		value := p.color(c, flag)
 		if !colorValue.MatchString(value) {
 			p.errf(c, "color must be #rrggbb, got %q", value)
 		}

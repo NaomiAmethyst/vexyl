@@ -16,8 +16,16 @@ meta {
 }
 palette {
   white "#ffffff"
-  red "#cd2e3a"
-  blue "#0047a0"
+  red "#cd2e3a" {
+    munsell "6.0R 4.5/14"
+    pantone "186 C"
+    reference "CIE xyY" "0.5640 0.3194 15.3"
+  }
+  blue "#0047a0" {
+    munsell "5.0PB 3.0/12"
+    pantone "294 C"
+    reference "CIE xyY" "0.1556 0.1354 6.5"
+  }
   black "#000000"
 }
 proportion hoist=96 fly=144

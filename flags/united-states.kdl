@@ -5,6 +5,8 @@
 vexyl 1
 meta {
   name "United States"
+  version "50-star"
+  date "1960-07-04"
   encoder "Naomi Persephone Amethyst"
   license "Apache-2.0"
   source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
@@ -37,4 +39,28 @@ canton {
 variant vertical {
   from transpose
   upright
+}
+
+// Custom rather than the Flag Code: two folds lengthwise with the blue outside, then
+// triangles from the striped end, with what's left at the hoist tucked in.
+fold triangle {
+  description "The customary triangular fold"
+  source "https://www.va.gov/opa/publications/celebrate/flagfold.pdf"
+  source "https://www.legion.org/advocacy/flag-advocacy/flag-folding-procedures"
+  over along=fly at=6.5 move=bottom
+  over along=fly at=3.25 move=bottom
+  over through="24.7 0 21.45 3.25" move="24.7 3.25"
+  over along=hoist at=21.45 move=fly
+  over through="21.45 3.25 18.2 0" move="21.45 0"
+  over along=hoist at=18.2 move=fly
+  over through="18.2 0 14.95 3.25" move="18.2 3.25"
+  over along=hoist at=14.95 move=fly
+  over through="14.95 3.25 11.7 0" move="14.95 0"
+  over along=hoist at=11.7 move=fly
+  over through="11.7 0 8.45 3.25" move="11.7 3.25"
+  over along=hoist at=8.45 move=fly
+  over through="8.45 3.25 5.2 0" move="8.45 0"
+  over along=hoist at=5.2 move=fly
+  over through="5.2 0 1.95 3.25" move="5.2 3.25"
+  tuck along=hoist at=1.95 move=hoist
 }

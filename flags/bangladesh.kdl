@@ -9,8 +9,14 @@ meta {
   source "https://en.wikipedia.org/wiki/Flag_of_Bangladesh"
 }
 palette {
-  green "#006747"
-  red "#da291c"
+  green "#006747" {
+    dye "Procion Brilliant Green H-2RS, 50 parts per 1000"
+    pantone "342 C"
+  }
+  red "#da291c" {
+    dye "Procion Brilliant Orange H-2RS, 60 parts per 1000"
+    pantone "485 C"
+  }
 }
 proportion hoist=6 fly=10
 

@@ -11,6 +11,8 @@ type Flag struct {
 	Meta    Meta
 	// Palette maps color names to #rrggbb values.
 	Palette map[string]string
+	// ColorRefs gives colors' values in other color systems, for print and dye.
+	ColorRefs map[string][]ColorRef
 	// Gradients maps palette names to gradients, usable wherever a color is.
 	Gradients map[string]*Gradient
 	// Hoist and Fly are the flag's proportion, which is also its grid.
@@ -29,6 +31,8 @@ type Flag struct {
 	Adapt *Adapt
 	// Variants are named forms of the flag, such as vertical or banner forms.
 	Variants map[string]*Variant
+	// Folds are named ways to fold the flag.
+	Folds map[string]*Fold
 
 	// idPrefix is unique to the source document, so that several flags can be
 	// inlined in one page without their definitions colliding.
@@ -47,13 +51,23 @@ type Gradient struct {
 
 // Meta describes a flag and credits the people behind it.
 type Meta struct {
-	Name         string
-	Description  string
+	Name        string
+	Description string
+	// Version names this version of the flag, such as "50-star".
+	Version string
+	// Date is when this version took effect: YYYY, YYYY-MM or YYYY-MM-DD.
+	Date         string
 	Designers    []string
 	DesignRights string
 	Encoders     []string
 	License      string
 	Sources      []string
+}
+
+// ColorRef is a color's value in another system, such as Pantone or a named dye.
+// Vexyl doesn't convert between systems, so it's only ever passed along.
+type ColorRef struct {
+	System, Value string
 }
 
 // Point is a position in grid units: Fly from the hoist edge of the region,

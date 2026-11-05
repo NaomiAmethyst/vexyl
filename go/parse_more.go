@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	kdl "github.com/calico32/kdl-go"
 )
@@ -446,4 +447,179 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 		}
 	}
 	flag.Variants[name] = v
+}
+
+// validDate accepts a year, a month or a day, which is as much as many flags' origins
+// are known to.
+func validDate(text string) bool {
+	for _, layout := range []string{"2006", "2006-01", "2006-01-02"} {
+		if _, err := time.Parse(layout, text); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// color reads a palette color, with its values in any other color systems.
+func (p *parser) color(n *kdl.Node, flag *Flag) string {
+	p.noProps(n)
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs one string")
+		return ""
+	}
+	var refs []ColorRef
+	named := func(c *kdl.Node) { refs = append(refs, ColorRef{c.Name(), p.str(c)}) }
+	p.children(n, []string{"dye", "reference"}, map[string]func(*kdl.Node){
+		"pantone": named,
+		"ncs":     named,
+		"ral":     named,
+		"munsell": named,
+		"dye":     named,
+		"thread":  named,
+		"cmyk": func(c *kdl.Node) {
+			v := p.numbers(c)
+			if len(v) != 4 {
+				p.errf(c, "needs 4 values from 0 to 100")
+				return
+			}
+			parts := make([]string, 4)
+			for i, x := range v {
+				if x < 0 || x > 100 {
+					p.errf(c, "needs 4 values from 0 to 100")
+				}
+				parts[i] = strconv.FormatFloat(x, 'f', -1, 64)
+			}
+			refs = append(refs, ColorRef{"cmyk", strings.Join(parts, " ")})
+		},
+		"reference": func(c *kdl.Node) {
+			p.noProps(c)
+			p.noChildren(c)
+			a := c.Arguments()
+			if len(a) != 2 || a[0].Kind() != kdl.String || a[1].Kind() != kdl.String {
+				p.errf(c, "needs a system's name and a value")
+				return
+			}
+			refs = append(refs, ColorRef{a[0].String(), a[1].String()})
+		},
+	})
+	if refs != nil {
+		if flag.ColorRefs == nil {
+			flag.ColorRefs = map[string][]ColorRef{}
+		}
+		flag.ColorRefs[n.Name()] = refs
+	}
+	return args[0].String()
+}
+
+// fold reads a named sequence of folds.
+func (p *parser) fold(n *kdl.Node, flag *Flag) {
+	p.plain(n)
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs a name")
+		return
+	}
+	p.noProps(n)
+	name := args[0].String()
+	if _, dup := flag.Folds[name]; dup {
+		p.errf(n, "%q is defined twice", name)
+		return
+	}
+	f := &Fold{}
+	step := func(c *kdl.Node) {
+		if s := p.foldStep(c); s != nil {
+			f.Steps = append(f.Steps, *s)
+		}
+	}
+	p.children(n, []string{"source", "over", "under", "tuck"}, map[string]func(*kdl.Node){
+		"description": func(c *kdl.Node) { f.Description = p.str(c) },
+		"source":      func(c *kdl.Node) { f.Sources = append(f.Sources, p.str(c)) },
+		"over":        step,
+		"under":       step,
+		"tuck":        step,
+	})
+	if len(f.Steps) == 0 && n.Children() != nil {
+		p.errf(n, "needs at least one step")
+	}
+	flag.Folds[name] = f
+}
+
+// foldStep reads `over along=fly at=5 move=bottom`, or for any line,
+// `over through="a b c d" move="e f"`.
+func (p *parser) foldStep(n *kdl.Node) *FoldStep {
+	p.noChildren(n)
+	p.only(n, 0, "along", "at", "move", "through")
+	s := &FoldStep{Kind: n.Name()}
+	moveValue := n.Prop("move")
+	if !moveValue.IsValid() || moveValue.Kind() != kdl.String {
+		p.errf(n, "needs move=, the part that moves")
+		return nil
+	}
+	move := moveValue.String()
+	if through := n.Prop("through"); through.IsValid() {
+		line := p.pointList(n, through, 4)
+		point := p.pointList(n, moveValue, 2)
+		if line == nil || point == nil {
+			return nil
+		}
+		s.A, s.B, s.Moving = Point{line[0], line[1]}, Point{line[2], line[3]}, Point{point[0], point[1]}
+		return s
+	}
+	along := n.Prop("along")
+	if !along.IsValid() || along.Kind() != kdl.String || !n.Prop("at").IsValid() {
+		p.errf(n, `needs along= and at=, or through=`)
+		return nil
+	}
+	at := p.prop(n, "at")
+	switch along.String() {
+	case "fly":
+		s.A, s.B = Point{0, at}, Point{1, at}
+		switch move {
+		case "top":
+			s.Moving = Point{0, at - 1}
+		case "bottom":
+			s.Moving = Point{0, at + 1}
+		default:
+			p.errf(n, "a crease along the fly moves top or bottom")
+			return nil
+		}
+	case "hoist":
+		s.A, s.B = Point{at, 0}, Point{at, 1}
+		switch move {
+		case "hoist":
+			s.Moving = Point{at - 1, 0}
+		case "fly":
+			s.Moving = Point{at + 1, 0}
+		default:
+			p.errf(n, "a crease along the hoist moves hoist or fly")
+			return nil
+		}
+	default:
+		p.errf(n, "along must be fly or hoist")
+		return nil
+	}
+	return s
+}
+
+func (p *parser) pointList(n *kdl.Node, v kdl.Value, count int) []float64 {
+	if v.Kind() != kdl.String {
+		p.errf(n, "needs %d numbers in a string", count)
+		return nil
+	}
+	fields := strings.Fields(v.String())
+	if len(fields) != count {
+		p.errf(n, "needs %d numbers in a string", count)
+		return nil
+	}
+	out := make([]float64, count)
+	for i, field := range fields {
+		x, err := strconv.ParseFloat(field, 64)
+		if err != nil {
+			p.errf(n, "needs %d numbers in a string", count)
+			return nil
+		}
+		out[i] = x
+	}
+	return out
 }

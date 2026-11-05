@@ -28,7 +28,9 @@ self-contained, so a flag can be shared as a single `.kdl` file.
 
 A file can also say how the flag behaves away from its usual form. `adapt` says how it
 reaches other proportions without distorting, since a cross should keep its place while
-a tricolor can simply spread out. `variant` describes vertical, banner and other forms.
+a tricolor can simply spread out. `variant` describes vertical, banner and other forms. `fold`
+describes how it's folded, and can be drawn step by step. Colors can also record their
+Pantone, NCS, dye or other values, for print and manufacturing.
 
 **Status:** early draft. The format can still change.
 
@@ -47,6 +49,13 @@ vexyl render -ratio 1:2 -o sweden-long.svg flags/sweden.kdl
 # A named form, or the other side
 vexyl render -variant vertical -o us-vertical.svg flags/united-states.kdl
 vexyl render -side reverse -o us-back.svg flags/united-states.kdl
+
+# A shape the flag can't reach, padded with transparency
+vexyl render -ratio 1:1 -fit pad -align left -o sweden-square.svg flags/sweden.kdl
+
+# Folded, or partway through folding
+vexyl render -fold triangle -o us-folded.svg flags/united-states.kdl
+vexyl render -fold triangle -fold-step 2 -o us-step-2.svg flags/united-states.kdl
 ```
 
 As a Go library, imported from `github.com/NaomiAmethyst/vexyl/go`:

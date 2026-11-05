@@ -536,6 +536,11 @@ func TestRejected(t *testing.T) {
 		{"variant unknown turn", header + `variant v { from flip; }`, "must be one of"},
 		{"outline unknown", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\noutline flag\n", "unknown form"},
 		{"layers after adapt", header + "adapt { wider extend; }\nfield a\n", "out of order"},
+		{"bad date", "vexyl 1\nmeta { name \"T\"; date \"last year\"; }\n", "must be YYYY"},
+		{"impossible date", "vexyl 1\nmeta { name \"T\"; date \"2026-02-30\"; }\n", "must be YYYY"},
+		{"cmyk count", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\" { cmyk 1 2; }; }\n", "4 values"},
+		{"cmyk range", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\" { cmyk 101 0 0 0; }; }\n", "from 0 to 100"},
+		{"unknown color system", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\" { hsl \"x\"; }; }\n", "unknown here"},
 		{"apex without angle", header + `chevrons a { depth 1; apex 2; }`, "needs an `angle`"},
 		{"negative apex", header + `chevrons a { depth 1; angle 45; apex -2; }`, "can't be negative"},
 		{"heart radius", header + `charge heart a`, "needs a `radius`"},
@@ -1036,6 +1041,283 @@ func TestFormsOfAFlagHaveDistinctIDs(t *testing.T) {
 	}
 }
 
+func TestFitPadding(t *testing.T) {
+	src := adaptHeader + "field a\n"
+	tests := []struct {
+		name string
+		opts Options
+		want string
+	}{
+		{"center by default", Options{Ratio: 4, Fit: "pad"}, `viewBox="-10 0 40 10"`},
+		{"start", Options{Ratio: 4, Fit: "pad", Align: "start"}, `viewBox="0 0 40 10"`},
+		{"end", Options{Ratio: 4, Fit: "pad", Align: "end"}, `viewBox="-20 0 40 10"`},
+		{"taller, centered", Options{Ratio: 1, Fit: "pad"}, `viewBox="0 -5 20 20"`},
+		{"taller, top", Options{Ratio: 1, Fit: "pad", Align: "start"}, `viewBox="0 0 20 20"`},
+		{"taller, bottom", Options{Ratio: 1, Fit: "pad", Align: "end"}, `viewBox="0 -10 20 20"`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if out := render(t, src, tt.opts); !strings.Contains(out, tt.want) {
+				t.Errorf("no %q in %s", tt.want, out)
+			}
+		})
+	}
+}
+
+func TestFitPadsFromNearestProportion(t *testing.T) {
+	src := adaptHeader + "field a\nadapt { range 1 3; wider extend; }\n"
+	// The rules reach 3, so the flag is 30 wide, then padded to 4.
+	out := render(t, src, Options{Ratio: 4, Fit: "pad", Height: 100})
+	if !strings.Contains(out, `viewBox="-5 0 40 10"`) || !strings.Contains(out, `points="0,0 30,0 30,10 0,10"`) {
+		t.Errorf("should adapt to 3, then pad: %s", out)
+	}
+	if !strings.Contains(out, `width="400" height="100"`) {
+		t.Errorf("image should have the canvas's shape: %s", out)
+	}
+}
+
+func TestFitPadsFromOwnProportionWhenTheDesignCantReach(t *testing.T) {
+	src := adaptHeader + "cross a { fly 5 2 3; hoist 4 2 4; }\nadapt { narrower cut; }\n"
+	out := render(t, src, Options{Ratio: 0.5, Fit: "pad"})
+	if !strings.Contains(out, `viewBox="0 -15 20 40"`) {
+		t.Errorf("should pad from the flag's own shape: %s", out)
+	}
+}
+
+func TestFitPadsTurnedFlagsInTheirFinalShape(t *testing.T) {
+	src := adaptHeader + "field a\nvariant v { from transpose; }\n"
+	// A ratio of 4 before turning is a canvas 4 times taller than wide.
+	out := render(t, src, Options{Variant: "v", Ratio: 4, Fit: "pad"})
+	if !strings.Contains(out, `viewBox="0 -10 10 40"`) {
+		t.Errorf("unexpected canvas: %s", out)
+	}
+}
+
+func TestFitRefusals(t *testing.T) {
+	var out bytes.Buffer
+	f := parse(t, adaptHeader+"field a\n")
+	if err := f.WriteSVG(&out, Options{Ratio: 4}); err == nil || !strings.Contains(err.Error(), "doesn't say how") {
+		t.Errorf("should refuse by default: %v", err)
+	}
+	if err := f.WriteSVG(&out, Options{Ratio: 4, Fit: "squash"}); err == nil {
+		t.Error("unknown fit accepted")
+	}
+	if err := f.WriteSVG(&out, Options{Ratio: 4, Fit: "pad", Align: "up"}); err == nil {
+		t.Error("unknown align accepted")
+	}
+}
+
+func TestMetaVersionAndDate(t *testing.T) {
+	f := parse(t, `vexyl 1
+meta { name "T"; version "50-star"; date "1960-07-04"; }
+palette { a "#112233"; }
+proportion hoist=1 fly=1`)
+	if f.Meta.Version != "50-star" || f.Meta.Date != "1960-07-04" {
+		t.Errorf("got %+v", f.Meta)
+	}
+	for _, date := range []string{"1960", "1960-07", "1960-07-04"} {
+		parse(t, `vexyl 1
+meta { name "T"; date "`+date+`"; }
+palette { a "#112233"; }
+proportion hoist=1 fly=1`)
+	}
+}
+
+func TestColorReferences(t *testing.T) {
+	f := parse(t, `vexyl 1
+meta { name "T"; }
+palette {
+  a "#112233" {
+    pantone "301 C"
+    ncs "4055-R95B"
+    cmyk 100 50.5 0 10
+    dye "One"
+    dye "Two"
+    reference "CIE xyY" "0.1 0.2 3"
+  }
+  b "#445566"
+}
+proportion hoist=1 fly=1
+field a`)
+	want := []ColorRef{{"pantone", "301 C"}, {"ncs", "4055-R95B"}, {"cmyk", "100 50.5 0 10"},
+		{"dye", "One"}, {"dye", "Two"}, {"CIE xyY", "0.1 0.2 3"}}
+	if !slices.Equal(f.ColorRefs["a"], want) {
+		t.Errorf("got %v", f.ColorRefs["a"])
+	}
+	if len(f.ColorRefs["b"]) != 0 {
+		t.Errorf("b has references: %v", f.ColorRefs["b"])
+	}
+	// They're records only, so they must not reach the drawing.
+	var out bytes.Buffer
+	if err := f.WriteSVG(&out, Options{}); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "301 C") {
+		t.Errorf("reference leaked into output: %s", out.String())
+	}
+}
+
+const foldHeader = `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+field a
+`
+
+func foldedFacets(t *testing.T, fold string) []facet {
+	t.Helper()
+	f := parse(t, foldHeader+fold)
+	shape, err := f.foldShape()
+	if err != nil {
+		t.Fatal(err)
+	}
+	stack, err := foldFacets(shape, f.Folds["f"], 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return stack
+}
+
+func TestFoldInHalf(t *testing.T) {
+	stack := foldedFacets(t, `fold f { over along=hoist at=10 move=fly; }`)
+	if len(stack) != 2 {
+		t.Fatalf("%d facets", len(stack))
+	}
+	if stack[0].flipped || !stack[1].flipped {
+		t.Errorf("the moved half should be flipped and on top: %+v", stack)
+	}
+	x, _, w, _ := bounds(append(stack[0].poly, stack[1].poly...))
+	if x != 0 || w != 10 {
+		t.Errorf("should lie over the hoist half: x=%v w=%v", x, w)
+	}
+	// The fly end's corner lands back on the hoist's.
+	if got := stack[1].place.apply(vec{20, 0}); !near(got, vec{0, 0}) {
+		t.Errorf("fly corner went to %v", got)
+	}
+}
+
+func TestFoldDirections(t *testing.T) {
+	under := foldedFacets(t, `fold f { under along=hoist at=10 move=fly; }`)
+	if !under[0].flipped || under[1].flipped {
+		t.Errorf("under should put the moved half at the back: %+v", under)
+	}
+	tuck := foldedFacets(t, `fold f { tuck along=hoist at=10 move=fly; }`)
+	if len(tuck) != 1 || tuck[0].flipped {
+		t.Errorf("a tuck should hide the moved part: %+v", tuck)
+	}
+}
+
+// Folding twice over reverses the moved layers: what was on top ends up lowest.
+func TestFoldStacksInReverse(t *testing.T) {
+	stack := foldedFacets(t, `fold f { over along=hoist at=10 move=fly; over along=fly at=5 move=bottom; }`)
+	if len(stack) != 4 {
+		t.Fatalf("%d facets", len(stack))
+	}
+	// Kept: the upper halves, back then front. Moved: their lower halves, with the one
+	// that was on top flipping face up again and landing lowest.
+	want := []bool{false, true, false, true}
+	for i, f := range stack {
+		if f.flipped != want[i] {
+			t.Errorf("facet %d flipped = %v, want %v", i, f.flipped, want[i])
+		}
+	}
+}
+
+func TestFoldDiagonal(t *testing.T) {
+	stack := foldedFacets(t, `fold f { over through="20 0 10 10" move="20 10"; }`)
+	if len(stack) != 2 {
+		t.Fatalf("%d facets", len(stack))
+	}
+	// The lower fly corner lands on the top edge.
+	if got := stack[1].place.apply(vec{20, 10}); !near(got, vec{10, 0}) {
+		t.Errorf("corner went to %v", got)
+	}
+}
+
+func TestFoldRendering(t *testing.T) {
+	out := render(t, foldHeader+`fold f { over along=hoist at=10 move=fly; }`, Options{Fold: "f"})
+	if !strings.Contains(out, `viewBox="0 0 10 10"`) {
+		t.Errorf("should crop to the folded flag: %s", out)
+	}
+	if !strings.Contains(out, `<use href="#`) || !strings.Contains(out, `matrix(-1 0 0 1 20 0)`) {
+		t.Errorf("should place artwork through each facet: %s", out)
+	}
+	assertWellFormed(t, []byte(out))
+	first := render(t, foldHeader+`fold f { over along=hoist at=10 move=fly; over along=fly at=5 move=top; }`, Options{Fold: "f", FoldStep: 1})
+	if !strings.Contains(first, `viewBox="0 0 10 10"`) {
+		t.Errorf("should stop after the step asked for: %s", first)
+	}
+}
+
+func TestFoldUsesTheFlagsOwnReverse(t *testing.T) {
+	out := render(t, foldHeader+"reverse {\n  field b\n}\n"+`fold f { over along=hoist at=10 move=fly; }`, Options{Fold: "f"})
+	if !strings.Contains(out, "#445566") || strings.Count(out, "<use") != 2 {
+		t.Errorf("flipped facets should show the back: %s", out)
+	}
+}
+
+func TestFoldRefusals(t *testing.T) {
+	bad := []struct{ name, fold, want string }{
+		{"crease misses the flag", `fold f { over along=hoist at=30 move=fly; }`, "nothing is on the side"},
+		{"everything moves", `fold f { over along=hoist at=30 move=hoist; }`, "nothing is left"},
+		{"point on the crease", `fold f { over through="0 0 1 1" move="5 5"; }`, "on its crease"},
+		{"wrong side name", `fold f { over along=hoist at=5 move=top; }`, "moves hoist or fly"},
+		{"bad numbers", `fold f { over through="1 2" move="3 4"; }`, "4 numbers"},
+		{"no crease", `fold f { over move=top; }`, "needs along"},
+		{"no steps", `fold f { description "x"; }`, "at least one step"},
+	}
+	for _, tt := range bad {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := Parse(strings.NewReader(foldHeader+tt.fold), "test")
+			if err == nil || !strings.Contains(err.Error(), tt.want) {
+				t.Errorf("err = %v, want %q", err, tt.want)
+			}
+		})
+	}
+	f := parse(t, foldHeader+"variant v { from rotate; }\n"+`fold f { over along=hoist at=10 move=fly; }`)
+	var out bytes.Buffer
+	if err := f.WriteSVG(&out, Options{Fold: "nope"}); err == nil {
+		t.Error("unknown fold accepted")
+	}
+	if err := f.WriteSVG(&out, Options{Fold: "f", Variant: "v"}); err == nil {
+		t.Error("a fold of a turned variant was accepted")
+	}
+}
+
+func TestFinishedUSFoldIsABlueTriangle(t *testing.T) {
+	src, err := os.ReadFile("../flags/united-states.kdl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := parse(t, string(src))
+	shape, err := f.foldShape()
+	if err != nil {
+		t.Fatal(err)
+	}
+	stack, err := foldFacets(shape, f.Folds["triangle"], 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var all []vec
+	for _, fc := range stack {
+		all = append(all, fc.poly...)
+	}
+	_, _, w, h := bounds(all)
+	if math.Abs(w-h) > 1e-6 {
+		t.Errorf("finished shape is %v by %v, not a right triangle's square bounds", w, h)
+	}
+	// Every point visible on top has to come from the canton, within 9.88 of the hoist.
+	top := stack[len(stack)-1]
+	det := top.place.a*top.place.d - top.place.b*top.place.c
+	for _, p := range top.poly {
+		q := p.sub(vec{top.place.e, top.place.f})
+		flat := vec{(top.place.d*q.x - top.place.c*q.y) / det, (top.place.a*q.y - top.place.b*q.x) / det}
+		if flat.x > 9.88+1e-6 || flat.y > 7+1e-6 {
+			t.Errorf("top facet shows %v, outside the canton", flat)
+		}
+	}
+}
+
 func TestDeepNestingRejected(t *testing.T) {
 	src := header + strings.Repeat("group {\n", maxDepth+1) + "field a\n" + strings.Repeat("}\n", maxDepth+1)
 	if _, err := Parse(strings.NewReader(src), "test"); err == nil || !strings.Contains(err.Error(), "nested") {
@@ -1219,6 +1501,7 @@ func FuzzParse(f *testing.F) {
 	f.Add(header + `emblem { along bend; charge rect a { fly 1; hoist 2; repeat line count=2 fly=3; cut { disc { radius 1; }; }; }; }`)
 	f.Add(header + `border a 1 outside` + "\n" + `field a`)
 	f.Add(header + `panel { side hoist; width 2; edge zigzag depth=1 count=3; rays a b { count 5; measure edge; }; }`)
+	f.Add(header + "field a\nfold f { over along=hoist at=5 move=fly; under through=\"0 0 1 1\" move=\"0 1\"; tuck along=fly at=2 move=top; }\n")
 	f.Add(header + `pall a { width 1; }` + "\n" + `pile b { depth 1; }` + "\n" + `quarters a b a b { diagonal; }` + "\n" + `checks a b { rows 2; columns 2; }`)
 	f.Add(header + `charge sun a { radius 2; disc 1; }` + "\n" + `charge crescent a { radius 2; inner 2; offset 1; }`)
 	f.Add(header + "bars a b { edge wavy depth=1 period=2; }\nadapt { wider extend; narrower hoist-center; }\nvariant v { from rotate; upright; ratio 3; }\nreverse { field a; }\n")
@@ -1233,7 +1516,13 @@ func FuzzParse(f *testing.F) {
 			return
 		}
 		assertWellFormed(t, out.Bytes())
-		for _, opts := range []Options{{Ratio: 1}, {Ratio: 3}, {Side: "reverse"}} {
+		for name := range flag.Folds {
+			out.Reset()
+			if err := flag.WriteSVG(&out, Options{Fold: name}); err == nil {
+				assertWellFormed(t, out.Bytes())
+			}
+		}
+		for _, opts := range []Options{{Ratio: 1}, {Ratio: 3}, {Side: "reverse"}, {Ratio: 5, Fit: "pad"}} {
 			out.Reset()
 			if err := flag.WriteSVG(&out, opts); err == nil {
 				assertWellFormed(t, out.Bytes())

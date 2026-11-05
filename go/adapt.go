@@ -401,17 +401,31 @@ func view(kind string, x0, y0, width, tall float64) (transform, upright string) 
 	return "", ""
 }
 
-// resolve applies a side, a variant and a proportion to the flag.
-func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror bool, err error) {
+// resolve applies a side, a variant and a proportion to the flag. A non-zero canvas
+// is the proportion to pad the result to.
+func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror bool, canvas float64, err error) {
 	out := *f
 	ratio := opts.Ratio
 	turn = "none"
+	fail := func(err error) (*Flag, string, bool, bool, float64, error) {
+		return nil, "", false, false, 0, err
+	}
 	var variant *Variant
 	if opts.Variant != "" {
 		var ok bool
 		if variant, ok = f.Variants[opts.Variant]; !ok {
-			return nil, "", false, false, fmt.Errorf("%s has no variant %q", f.Meta.Name, opts.Variant)
+			return fail(fmt.Errorf("%s has no variant %q", f.Meta.Name, opts.Variant))
 		}
+	}
+	switch opts.Fit {
+	case "", "error", "pad":
+	default:
+		return fail(fmt.Errorf("unknown fit %q", opts.Fit))
+	}
+	switch opts.Align {
+	case "", "start", "center", "end":
+	default:
+		return fail(fmt.Errorf("unknown align %q", opts.Align))
 	}
 	switch opts.Side {
 	case "", "obverse":
@@ -422,7 +436,7 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 			mirror = true
 		}
 	default:
-		return nil, "", false, false, fmt.Errorf("unknown side %q", opts.Side)
+		return fail(fmt.Errorf("unknown side %q", opts.Side))
 	}
 	if variant != nil {
 		turn, upright = variant.From, variant.Upright
@@ -440,11 +454,37 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 		}
 	}
 	if ratio == 0 {
-		return &out, turn, upright, mirror, nil
+		return &out, turn, upright, mirror, 0, nil
+	}
+	if opts.Fit == "pad" {
+		adapted, err := out.withRatio(out.nearestRatio(ratio))
+		if err != nil {
+			// The rules allow that proportion, but this design can't reach it.
+			adapted = &out
+		}
+		return adapted, turn, upright, mirror, ratio, nil
 	}
 	adapted, err := out.withRatio(ratio)
 	if err != nil {
-		return nil, "", false, false, err
+		return fail(err)
 	}
-	return adapted, turn, upright, mirror, nil
+	return adapted, turn, upright, mirror, 0, nil
+}
+
+// nearestRatio finds the proportion closest to a target that the flag's rules allow.
+func (f *Flag) nearestRatio(target float64) float64 {
+	current := f.Fly / f.Hoist
+	if f.Adapt == nil {
+		return current
+	}
+	if target > current && f.Adapt.Wider == "" || target < current && f.Adapt.Narrower == "" {
+		return current
+	}
+	if f.Adapt.Min > 0 {
+		target = max(target, f.Adapt.Min)
+	}
+	if f.Adapt.Max > 0 {
+		target = min(target, f.Adapt.Max)
+	}
+	return target
 }

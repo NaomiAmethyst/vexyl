@@ -9,8 +9,14 @@ meta {
   source "https://en.wikipedia.org/wiki/Flag_of_Sweden"
 }
 palette {
-  blue "#005583"
-  yellow "#ffc200"
+  blue "#005583" {
+    ncs "4055-R95B"
+    pantone "301 C"
+  }
+  yellow "#ffc200" {
+    ncs "0580-Y10R"
+    pantone "116 C"
+  }
 }
 proportion hoist=10 fly=16
 

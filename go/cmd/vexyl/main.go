@@ -9,7 +9,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"maps"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -19,6 +21,7 @@ import (
 const usage = `usage:
   vexyl render [options] FILE   render a flag to SVG
   vexyl check FILE...           validate flags
+  vexyl info FILE               list a flag's details, colors, variants and folds
 
 render options:
   -o FILE         write to a file instead of standard output
@@ -26,6 +29,11 @@ render options:
   -ratio H:F      another proportion, by the flag's adapt rules, such as 1:2
   -variant NAME   one of the flag's variants, such as vertical or banner
   -side SIDE      obverse or reverse
+  -fit FIT        error, the default, or pad with transparency if the flag
+                  can't reach the ratio
+  -align WHERE    place a padded flag: left, right, top, bottom or center
+  -fold NAME      show one of the flag's folds
+  -fold-step N    stop the fold after N steps
 
 FILE can be - for standard input.
 `
@@ -46,6 +54,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 		return render(args[1:], stdin, stdout)
 	case "check":
 		return check(args[1:], stdin)
+	case "info":
+		return info(args[1:], stdin, stdout)
 	case "help", "-h", "--help":
 		_, err := io.WriteString(stdout, usage)
 		return err
@@ -60,6 +70,10 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	ratio := fs.String("ratio", "", "another proportion, as `hoist:fly`")
 	variant := fs.String("variant", "", "a variant's `name`")
 	side := fs.String("side", "", "obverse or reverse")
+	fit := fs.String("fit", "", "error or pad")
+	align := fs.String("align", "", "left, right, top, bottom or center")
+	fold := fs.String("fold", "", "a fold's `name`")
+	foldStep := fs.Int("fold-step", 0, "stop the fold after this many steps")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -78,7 +92,12 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	opts := vexyl.Options{Height: *height, Ratio: proportion, Variant: *variant, Side: *side}
+	where, ok := map[string]string{"": "", "left": "start", "top": "start", "start": "start", "center": "center", "right": "end", "bottom": "end", "end": "end"}[*align]
+	if !ok {
+		return fmt.Errorf("-align must be left, right, top, bottom or center, got %q", *align)
+	}
+	opts := vexyl.Options{Height: *height, Ratio: proportion, Variant: *variant, Side: *side,
+		Fit: *fit, Align: where, Fold: *fold, FoldStep: *foldStep}
 	if err := doc.WriteSVG(&out, opts); err != nil {
 		return err
 	}
@@ -101,6 +120,39 @@ func parseRatio(text string) (float64, error) {
 		return 0, fmt.Errorf("-ratio must look like 1:2, hoist then fly, got %q", text)
 	}
 	return fly / hoist, nil
+}
+
+func info(paths []string, stdin io.Reader, stdout io.Writer) error {
+	if len(paths) != 1 {
+		return fmt.Errorf("info needs one file\n%s", usage)
+	}
+	doc, err := load(paths[0], stdin)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(stdout, "name: %s\n", doc.Meta.Name)
+	if doc.Meta.Version != "" {
+		fmt.Fprintf(stdout, "version: %s\n", doc.Meta.Version)
+	}
+	if doc.Meta.Date != "" {
+		fmt.Fprintf(stdout, "date: %s\n", doc.Meta.Date)
+	}
+	fmt.Fprintf(stdout, "proportion: %v:%v\n", doc.Hoist, doc.Fly)
+	fmt.Fprintln(stdout, "colors:")
+	for _, name := range slices.Sorted(maps.Keys(doc.Palette)) {
+		fmt.Fprintf(stdout, "  %s %s", name, doc.Palette[name])
+		for _, ref := range doc.ColorRefs[name] {
+			fmt.Fprintf(stdout, ", %s %s", ref.System, ref.Value)
+		}
+		fmt.Fprintln(stdout)
+	}
+	if len(doc.Variants) > 0 {
+		fmt.Fprintf(stdout, "variants: %s\n", strings.Join(slices.Sorted(maps.Keys(doc.Variants)), ", "))
+	}
+	if len(doc.Folds) > 0 {
+		fmt.Fprintf(stdout, "folds: %s\n", strings.Join(slices.Sorted(maps.Keys(doc.Folds)), ", "))
+	}
+	return nil
 }
 
 func check(paths []string, stdin io.Reader) error {

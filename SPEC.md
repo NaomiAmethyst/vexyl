@@ -83,6 +83,7 @@ define ...           optional and repeatable, §9
 reverse ...          optional, §10
 adapt { ... }        optional, §11
 variant ...          optional and repeatable, §12
+fold ...             optional and repeatable, §13
 ```
 
 A renderer MUST reject an unknown format version, unknown nodes and unknown
@@ -95,6 +96,8 @@ would produce a wrong flag.
 |---|---|---|
 | `name` | yes | The flag's name |
 | `description` | no | Prose description |
+| `version` | no | Names this version of the flag, such as `"50-star"` |
+| `date` | no | When this version took effect: `YYYY`, `YYYY-MM` or `YYYY-MM-DD` |
 | `designer` | no, repeatable | Who designed the flag |
 | `design-rights` | no | Rights in the design, as free text or an SPDX ID |
 | `encoder` | no, repeatable | Who wrote this file |
@@ -105,7 +108,31 @@ A design and its encoding can have different owners, so they are separate.
 
 ### 4.2 palette
 
-Each child names a color: `gold "#fcd116"`. Values MUST be `#rrggbb`.
+Each child names a color: `gold "#fcd116"`. Values MUST be `#rrggbb`, in sRGB, and
+that's what's drawn on screen.
+
+A color can also give its value in other systems, for print, cloth and manufacturing.
+All of them are optional:
+
+```kdl
+palette {
+  blue "#005583" {
+    ncs "4055-R95B"
+    pantone "301 C"
+    cmyk 100 60 0 40
+    dye "Example Blue, 50 parts per 1000"
+    reference "CIE xyY" "0.1556 0.1354 6.5"
+  }
+}
+```
+
+The named systems are `pantone`, `ncs`, `ral`, `munsell`, `dye` and `thread`, each with a
+string; `cmyk`, with four numbers from 0 to 100; and `reference`, with the name of any
+other system and a value. `dye` and `reference` can repeat.
+
+These are records of what a flag's specification says. Renderers MUST NOT draw from them
+or convert between systems, because such conversions are approximate and can be proprietary.
+Libraries SHOULD make them available, so that tools can pass them on.
 
 Layers refer to colors only by name. A color used but not defined is an error.
 
@@ -833,6 +860,42 @@ under every rule. Under `extend`, one anchored `start` keeps its place from the 
 `bars` can take `grow N...`, which shares out the change between them by these weights
 instead. Canada's pale would stay its own width with `grow 1 0 1`.
 
+### 11.1 Asking for a proportion
+
+Rendering takes a proportion, along with how to treat one the flag can't reach:
+
+| Option | Values | Meaning |
+|---|---|---|
+| `ratio` | A number | The proportion wanted, as fly divided by hoist |
+| `fit` | `error` (default), `pad` | What to do if the flag can't reach it |
+| `align` | `start`, `center` (default), `end` | Where a padded flag sits: left or top, the middle, or right or bottom |
+
+A flag that can't reach a proportion MUST be refused by default, so that nothing distorts
+or silently changes shape. With `pad`, a renderer draws the flag at the nearest proportion
+its rules allow, then widens the canvas to the one asked for, leaving the rest transparent:
+
+```
+function nearest(flag, target):
+    current = flag.fly / flag.hoist
+    rule = flag.adapt.wider if target > current else flag.adapt.narrower
+    if rule is missing: return current
+    return target limited to flag.adapt.range
+
+function canvas(box, target, align):
+    share = 0 for start, 0.5 for center, 1 for end
+    if box.width / box.height < target:
+        extra = box.height * target - box.width
+        box.x = box.x - extra * share
+        box.width = box.width + extra
+    else:
+        extra = box.width / target - box.height
+        box.y = box.y - extra * share
+        box.height = box.height + extra
+```
+
+If the rules allow the nearest proportion but the design can't reach it, as when a cut
+would remove a cross's arm, the flag is padded from its own proportion instead.
+
 ## 12. Variants
 
 A `variant` is a named form of the flag, such as a vertical or banner one. Its rules
@@ -873,14 +936,76 @@ so it turns with the flag.
 Rendering takes a variant's name, a side and a proportion as options. Asking for a
 proportion overrides a variant's `ratio`.
 
-## 13. Output
+## 13. Folding
+
+A `fold` is a named way to fold the flag, for storage or ceremony. It isn't a `variant`,
+because a variant is another form of the flag, while any form can be folded. Few flags
+have an official way to fold, so `source` and `description` should say where one comes from.
+
+```kdl
+fold storage {
+  description "In half lengthwise, then toward the hoist"
+  source "https://example.test/how-to-fold"
+  over along=fly at=5 move=bottom
+  under along=hoist at=10 move=fly
+}
+```
+
+Each step folds everything on one side of a crease, all layers at once:
+
+| Step | Effect |
+|---|---|
+| `over` | The moving part comes toward the viewer and lands on top |
+| `under` | The moving part goes behind |
+| `tuck` | The moving part goes inside the fold, out of sight |
+
+A crease is written `along=fly at=H move=top|bottom`, `along=hoist at=F move=hoist|fly`, or
+for any line, `through="A B C D" move="E F"`, where the line runs through two points and the
+part holding a third moves. Positions are where the flag lies at that step, not where those
+points were on the flat flag.
+
+Only flat folds are modeled. A step MUST have something on both sides of its crease.
+
+```
+function fold(shape, steps):
+    stack = [facet(polygon = shape, place = identity, flipped = false)]   // back to front
+    for step in steps:
+        mirror = reflection across step's crease
+        kept, moved = [], []
+        for f in stack:
+            keep the part of f on the far side of the crease in kept
+            add the part on the moving side to moved, with
+                polygon = mirror(polygon), place = place then mirror, flipped = not flipped
+        reverse moved
+        case step.kind:
+            over:  stack = kept + moved
+            under: stack = moved + kept
+            tuck:  stack = kept
+    return stack
+```
+
+To draw a folded flag, paint each facet from back to front: the flag's artwork through
+`place`, clipped to the facet's polygon. Because `place` mirrors a flipped facet, the flag's
+default reverse needs nothing more. A flag with its own `reverse` paints that on flipped
+facets instead, first mirrored across the flag so that it's in the same coordinates:
+
+```
+(x, y) -> (fly - x, y)
+```
+
+Renderers SHOULD mark each facet's edge with a faint line so the folds can be seen. The
+image is cropped to the facets' bounds. Rendering takes a fold's name and optionally a number
+of steps to stop after, which makes step-by-step instructions. A fold can't be applied
+to a turned variant.
+
+## 14. Output
 
 Renderers targeting SVG or a similar format SHOULD make any generated IDs unique
 to the document, for example with a hash of its source. Several flags are often
 inlined in one page, where IDs share a single namespace and a collision would
 make one flag use another's clip paths.
 
-## 14. Limits
+## 15. Limits
 
 So that a small document can't demand unbounded work, a renderer MUST accept and
 MAY reject beyond these limits:
@@ -890,7 +1015,7 @@ MAY reject beyond these limits:
 
 Numbers MUST be finite, and renderers MAY reject magnitudes above 1e12.
 
-## 15. Open questions
+## 16. Open questions
 
 [`docs/missing-from-spec.md`](docs/missing-from-spec.md) records the survey behind much
 of this format's vocabulary.

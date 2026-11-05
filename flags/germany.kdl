@@ -24,3 +24,12 @@ adapt {
 variant hanging {
   from transpose
 }
+
+// A generic way to fold a striped flag for storage, not any official procedure.
+fold storage {
+  description "In half lengthwise twice, then in half twice toward the hoist"
+  under along=fly at=1.5 move=bottom
+  under along=fly at=0.75 move=bottom
+  over along=hoist at=2.5 move=fly
+  over along=hoist at=1.25 move=fly
+}

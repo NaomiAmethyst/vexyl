@@ -10,8 +10,14 @@ meta {
   source "https://en.wikipedia.org/wiki/Flag_of_Europe"
 }
 palette {
-  blue "#003399"
-  gold "#ffcc00"
+  blue "#003399" {
+    pantone "Reflex Blue"
+    cmyk 100 80 0 0
+  }
+  gold "#ffcc00" {
+    pantone "Yellow"
+    cmyk 0 21 100 0
+  }
 }
 proportion hoist=18 fly=27
 

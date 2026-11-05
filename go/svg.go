@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -29,6 +30,16 @@ type Options struct {
 	Variant string
 	// Side is obverse, the default, or reverse.
 	Side string
+	// Fit says what happens when a flag can't reach Ratio: error, the default, or
+	// pad, which draws it as near as it can and leaves the rest transparent.
+	Fit string
+	// Align places a padded flag: start, for the left or top; center, the default;
+	// or end, for the right or bottom.
+	Align string
+	// Fold names one of the flag's folds, to render it folded.
+	Fold string
+	// FoldStep stops a fold after that many steps, or finishes it if that's 0.
+	FoldStep int
 }
 
 // WriteSVG renders the flag as a standalone SVG document.
@@ -38,15 +49,29 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 		height = DefaultHeight
 	}
 	original := f
-	f, turn, upright, mirror, err := f.resolve(opts)
+	f, turn, upright, mirror, canvas, err := f.resolve(opts)
 	if err != nil {
 		return err
 	}
 	r := &renderer{flag: f, idPrefix: original.idPrefix}
-	if opts.Ratio != 0 || opts.Variant != "" || opts.Side != "" {
+	if opts != (Options{Height: opts.Height}) {
 		// A page can show several forms of one flag, which mustn't share definitions.
-		sum := sha256.Sum256([]byte(fmt.Sprintf("%v|%s|%s", opts.Ratio, opts.Variant, opts.Side)))
+		sum := sha256.Sum256([]byte(fmt.Sprintf("%v|%s|%s|%s|%s|%s|%d", opts.Ratio, opts.Variant, opts.Side, opts.Fit, opts.Align, opts.Fold, opts.FoldStep)))
 		r.idPrefix += hex.EncodeToString(sum[:2]) + "-"
+	}
+	if opts.Fold != "" {
+		fold, ok := f.Folds[opts.Fold]
+		if !ok {
+			return fmt.Errorf("%s has no fold %q", f.Meta.Name, opts.Fold)
+		}
+		if turn != "none" {
+			return errors.New("a fold can't be applied to a turned variant")
+		}
+		if err := r.writeFolded(f, fold, opts, height); err != nil {
+			return err
+		}
+		_, err = w.Write(r.out.Bytes())
+		return err
 	}
 	x0, y0, width, tall := 0.0, 0.0, f.Fly, f.Hoist
 	var outer []vec
@@ -68,6 +93,26 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	if upright {
 		r.upright = undo
 	}
+	if canvas != 0 {
+		// The canvas ratio is the design's, so a turned flag's is the other way up.
+		want := canvas
+		if turn != "none" {
+			want = 1 / canvas
+		}
+		share := map[string]float64{"start": 0, "end": 1}[opts.Align]
+		if opts.Align == "" || opts.Align == "center" {
+			share = 0.5
+		}
+		if vw/vh < want {
+			extra := vh*want - vw
+			vx -= extra * share
+			vw += extra
+		} else {
+			extra := vw/want - vh
+			vy -= extra * share
+			vh += extra
+		}
+	}
 	r.line(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s" width="%s" height="%s">`,
 		num(vx), num(vy), num(vw), num(vh), num(height*vw/vh), num(height))
 	r.depth++
@@ -80,7 +125,22 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 		r.depth++
 	}
 
-	if outer != nil {
+	r.flagArt(f)
+	if transform != "" {
+		r.depth--
+		r.line(`</g>`)
+	}
+	r.depth--
+	r.line(`</svg>`)
+	_, err = w.Write(r.out.Bytes())
+	return err
+}
+
+// flagArt paints a flag's outside border, then everything within its outline.
+func (r *renderer) flagArt(f *Flag) {
+	if f.Border != nil && f.BorderOutside {
+		// Worked out once for its bounds, so this can't fail here.
+		outer, _ := offsetPolygon(f.boundary(), f.Border.Width)
 		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.fill(f.Border.Color, nil)))
 	}
 	root := region{w: f.Fly, h: f.Hoist}
@@ -105,14 +165,6 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	}
 	r.depth--
 	r.line(`</g>`)
-	if transform != "" {
-		r.depth--
-		r.line(`</g>`)
-	}
-	r.depth--
-	r.line(`</svg>`)
-	_, err = w.Write(r.out.Bytes())
-	return err
 }
 
 func bounds(poly []vec) (x, y, width, height float64) {

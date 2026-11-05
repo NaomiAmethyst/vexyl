@@ -79,6 +79,42 @@ func TestRenderOptions(t *testing.T) {
 	}
 }
 
+func TestRenderPaddedAndFolded(t *testing.T) {
+	var out bytes.Buffer
+	if err := run([]string{"render", "-ratio", "1:4", "-fit", "pad", "-align", "left", "-height", "10", sweden}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), `width="40" height="10"`) {
+		t.Errorf("unexpected output: %s", out.String()[:200])
+	}
+	out.Reset()
+	if err := run([]string{"render", "-fold", "triangle", "-fold-step", "1", "../../../flags/united-states.kdl"}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "<use") {
+		t.Errorf("unexpected output: %s", out.String()[:200])
+	}
+}
+
+func TestInfo(t *testing.T) {
+	var out bytes.Buffer
+	if err := run([]string{"info", "../../../flags/united-states.kdl"}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"name: United States", "version: 50-star", "date: 1960-07-04", "variants: vertical", "folds: triangle"} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("no %q in %s", want, out.String())
+		}
+	}
+	out.Reset()
+	if err := run([]string{"info", "../../../flags/sweden.kdl"}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "ncs 4055-R95B") {
+		t.Errorf("no color reference in %s", out.String())
+	}
+}
+
 func TestErrors(t *testing.T) {
 	tests := []struct {
 		name string
@@ -94,6 +130,9 @@ func TestErrors(t *testing.T) {
 		{"check no file", []string{"check"}, "at least one"},
 		{"check missing", []string{"check", "no-such.kdl"}, "1 of 1"},
 		{"bad ratio", []string{"render", "-ratio", "wide", sweden}, "hoist then fly"},
+		{"bad align", []string{"render", "-align", "up", sweden}, "-align must be"},
+		{"unknown fold", []string{"render", "-fold", "nope", sweden}, "no fold"},
+		{"info no file", []string{"info"}, "one file"},
 		{"unknown variant", []string{"render", "-variant", "nope", sweden}, "no variant"},
 		{"unknown side", []string{"render", "-side", "edge", sweden}, "unknown side"},
 	}
