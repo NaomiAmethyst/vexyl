@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-const sweden = "../../flags/sweden.kdl"
+const sweden = "../../../flags/sweden.kdl"
 
 func TestRenderToStdout(t *testing.T) {
 	var out bytes.Buffer
@@ -64,7 +64,7 @@ func TestRenderOptions(t *testing.T) {
 		t.Errorf("unexpected output: %s", out.String())
 	}
 	out.Reset()
-	if err := run([]string{"render", "-variant", "vertical", "-height", "190", "../../flags/united-states.kdl"}, nil, &out); err != nil {
+	if err := run([]string{"render", "-variant", "vertical", "-height", "190", "../../../flags/united-states.kdl"}, nil, &out); err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(out.String(), `width="100" height="190"`) {

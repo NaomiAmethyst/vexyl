@@ -7,26 +7,26 @@ DESTDIR ?=
 
 GO      ?= go
 
-SOURCES := $(shell find . -name '*.go') go.mod go.sum
+SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
 .PHONY: all test check fuzz install uninstall clean
 
 all: vexyl
 
 vexyl: $(SOURCES)
-	$(GO) build -trimpath -o $@ ./cmd/vexyl
+	cd go && $(GO) build -trimpath -o ../$@ ./cmd/vexyl
 
 test:
-	$(GO) test ./...
+	cd go && $(GO) test ./...
 
 check: test
-	$(GO) vet ./...
+	cd go && $(GO) vet ./...
 	python3 -m unittest discover -s tools
-	@test -z "$$(gofmt -l .)" || { gofmt -l .; exit 1; }
+	@test -z "$$(gofmt -l go)" || { gofmt -l go; exit 1; }
 
 fuzz:
-	$(GO) test -run '^$$' -fuzz '^FuzzSanitize$$' -fuzztime 60s .
-	$(GO) test -run '^$$' -fuzz '^FuzzParse$$' -fuzztime 60s .
+	cd go && $(GO) test -run '^$$' -fuzz '^FuzzSanitize$$' -fuzztime 60s .
+	cd go && $(GO) test -run '^$$' -fuzz '^FuzzParse$$' -fuzztime 60s .
 
 install: vexyl
 	install -Dm755 vexyl $(DESTDIR)$(BINDIR)/vexyl

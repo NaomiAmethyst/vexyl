@@ -38,7 +38,7 @@ proportion hoist=10 fly=20
 `
 
 func TestGolden(t *testing.T) {
-	flags, _ := filepath.Glob("flags/*.kdl")
+	flags, _ := filepath.Glob("../flags/*.kdl")
 	extra, _ := filepath.Glob("testdata/*.kdl")
 	paths := append(flags, extra...)
 	if len(paths) == 0 {
@@ -415,7 +415,7 @@ func svgOf(t *testing.T, f *Flag) string {
 }
 
 func TestUSCantonHasFiftyStars(t *testing.T) {
-	src, err := os.ReadFile("flags/united-states.kdl")
+	src, err := os.ReadFile("../flags/united-states.kdl")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -426,7 +426,7 @@ func TestUSCantonHasFiftyStars(t *testing.T) {
 }
 
 func TestEUStarsStayUpright(t *testing.T) {
-	src, err := os.ReadFile("flags/european-union.kdl")
+	src, err := os.ReadFile("../flags/european-union.kdl")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -444,7 +444,7 @@ func TestEUStarsStayUpright(t *testing.T) {
 // Every full or fragmentary KDL example in the docs must be valid.
 func TestDocExamples(t *testing.T) {
 	block := regexp.MustCompile("(?s)```kdl\n(.*?)```")
-	for _, doc := range []string{"README.md", "SPEC.md"} {
+	for _, doc := range []string{"../README.md", "../SPEC.md"} {
 		src, err := os.ReadFile(doc)
 		if err != nil {
 			t.Fatal(err)
@@ -632,7 +632,7 @@ border a 1 outside`
 // Nepal's constitution gives the flag no ratio, only a construction. The known
 // 1:1.219 emerges once its border is added, so it's a check on the whole of it.
 func TestNepalConstruction(t *testing.T) {
-	src, err := os.ReadFile("flags/nepal.kdl")
+	src, err := os.ReadFile("../flags/nepal.kdl")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -651,7 +651,7 @@ func TestNepalConstruction(t *testing.T) {
 }
 
 func TestProgressChevronsRunWhiteToBlack(t *testing.T) {
-	src, err := os.ReadFile("flags/progress-pride.kdl")
+	src, err := os.ReadFile("../flags/progress-pride.kdl")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -705,7 +705,7 @@ func TestEmblemMaskCoversVisibleArea(t *testing.T) {
 }
 
 func TestSouthKoreaConstruction(t *testing.T) {
-	src, err := os.ReadFile("flags/south-korea.kdl")
+	src, err := os.ReadFile("../flags/south-korea.kdl")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -732,7 +732,7 @@ func TestSouthKoreaConstruction(t *testing.T) {
 // Imported flags are mechanical conversions, so they get no golden files, but they
 // have to stay valid as the format changes.
 func TestImportedFlagsRender(t *testing.T) {
-	paths, _ := filepath.Glob("flags/imported/*/*.kdl")
+	paths, _ := filepath.Glob("../flags/imported/*/*.kdl")
 	for _, path := range paths {
 		src, err := os.ReadFile(path)
 		if err != nil {

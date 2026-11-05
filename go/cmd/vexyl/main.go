@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/NaomiAmethyst/vexyl"
+	vexyl "github.com/NaomiAmethyst/vexyl/go"
 )
 
 const usage = `usage:

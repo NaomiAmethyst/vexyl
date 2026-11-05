@@ -33,7 +33,7 @@ terms may apply to them.
 
 ```sh
 tools/fetch_flags.py CORPUS
-go build -o vexyl ./cmd/vexyl
+(cd go && go build -o ../vexyl ./cmd/vexyl)
 tools/import_flags.py CORPUS OUT ./vexyl flags/imported
 ```
 

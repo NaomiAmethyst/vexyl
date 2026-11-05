@@ -35,7 +35,7 @@ a tricolor can simply spread out. `variant` describes vertical, banner and other
 ## Use
 
 ```sh
-go install github.com/NaomiAmethyst/vexyl/cmd/vexyl@latest
+go install github.com/NaomiAmethyst/vexyl/go/cmd/vexyl@latest
 
 vexyl check flags/*.kdl
 vexyl render -o sweden.svg flags/sweden.kdl
@@ -49,7 +49,7 @@ vexyl render -variant vertical -o us-vertical.svg flags/united-states.kdl
 vexyl render -side reverse -o us-back.svg flags/united-states.kdl
 ```
 
-As a Go library:
+As a Go library, imported from `github.com/NaomiAmethyst/vexyl/go`:
 
 ```go
 flag, err := vexyl.Parse(file, "sweden.kdl")
@@ -63,8 +63,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
 
 - [`SPEC.md`](SPEC.md) is the language-neutral format specification, with its
   algorithms in pseudocode.
-- The root package and [`cmd/vexyl`](cmd/vexyl) are the Go reference
-  implementation.
+- [`go/`](go) is the Go reference implementation, with the `vexyl` command in
+  [`go/cmd/vexyl`](go/cmd/vexyl).
 - [`flags/`](flags) holds flags written by hand and checked against official
   sources where possible, with notes on what each relies on.
 - [`flags/imported/`](flags/imported) holds country and pride flags converted
@@ -76,8 +76,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
   `fetch_flags.py` and `import_flags.py` gather a corpus and check each result.
 
 Run the tests with `make check`, and the fuzzers with `make fuzz`. Golden output
-lives in `testdata/golden`; after an intended change, rewrite it with
-`go test . -update`.
+lives in `go/testdata/golden`; after an intended change, rewrite it by running
+`go test . -update` in `go/`.
 
 ## License
 

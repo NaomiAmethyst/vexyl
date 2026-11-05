@@ -1,4 +1,4 @@
-module github.com/NaomiAmethyst/vexyl
+module github.com/NaomiAmethyst/vexyl/go
 
 go 1.25.7
 
