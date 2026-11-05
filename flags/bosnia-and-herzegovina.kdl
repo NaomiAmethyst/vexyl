@@ -1,0 +1,26 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Bosnia and Herzegovina"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Bosnia_and_Herzegovina.svg"
+}
+palette {
+  blue "#002395"
+  yellow "#fecb00"
+  white "#ffffff"
+}
+proportion hoist=8 fly=16
+
+field blue
+pile yellow {
+  from top
+  base 4.24 12.24
+  tip 12.24 8
+}
+charge star white {
+  radius 0.76
+  at fly=2.8 hoist=-0.09
+  repeat line count=9 fly=1 hoist=1
+}

@@ -22,15 +22,11 @@ palette {
 proportion hoist=240 fly=360
 
 field red
-charge disc white {
+charge crescent white {
   radius 60
+  inner 48
+  offset 15
   at fly=120 hoist=120
-  cut {
-    disc {
-      radius 48
-      at fly=135 hoist=120
-    }
-  }
 }
 charge star white {
   radius 30

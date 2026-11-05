@@ -1,0 +1,28 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Timor-Leste"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_East_Timor.svg"
+}
+palette {
+  red "#da291c"
+  gold "#ffc72c"
+  black "#000000"
+  white "#ffffff"
+}
+proportion hoist=18 fly=36
+
+field red
+chevrons gold {
+  depth 18
+}
+chevrons black {
+  depth 12
+}
+charge star white {
+  radius 3
+  rotate -23.96
+  at fly=4 hoist=9
+}

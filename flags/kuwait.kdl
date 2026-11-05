@@ -1,0 +1,22 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Kuwait"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Kuwait.svg"
+}
+palette {
+  green "#007a3d"
+  white "#ffffff"
+  red "#ce1126"
+  black "#000000"
+}
+proportion hoist=6 fly=12
+
+bars green white red
+pile black {
+  from hoist
+  depth 3
+  flat 2
+}

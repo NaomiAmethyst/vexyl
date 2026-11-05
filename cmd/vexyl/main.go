@@ -10,16 +10,24 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/NaomiAmethyst/vexyl"
 )
 
 const usage = `usage:
-  vexyl render [-o FILE] [-height PIXELS] FILE   render a flag to SVG
-  vexyl check FILE...                            validate flags
+  vexyl render [options] FILE   render a flag to SVG
+  vexyl check FILE...           validate flags
 
-FILE can be - for standard input. Rendered SVG goes to standard output
-unless -o is given.
+render options:
+  -o FILE         write to a file instead of standard output
+  -height PIXELS  the image's height
+  -ratio H:F      another proportion, by the flag's adapt rules, such as 1:2
+  -variant NAME   one of the flag's variants, such as vertical or banner
+  -side SIDE      obverse or reverse
+
+FILE can be - for standard input.
 `
 
 func main() {
@@ -49,6 +57,9 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	fs := flag.NewFlagSet("render", flag.ContinueOnError)
 	output := fs.String("o", "", "output `file`")
 	height := fs.Float64("height", vexyl.DefaultHeight, "image height in `pixels`")
+	ratio := fs.String("ratio", "", "another proportion, as `hoist:fly`")
+	variant := fs.String("variant", "", "a variant's `name`")
+	side := fs.String("side", "", "obverse or reverse")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -63,7 +74,12 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 		return err
 	}
 	var out bytes.Buffer
-	if err := doc.WriteSVG(&out, vexyl.Options{Height: *height}); err != nil {
+	proportion, err := parseRatio(*ratio)
+	if err != nil {
+		return err
+	}
+	opts := vexyl.Options{Height: *height, Ratio: proportion, Variant: *variant, Side: *side}
+	if err := doc.WriteSVG(&out, opts); err != nil {
 		return err
 	}
 	if *output != "" {
@@ -71,6 +87,20 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	}
 	_, err = stdout.Write(out.Bytes())
 	return err
+}
+
+// parseRatio reads hoist:fly, as flag proportions are written, into fly over hoist.
+func parseRatio(text string) (float64, error) {
+	if text == "" {
+		return 0, nil
+	}
+	h, f, ok := strings.Cut(text, ":")
+	hoist, err1 := strconv.ParseFloat(h, 64)
+	fly, err2 := strconv.ParseFloat(f, 64)
+	if !ok || err1 != nil || err2 != nil || hoist <= 0 || fly <= 0 {
+		return 0, fmt.Errorf("-ratio must look like 1:2, hoist then fly, got %q", text)
+	}
+	return fly / hoist, nil
 }
 
 func check(paths []string, stdin io.Reader) error {

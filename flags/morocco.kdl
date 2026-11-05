@@ -1,0 +1,19 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Morocco"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Morocco.svg"
+}
+palette {
+  red "#c1272d"
+  green "#006233"
+}
+proportion hoist=60000 fly=90000
+
+field red
+charge star green {
+  radius 12692
+  lines 1426
+}

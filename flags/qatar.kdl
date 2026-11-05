@@ -1,0 +1,21 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Qatar"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Qatar.svg"
+}
+palette {
+  maroon "#8a1538"
+  white "#ffffff"
+}
+proportion hoist=18 fly=75
+
+field maroon
+panel {
+  side hoist
+  width 25
+  edge zigzag depth=6 count=9
+  field white
+}

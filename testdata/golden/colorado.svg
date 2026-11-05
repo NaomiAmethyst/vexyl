@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" width="900" height="600">
+  <title>Colorado</title>
+  <clipPath id="vx-d010c9b8-flag1">
+    <polygon points="0,0 1800,0 1800,1200 0,1200"/>
+  </clipPath>
+  <g clip-path="url(#vx-d010c9b8-flag1)">
+    <polygon points="0,0 1800,0 1800,1200 0,1200" fill="#00205b"/>
+    <polygon points="0,400 1800,400 1800,1200 0,1200" fill="#ffffff"/>
+    <polygon points="0,800 1800,800 1800,1200 0,1200" fill="#00205b"/>
+    <path d="M1130.873542 749.842637A400 400 0 1 1 1130.873542 450.157363L899.077578 543.809011A150 150 0 1 0 899.077578 656.190989Z" fill="#bf0a30"/>
+    <circle cx="760" cy="600" r="200" fill="#ffd700"/>
+  </g>
+</svg>

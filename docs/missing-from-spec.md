@@ -1,8 +1,10 @@
 # What the spec is missing
 
-This records what Vexyl needs before most flags can be written the way someone would
-describe them. **None of it is implemented yet.** The syntax here is a sketch, and the
-numbers in it show the shape of a file rather than checked constructions.
+This is the survey that determined what Vexyl needed for most flags to be written the
+way someone would describe them. **Everything it recommends has since been added**, and
+[`SPEC.md`](../SPEC.md) is the authority on it. The syntax here is the original sketch,
+and implementing it changed a few details, such as `rays` gaining `measure edge` after
+Seychelles' drawing showed its rays are spaced along the edge.
 
 ## The short answer
 

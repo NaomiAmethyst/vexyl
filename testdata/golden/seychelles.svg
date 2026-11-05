@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 3" width="1200" height="600">
+  <title>Seychelles</title>
+  <clipPath id="vx-e4fdf0b3-flag1">
+    <polygon points="0,0 6,0 6,3 0,3"/>
+  </clipPath>
+  <g clip-path="url(#vx-e4fdf0b3-flag1)">
+    <polygon points="0,0 6,0 6,3 0,3" fill="#002f6c"/>
+    <polygon points="0,3 0,0 2,0" fill="#002f6c"/>
+    <polygon points="0,3 2,0 4,0" fill="#fed141"/>
+    <polygon points="0,3 4,0 6,0 6,1" fill="#d22730"/>
+    <polygon points="0,3 6,1 6,2" fill="#ffffff"/>
+    <polygon points="0,3 6,2 6,3 6,3" fill="#007a33"/>
+  </g>
+</svg>

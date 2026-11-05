@@ -38,10 +38,10 @@
     </linearGradient>
     <polygon points="0,0 0,0.583095 34.028175,21 35,21 35,20.416905 0.971825,0" fill="url(#vx-4068f8ac-gradient6)"/>
     <polygon points="0,21 0,20.416905 34.028175,0 35,0 35,0.583095 0.971825,21" fill="url(#vx-4068f8ac-gradient6)"/>
-    <clipPath id="vx-4068f8ac-canton7">
+    <clipPath id="vx-4068f8ac-panel7">
       <polygon points="0,0 6,0 6,6 0,6"/>
     </clipPath>
-    <g clip-path="url(#vx-4068f8ac-canton7)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-4068f8ac-panel7)" style="isolation:isolate">
       <polygon points="0,0 6,0 6,6 0,6" fill="url(#vx-4068f8ac-gradient4)"/>
     </g>
     <polygon points="28,2 28.449028,3.381966 29.902113,3.381966 28.726543,4.236068 29.175571,5.618034 28,4.763932 26.824429,5.618034 27.273457,4.236068 26.097887,3.381966 27.550972,3.381966" fill="url(#vx-4068f8ac-gradient3)" stroke="url(#vx-4068f8ac-gradient3)" stroke-width="0.4" stroke-linejoin="miter" stroke-miterlimit="10"/>

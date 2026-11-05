@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 )
 
 type vec struct{ x, y float64 }
@@ -49,11 +50,7 @@ func (f *Flag) boundary() []vec {
 	if f.Outline == nil {
 		return rectPoly(0, 0, f.Fly, f.Hoist)
 	}
-	poly := make([]vec, len(f.Outline))
-	for i, p := range f.Outline {
-		poly[i] = vec{p.Fly, p.Hoist}
-	}
-	return poly
+	return f.Outline.points(f.Fly, f.Hoist)
 }
 
 // offsetPolygon moves a polygon's edges outward by a distance, keeping its
@@ -169,10 +166,27 @@ func barPolys(b *Bars, r region, exact func(i int) bool) [][]vec {
 	for i, part := range b.Ratio {
 		next := t + (hi-lo)*part/total
 		end := hi
-		if exact != nil && exact(i) {
+		isExact := exact != nil && exact(i)
+		if isExact {
 			end = next
 		}
-		polys = append(polys, clipConvex(stripPoly(c, dir, normal, t, end, reach), r))
+		if b.Line == nil {
+			polys = append(polys, clipConvex(stripPoly(c, dir, normal, t, end, reach), r))
+			t = next
+			continue
+		}
+		// A shaped edge isn't convex, so clipping is left to the region's own clip.
+		margin := b.Line.Depth + 1
+		near := []vec{c.add(normal.mul(lo - margin)).sub(dir.mul(reach)), c.add(normal.mul(lo - margin)).add(dir.mul(reach))}
+		if i > 0 {
+			near = waveEdge(c, dir, normal, t, axisSpan(r, b.Along), reach, b.Line)
+		}
+		far := []vec{c.add(normal.mul(hi + margin)).add(dir.mul(reach)), c.add(normal.mul(hi + margin)).sub(dir.mul(reach))}
+		if isExact && i < len(b.Ratio)-1 {
+			far = waveEdge(c, dir, normal, next, axisSpan(r, b.Along), reach, b.Line)
+			slices.Reverse(far)
+		}
+		polys = append(polys, append(near, far...))
 		t = next
 	}
 	return polys
@@ -191,6 +205,16 @@ func stripPoly(c, dir, normal vec, t0, t1, reach float64) []vec {
 // chevronPolys returns one polygon per color, from the outermost inward, which
 // is the order they paint in.
 func chevronPolys(ch *Chevrons, r region) [][]vec {
+	raw, _ := rawChevrons(ch, r)
+	for i, poly := range raw {
+		raw[i] = clipConvex(poly, r)
+	}
+	return raw
+}
+
+// rawChevrons returns each chevron's polygon reaching well past the region, and
+// each chevron alone between its apex and the next, for when gaps have to show.
+func rawChevrons(ch *Chevrons, r region) (nested, bands [][]vec) {
 	var origin, u, v vec
 	var edge float64
 	switch ch.From {
@@ -228,20 +252,33 @@ func chevronPolys(ch *Chevrons, r region) [][]vec {
 		point := origin.add(u.mul(pu)).add(v.mul(pv))
 		return r.center().add(point.sub(r.center()).rotate(ch.Rotate))
 	}
-	polys := make([][]vec, 0, len(apexes))
 	for i := len(apexes) - 1; i >= 0; i-- {
 		a := apexes[i]
 		armEnd := a - slope*reach
 		back := min(armEnd, 0) - reach
-		polys = append(polys, clipConvex([]vec{
+		nested = append(nested, []vec{
 			place(a, 0),
 			place(armEnd, reach),
 			place(back, reach),
 			place(back, -reach),
 			place(armEnd, -reach),
-		}, r))
+		})
+		if i == 0 {
+			bands = append(bands, nested[len(nested)-1])
+			continue
+		}
+		inner := apexes[i-1]
+		innerEnd := inner - slope*reach
+		bands = append(bands, []vec{
+			place(a, 0),
+			place(armEnd, reach),
+			place(innerEnd, reach),
+			place(inner, 0),
+			place(innerEnd, -reach),
+			place(armEnd, -reach),
+		})
 	}
-	return polys
+	return nested, bands
 }
 
 // bandPoly is a band's rectangle. It's clipped to the region unless it will be
@@ -280,6 +317,11 @@ type geom struct {
 	poly   []vec
 	// path is SVG path data, for shapes that polygons can't draw exactly.
 	path string
+	// evenodd is a path's fill rule.
+	evenodd bool
+	// transform places a path, whose scale strokes have to allow for.
+	transform string
+	scale     float64
 }
 
 func position(s *Shape, r region) vec {
@@ -297,6 +339,9 @@ func shapeGeom(s *Shape, center vec, extra float64) geom {
 	case "disc":
 		return geom{circle: true, c: center, r: s.Radius}
 	case "ring":
+		if s.HasArc {
+			return geom{path: ringArcPath(s, center, rotation)}
+		}
 		return geom{ring: true, c: center, r: s.Radius, inner: s.Inner}
 	case "rect":
 		x, y := s.Fly/2, s.Hoist/2
@@ -310,9 +355,21 @@ func shapeGeom(s *Shape, center vec, extra float64) geom {
 	case "triangle":
 		return geom{poly: placeAll(starPoints(3, s.Radius, 0), place)}
 	case "star":
+		if s.Lines > 0 {
+			return geom{path: starChords(s.Points, s.Radius, place)}
+		}
 		return geom{poly: placeAll(starPoints(s.Points, s.Radius, s.Inner), place)}
 	case "heart":
 		return geom{path: heartPath(s.Radius, s.Spread, place)}
+	case "crescent":
+		return geom{path: crescentPath(s.Radius, s.Inner, s.Offset, place)}
+	case "sun":
+		return geom{path: sunPath(s, center, place)}
+	case "lozenge":
+		x, y := s.Fly/2, s.Hoist/2
+		return geom{poly: placeAll([]vec{{0, -y}, {x, 0}, {0, y}, {-x, 0}}, place)}
+	case "path":
+		return pathGeom(s, center, rotation)
 	case "cardioid":
 		return geom{poly: placeAll(cardioidPoints(s.Radius), place)}
 	case "polygon":

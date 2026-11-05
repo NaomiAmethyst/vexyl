@@ -55,6 +55,30 @@ func TestRenderFromStdin(t *testing.T) {
 	}
 }
 
+func TestRenderOptions(t *testing.T) {
+	var out bytes.Buffer
+	if err := run([]string{"render", "-ratio", "1:2", "-height", "100", sweden}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), `width="200" height="100"`) {
+		t.Errorf("unexpected output: %s", out.String())
+	}
+	out.Reset()
+	if err := run([]string{"render", "-variant", "vertical", "-height", "190", "../../flags/united-states.kdl"}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), `width="100" height="190"`) {
+		t.Errorf("unexpected output: %s", out.String()[:200])
+	}
+	out.Reset()
+	if err := run([]string{"render", "-side", "reverse", sweden}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "matrix(-1 0 0 1 16 0)") {
+		t.Errorf("unexpected output: %s", out.String()[:200])
+	}
+}
+
 func TestErrors(t *testing.T) {
 	tests := []struct {
 		name string
@@ -69,6 +93,9 @@ func TestErrors(t *testing.T) {
 		{"missing file", []string{"render", "no-such.kdl"}, "no-such.kdl"},
 		{"check no file", []string{"check"}, "at least one"},
 		{"check missing", []string{"check", "no-such.kdl"}, "1 of 1"},
+		{"bad ratio", []string{"render", "-ratio", "wide", sweden}, "hoist then fly"},
+		{"unknown variant", []string{"render", "-variant", "nope", sweden}, "no variant"},
+		{"unknown side", []string{"render", "-side", "edge", sweden}, "unknown side"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

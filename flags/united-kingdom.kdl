@@ -1,6 +1,6 @@
-// The Union Flag at 1:2, on the usual 30 by 60 construction: a white saltire 6 wide
-// and a red one 4 wide, cut so that it shows only on one side of each white arm,
-// then a red cross 6 wide with a white edge of 2. There's no statutory construction
+// The Union Flag at 1:2, on the usual 30 by 60 construction: a white saltire 6 wide,
+// a red one showing 2 wide on one side of each diagonal, then a red cross 6 wide with
+// a white edge of 2. There's no statutory construction
 // sheet that was found; this follows the common drawing on Commons, which it matches.
 vexyl 1
 meta {
@@ -21,29 +21,18 @@ saltire white {
   width 6
 }
 
-// Counterchange: four triangles around the center, joined at it, keep the red to the
-// clockwise side of each arm.
 saltire red {
-  width 4
-  clip {
-    polygon {
-      point fly=30 hoist=15
-      point fly=60 hoist=15
-      point fly=60 hoist=30
-      point fly=30 hoist=15
-      point fly=30 hoist=30
-      point fly=0 hoist=30
-      point fly=30 hoist=15
-      point fly=0 hoist=15
-      point fly=0 hoist=0
-      point fly=30 hoist=15
-      point fly=30 hoist=0
-      point fly=60 hoist=0
-    }
-  }
+  width 2
+  counterchange
 }
 cross red {
   fly 27 6 27
   hoist 12 6 12
   fimbriate white 2
+}
+
+// The diagonals follow the corners, and the cross stays centered at its own width.
+adapt {
+  wider center
+  narrower center
 }

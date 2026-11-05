@@ -1,0 +1,21 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Benin"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Benin.svg"
+}
+palette {
+  yellow "#fcd116"
+  red "#e8112d"
+  green "#008751"
+}
+proportion hoist=600 fly=900
+
+bars yellow red
+panel {
+  side hoist
+  width 360
+  field green
+}

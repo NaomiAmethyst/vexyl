@@ -1,0 +1,26 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Saint Vincent and the Grenadines"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Saint_Vincent_and_the_Grenadines.svg"
+}
+palette {
+  blue "#002674"
+  yellow "#fcd022"
+  green "#007c2e"
+}
+proportion hoist=160 fly=240
+
+bars blue yellow green {
+  along hoist
+  ratio 1 2 1
+}
+charge lozenge green {
+  fly 30
+  hoist 51.962
+  at fly=102 hoist=77.943
+  at fly=138 hoist=77.943
+  at fly=120 hoist=109.119
+}

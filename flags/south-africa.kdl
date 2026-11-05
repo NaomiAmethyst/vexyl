@@ -1,0 +1,36 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "South Africa"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa.svg"
+}
+palette {
+  red "#e03c31"
+  blue "#001489"
+  white "#ffffff"
+  gold "#ffb81c"
+  black "#000000"
+  green "#007749"
+}
+proportion hoist=60 fly=90
+
+bars red blue
+pall white {
+  from hoist
+  width 20
+  junction 45
+}
+chevrons gold {
+  depth 45
+}
+chevrons black {
+  depth 26.9722
+  angle 33.6901
+}
+pall green {
+  from hoist
+  width 12
+  junction 45
+}

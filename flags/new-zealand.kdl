@@ -1,0 +1,53 @@
+// Sizes follow the drawing on Commons. Each star has the same white edge, whatever its size.
+vexyl 1
+meta {
+  name "New Zealand"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_New_Zealand.svg"
+}
+palette {
+  blue "#012169"
+  white "#ffffff"
+  red "#c8102e"
+}
+proportion hoist=600 fly=1200
+
+define union hoist=30 fly=60 {
+  field blue
+  saltire white {
+    width 6
+  }
+  saltire red {
+    width 2
+    counterchange
+  }
+  cross red {
+    fly 27 6 27
+    hoist 12 6 12
+    fimbriate white 2
+  }
+}
+
+field blue
+canton {
+  fly 600
+  hoist 300
+  use union
+}
+charge star red {
+  radius 31.545
+  at fly=900 hoist=120
+  at fly=761.362 hoist=259.484
+  fimbriate white 5
+}
+charge star red {
+  radius 26.288
+  at fly=1018.832 hoist=223.299
+  fimbriate white 5
+}
+charge star red {
+  radius 36.803
+  at fly=900 hoist=480
+  fimbriate white 5
+}

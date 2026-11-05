@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 140" width="1200" height="600">
+  <title>North Macedonia</title>
+  <clipPath id="vx-74575af6-flag1">
+    <polygon points="0,0 280,0 280,140 0,140"/>
+  </clipPath>
+  <g clip-path="url(#vx-74575af6-flag1)">
+    <polygon points="0,0 280,0 280,140 0,140" fill="#f8e92e"/>
+    <polygon points="140,70 140,0 154,0" fill="#f8e92e"/>
+    <polygon points="140,70 154,0 238,0" fill="#d82126"/>
+    <polygon points="140,70 238,0 280,0 280,0" fill="#f8e92e"/>
+    <polygon points="140,70 280,0 280,56" fill="#d82126"/>
+    <polygon points="140,70 280,56 280,84" fill="#f8e92e"/>
+    <polygon points="140,70 280,84 280,140 280,140" fill="#d82126"/>
+    <polygon points="140,70 280,140 238,140" fill="#f8e92e"/>
+    <polygon points="140,70 238,140 154,140" fill="#d82126"/>
+    <polygon points="140,70 154,140 126,140" fill="#f8e92e"/>
+    <polygon points="140,70 126,140 42,140" fill="#d82126"/>
+    <polygon points="140,70 42,140 0,140 0,140" fill="#f8e92e"/>
+    <polygon points="140,70 0,140 0,84" fill="#d82126"/>
+    <polygon points="140,70 0,84 0,56" fill="#f8e92e"/>
+    <polygon points="140,70 0,56 0,0 0,0" fill="#d82126"/>
+    <polygon points="140,70 0,0 42,0" fill="#f8e92e"/>
+    <polygon points="140,70 42,0 126,0" fill="#d82126"/>
+    <polygon points="140,70 126,0 140,0 140,0" fill="#f8e92e"/>
+    <circle cx="140" cy="70" r="22.5" fill="#d82126" stroke="#d82126" stroke-width="5" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <circle cx="140" cy="70" r="22.5" fill="#f8e92e"/>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Panama"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Panama.svg"
+}
+palette {
+  white "#ffffff"
+  red "#da121a"
+  blue "#072357"
+}
+proportion hoist=8 fly=12
+
+quarters white red blue white
+charge star blue {
+  radius 1.105
+  at fly=3 hoist=2.105
+}
+charge star red {
+  radius 1.105
+  at fly=9 hoist=6.105
+}

@@ -1,0 +1,21 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Bahrain"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Bahrain.svg"
+}
+palette {
+  white "#ffffff"
+  red "#da291c"
+}
+proportion hoist=60 fly=100
+
+field red
+panel {
+  side hoist
+  width 32.5
+  edge zigzag depth=15 count=5
+  field white
+}

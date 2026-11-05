@@ -1,0 +1,26 @@
+// Sizes follow the drawing on Commons. Hanging forms turn the stripes, with black at
+// the viewer's left, as the Commons hanging drawing shows.
+vexyl 1
+meta {
+  name "Germany"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Germany.svg"
+}
+palette {
+  black "#000000"
+  red "#dd0000"
+  gold "#ffce00"
+}
+proportion hoist=3 fly=5
+
+bars black red gold
+
+adapt {
+  wider scale
+  narrower scale
+}
+
+variant hanging {
+  from transpose
+}

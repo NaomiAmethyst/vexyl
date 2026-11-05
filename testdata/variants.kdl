@@ -1,0 +1,65 @@
+// An invented flag exercising adaptation, variants and a separate reverse.
+vexyl 1
+meta {
+  name "Variants Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+}
+proportion hoist=20 fly=30
+
+define mark {
+  path "M0 0H10V10H0Z" box="0 0 10 10"
+}
+
+bars night violet {
+  along hoist
+  ratio 1 1
+}
+panel {
+  side hoist
+  width 4
+  field gold
+}
+charge crescent white {
+  radius 4
+  inner 3
+  offset 1.5
+  at center
+}
+charge mark gold {
+  fly 2
+  hoist 2
+  at fly=2 hoist=2
+  anchor start
+}
+
+reverse {
+  field night
+}
+
+adapt {
+  range 1 3
+  wider extend
+  narrower cut
+}
+
+variant vertical {
+  from transpose
+  upright
+  ratio 2
+}
+
+variant banner {
+  from rotate
+  outline swallowtail {
+    depth 6
+  }
+}
+
+variant plain {
+  field violet
+}

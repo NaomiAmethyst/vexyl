@@ -1,0 +1,18 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "International code signal flag N"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:ICS_November.svg"
+}
+palette {
+  blue "#0000ff"
+  white "#ffffff"
+}
+proportion hoist=4 fly=4
+
+checks blue white {
+  rows 4
+  columns 4
+}

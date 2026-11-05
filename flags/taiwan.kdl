@@ -1,0 +1,28 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Taiwan"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Republic_of_China.svg"
+}
+palette {
+  red "#fe0000"
+  blue "#000094"
+  white "#ffffff"
+}
+proportion hoist=80 fly=120
+
+field red
+canton {
+  fly 60
+  hoist 40
+  field blue
+  charge sun white {
+    radius 15
+    disc 7.5
+    gap 1
+    points 12
+    spread 0.786
+  }
+}

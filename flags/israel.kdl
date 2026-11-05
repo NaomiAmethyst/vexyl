@@ -1,0 +1,22 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Israel"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Israel.svg"
+}
+palette {
+  white "#ffffff"
+  blue "#0038b8"
+}
+proportion hoist=800 fly=1100
+
+bars white blue white blue white {
+  ratio 75 125 400 125 75
+}
+charge star blue {
+  radius 145.7
+  points 6
+  lines 27.5
+}

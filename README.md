@@ -26,6 +26,10 @@ cross yellow {
 Those numbers are Sweden's official 5:2:9 and 4:2:4 construction. Each file is
 self-contained, so a flag can be shared as a single `.kdl` file.
 
+A file can also say how the flag behaves away from its usual form. `adapt` says how it
+reaches other proportions without distorting, since a cross should keep its place while
+a tricolor can simply spread out. `variant` describes vertical, banner and other forms.
+
 **Status:** early draft. The format can still change.
 
 ## Use
@@ -36,6 +40,13 @@ go install github.com/NaomiAmethyst/vexyl/cmd/vexyl@latest
 vexyl check flags/*.kdl
 vexyl render -o sweden.svg flags/sweden.kdl
 vexyl render -height 1200 flags/sweden.kdl > sweden.svg
+
+# Another proportion, by the flag's own rules, written hoist:fly
+vexyl render -ratio 1:2 -o sweden-long.svg flags/sweden.kdl
+
+# A named form, or the other side
+vexyl render -variant vertical -o us-vertical.svg flags/united-states.kdl
+vexyl render -side reverse -o us-back.svg flags/united-states.kdl
 ```
 
 As a Go library:
@@ -59,8 +70,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
 - [`flags/imported/`](flags/imported) holds country and pride flags converted
   mechanically from Wikimedia Commons. They exist to stress test the format; see
   [its README](flags/imported/README.md).
-- [`docs/missing-from-spec.md`](docs/missing-from-spec.md) lists what the format still
-  needs, ranked, with evidence.
+- [`docs/missing-from-spec.md`](docs/missing-from-spec.md) is the survey of real flags
+  behind the format's vocabulary.
 - [`tools/`](tools) holds the importer. `svg2vexyl.py` converts one SVG file, and
   `fetch_flags.py` and `import_flags.py` gather a corpus and check each result.
 

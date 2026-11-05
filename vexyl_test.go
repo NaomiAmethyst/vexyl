@@ -509,6 +509,33 @@ func TestRejected(t *testing.T) {
 		{"gradient stop range", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a { stops 0 2; }; }\n", "between 0 and 1"},
 		{"gradient stop order", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a { stops 1 0; }; }\n", "backward"},
 		{"gradient on svg", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; g gradient a a; }\nproportion hoist=1 fly=1\ncharge svg g { fly 1; hoist 1; markup \"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>\"; }", "solid color is needed"},
+		{"none in the palette", "vexyl 1\nmeta { name \"T\"; }\npalette { none \"#112233\"; }\n", "reserved"},
+		{"crescent circles apart", header + `charge crescent a { radius 1; inner 1; offset 3; }`, "cross"},
+		{"sun disc too big", header + `charge sun a { radius 1; disc 1; }`, "smaller than"},
+		{"path not path data", header + `charge path a { d "<script>"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path no box", header + `charge path a { d "M0 0"; fly 1; }`, "needs a `box`"},
+		{"pile without reach", header + `pile a`, "needs a `depth`"},
+		{"pall without width", header + `pall a`, "needs a `width`"},
+		{"quarters count", header + `quarters a b`, "needs 4"},
+		{"checks size", header + `checks a b`, "needs `rows`"},
+		{"panel both", header + `panel { side top; corner upper-fly; width 1; field a; }`, "not both"},
+		{"panel size", header + `panel { field a; }`, "needs a `side`"},
+		{"panel edge", header + `panel { fly 1; hoist 1; edge wavy depth=1 count=1; field a; }`, "only a side panel"},
+		{"edge kind", header + `bars a { edge curly depth=1 count=1; }`, "wavy or zigzag"},
+		{"edge size", header + `bars a { edge wavy depth=1; }`, "needs `period`"},
+		{"repeat with ats", header + `charge disc a { radius 1; at center; at center; repeat ring count=2 radius=1; }`, "can't be combined"},
+		{"arc of one", header + `charge disc a { radius 1; repeat arc count=1 radius=1 from=0 to=1; }`, "at least 2"},
+		{"lines and hollow", header + `charge star a { radius 1; lines 1; hollow 1; }`, "can't be combined"},
+		{"grow length", header + `bars a b { grow 1; }`, "`grow` values"},
+		{"use unknown", header + `use nope`, "isn't a defined design"},
+		{"define taken", header + "define disc { rect { fly 1; hoist 1; }; }\n", "already taken"},
+		{"counterchange fimbriated", header + `saltire a { width 1; counterchange; fimbriate b 1; }`, "can't be fimbriated"},
+		{"adapt empty", header + `adapt`, "needs `wider`"},
+		{"adapt bad rule", header + `adapt { wider stretch; }`, "must be one of"},
+		{"adapt bad range", header + `adapt { wider extend; range 2 1; }`, "lowest and highest"},
+		{"variant unknown turn", header + `variant v { from flip; }`, "must be one of"},
+		{"outline unknown", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\noutline flag\n", "unknown form"},
+		{"layers after adapt", header + "adapt { wider extend; }\nfield a\n", "out of order"},
 		{"apex without angle", header + `chevrons a { depth 1; apex 2; }`, "needs an `angle`"},
 		{"negative apex", header + `chevrons a { depth 1; angle 45; apex -2; }`, "can't be negative"},
 		{"heart radius", header + `charge heart a`, "needs a `radius`"},
@@ -725,6 +752,290 @@ func TestImportedFlagsRender(t *testing.T) {
 	}
 }
 
+func render(t *testing.T, src string, opts Options) string {
+	t.Helper()
+	var out bytes.Buffer
+	if err := parse(t, src).WriteSVG(&out, opts); err != nil {
+		t.Fatal(err)
+	}
+	return out.String()
+}
+
+func TestNewShapesDraw(t *testing.T) {
+	tests := []struct{ name, src, want string }{
+		{"panel on a side", `panel { side hoist; width 5; field a; }`, `translate(0 0)`},
+		{"panel on the far side", `panel { side fly; width 5; field a; }`, `translate(15 0)`},
+		{"panel in a corner", `panel { corner lower-fly; fly 4; hoist 2; field a; }`, `translate(16 8)`},
+		{"panel centered", `panel { fly 4; hoist 2; field a; }`, `translate(8 4)`},
+		{"canton", `canton { fly 4; hoist 2; field a; }`, `translate(0 0)`},
+		{"quarters", `quarters a b b a`, `points="10,5 20,5 20,10 10,10"`},
+		{"quarters split", `quarters a b b a { split fly=4 hoist=2; }`, `points="4,2 20,2 20,10 4,10"`},
+		{"quarters diagonal", `quarters a b b a { diagonal; }`, `points="10,5 0,0 20,0"`},
+		{"pile", `pile a { depth 5; flat 2; }`, `5,4 5,6`},
+		{"crescent", `charge crescent a { radius 5; inner 4; offset 2; at center; }`, `<path d="M`},
+		{"sun", `charge sun a { radius 3; disc 1; points 3; }`, `Z M`},
+		{"lozenge throughout", `charge lozenge a`, `points="10,0 20,5 10,10 0,5"`},
+		{"hollow", `charge disc a { radius 1; hollow 0.5; }`, `fill="none" stroke="#112233" stroke-width="0.5"`},
+		{"lines", `charge star a { radius 1; lines 0.1; }`, `fill="none"`},
+		{"path", `charge path a { d "M0 0H1V1Z"; box "0 0 1 1"; fly 2; }`, `scale(2) translate(-0.5 -0.5)`},
+		{"partial ring", `charge ring a { radius 2; inner 1; from 0; to 90; }`, `A2 2 0 0 1`},
+		{"arc", `charge disc a { radius 1; repeat arc count=3 radius=2 from=-90 to=90; }`, `cx="10" cy="3"`},
+		{"several positions", `charge disc a { radius 1; at fly=1 hoist=1; at fly=2 hoist=2; }`, `cx="2" cy="2"`},
+		{"counterchange", `saltire a { width 1; counterchange; }`, `clip-path`},
+		{"chevron fimbriation", `chevrons a { depth 5; fimbriate b 1; }`, `stroke="#445566"`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := render(t, header+tt.src, Options{})
+			if !strings.Contains(out, tt.want) {
+				t.Errorf("no %q in %s", tt.want, out)
+			}
+		})
+	}
+}
+
+func TestChecksFlow(t *testing.T) {
+	cells := func(src string) []string {
+		var fills []string
+		for _, m := range regexp.MustCompile(`fill="(#\w+)"`).FindAllStringSubmatch(render(t, header+src, Options{}), -1) {
+			fills = append(fills, m[1])
+		}
+		return fills
+	}
+	want := []string{"#112233", "#445566", "#445566", "#112233"}
+	if got := cells(`checks a b { rows 2; columns 2; }`); !slices.Equal(got, want) {
+		t.Errorf("got %v", got)
+	}
+}
+
+func TestRaysByEdge(t *testing.T) {
+	f := parse(t, `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; }
+proportion hoist=3 fly=6
+rays a a a a a { from lower-hoist; measure edge; ratio 2 2 3 1 1; }`)
+	polys := rayPolys(f.Layers[0].(*Rays), region{w: 6, h: 3})
+	// The third wedge turns the corner: 4 along the top, the corner, then 1 down.
+	for _, want := range []vec{{0, 3}, {4, 0}, {6, 0}, {6, 1}} {
+		if !hasPoint(polys[2], want) {
+			t.Errorf("wedge %v lacks %v", polys[2], want)
+		}
+	}
+	if !hasPoint(polys[4], vec{6, 3}) {
+		t.Errorf("last wedge %v doesn't reach the corner", polys[4])
+	}
+}
+
+func TestRaysByAngleCoverTheirSweep(t *testing.T) {
+	f := parse(t, header+`rays a b { count 4; from hoist; }`)
+	polys := rayPolys(f.Layers[0].(*Rays), region{w: 20, h: 10})
+	if len(polys) != 4 || !hasPoint(polys[0], vec{0, 5}) || !hasPoint(polys[0], vec{0, 0}) {
+		t.Errorf("first wedge should start from the hoist, going up: %v", polys)
+	}
+}
+
+func TestPallIsOneShapeReachingTheCorners(t *testing.T) {
+	s := Shape{Kind: "pall", Edge: "hoist", Width: 2, Junction: 5}
+	points := pallPoints(&s, region{w: 20, h: 10})
+	if len(points) != 9 {
+		t.Fatalf("%d points", len(points))
+	}
+	// The notch between the arms lies on the center line, and the stem at its width.
+	seenNotch := false
+	for _, p := range points {
+		if math.Abs(p.Hoist-5) < 1e-9 && p.Fly > 0 && p.Fly < 5 {
+			seenNotch = true
+		}
+	}
+	if !seenNotch {
+		t.Errorf("no notch: %v", points)
+	}
+}
+
+func TestPanelEdgeIsCenteredOnItsWidth(t *testing.T) {
+	out := render(t, header+`panel { side hoist; width 5; edge zigzag depth=2 count=2; field a; }`, Options{})
+	// A base at 4 and points at 6, on the line at 5.
+	if !strings.Contains(out, `0,0 4,0 6,2.5 4,5 6,7.5 4,10 0,10`) {
+		t.Errorf("unexpected edge: %s", out)
+	}
+}
+
+func TestGapsShowWhatsBeneath(t *testing.T) {
+	out := render(t, header+`bars a none b`, Options{})
+	if strings.Contains(out, `0,0 20,0 20,10 0,10" fill`) {
+		t.Errorf("a bar ran on beneath a gap: %s", out)
+	}
+	out = render(t, header+`chevrons none a { depth 8; ratio 1 1; }`, Options{})
+	if strings.Count(out, "<polygon") != 2 { // the flag's clip and one band
+		t.Errorf("want one band: %s", out)
+	}
+}
+
+func TestDefinesAndUses(t *testing.T) {
+	src := `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+define square { path "M0 0H1V1H0Z" box="0 0 1 1"; }
+define mini hoist=1 fly=2 { field a; }
+define loose { bars a b; }
+charge square b { fly 2; hoist 2; repeat line count=2 fly=4; }
+use mini
+panel { side top; width 2; use loose; }
+`
+	out := render(t, src, Options{})
+	if got := strings.Count(out, `d="M0 0H1V1H0Z"`); got != 2 {
+		t.Errorf("%d squares: %s", got, out)
+	}
+	if !strings.Contains(out, `scale(10 10)`) {
+		t.Errorf("design with a grid isn't scaled: %s", out)
+	}
+}
+
+func TestOutlines(t *testing.T) {
+	tests := []struct{ outline, want string }{
+		{`outline swallowtail { depth 5; }`, `0,0 20,0 15,5 20,10 0,10`},
+		{`outline swallowtail { depth 5; taper 1; }`, `0,0 20,1 15,5 20,9 0,10`},
+		{`outline tongued { depth 5; tongue 2; }`, `0,0 20,0 15,4 20,5 15,6 20,10 0,10`},
+		{`outline pennant`, `0,0 20,5 0,10`},
+		{`outline pennant { tip 2; }`, `0,0 20,4 20,6 0,10`},
+		{`outline { path "M0 0H1V1Z" box="0 0 1 1"; }`, `scale(20 10)`},
+	}
+	base := "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=10 fly=20\n"
+	for _, tt := range tests {
+		if out := render(t, base+tt.outline+"\nfield a\n", Options{}); !strings.Contains(out, tt.want) {
+			t.Errorf("%s: no %q in %s", tt.outline, tt.want, out)
+		}
+	}
+}
+
+const adaptHeader = `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+`
+
+func TestAdaptRules(t *testing.T) {
+	cross := "cross a { fly 5 2 13; hoist 4 2 4; }\n"
+	tests := []struct {
+		name, src string
+		ratio     float64
+		want      string
+	}{
+		{"extend keeps the arm's place", cross + `adapt { wider extend; }`, 3, `5,0 7,0 7,10 5,10`},
+		{"cut keeps the arm's place", cross + `adapt { narrower cut; }`, 1, `5,0 7,0 7,10 5,10`},
+		{"center moves the arm with the center", cross + `adapt { wider center; }`, 3, `10,0 12,0 12,10 10,10`},
+		{"scale keeps the arm's share", cross + `adapt { wider scale; }`, 3, `7.5,0 10.5,0 10.5,10 7.5,10`},
+		{"the hoist can change instead", cross + `adapt { narrower hoist-extend; }`, 1, `0,4 20,4 20,6 0,6`},
+		{"extend grows the last bar", "bars a b { along hoist; }\n" + `adapt { wider extend; }`, 3, `10,0 10,10 30,10 30,0`},
+		{"grow shares it out", "bars a b { along hoist; ratio 1 1; grow 1 0; }\n" + `adapt { wider extend; }`, 3, `20,0 20,10 30,10 30,0`},
+		{"bars along the axis are unchanged", "bars a b\n" + `adapt { wider extend; }`, 3, `0,5 30,5 30,10 0,10`},
+		{"a charge at the center follows it", "charge disc a { radius 1; }\n" + `adapt { wider extend; }`, 3, `cx="15" cy="5"`},
+		{"an explicit position stays", "charge disc a { radius 1; at fly=4 hoist=5; }\n" + `adapt { wider extend; }`, 3, `cx="4" cy="5"`},
+		{"an anchor overrides the rule", "charge disc a { radius 1; at fly=18 hoist=5; anchor end; }\n" + `adapt { wider extend; }`, 3, `cx="28" cy="5"`},
+		{"center charges can be held to the hoist", "charge disc a { radius 1; anchor start; }\n" + `adapt { wider extend; }`, 3, `cx="10" cy="5"`},
+		{"a far side panel stays on its edge", "panel { side fly; width 2; field a; }\n" + `adapt { wider extend; }`, 3, `translate(28 0)`},
+		{"a top panel grows", "panel { side top; width 2; bars a b { along hoist; }; }\n" + `adapt { wider extend; }`, 3, `10,0 10,2 30,2 30,0`},
+		{"a canton keeps its size", "canton { fly 8; hoist 5; field a; }\n" + `adapt { wider extend; }`, 3, `0,0 8,0 8,5 0,5`},
+		{"scaling scales a canton", "canton { fly 8; hoist 5; field a; }\n" + `adapt { wider scale; }`, 3, `0,0 12,0 12,5 0,5`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := render(t, adaptHeader+tt.src, Options{Ratio: tt.ratio})
+			if !strings.Contains(out, tt.want) {
+				t.Errorf("no %q in %s", tt.want, out)
+			}
+		})
+	}
+}
+
+func TestAdaptRefusals(t *testing.T) {
+	tests := []struct {
+		name, src string
+		ratio     float64
+		want      string
+	}{
+		{"no rules", `field a`, 3, "doesn't say how"},
+		{"wrong direction", `adapt { wider extend; }`, 1, "no rule for this direction"},
+		{"out of range", `adapt { range 1 2.5; wider extend; }`, 3, "only adapts between"},
+		{"cut too far", "cross a { fly 5 2 3; hoist 4 2 4; }\n" + `adapt { narrower cut; }`, 0.5, "can't be cut"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var out bytes.Buffer
+			err := parse(t, adaptHeader+tt.src).WriteSVG(&out, Options{Ratio: tt.ratio})
+			if err == nil || !strings.Contains(err.Error(), tt.want) {
+				t.Errorf("err = %v, want %q", err, tt.want)
+			}
+		})
+	}
+}
+
+func TestOwnProportionNeedsNoRules(t *testing.T) {
+	if out := render(t, adaptHeader+`field a`, Options{Ratio: 2}); !strings.Contains(out, `viewBox="0 0 20 10"`) {
+		t.Errorf("unexpected output: %s", out)
+	}
+}
+
+func TestVariants(t *testing.T) {
+	src, err := os.ReadFile("testdata/variants.kdl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	vertical := render(t, string(src), Options{Variant: "vertical"})
+	if !strings.Contains(vertical, `viewBox="0 0 20 40"`) || !strings.Contains(vertical, `matrix(0 1 1 0 0 0)`) {
+		t.Errorf("vertical should be transposed at 2: %s", vertical)
+	}
+	// The crescent turns back around the center of the adapted flag.
+	if !strings.Contains(vertical, `translate(20 10) matrix(0 1 1 0 0 0) translate(-20 -10)`) {
+		t.Errorf("charge isn't kept upright: %s", vertical)
+	}
+	banner := render(t, string(src), Options{Variant: "banner"})
+	if !strings.Contains(banner, `matrix(0 1 -1 0 20 0)`) || !strings.Contains(banner, `0,0 30,0 24,10 30,20 0,20`) {
+		t.Errorf("banner should rotate and be swallowtailed: %s", banner)
+	}
+	plain := render(t, string(src), Options{Variant: "plain"})
+	if strings.Contains(plain, "<path") {
+		t.Errorf("variant layers should replace the flag's: %s", plain)
+	}
+	var out bytes.Buffer
+	if err := parse(t, string(src)).WriteSVG(&out, Options{Variant: "nope"}); err == nil {
+		t.Error("unknown variant accepted")
+	}
+}
+
+func TestVariantRatioNeedsRules(t *testing.T) {
+	_, err := Parse(strings.NewReader(adaptHeader+`variant tall { ratio 3; }`), "test")
+	if err == nil || !strings.Contains(err.Error(), "no `adapt` rules") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestReverse(t *testing.T) {
+	mirrored := render(t, adaptHeader+`field a`, Options{Side: "reverse"})
+	if !strings.Contains(mirrored, `matrix(-1 0 0 1 20 0)`) {
+		t.Errorf("default reverse should mirror: %s", mirrored)
+	}
+	own := render(t, adaptHeader+"field a\nreverse {\n  field b\n}\n", Options{Side: "reverse"})
+	if strings.Contains(own, "matrix") || !strings.Contains(own, "#445566") {
+		t.Errorf("own reverse should be painted as written: %s", own)
+	}
+	front := render(t, adaptHeader+"field a\nreverse {\n  field b\n}\n", Options{})
+	if strings.Contains(front, "#445566") {
+		t.Errorf("reverse leaked onto the front: %s", front)
+	}
+}
+
+func TestFormsOfAFlagHaveDistinctIDs(t *testing.T) {
+	src := adaptHeader + "field a\nadapt { wider extend; }\n"
+	id := regexp.MustCompile(` id="([^"]+)"`)
+	a := id.FindStringSubmatch(render(t, src, Options{}))[1]
+	b := id.FindStringSubmatch(render(t, src, Options{Ratio: 3}))[1]
+	if a == b {
+		t.Errorf("both use id %q", a)
+	}
+}
+
 func TestDeepNestingRejected(t *testing.T) {
 	src := header + strings.Repeat("group {\n", maxDepth+1) + "field a\n" + strings.Repeat("}\n", maxDepth+1)
 	if _, err := Parse(strings.NewReader(src), "test"); err == nil || !strings.Contains(err.Error(), "nested") {
@@ -907,6 +1218,10 @@ func FuzzParse(f *testing.F) {
 	f.Add(header + `charge star a { radius 1; repeat ring count=5 radius=2; }`)
 	f.Add(header + `emblem { along bend; charge rect a { fly 1; hoist 2; repeat line count=2 fly=3; cut { disc { radius 1; }; }; }; }`)
 	f.Add(header + `border a 1 outside` + "\n" + `field a`)
+	f.Add(header + `panel { side hoist; width 2; edge zigzag depth=1 count=3; rays a b { count 5; measure edge; }; }`)
+	f.Add(header + `pall a { width 1; }` + "\n" + `pile b { depth 1; }` + "\n" + `quarters a b a b { diagonal; }` + "\n" + `checks a b { rows 2; columns 2; }`)
+	f.Add(header + `charge sun a { radius 2; disc 1; }` + "\n" + `charge crescent a { radius 2; inner 2; offset 1; }`)
+	f.Add(header + "bars a b { edge wavy depth=1 period=2; }\nadapt { wider extend; narrower hoist-center; }\nvariant v { from rotate; upright; ratio 3; }\nreverse { field a; }\n")
 	f.Fuzz(func(t *testing.T, src string) {
 		flag, err := Parse(strings.NewReader(src), "fuzz")
 		if err != nil {
@@ -914,8 +1229,21 @@ func FuzzParse(f *testing.F) {
 		}
 		var out bytes.Buffer
 		if err := flag.WriteSVG(&out, Options{}); err != nil {
-			t.Fatal(err)
+			// A border needing an outside on a shape with none is refused here.
+			return
 		}
 		assertWellFormed(t, out.Bytes())
+		for _, opts := range []Options{{Ratio: 1}, {Ratio: 3}, {Side: "reverse"}} {
+			out.Reset()
+			if err := flag.WriteSVG(&out, opts); err == nil {
+				assertWellFormed(t, out.Bytes())
+			}
+		}
+		for name := range flag.Variants {
+			out.Reset()
+			if err := flag.WriteSVG(&out, Options{Variant: name}); err == nil {
+				assertWellFormed(t, out.Bytes())
+			}
+		}
 	})
 }

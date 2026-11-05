@@ -1,0 +1,22 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Venezuela"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Venezuela.svg"
+}
+palette {
+  yellow "#ffcc00"
+  blue "#00247d"
+  red "#cf142b"
+  white "#ffffff"
+}
+proportion hoist=120 fly=180
+
+bars yellow blue red
+charge star white {
+  radius 5.19
+  at fly=90.026 hoist=85.796
+  repeat arc count=8 radius=36.719 from=-66.50 to=66.50 turn=#true
+}

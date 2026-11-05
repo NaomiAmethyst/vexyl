@@ -1,0 +1,29 @@
+// Sizes follow the drawing on Commons. Each chevron is set in from the corners by its
+// edge, so it keeps the angle of a chevron reaching them.
+vexyl 1
+meta {
+  name "Guyana"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Guyana.svg"
+}
+palette {
+  green "#2a936a"
+  gold "#ffc20e"
+  white "#ffffff"
+  red "#be1e2d"
+  black "#000000"
+}
+proportion hoist=60 fly=100
+
+field green
+chevrons gold {
+  depth 93.0398
+  angle 16.6992
+  fimbriate white 2
+}
+chevrons red {
+  depth 46.1127
+  angle 30.9638
+  fimbriate black 2
+}

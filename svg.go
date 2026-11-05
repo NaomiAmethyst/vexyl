@@ -5,10 +5,13 @@ package vexyl
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -20,6 +23,12 @@ const DefaultHeight = 600
 type Options struct {
 	// Height is the image's height in pixels. Its width follows the proportion.
 	Height float64
+	// Ratio asks for another proportion, as fly divided by hoist.
+	Ratio float64
+	// Variant names one of the flag's variants.
+	Variant string
+	// Side is obverse, the default, or reverse.
+	Side string
 }
 
 // WriteSVG renders the flag as a standalone SVG document.
@@ -28,22 +37,47 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	if height == 0 {
 		height = DefaultHeight
 	}
-	r := &renderer{flag: f}
+	original := f
+	f, turn, upright, mirror, err := f.resolve(opts)
+	if err != nil {
+		return err
+	}
+	r := &renderer{flag: f, idPrefix: original.idPrefix}
+	if opts.Ratio != 0 || opts.Variant != "" || opts.Side != "" {
+		// A page can show several forms of one flag, which mustn't share definitions.
+		sum := sha256.Sum256([]byte(fmt.Sprintf("%v|%s|%s", opts.Ratio, opts.Variant, opts.Side)))
+		r.idPrefix += hex.EncodeToString(sum[:2]) + "-"
+	}
 	x0, y0, width, tall := 0.0, 0.0, f.Fly, f.Hoist
 	var outer []vec
 	if f.Border != nil && f.BorderOutside {
-		var err error
 		if outer, err = offsetPolygon(f.boundary(), f.Border.Width); err != nil {
 			return err
 		}
 		x0, y0, width, tall = bounds(outer)
 	}
+	transform, undo := view(turn, x0, y0, width, tall)
+	if mirror {
+		// The back is the mirror image, then turned as the front would be.
+		transform = strings.TrimSpace(transform + fmt.Sprintf(" matrix(-1 0 0 1 %s 0)", num(2*x0+width)))
+	}
+	vx, vy, vw, vh := x0, y0, width, tall
+	if turn != "none" {
+		vx, vy, vw, vh = y0, x0, tall, width
+	}
+	if upright {
+		r.upright = undo
+	}
 	r.line(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s" width="%s" height="%s">`,
-		num(x0), num(y0), num(width), num(tall), num(height*width/tall), num(height))
+		num(vx), num(vy), num(vw), num(vh), num(height*vw/vh), num(height))
 	r.depth++
 	r.line(`<title>%s</title>`, esc(f.Meta.Name))
 	if f.Meta.Description != "" {
 		r.line(`<desc>%s</desc>`, esc(f.Meta.Description))
+	}
+	if transform != "" {
+		r.line(`<g transform="%s">`, transform)
+		r.depth++
 	}
 
 	if outer != nil {
@@ -52,8 +86,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	root := region{w: f.Fly, h: f.Hoist}
 	shape := geom{poly: rectPoly(0, 0, f.Fly, f.Hoist)}
 	if f.Outline != nil {
-		s := Shape{Kind: "polygon", Vertices: f.Outline}
-		shape = shapeGeom(&s, vec{}, 0)
+		shape = f.Outline.geom(f.Fly, f.Hoist)
 	}
 	flagClip := r.id("flag")
 	r.line(`<clipPath id="%s">`, flagClip)
@@ -72,9 +105,13 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
 	}
 	r.depth--
 	r.line(`</g>`)
+	if transform != "" {
+		r.depth--
+		r.line(`</g>`)
+	}
 	r.depth--
 	r.line(`</svg>`)
-	_, err := w.Write(r.out.Bytes())
+	_, err = w.Write(r.out.Bytes())
 	return err
 }
 
@@ -92,6 +129,9 @@ type renderer struct {
 	depth     int
 	nextID    int
 	gradients map[string]string
+	// upright is the transform that undoes a turned variant's rotation.
+	upright  string
+	idPrefix string
 }
 
 func (r *renderer) line(format string, args ...any) {
@@ -147,7 +187,7 @@ func (r *renderer) fill(name string, box *[4]float64) string {
 
 func (r *renderer) id(kind string) string {
 	r.nextID++
-	return fmt.Sprintf("%s%s%d", r.flag.idPrefix, kind, r.nextID)
+	return fmt.Sprintf("%s%s%d", r.idPrefix, kind, r.nextID)
 }
 
 func (r *renderer) layers(layers []Layer, reg region) {
@@ -188,7 +228,8 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 		id := r.id("clip")
 		r.line(`<clipPath id="%s">`, id)
 		r.depth++
-		r.geom(shapeGeom(e.Clip, position(e.Clip, reg), 0), "")
+		clip := e.Clip.forRegion(reg)
+		r.geom(shapeGeom(clip, position(clip, reg), 0), "")
 		r.depth--
 		r.line(`</clipPath>`)
 		attrs = append(attrs, fmt.Sprintf(`clip-path="url(#%s)"`, id))
@@ -200,7 +241,8 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 		r.depth++
 		r.geom(geom{poly: rectPoly(x, y, x+w, y+h)}, `fill="#fff"`)
 		for i := range e.Cuts {
-			r.geom(shapeGeom(&e.Cuts[i], position(&e.Cuts[i], reg), 0), `fill="#000"`)
+			cut := e.Cuts[i].forRegion(reg)
+			r.geom(shapeGeom(cut, position(cut, reg), 0), `fill="#000"`)
 		}
 		r.depth--
 		r.line(`</mask>`)
@@ -214,9 +256,10 @@ func (r *renderer) content(l Layer, reg region) {
 	case *Field:
 		r.paint(l.Color, nil, nil, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
 	case *Bars:
+		hasGap := slices.Contains(l.Colors, noColor)
 		exact := func(i int) bool {
 			_, isGradient := r.flag.Gradients[l.Colors[i]]
-			return isGradient
+			return isGradient || hasGap
 		}
 		for i, poly := range barPolys(l, reg, exact) {
 			if len(poly) > 0 {
@@ -224,7 +267,15 @@ func (r *renderer) content(l Layer, reg region) {
 			}
 		}
 	case *Chevrons:
+		nested, bands := rawChevrons(l, reg)
 		polys := chevronPolys(l, reg)
+		if slices.Contains(l.Colors, noColor) {
+			// A gap has to show what's beneath, so each band stands alone.
+			polys = bands
+		}
+		if l.Fimbriate != nil {
+			r.paint(l.Colors[len(polys)-1], nil, l.Fimbriate, []geom{{poly: nested[0]}}, nil)
+		}
 		for i, poly := range polys {
 			if len(poly) > 0 {
 				r.paint(l.Colors[len(polys)-1-i], nil, nil, nil, []geom{{poly: poly}})
@@ -250,7 +301,26 @@ func (r *renderer) content(l Layer, reg region) {
 		}
 		polys := crossPolys(l, reg, 0)
 		r.paint(l.Color, box, l.Fimbriate, stroke, []geom{{poly: polys[0]}, {poly: polys[1]}})
+	case *Quarters:
+		r.quarters(l, reg)
+	case *Checks:
+		r.checks(l, reg)
+	case *Rays:
+		polys := rayPolys(l, reg)
+		if l.Colors[0] != noColor && !slices.Contains(l.Colors, noColor) {
+			// Beneath the wedges, so that antialiasing can't leave seams between them.
+			r.paint(l.Colors[0], nil, nil, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
+		}
+		for i, poly := range polys {
+			if len(poly) > 0 {
+				r.paint(l.Colors[i], nil, nil, nil, []geom{{poly: poly}})
+			}
+		}
 	case *Saltire:
+		if l.Counterchange {
+			r.counterchange(l, reg)
+			return
+		}
 		box := &[4]float64{0, 0, reg.w, reg.h}
 		var stroke []geom
 		if l.Fimbriate != nil {
@@ -269,19 +339,110 @@ func (r *renderer) content(l Layer, reg region) {
 		r.emblem(l, reg)
 	case *Group:
 		r.layers(l.Layers, reg)
-	case *Canton:
-		id := r.id("canton")
-		r.line(`<clipPath id="%s">`, id)
+	case *Panel:
+		r.panel(l, reg)
+	case *Use:
+		if l.Define.Fly == 0 {
+			r.layers(l.Define.Layers, reg)
+			return
+		}
+		// A design with its own grid is scaled to fill the region it's used in.
+		r.line(`<g transform="scale(%s %s)">`, num(reg.w/l.Define.Fly), num(reg.h/l.Define.Hoist))
 		r.depth++
-		r.geom(geom{poly: rectPoly(0, 0, l.Fly, l.Hoist)}, "")
-		r.depth--
-		r.line(`</clipPath>`)
-		r.line(`<g clip-path="url(#%s)" style="isolation:isolate">`, id)
-		r.depth++
-		r.layers(l.Layers, region{w: l.Fly, h: l.Hoist})
+		r.layers(l.Define.Layers, region{w: l.Define.Fly, h: l.Define.Hoist})
 		r.depth--
 		r.line(`</g>`)
 	}
+}
+
+func (r *renderer) panel(p *Panel, reg region) {
+	x, y, w, h := panelRect(p, reg)
+	shape := geom{poly: rectPoly(0, 0, w, h)}
+	if p.Line != nil {
+		shape = geom{poly: panelEdge(p, w, h)}
+	}
+	id := r.id("panel")
+	r.line(`<clipPath id="%s">`, id)
+	r.depth++
+	r.geom(shape, "")
+	r.depth--
+	r.line(`</clipPath>`)
+	r.line(`<g transform="translate(%s %s)" clip-path="url(#%s)" style="isolation:isolate">`, num(x), num(y), id)
+	r.depth++
+	r.layers(p.Layers, region{w: w, h: h})
+	r.depth--
+	r.line(`</g>`)
+}
+
+func (r *renderer) quarters(q *Quarters, reg region) {
+	c := reg.center()
+	if q.Diagonal {
+		corners := reg.corners()
+		for i, color := range q.Colors {
+			r.paint(color, nil, nil, nil, []geom{{poly: []vec{c, corners[i], corners[(i+1)%4]}}})
+		}
+		return
+	}
+	if q.Split != nil {
+		c = vec{q.Split.Fly, q.Split.Hoist}
+	}
+	if slices.Contains(q.Colors[:], noColor) {
+		r.paint(q.Colors[0], nil, nil, nil, []geom{{poly: rectPoly(0, 0, c.x, c.y)}})
+		r.paint(q.Colors[1], nil, nil, nil, []geom{{poly: rectPoly(c.x, 0, reg.w, c.y)}})
+		r.paint(q.Colors[2], nil, nil, nil, []geom{{poly: rectPoly(0, c.y, c.x, reg.h)}})
+	} else {
+		// Each runs on beneath the next, so antialiasing can't leave a seam.
+		r.paint(q.Colors[0], nil, nil, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
+		r.paint(q.Colors[1], nil, nil, nil, []geom{{poly: rectPoly(c.x, 0, reg.w, reg.h)}})
+		r.paint(q.Colors[2], nil, nil, nil, []geom{{poly: rectPoly(0, c.y, reg.w, reg.h)}})
+	}
+	r.paint(q.Colors[3], nil, nil, nil, []geom{{poly: rectPoly(c.x, c.y, reg.w, reg.h)}})
+}
+
+func (r *renderer) checks(ch *Checks, reg region) {
+	n := len(ch.Colors)
+	cellW, cellH := reg.w/float64(ch.Columns), reg.h/float64(ch.Rows)
+	for row := range ch.Rows {
+		for col := range ch.Columns {
+			i := row + col
+			if ch.Flow == "bend" {
+				i = col - row + ch.Rows*n
+			}
+			x, y := float64(col)*cellW, float64(row)*cellH
+			// Each cell runs on beneath the next ones, unless gaps have to show.
+			right, bottom := reg.w, reg.h
+			if slices.Contains(ch.Colors, noColor) {
+				right, bottom = x+cellW, y+cellH
+			}
+			r.paint(ch.Colors[i%n], nil, nil, nil, []geom{{poly: rectPoly(x, y, right, bottom)}})
+		}
+	}
+}
+
+// counterchange paints a saltire twice its width, clipped to four triangles around
+// the center, so that one side of each diagonal shows.
+func (r *renderer) counterchange(l *Saltire, reg region) {
+	c := reg.center()
+	id := r.id("clip")
+	r.line(`<clipPath id="%s">`, id)
+	r.depth++
+	r.geom(geom{poly: []vec{
+		c, {reg.w, c.y}, {reg.w, reg.h},
+		c, {c.x, reg.h}, {0, reg.h},
+		c, {0, c.y}, {0, 0},
+		c, {c.x, 0}, {reg.w, 0},
+	}}, "")
+	r.depth--
+	r.line(`</clipPath>`)
+	r.line(`<g clip-path="url(#%s)">`, id)
+	r.depth++
+	box := &[4]float64{0, 0, reg.w, reg.h}
+	r.paint(l.Color, box, nil, nil, []geom{
+		{poly: bandPoly(reg, "bend", 0, 2*l.Width, 0, false)},
+		{poly: bandPoly(reg, "bend-sinister", 0, 2*l.Width, 0, false)},
+	})
+	r.depth--
+	r.line(`</g>`)
 }
 
 func (r *renderer) emblem(e *Emblem, reg region) {
@@ -300,26 +461,45 @@ func (r *renderer) emblem(e *Emblem, reg region) {
 	for _, corner := range reg.corners() {
 		reach = max(reach, math.Hypot(corner.x-at.x, corner.y-at.y))
 	}
-	r.line(`<g transform="translate(%s %s) rotate(%s)">`, num(at.x), num(at.y), num(angle))
-	r.depth++
-	for _, c := range e.Charges {
-		r.layer(c, region{local: reach})
-	}
-	r.depth--
-	r.line(`</g>`)
+	r.keepUpright(at, func() {
+		r.line(`<g transform="translate(%s %s) rotate(%s)">`, num(at.x), num(at.y), num(angle))
+		r.depth++
+		// Charges in an emblem turn with it, so they aren't each kept upright as well.
+		upright := r.upright
+		r.upright = ""
+		for _, c := range e.Charges {
+			r.layer(c, region{local: reach})
+		}
+		r.upright = upright
+		r.depth--
+		r.line(`</g>`)
+	})
 }
 
 func (r *renderer) charge(c *Charge, reg region) {
-	s := &c.Shape
+	s := c.Shape.forRegion(reg)
 	at := position(s, reg)
 	if s.Kind == "svg" {
-		r.embedded(c, at)
+		r.keepUpright(at, func() { r.embedded(c, at) })
 		return
 	}
 	var copies []geom
+	var centers []vec
+	add := func(center vec, turn float64) {
+		copies = append(copies, shapeGeom(s, center, turn))
+		centers = append(centers, center)
+	}
 	switch {
+	case len(s.Ats) > 1:
+		for _, p := range s.Ats {
+			if p == nil {
+				add(reg.center(), 0)
+			} else {
+				add(vec{p.Fly, p.Hoist}, 0)
+			}
+		}
 	case c.Repeat == nil:
-		copies = []geom{shapeGeom(s, at, 0)}
+		add(at, 0)
 	case c.Repeat.Kind == "ring":
 		for i := range c.Repeat.Count {
 			a := float64(i) * 360 / float64(c.Repeat.Count)
@@ -327,12 +507,20 @@ func (r *renderer) charge(c *Charge, reg region) {
 			if c.Repeat.Turn {
 				turn = a
 			}
-			copies = append(copies, shapeGeom(s, at.add(vec{0, -c.Repeat.Radius}.rotate(a)), turn))
+			add(at.add(vec{0, -c.Repeat.Radius}.rotate(a)), turn)
+		}
+	case c.Repeat.Kind == "arc":
+		for i := range c.Repeat.Count {
+			a := c.Repeat.From + (c.Repeat.To-c.Repeat.From)*float64(i)/float64(c.Repeat.Count-1)
+			turn := 0.0
+			if c.Repeat.Turn {
+				turn = a
+			}
+			add(at.add(vec{0, -c.Repeat.Radius}.rotate(a)), turn)
 		}
 	case c.Repeat.Kind == "line":
 		for i := range c.Repeat.Count {
-			step := vec{c.Repeat.Fly, c.Repeat.Hoist}.mul(float64(i))
-			copies = append(copies, shapeGeom(s, at.add(step), 0))
+			add(at.add(vec{c.Repeat.Fly, c.Repeat.Hoist}.mul(float64(i))), 0)
 		}
 	default:
 		for row := 1; row <= c.Repeat.Rows; row++ {
@@ -340,14 +528,61 @@ func (r *renderer) charge(c *Charge, reg region) {
 				if c.Repeat.Stagger && (row+col)%2 == 1 {
 					continue
 				}
-				copies = append(copies, shapeGeom(s, vec{
+				add(vec{
 					reg.w * float64(col) / float64(c.Repeat.Columns+1),
 					reg.h * float64(row) / float64(c.Repeat.Rows+1),
-				}, 0))
+				}, 0)
 			}
 		}
 	}
-	r.paint(c.Color, nil, c.Fimbriate, copies, copies)
+	draw := func(shapes []geom) {
+		switch {
+		case s.Hollow > 0:
+			r.outlineOnly(c.Color, s.Hollow, shapes)
+		case s.Lines > 0:
+			r.outlineOnly(c.Color, s.Lines, shapes)
+		default:
+			r.paint(c.Color, nil, c.Fimbriate, shapes, shapes)
+		}
+	}
+	if r.upright == "" || s.Kind == "polygon" {
+		draw(copies)
+		return
+	}
+	for i := range copies {
+		r.keepUpright(centers[i], func() { draw(copies[i : i+1]) })
+	}
+}
+
+// keepUpright undoes a turned variant's rotation around a point, if there is one.
+func (r *renderer) keepUpright(at vec, draw func()) {
+	if r.upright == "" {
+		draw()
+		return
+	}
+	r.line(`<g transform="translate(%s %s) %s translate(%s %s)">`, num(at.x), num(at.y), r.upright, num(-at.x), num(-at.y))
+	r.depth++
+	draw()
+	r.depth--
+	r.line(`</g>`)
+}
+
+func (r *renderer) outlineOnly(color string, width float64, shapes []geom) {
+	if color == noColor {
+		return
+	}
+	stroke := r.fill(color, nil)
+	for _, g := range shapes {
+		r.geom(g, fmt.Sprintf(`fill="none" stroke="%s" stroke-width="%s" stroke-linejoin="miter" stroke-miterlimit="10"`,
+			stroke, num(width/g.strokeScale())))
+	}
+}
+
+func (g geom) strokeScale() float64 {
+	if g.scale > 0 {
+		return g.scale
+	}
+	return 1
 }
 
 func (r *renderer) embedded(c *Charge, at vec) {
@@ -380,10 +615,10 @@ func (r *renderer) paint(color string, box *[4]float64, fimbriate *Edge, stroke,
 		edge := r.fill(fimbriate.Color, box)
 		for _, g := range stroke {
 			r.geom(g, fmt.Sprintf(`fill="%s" stroke="%s" stroke-width="%s" stroke-linejoin="miter" stroke-miterlimit="10"`,
-				edge, edge, num(2*fimbriate.Width)))
+				edge, edge, num(2*fimbriate.Width/g.strokeScale())))
 		}
 	}
-	if len(shapes) == 0 {
+	if len(shapes) == 0 || color == noColor {
 		return
 	}
 	fill := r.fill(color, box)
@@ -395,6 +630,12 @@ func (r *renderer) paint(color string, box *[4]float64, fimbriate *Edge, stroke,
 func (r *renderer) geom(g geom, attrs string) {
 	if attrs != "" {
 		attrs = " " + attrs
+	}
+	if g.transform != "" {
+		attrs += fmt.Sprintf(` transform="%s"`, g.transform)
+	}
+	if g.evenodd {
+		attrs += ` fill-rule="evenodd"`
 	}
 	switch {
 	case g.path != "":

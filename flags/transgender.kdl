@@ -16,3 +16,8 @@ palette {
 proportion hoist=3 fly=5
 
 bars blue pink white pink blue
+
+adapt {
+  wider scale
+  narrower scale
+}

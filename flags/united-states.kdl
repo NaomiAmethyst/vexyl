@@ -8,6 +8,7 @@ meta {
   encoder "Naomi Persephone Amethyst"
   license "Apache-2.0"
   source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+  source "https://www.law.cornell.edu/uscode/text/4/7"
   source "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
 }
 palette {
@@ -28,4 +29,12 @@ canton {
     radius 0.4004
     repeat grid rows=9 columns=11 stagger=#true
   }
+}
+
+// 4 U.S.C. section 7(i): against a wall, the union is uppermost and at the observer's
+// left, horizontally or vertically. Stars stay upright, since they would otherwise
+// point sideways.
+variant vertical {
+  from transpose
+  upright
 }

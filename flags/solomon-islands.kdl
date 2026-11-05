@@ -1,0 +1,31 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Solomon Islands"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Solomon_Islands.svg"
+}
+palette {
+  blue "#0051ba"
+  green "#215b33"
+  gold "#fcd116"
+  white "#ffffff"
+}
+proportion hoist=100 fly=200
+
+bars blue green {
+  along bend-sinister
+}
+band gold {
+  along bend-sinister
+  width 9
+}
+charge star white {
+  radius 10
+  at fly=35 hoist=30
+  at fly=54.741 hoist=13.08
+  at fly=54.741 hoist=46.92
+  at fly=15.259 hoist=46.92
+  at fly=15.259 hoist=13.08
+}

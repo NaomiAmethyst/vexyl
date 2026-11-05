@@ -1,0 +1,24 @@
+// Sizes follow the drawing on Commons.
+vexyl 1
+meta {
+  name "Norway (state and war flag)"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Norway,_state.svg"
+}
+palette {
+  red "#ba0c2f"
+  white "#ffffff"
+  blue "#00205b"
+}
+proportion hoist=16 fly=27
+outline tongued {
+  depth 11
+  tongue 4
+}
+field red
+cross blue {
+  fly 7 2 18
+  hoist 7 2 7
+  fimbriate white 1
+}

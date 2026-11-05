@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800" width="825" height="600">
+  <title>Israel</title>
+  <clipPath id="vx-a1b031b7-flag1">
+    <polygon points="0,0 1100,0 1100,800 0,800"/>
+  </clipPath>
+  <g clip-path="url(#vx-a1b031b7-flag1)">
+    <polygon points="0,0 1100,0 1100,800 0,800" fill="#ffffff"/>
+    <polygon points="0,75 1100,75 1100,800 0,800" fill="#0038b8"/>
+    <polygon points="0,200 1100,200 1100,800 0,800" fill="#ffffff"/>
+    <polygon points="0,600 1100,600 1100,800 0,800" fill="#0038b8"/>
+    <polygon points="0,725 1100,725 1100,800 0,800" fill="#ffffff"/>
+    <path d="M550 254.3L676.179901 472.85L423.820099 472.85ZM676.179901 327.15L550 545.7L423.820099 327.15Z" fill="none" stroke="#0038b8" stroke-width="27.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
+  </g>
+</svg>

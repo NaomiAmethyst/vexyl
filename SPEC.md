@@ -76,9 +76,13 @@ vexyl 1              required; the format version
 meta { ... }         required
 palette { ... }      required
 proportion ...       required
-outline { ... }      optional, §9
+outline ...          optional, §9
 border ...           optional, §9
+define ...           optional and repeatable, §9
 <layers>             painted first to last, §6
+reverse ...          optional, §10
+adapt { ... }        optional, §11
+variant ...          optional and repeatable, §12
 ```
 
 A renderer MUST reject an unknown format version, unknown nodes and unknown
@@ -151,6 +155,10 @@ What counts as the shape:
 
 A gradient can't be the color of a `charge svg`, or a color in another gradient.
 
+`none` is reserved. In the color list of `bars`, `chevrons`, `rays`, `quarters` or
+`checks`, it leaves a gap that shows what's beneath, and the other colors in the list
+keep their own exact shapes, rather than running on beneath each other.
+
 ## 5. Regions
 
 Every layer paints within a region: a rectangle with an origin, a `width` and a
@@ -207,8 +215,8 @@ A `blend` mixes a layer with what's beneath it in the same `group` or `canton`,
 or on the flag at the top level. A group or canton is composited as a unit, so
 its children never blend with anything outside it.
 
-The shapes in `clip` and `cut` use the coordinates of the region the layer sits
-in. They apply to the layer as a whole, after any `repeat`.
+`clip` and `cut` take any shape, including `pile` and `pall`, or a shape from a
+`define`. The shapes use the coordinates of the region the layer sits in. They apply to the layer as a whole, after any `repeat`.
 
 ## 7. Divisions and ordinaries
 
@@ -289,7 +297,8 @@ for `top` and `bottom`, and defaults to the edge's middle. An `apex` REQUIRES an
 `angle`, because one slope can't meet both corners from off-center.
 
 Each chevron is the previous one moved along the center line, so arms stay
-parallel. Space beyond the outermost chevron is left unpainted.
+parallel. Space beyond the outermost chevron is left unpainted. `fimbriate` edges the
+outermost chevron.
 
 ```
 function paint_chevrons(ch, region, target):
@@ -367,7 +376,86 @@ saltire COLOR { width N; fimbriate COLOR W }
 
 A `band` along `bend` and another along `bend-sinister`, painted as one shape.
 
-### 7.8 Fimbriation
+A `saltire` can take `counterchange` instead of `fimbriate`. Each arm then shows only
+on one side of its diagonal, `width` wide, which is how the Union Flag's red saltire
+works:
+
+```
+clip = triangles (c, (W, c.y), (W, H)), (c, (c.x, H), (0, H)),
+                 (c, (0, c.y), (0, 0)), (c, (c.x, 0), (W, 0))
+paint saltire of width 2 * width, within clip
+```
+
+### 7.8 quarters, checks
+
+```
+quarters COLOR COLOR COLOR COLOR { split fly=A hoist=B }
+quarters COLOR COLOR COLOR COLOR { diagonal }
+checks COLOR... { rows R; columns C; flow bend | bend-sinister }
+```
+
+`quarters` divides its region per cross, with colors running upper hoist, upper fly,
+lower hoist, lower fly. `split` moves the crossing point from the center. With
+`diagonal`, it divides per saltire instead, with colors running top, fly, bottom,
+hoist. `checks` makes a checkerboard, cycling through its colors so that like colors
+run along the `flow` diagonal, which defaults to `bend-sinister`:
+
+```
+index = (row + column) mod n          // bend-sinister
+index = (column - row) mod n          // bend
+```
+
+### 7.9 rays
+
+```
+rays COLOR... { from POINT; count N; ratio N...; measure angle | edge; rotate DEGREES }
+```
+
+`rays` divides its region into wedges from a point, going clockwise. `from` is
+`center` (default), a corner (`upper-hoist`, `upper-fly`, `lower-hoist`, `lower-fly`),
+the middle of an edge (`hoist`, `fly`, `top`, `bottom`), or `fly=A hoist=B`. A wedge
+starts at the first direction that can see the region's inside, so `lower-hoist` starts
+straight up and sweeps a quarter turn, `hoist` sweeps a half turn, and `center` a full
+one starting from up. `count N` cycles through the colors until there are N wedges.
+
+`measure` says what `ratio` shares out: the angle (default), or the region's far edges
+by length, walking clockwise from the first wedge. Seychelles' rays are evenly spaced
+along its edges, for example, not by angle.
+
+### 7.10 pile, pall
+
+```
+pile COLOR { from EDGE; base A B; depth D; flat W; fimbriate COLOR W }
+pile COLOR { from EDGE; base A B; tip ALONG IN; fimbriate COLOR W }
+pall COLOR { from EDGE; width W; junction D; fimbriate COLOR W }
+```
+
+Both are placed by an `EDGE` of the region: `hoist` (default), `fly`, `top` or `bottom`.
+Distances along it are from the top, or from the hoist for `top` and `bottom`.
+
+A `pile` is a triangle or trapezoid from that edge. `base` is the part of the edge it
+stands on, and defaults to all of it. It reaches in `depth` to a point midway along its
+base, cut to a width of `flat` if given, or to the point given by `tip`.
+
+A `pall` is a Y: two arms of `width` run from the edge's corners to a point `junction`
+in from the middle of the edge, then one stem of the same width runs on to the far
+side. `junction` defaults to half the edge's length. Its corners are mitered.
+
+### 7.11 edge
+
+`bars` and side panels can take a shaped line between divisions:
+
+```
+edge wavy depth=D period=P
+edge zigzag depth=D count=N
+```
+
+`depth` is the distance from one extreme to the other. The line is centered on where a
+straight one would be, so a zigzag's points and notches are `depth / 2` either side.
+`period` is the length of one wave, or `count` is how many fit the edge. A zigzag starts
+at its low point, and a wave at its middle going outward, from the hoist or the top.
+
+### 7.12 Fimbriation
 
 `fimbriate COLOR W` paints the ordinary or charge's shape, expanded outward by `W`
 grid units with mitered corners, in `COLOR` beneath the shape. For a cross or
@@ -377,7 +465,7 @@ saltire, the expanded arms are one shape, so the edge never crosses the center.
 
 ```
 charge SHAPE COLOR {
-    at center | at fly=A hoist=B    // default center
+    at center | at fly=A hoist=B    // default center; repeat for several positions
     rotate DEGREES                  // about the position
     fimbriate COLOR W
     repeat ...
@@ -398,12 +486,34 @@ is centered on its position, except where noted.
 | `plus` | `radius`, `width` | Equal-armed cross with arms of length `radius` from the center |
 | `triangle` | `radius` | Equilateral triangle, one point up |
 | `star` | `radius`, `points` (default 5), `inner` | Star with one point up |
+| `crescent` | `radius`, `inner`, `offset` | A disc with another cut from it; opens toward the fly |
+| `sun` | `radius`, `disc`, `gap`, `points`, `spread` | A disc with triangular rays, one straight up |
+| `lozenge` | `fly`, `hoist` | A rhombus; each size defaults to its region's |
+| `path` | `d`, `box`, `fly`, `hoist`, `evenodd` | Any shape, drawn in `box` and fit to the size given |
 | `heart` | `radius`, `spread` | Tip down; the position is midway between the lobes' centers; see below |
 | `cardioid` | `radius` | Cusp at the position, lobe below it; see below |
 | `polygon` | `point fly=A hoist=B`, at least 3 | Points relative to the current region |
 
 A `polygon` is already placed by its points, so it MUST NOT have `at`, `rotate`
 or `repeat`.
+
+A `ring` can take `from` and `to`, in degrees clockwise from up, to draw only that part
+of it, going clockwise, with straight ends along radii.
+
+`hollow W` draws any shape's outline at a width of `W` centered on its edge, instead of
+filling it. `lines W` draws a star as lines between its points, skipping one each time.
+That's a single closed line for five points and two triangles for six.
+
+A `crescent`'s cut has radius `inner`, with its center `offset` toward the fly. Its two
+circles MUST cross. A `sun`'s `disc` is its radius, and `radius` reaches the tips of its
+rays, which start at `disc + gap`. `points` defaults to 12, and `spread` is the share
+from 0 to 1 of its slot that each ray fills at its base, which defaults to 1.
+
+A `path` is for shapes that have no other name. `d` is SVG path data, and `box` is
+`"x y width height"`, the area of its coordinates that fits within `fly` by `hoist`,
+keeping its shape and centered on the charge's position. Either size can be left out to
+take its size from the other. It keeps a palette color and everything else a charge has,
+which makes it the better choice over inline SVG for anything in one color.
 
 The default `inner` of a star is that of the regular star polygon {n/2}:
 
@@ -467,6 +577,10 @@ for r in 1 .. R:
         if stagger and (r + c) is odd: continue
         paint charge at (region.width * c / (C + 1), region.height * r / (R + 1))
 ```
+
+**`repeat arc count=N radius=R from=A to=B turn=BOOL`** is a ring limited to the angles
+from `A` to `B`, in degrees clockwise from up, with copies at both ends and evenly
+between. It needs at least two copies.
 
 **`repeat line count=N fly=A hoist=B`** places copies in a straight line, starting
 at the charge's position and stepping by `fly` and `hoist` each time. At least one
@@ -546,7 +660,10 @@ A renderer MUST rewrite every `id` and reference with a prefix unique to the
 charge, or otherwise isolate the artwork, so that one piece of artwork can't refer
 to the flag's own definitions or another's.
 
-## 9. Emblems, groups, cantons and outlines
+A charge can also repeat `at`, placing a copy at each position, as a constellation does.
+That can't be combined with `repeat`.
+
+## 9. Emblems, groups, panels, definitions and outlines
 
 **`emblem { ... }`** draws charges together in their own frame, so that they can be
 measured from each other as a construction sheet does. Only `charge` and the
@@ -581,18 +698,41 @@ placed this way, along the flag's diagonals at any proportion.
 **`group { ... }`** holds layers and treats them as one for `opacity`, `blend`,
 `clip` and `cut`. Its children use the parent's region.
 
-**`canton { fly W; hoist H; <layers> }`** is a new region in the upper hoist
-corner, with its own origin at the flag's corner:
+**`panel { ...; <layers> }`** is a new region within its parent, with its own origin,
+and everything inside it is clipped to it. It's placed in one of three ways:
 
-```
-Region(origin = parent.origin, width = W, height = H)
-```
+| Placement | Region |
+|---|---|
+| `side EDGE; width W` | A band along an edge of its parent: `hoist`, `fly`, `top` or `bottom` |
+| `corner CORNER; fly W; hoist H` | A rectangle in `upper-hoist`, `upper-fly`, `lower-hoist` or `lower-fly` |
+| `fly W; hoist H`, with an optional `at` | A rectangle centered on a position, or on its parent's center |
 
-Groups and cantons can be nested.
+A side panel can take an `edge` (§7.11) along its inner side, and its region then
+reaches as far as the line does.
 
-**`outline { polygon { ... } }`** gives a flag a non-rectangular shape. Its points
-are in the root region and everything paints inside it. The proportion still sets
-the grid, which SHOULD be the outline's bounding box.
+**`canton { fly W; hoist H; <layers> }`** is a panel with `corner upper-hoist`.
+
+Groups and panels can be nested.
+
+**`define NAME { ... }`** names something to reuse, so that it's still all in one file.
+It has to come before the layers using it. It can hold one of two things:
+
+- **A shape:** a single child such as `path "M0 0H1V1Z" box="0 0 1 1"` or `polygon`.
+  It's then used like any other shape, with `charge NAME COLOR`, or in a `clip` or `cut`.
+- **A design:** any layers, used with `use NAME`, which paints them in the current
+  region. `define NAME hoist=H fly=F` gives a design its own grid, which is scaled to
+  fill wherever it's used, as a flag within a canton needs.
+
+**`outline ...`** gives a flag a non-rectangular shape, and everything paints inside
+it. The proportion still sets the grid, which SHOULD be the outline's bounding box.
+
+| Outline | Shape |
+|---|---|
+| `outline swallowtail { depth D; taper T }` | Cut into a point from the fly; `taper` narrows its ends |
+| `outline tongued { depth D; tongue W }` | A swallowtail with a tongue of width `W`, as on Nordic state flags |
+| `outline pennant { tip W }` | Narrowing to a point, or to an end of width `W` |
+| `outline { polygon { ... } }` | Any straight-edged shape |
+| `outline { path "..." box="..." }` | Any shape, stretched from `box` to the flag |
 
 **`border COLOR W [SIDE]`** gives the flag a border of width `W` along its outline,
 or along its rectangle if it has no outline. `SIDE` is `inside` (default) or
@@ -601,7 +741,7 @@ or along its rectangle if it has no outline. `SIDE` is `inside` (default) or
 An `inside` border lies within the shape, above every layer. Renderers can stroke
 the edge at `2 * W` and clip the stroke to the shape.
 
-An `outside` border is added around the shape, as Nepal's constitution constructs
+An `outside` border can't go around a `path` outline. It is added around the shape, as Nepal's constitution constructs
 its flag. The proportion and grid still describe the shape inside the border, so
 the finished flag is larger than its grid and its coordinates can start below
 zero. The corners are mitered, so each outer angle equals the inner one:
@@ -621,14 +761,126 @@ function outward_normal(a, b, side):
 A renderer MUST reject an `outside` border on a shape with no area, a repeated
 point, or an edge that folds straight back on the previous one.
 
-## 10. Output
+## 10. The reverse
+
+By default, a flag's reverse is the mirror image of its obverse. `reverse mirror` says
+so outright. `reverse { <layers> }` gives a different back. Those layers are painted as
+written, as seen by someone looking at that side, with no mirroring.
+
+## 11. Other proportions
+
+A flag's `proportion` is its true shape, but flags often have to fit another. Stretching
+one would distort it, and what should happen instead depends on the design. A flag says
+so with `adapt`:
+
+```kdl
+adapt {
+  range 1.2 2.4
+  wider extend
+  narrower cut
+}
+```
+
+`range` limits the proportion, as fly divided by hoist. `wider` and `narrower` each name
+a rule for when that's more or less than the flag's own. Without one, the flag MUST NOT
+be rendered in that direction, and without `adapt` it can't be rendered at another
+proportion at all. A design whose shape is fixed by law should say nothing here.
+
+| Rule | Effect |
+|---|---|
+| `extend` | Grows or shrinks the fly end, leaving what's measured from the hoist in place |
+| `cut` | The same as `extend`, for saying that a narrower flag loses its fly end |
+| `center` | Grows or shrinks both ends equally |
+| `scale` | Spaces everything out along the fly, in proportion |
+| `hoist-extend`, `hoist-center`, `hoist-scale` | The same, with the hoist changing instead, from the top |
+
+The rest of this section describes changing the fly. Changing the hoist works the same
+way along the other axis.
+
+**Shapes never distort.** Discs stay round and stars stay regular under every rule. Only
+their positions move, except that a `rect`'s or `lozenge`'s size scales under `scale`, and
+a `polygon` moves by each of its points.
+
+**Each layer has an anchor,** which is where it stays. The rule sets it: `start` for
+`extend` and `cut`, `center` for `center`, and `scale` for `scale`. A layer can override it
+with `anchor start`, `anchor center`, `anchor end` or `anchor scale`, as a charge held near
+the fly would need.
+
+```
+function move(x, old, new, anchor):
+    case anchor:
+        start:  return x
+        center: return x + (new - old) / 2
+        end:    return x + new - old
+        scale:  return x * new / old
+```
+
+| Layer | What happens |
+|---|---|
+| `field`, `saltire`, `checks`; axes `bend` and `bend-sinister` | They follow the region, so nothing's needed |
+| `bars` across the axis, `cross` arms | The last part grows for `start`, the first for `end`, and the first and last equally for `center`. Under `scale`, the ratio holds. A part reaching zero is an error |
+| `bars` along the axis | Nothing's needed |
+| `band` across the axis | Stays put by its anchor. Its width only changes under `scale` |
+| `chevrons`, `pile`, `pall` | They stay on their edge. Depths only change under `scale`. Positions along an edge that's changing size move by the anchor |
+| `quarters`, `rays`, `charge`, `emblem` | Positions move by the anchor |
+| `panel` | Stays on its edge or corner, keeping its size unless `scale`. One running along the axis grows, and its layers adapt with it |
+| `group`, `use` | Their layers adapt. A design with its own grid doesn't, because it fills its region |
+| `outline polygon` | Its points scale. Named outlines are recalculated for the new size |
+
+**A charge at the center stays at the center,** so a charge with no position follows it
+under every rule. Under `extend`, one anchored `start` keeps its place from the hoist.
+
+`bars` can take `grow N...`, which shares out the change between them by these weights
+instead. Canada's pale would stay its own width with `grow 1 0 1`.
+
+## 12. Variants
+
+A `variant` is a named form of the flag, such as a vertical or banner one. Its rules
+can't be worked out from the design, because they're choices that differ between flags.
+
+```kdl
+variant vertical {
+  from transpose
+  upright
+  outline swallowtail {
+    depth 5
+  }
+}
+```
+
+| Child | Meaning |
+|---|---|
+| `from none`, `from rotate` or `from transpose` | How the design turns; the default is `none` |
+| `upright` | Keeps charges and emblems the right way up as the design turns |
+| `ratio N` | Its proportion by the flag's `adapt` rules, as fly divided by hoist before turning |
+| `outline ...`, `border ...` | Replace the flag's own |
+| `<layers>` | Replace the flag's own, for a form with a different design |
+
+`from transpose` reflects the flag across its diagonal, so its hoist runs along the top
+and its upper hoist corner stays at the viewer's upper left. It's how a flag hanging
+from a crossbar looks from the front. `from rotate` turns it a quarter turn clockwise,
+which moves the upper hoist corner to the upper right.
+
+```
+transpose: (x, y) -> (y, x)
+rotate:    (x, y) -> (H - y, x)
+```
+
+A variant with `upright` puts each charge back the right way up around its own position,
+leaving where it sits on the flag alone. A polygon doesn't have a position to turn around,
+so it turns with the flag.
+
+Rendering takes a variant's name, a side and a proportion as options. Asking for a
+proportion overrides a variant's `ratio`.
+
+## 13. Output
 
 Renderers targeting SVG or a similar format SHOULD make any generated IDs unique
 to the document, for example with a hash of its source. Several flags are often
 inlined in one page, where IDs share a single namespace and a collision would
 make one flag use another's clip paths.
 
-## 11. Limits
+## 14. Limits
 
 So that a small document can't demand unbounded work, a renderer MUST accept and
 MAY reject beyond these limits:
@@ -638,19 +890,14 @@ MAY reject beyond these limits:
 
 Numbers MUST be finite, and renderers MAY reject magnitudes above 1e12.
 
-## 12. Open questions
+## 15. Open questions
 
-[`docs/missing-from-spec.md`](docs/missing-from-spec.md) lists what's still needed for
-most flags to read naturally, ranked by how many flags need it.
+[`docs/missing-from-spec.md`](docs/missing-from-spec.md) records the survey behind much
+of this format's vocabulary.
 
 - **Cuts on repeats:** a cut applies after `repeat`, so a repeated crescent needs
   several cuts. It might be better to have a `cut` inside a charge travel with it.
 - **Cardioid anchor:** placing it by its cusp is exact but awkward for centering.
-- **Reverse sides:** left out for now. A later version could add `reverse { ... }`.
-- **Other divisions:** serrated edges (Qatar, Bahrain) and quartering (Panama)
-  have no vocabulary of their own. Polygons and rectangles draw them exactly.
-- **Hollow charges:** a star drawn only as an outline (Morocco, Israel) has no native
-  form, and neither does an ellipse.
-- **Counterchange:** the Union Flag's red saltire uses a `clip` around the center.
-  It's exact, but a named way to say it might read better.
-- **Aspect-independent rendering:** one grid per flag for now.
+- **Ellipses:** there's no native shape, so they're paths.
+- **Emblem upright rules:** `upright` applies to a whole variant, but some flags may
+  keep only some charges upright. A variant can replace its layers for now.

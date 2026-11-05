@@ -1,0 +1,24 @@
+// Sizes follow the drawing on Commons, whose rays run slightly past the center before
+// the disc hides their tips.
+vexyl 1
+meta {
+  name "North Macedonia"
+  encoder "Naomi Persephone Amethyst"
+  license "Apache-2.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_North_Macedonia.svg"
+}
+palette {
+  red "#d82126"
+  yellow "#f8e92e"
+}
+proportion hoist=140 fly=280
+
+rays yellow red {
+  count 17
+  measure edge
+  ratio 14 84 42 56 28 56 42 84 28 84 42 56 28 56 42 84 14
+}
+charge disc yellow {
+  radius 22.5
+  fimbriate red 2.5
+}
