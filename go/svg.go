@@ -44,6 +44,9 @@ type Options struct {
 	// IDPrefix starts every ID in the output, in place of one worked out from the document.
 	// A page showing documents it doesn't trust should pass one that it knows is unique.
 	IDPrefix string
+	// Tags marks each drawn element with the path of the layer that drew it, in the attribute
+	// TagAttribute. SDK.md section 7 says how. It draws exactly the same.
+	Tags bool
 }
 
 // Float gives an option's value, for Height and Ratio.
@@ -121,9 +124,13 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 		return err
 	}
 	r := &renderer{flag: f, idPrefix: original.idPrefix}
+	if opts.Tags {
+		r.tagging = true
+		r.scopeLayers, r.scopeBorder = original.tagScope(opts)
+	}
 	if opts.IDPrefix != "" {
 		r.idPrefix = opts.IDPrefix
-	} else if opts != (Options{Height: opts.Height}) {
+	} else if opts != (Options{Height: opts.Height, Tags: opts.Tags}) {
 		// A page can show several forms of one flag, which mustn't share definitions.
 		ratio, step := 0.0, 0
 		if opts.Ratio != nil {
@@ -212,11 +219,33 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 	return err
 }
 
+// tagScope gives what starts the paths of a render's layers and of its border.
+func (f *Flag) tagScope(opts Options) (layers, border string) {
+	v := f.Variants[opts.Variant]
+	if opts.Variant == "" || v == nil {
+		if opts.Side == "reverse" && f.Reverse != nil {
+			return "reverse/", ""
+		}
+		return "", ""
+	}
+	scope := "variant/" + EncodePathName(opts.Variant) + "/"
+	if len(v.Layers) > 0 {
+		layers = scope
+	} else if opts.Side == "reverse" && f.Reverse != nil {
+		layers = "reverse/"
+	}
+	if v.Border != nil {
+		border = scope
+	}
+	return layers, border
+}
+
 // flagArt paints a flag's outside border, then everything within its outline.
 func (r *renderer) flagArt(f *Flag) {
 	if f.Border != nil && f.BorderOutside {
 		// Reading the flag refused any that fails, and its bounds were worked out from this.
 		outer, _ := offsetPolygon(f.boundary(), f.Border.Width)
+		r.tag = r.scopeBorder + "border"
 		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.fill(f.Border.Color, nil)))
 	}
 	root := region{w: f.Fly, h: f.Hoist}
@@ -227,15 +256,16 @@ func (r *renderer) flagArt(f *Flag) {
 	flagClip := r.id("flag")
 	r.line(`<clipPath id="%s">`, flagClip)
 	r.depth++
-	r.geom(shape, "")
+	r.unmarked(shape, "")
 	r.depth--
 	r.line(`</clipPath>`)
 
 	r.line(`<g clip-path="url(#%s)">`, flagClip)
 	r.depth++
-	r.layers(f.Layers, root)
+	r.layers(f.Layers, root, r.scopeLayers)
 	if f.Border != nil && !f.BorderOutside {
 		// Half of the stroke falls outside the outline, and the clip removes it.
+		r.tag = r.scopeBorder + "border"
 		r.geom(shape, fmt.Sprintf(`fill="none" stroke="%s" stroke-width="%s" stroke-linejoin="miter" stroke-miterlimit="10"`,
 			r.fill(f.Border.Color, nil), num(2*f.Border.Width)))
 	}
@@ -260,6 +290,12 @@ type renderer struct {
 	// upright is the transform that undoes a turned variant's rotation.
 	upright  string
 	idPrefix string
+	// tagging marks each drawn element with the path of the layer that drew it.
+	tagging                  bool
+	scopeLayers, scopeBorder string
+	// tag is the path of the layer being drawn, and using how many use layers it's inside.
+	tag   string
+	using int
 }
 
 func (r *renderer) line(format string, args ...any) {
@@ -318,13 +354,17 @@ func (r *renderer) id(kind string) string {
 	return fmt.Sprintf("%s%s%d", r.idPrefix, kind, r.nextID)
 }
 
-func (r *renderer) layers(layers []Layer, reg region) {
-	for _, l := range layers {
-		r.layer(l, reg)
+// layers paints layers, whose paths start with base: a scope, or a parent's path and a dot.
+func (r *renderer) layers(layers []Layer, reg region, base string) {
+	for i, l := range layers {
+		r.layer(l, reg, base+strconv.Itoa(i))
 	}
 }
 
-func (r *renderer) layer(l Layer, reg region) {
+func (r *renderer) layer(l Layer, reg region, path string) {
+	if r.using == 0 {
+		r.tag = path
+	}
 	attrs, style := r.effects(l.effects(), reg)
 	if _, isGroup := l.(*Group); isGroup {
 		// A group composites as a unit, so its children blend only with each other.
@@ -341,7 +381,7 @@ func (r *renderer) layer(l Layer, reg region) {
 			r.line(`</g>`)
 		}()
 	}
-	r.content(l, reg)
+	r.content(l, reg, path)
 }
 
 // effects writes any clip and mask a layer needs, and returns its attributes.
@@ -357,7 +397,7 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 		r.line(`<clipPath id="%s">`, id)
 		r.depth++
 		clip := e.Clip.forRegion(reg)
-		r.geom(shapeGeom(clip, position(clip, reg), 0), "")
+		r.unmarked(shapeGeom(clip, position(clip, reg), 0), "")
 		r.depth--
 		r.line(`</clipPath>`)
 		attrs = append(attrs, fmt.Sprintf(`clip-path="url(#%s)"`, id))
@@ -367,10 +407,10 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 		x, y, w, h := reg.bounds()
 		r.line(`<mask id="%s" maskUnits="userSpaceOnUse" x="%s" y="%s" width="%s" height="%s">`, id, num(x), num(y), num(w), num(h))
 		r.depth++
-		r.geom(geom{poly: rectPoly(x, y, x+w, y+h)}, `fill="#fff"`)
+		r.unmarked(geom{poly: rectPoly(x, y, x+w, y+h)}, `fill="#fff"`)
 		for i := range e.Cuts {
 			cut := e.Cuts[i].forRegion(reg)
-			r.geom(shapeGeom(cut, position(cut, reg), 0), `fill="#000"`)
+			r.unmarked(shapeGeom(cut, position(cut, reg), 0), `fill="#000"`)
 		}
 		r.depth--
 		r.line(`</mask>`)
@@ -379,7 +419,7 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 	return attrs, style
 }
 
-func (r *renderer) content(l Layer, reg region) {
+func (r *renderer) content(l Layer, reg region, path string) {
 	switch l := l.(type) {
 	case *Field:
 		r.paint(l.Color, nil, nil, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
@@ -464,26 +504,29 @@ func (r *renderer) content(l Layer, reg region) {
 	case *Charge:
 		r.charge(l, reg)
 	case *Emblem:
-		r.emblem(l, reg)
+		r.emblem(l, reg, path)
 	case *Group:
-		r.layers(l.Layers, reg)
+		r.layers(l.Layers, reg, path+".")
 	case *Panel:
-		r.panel(l, reg)
+		r.panel(l, reg, path)
 	case *Use:
+		// Everything a use draws is marked with its path, since it's the use in the document.
+		r.using++
+		defer func() { r.using-- }()
 		if l.design.Fly == 0 {
-			r.layers(l.design.Layers, reg)
+			r.layers(l.design.Layers, reg, "")
 			return
 		}
 		// A design with its own grid is scaled to fill the region it's used in.
 		r.line(`<g transform="scale(%s %s)">`, num(reg.w/l.design.Fly), num(reg.h/l.design.Hoist))
 		r.depth++
-		r.layers(l.design.Layers, region{w: l.design.Fly, h: l.design.Hoist})
+		r.layers(l.design.Layers, region{w: l.design.Fly, h: l.design.Hoist}, "")
 		r.depth--
 		r.line(`</g>`)
 	}
 }
 
-func (r *renderer) panel(p *Panel, reg region) {
+func (r *renderer) panel(p *Panel, reg region, path string) {
 	x, y, w, h := panelRect(p, reg)
 	shape := geom{poly: rectPoly(0, 0, w, h)}
 	if p.Line != nil {
@@ -492,12 +535,12 @@ func (r *renderer) panel(p *Panel, reg region) {
 	id := r.id("panel")
 	r.line(`<clipPath id="%s">`, id)
 	r.depth++
-	r.geom(shape, "")
+	r.unmarked(shape, "")
 	r.depth--
 	r.line(`</clipPath>`)
 	r.line(`<g transform="translate(%s %s)" clip-path="url(#%s)" style="isolation:isolate">`, num(x), num(y), id)
 	r.depth++
-	r.layers(p.Layers, region{w: w, h: h})
+	r.layers(p.Layers, region{w: w, h: h}, path+".")
 	r.depth--
 	r.line(`</g>`)
 }
@@ -568,7 +611,7 @@ func (r *renderer) counterchange(l *Saltire, reg region) {
 	id := r.id("clip")
 	r.line(`<clipPath id="%s">`, id)
 	r.depth++
-	r.geom(geom{poly: []vec{
+	r.unmarked(geom{poly: []vec{
 		c, {reg.w, c.y}, {reg.w, reg.h},
 		c, {c.x, reg.h}, {0, reg.h},
 		c, {0, c.y}, {0, 0},
@@ -587,7 +630,7 @@ func (r *renderer) counterchange(l *Saltire, reg region) {
 	r.line(`</g>`)
 }
 
-func (r *renderer) emblem(e *Emblem, reg region) {
+func (r *renderer) emblem(e *Emblem, reg region, path string) {
 	at := reg.center()
 	if e.At != nil {
 		at = vec{e.At.Fly, e.At.Hoist}
@@ -609,8 +652,8 @@ func (r *renderer) emblem(e *Emblem, reg region) {
 		// Charges in an emblem turn with it, so they aren't each kept upright as well.
 		upright := r.upright
 		r.upright = ""
-		for _, c := range e.Charges {
-			r.layer(c, region{local: reach})
+		for i, c := range e.Charges {
+			r.layer(c, region{local: reach}, path+"."+strconv.Itoa(i))
 		}
 		r.upright = upright
 		r.depth--
@@ -746,8 +789,8 @@ func (r *renderer) embedded(c *Charge, at vec) {
 	}
 	// Each time it's drawn gets its own prefix, since a definition can draw it many times.
 	prefix := r.id("svg") + "-"
-	r.line(`<svg x="%s" y="%s" width="%s" height="%s" viewBox="%s" preserveAspectRatio="xMidYMid meet"%s>%s</svg>`,
-		num(at.x-s.Fly/2), num(at.y-s.Hoist/2), num(s.Fly), num(s.Hoist), esc(s.embedded.viewBox),
+	r.line(`<svg%s x="%s" y="%s" width="%s" height="%s" viewBox="%s" preserveAspectRatio="xMidYMid meet"%s>%s</svg>`,
+		r.mark(), num(at.x-s.Fly/2), num(at.y-s.Hoist/2), num(s.Fly), num(s.Hoist), esc(s.embedded.viewBox),
 		strings.ReplaceAll(s.embedded.attrs, idMark, prefix), strings.ReplaceAll(s.embedded.body, idMark, prefix))
 }
 
@@ -771,10 +814,27 @@ func (r *renderer) paint(color string, box *[4]float64, fimbriate *Edge, stroke,
 	}
 }
 
+// mark gives the attribute that marks a drawn element, if this render has them.
+func (r *renderer) mark() string {
+	if !r.tagging {
+		return ""
+	}
+	return " " + TagAttribute + `="` + esc(r.tag) + `"`
+}
+
+// unmarked writes what's only part of a definition, which no layer drew.
+func (r *renderer) unmarked(g geom, attrs string) {
+	tagging := r.tagging
+	r.tagging = false
+	r.geom(g, attrs)
+	r.tagging = tagging
+}
+
 func (r *renderer) geom(g geom, attrs string) {
 	if attrs != "" {
 		attrs = " " + attrs
 	}
+	attrs = r.mark() + attrs
 	if g.transform != "" {
 		attrs += fmt.Sprintf(` transform="%s"`, g.transform)
 	}

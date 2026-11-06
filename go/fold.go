@@ -210,7 +210,10 @@ func (r *renderer) writeFolded(f *Flag, fold *Fold, opts Options, height float64
 		reverse.Layers = f.Reverse.Layers
 		r.line(`<g id="%s">`, back)
 		r.depth++
+		scope := r.scopeLayers
+		r.scopeLayers = "reverse/"
 		r.flagArt(&reverse)
+		r.scopeLayers = scope
 		r.depth--
 		r.line(`</g>`)
 	}
@@ -222,7 +225,7 @@ func (r *renderer) writeFolded(f *Flag, fold *Fold, opts Options, height float64
 		id := r.id("facet")
 		r.line(`<clipPath id="%s">`, id)
 		r.depth++
-		r.geom(geom{poly: fc.poly}, "")
+		r.unmarked(geom{poly: fc.poly}, "")
 		r.depth--
 		r.line(`</clipPath>`)
 		art, place := front, fc.place
@@ -233,7 +236,7 @@ func (r *renderer) writeFolded(f *Flag, fold *Fold, opts Options, height float64
 		}
 		r.line(`<g clip-path="url(#%s)"><use href="#%s" transform="matrix(%s %s %s %s %s %s)"/></g>`, id, art,
 			num(place.a), num(place.b), num(place.c), num(place.d), num(place.e), num(place.f))
-		r.geom(geom{poly: fc.poly}, crease)
+		r.unmarked(geom{poly: fc.poly}, crease)
 	}
 	r.depth--
 	r.line(`</svg>`)

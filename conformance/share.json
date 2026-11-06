@@ -1,0 +1,145 @@
+{
+ "dictionary": "share/v1.dict",
+ "sha256": "92062df2fd010bea13d1aefb30c2cfbb2ad6aee5a60e8f8e2d2455516c1c6b97",
+ "limit": 8388608,
+ "encode": [
+  "valid/united-states.kdl",
+  "valid/line-endings.kdl",
+  "valid/inline-svg.kdl",
+  "tags/everything.kdl"
+ ],
+ "accepted": [
+  {
+   "name": "a flag",
+   "link": "share/a flag.link",
+   "bytes": 4152,
+   "sha256": "029d1618b1163ef4d1285a2560454ddba72101da088c796e6204a2b254fc0ad1"
+  },
+  {
+   "name": "the dictionary itself, which needs every byte of it",
+   "link": "share/the dictionary itself, which needs every byte of it.link",
+   "bytes": 8192,
+   "sha256": "92062df2fd010bea13d1aefb30c2cfbb2ad6aee5a60e8f8e2d2455516c1c6b97"
+  },
+  {
+   "name": "stored blocks",
+   "link": "share/stored blocks.link",
+   "bytes": 4152,
+   "sha256": "029d1618b1163ef4d1285a2560454ddba72101da088c796e6204a2b254fc0ad1"
+  },
+  {
+   "name": "fixed codes",
+   "link": "share/fixed codes.link",
+   "bytes": 4152,
+   "sha256": "029d1618b1163ef4d1285a2560454ddba72101da088c796e6204a2b254fc0ad1"
+  },
+  {
+   "name": "no use of the dictionary",
+   "link": "share/no use of the dictionary.link",
+   "bytes": 5,
+   "sha256": "eb780193f1525b08a86fd2100c9646a321d18aa8a8ed76f96895148bec93f0d4"
+  },
+  {
+   "name": "nothing at all",
+   "link": "share/nothing at all.link",
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "name": "exactly at the limit",
+   "link": "share/exactly at the limit.link",
+   "bytes": 8388608,
+   "sha256": "ad97f87076920684e2ca66fc44e5d322797dc9d64706b174e51b5d0828937043"
+  },
+  {
+   "name": "line endings kept",
+   "link": "share/line endings kept.link",
+   "bytes": 20,
+   "sha256": "bf3d8309f807e0d6e5dc179ad74404dfe9104bffb0c6e095707ae57a9b548358"
+  },
+  {
+   "name": "a byte order mark and other text kept",
+   "link": "share/a byte order mark and other text kept.link",
+   "bytes": 21,
+   "sha256": "c6a74b54516a729111fb8150459ba8f98821be8f38e6a9a95dedadc5c5500b4d"
+  }
+ ],
+ "refused": [
+  {
+   "name": "no version",
+   "link": "share/no version.link"
+  },
+  {
+   "name": "no dot",
+   "link": "share/no dot.link"
+  },
+  {
+   "name": "a capital",
+   "link": "share/a capital.link"
+  },
+  {
+   "name": "another version",
+   "link": "share/another version.link"
+  },
+  {
+   "name": "a leading zero in its version",
+   "link": "share/a leading zero in its version.link"
+  },
+  {
+   "name": "a hash in front",
+   "link": "share/a hash in front.link"
+  },
+  {
+   "name": "empty",
+   "link": "share/empty.link"
+  },
+  {
+   "name": "base64 padding",
+   "link": "share/base64 padding.link"
+  },
+  {
+   "name": "the standard alphabet",
+   "link": "share/the standard alphabet.link"
+  },
+  {
+   "name": "whitespace inside",
+   "link": "share/whitespace inside.link"
+  },
+  {
+   "name": "an impossible length",
+   "link": "share/an impossible length.link"
+  },
+  {
+   "name": "stray bits at its end",
+   "link": "share/stray bits at its end.link"
+  },
+  {
+   "name": "cut short",
+   "link": "share/cut short.link"
+  },
+  {
+   "name": "more after its end",
+   "link": "share/more after its end.link"
+  },
+  {
+   "name": "not UTF-8",
+   "link": "share/not UTF-8.link"
+  },
+  {
+   "name": "over the limit by a byte",
+   "link": "share/over the limit by a byte.link"
+  },
+  {
+   "name": "a compression bomb",
+   "link": "share/a compression bomb.link"
+  },
+  {
+   "name": "a distance too far back",
+   "link": "share/a distance too far back.link"
+  },
+  {
+   "name": "a corrupt block type",
+   "link": "share/a corrupt block type.link"
+  }
+ ]
+}

@@ -68,6 +68,46 @@ class Models(unittest.TestCase):
         self.assertFalse(run.numbers_close(True, 1))
 
 
+class TagChecks(unittest.TestCase):
+    OPEN = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><title>T</title>'
+
+    def root(self, body):
+        return run.ET.fromstring(self.OPEN + body + "</svg>")
+
+    def test_a_plain_render_can_not_have_a_tag(self):
+        self.assertTrue(run.output_problems(self.OPEN + '<rect data-vexyl-layer="0"/></svg>'))
+
+    def test_a_tagged_render_can(self):
+        self.assertEqual(run.output_problems(self.OPEN + '<rect data-vexyl-layer="1.2"/></svg>', tagged=True), [])
+
+    def test_a_tag_has_to_be_a_path(self):
+        for bad in ("bars", "1.", ".1", "1..2", "variant//0", "x/0", "1;2"):
+            self.assertTrue(run.output_problems(self.OPEN + f'<rect data-vexyl-layer="{bad}"/></svg>', tagged=True), bad)
+        for good in ("0", "12.3.4", "border", "reverse/0.1", "variant/a%2Fb/2", "variant/__proto__/border"):
+            self.assertEqual(run.output_problems(self.OPEN + f'<rect data-vexyl-layer="{good}"/></svg>', tagged=True), [], good)
+
+    def test_what_is_only_a_definition_needs_no_tag(self):
+        root = self.root('<clipPath id="a"><rect/></clipPath><mask id="b"><rect/></mask><g><rect data-vexyl-layer="0"/></g>')
+        self.assertEqual(run.untagged_drawn(root, False), [])
+
+    def test_a_shape_with_no_tag_is_found(self):
+        self.assertEqual(len(run.untagged_drawn(self.root('<g><rect/></g><rect data-vexyl-layer="0"/>'), False)), 1)
+
+    def test_artwork_is_tagged_as_a_whole(self):
+        self.assertEqual(run.untagged_drawn(self.root('<svg data-vexyl-layer="0"><rect/><path/></svg>'), False), [])
+        self.assertEqual(len(run.untagged_drawn(self.root('<svg><rect/></svg>'), False)), 1)
+
+    def test_only_a_fold_has_lines_that_no_layer_drew(self):
+        root = self.root('<defs><g><rect data-vexyl-layer="0"/></g></defs><g><use href="#x"/></g><polygon/>')
+        self.assertEqual(run.untagged_drawn(root, True), [])
+        self.assertEqual(len(run.untagged_drawn(root, False)), 1)
+
+    def test_drawing_one_path_keeps_only_its_shapes(self):
+        root = self.root('<g><rect data-vexyl-layer="0"/><rect data-vexyl-layer="1"/></g><rect data-vexyl-layer="1"/>')
+        kept = run.only_tag(root, "1")
+        self.assertEqual([e.attrib[run.TAG] for e in kept.iter() if run.TAG in e.attrib], ["1", "1"])
+
+
 class OutputChecks(unittest.TestCase):
     OPEN = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><title>T</title>'
 

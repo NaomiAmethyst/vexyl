@@ -3,7 +3,7 @@
 # Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 """Runs Vexyl's conformance suite against an implementation.
 
-    run.py [--only render,model,invalid,accepted,sanitize,distinct,options] [--filter TEXT] [--resvg PATH] COMMAND...
+    run.py [--only render,model,invalid,accepted,sanitize,distinct,options,tags,locate,share] [--filter TEXT] [--resvg PATH] COMMAND...
 
 COMMAND is how to run the implementation, which has to offer these, as `vexyl` does:
 
@@ -12,17 +12,25 @@ COMMAND is how to run the implementation, which has to offer these, as `vexyl` d
     COMMAND model FILE
     COMMAND check -json FILE
     COMMAND tree FILE
+    COMMAND render -tags ...
+    COMMAND locate [-line N] FILE
+    COMMAND share encode FILE
+    COMMAND share decode FILE
 
 Renders are compared as pixels using the pinned resvg, never as text, so implementations
 are free to write their SVG differently.
 """
 import argparse
+import base64
+import copy
+import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
 import tempfile
+import zlib
 import xml.etree.ElementTree as ET
 
 import jsonschema
@@ -50,12 +58,20 @@ LOCAL_URL = re.compile(r"url\(#[A-Za-z_][A-Za-z0-9_.:-]*\)")
 COLOR_FUNCTION = re.compile(r"\b(?:rgb|rgba|hsl|hsla)\(", re.I)
 
 
+TAG = "data-vexyl-layer"
+TAG_PATH = re.compile(r"(?:(?:reverse|variant/[^/]+)/)?(?:[0-9]+(?:\.[0-9]+)*|border)\Z")
+# Only what's drawn is marked, and artwork draws as a whole.
+UNDRAWN = {"defs", "clipPath", "mask", "linearGradient", "radialGradient", "stop", "title", "desc"}
+SHAPES = {"path", "rect", "circle", "ellipse", "line", "polyline", "polygon"}
+
+
 def clean_paint(value):
     return "(" not in COLOR_FUNCTION.sub("", LOCAL_URL.sub("", value))
 
 
-def output_problems(text):
-    """Everything banned that an SVG document has in it, whatever it would look like when drawn."""
+def output_problems(text, tagged=False):
+    """Everything banned that an SVG document has in it, whatever it would look like when drawn.
+    A tagged render can also have the attribute that marks what drew each element."""
     problems = []
     try:
         root = ET.fromstring(text)
@@ -76,7 +92,10 @@ def output_problems(text):
         if not allowed:
             problems.append(f"<{tag}> isn't allowed")
         for name, value in el.attrib.items():
-            if name.startswith("{"):
+            if tagged and name == TAG:
+                if not TAG_PATH.match(value):
+                    problems.append(f"<{tag}> has {TAG} of {value!r}, which isn't a path")
+            elif name.startswith("{"):
                 problems.append(f"<{tag}> has a namespaced attribute {name}")
             elif name not in ARTWORK_ATTRS and not (tag == "svg" and name in ROOT_ATTRS):
                 problems.append(f"<{tag}> has an attribute {name}")
@@ -108,6 +127,63 @@ def output_problems(text):
     if root.tag != SVG + "svg":
         problems.append("the root isn't <svg>")
     return problems
+
+
+def drawn_elements(root):
+    """Yields what draws something, with whether it's a direct child of the root: each shape, and
+    each piece of artwork as a whole, leaving out what's only a definition. In a fold the art is
+    in defs and placed with <use>, so that counts as drawn, but its clips don't."""
+    def walk(el, parent):
+        for child in el:
+            tag = child.tag[len(SVG):] if child.tag.startswith(SVG) else child.tag
+            if tag in UNDRAWN and tag != "defs":
+                continue
+            if tag == "svg" or tag in SHAPES:
+                yield child, el is root
+            elif tag != "use":
+                yield from walk(child, el)
+    yield from walk(root, None)
+
+
+def untagged_drawn(root, folded):
+    """What a tagged render drew without saying what drew it. A fold's crease lines are the one
+    thing that no layer draws, and they lie directly under the root."""
+    return [el for el, top in drawn_elements(root) if TAG not in el.attrib and not (folded and top)]
+
+
+def only_tag(root, path):
+    """A copy of a tagged render holding nothing drawn but what a path drew."""
+    kept = copy.deepcopy(root)
+    def prune(el):
+        for child in list(el):
+            tag = child.tag[len(SVG):] if child.tag.startswith(SVG) else child.tag
+            if tag in UNDRAWN and tag != "defs":
+                continue
+            if tag == "svg" or tag in SHAPES:
+                if child.attrib.get(TAG) != path:
+                    el.remove(child)
+            elif tag != "use":
+                prune(child)
+    prune(kept)
+    return kept
+
+
+TAG_BOX_HEIGHT = 128
+
+
+def boxes_of_tags(resvg, text, tmp):
+    """The box of pixels that each path drew, by drawing each one alone."""
+    ET.register_namespace("", SVG[1:-1])
+    root = ET.fromstring(text)
+    boxes = {}
+    out, png = os.path.join(tmp, "only.svg"), os.path.join(tmp, "only.png")
+    for path in sorted({el.attrib[TAG] for el, _ in drawn_elements(root) if TAG in el.attrib}):
+        with open(out, "wb") as f:
+            f.write(ET.tostring(only_tag(root, path)))
+        alpha = rasterize(resvg, out, TAG_BOX_HEIGHT, png)[:, :, 3] > 64
+        rows, columns = np.flatnonzero(alpha.any(1)), np.flatnonzero(alpha.any(0))
+        boxes[path] = [int(columns[0]), int(rows[0]), int(columns[-1]) + 1, int(rows[-1]) + 1] if len(rows) else None
+    return boxes
 
 
 def artwork_differs(want, got):
@@ -477,9 +553,186 @@ def check_options(command, manifest, resvg, tolerance, wanted, failures):
     return count
 
 
+def check_tags(command, manifest, resvg, wanted, failures):
+    """A tagged render has to draw exactly what the plain one does, say which layer drew everything
+    it draws, and name only layers that the document has."""
+    count = 0
+    with tempfile.TemporaryDirectory() as tmp:
+        plain, tagged, a, b = (os.path.join(tmp, n) for n in ("plain.svg", "tagged.svg", "a.png", "b.png"))
+        for case in manifest["cases"]:
+            file = os.path.join(HERE, case["file"])
+            done = subprocess.run(command + ["locate", file], capture_output=True, text=True)
+            if done.returncode:
+                failures.append(f"tags: {case['name']}: locate failed: {done.stderr.strip()[:200]}")
+                continue
+            known = {s["path"] for s in json.loads(done.stdout)}
+            for render in case["renders"]:
+                label = f"tags: {case['name']} {render['name']}"
+                if render.get("refused") or (wanted and wanted not in label):
+                    continue
+                count += 1
+                args = flags_for(render["options"])
+                done = subprocess.run(command + ["render"] + args + ["-tags", "-o", tagged, file], capture_output=True, text=True)
+                if done.returncode:
+                    failures.append(f"{label}: failed: {done.stderr.strip()[:200]}")
+                    continue
+                subprocess.run(command + ["render"] + args + ["-o", plain, file], capture_output=True, text=True)
+                with open(tagged, encoding="utf-8") as f:
+                    text = f.read()
+                with open(plain, encoding="utf-8") as f:
+                    if TAG in f.read():
+                        failures.append(f"{label}: a plain render has tags in it")
+                for problem in output_problems(text, tagged=True)[:3]:
+                    failures.append(f"{label}: output: {problem}")
+                root = ET.fromstring(text)
+                missing = untagged_drawn(root, "fold" in render["options"])
+                if missing:
+                    failures.append(f"{label}: {len(missing)} drawn elements have no tag, such as <{missing[0].tag[len(SVG):]}>")
+                unknown = {el.attrib[TAG] for el in root.iter() if TAG in el.attrib} - known
+                if unknown:
+                    failures.append(f"{label}: tags that the document doesn't have: {sorted(unknown)[:3]}")
+                # Exactly the same pixels, with no tolerance at all.
+                if not np.array_equal(rasterize(resvg, tagged, 96, a), rasterize(resvg, plain, 96, b)):
+                    failures.append(f"{label}: it draws differently from the plain render")
+        with open(os.path.join(HERE, "tags.json")) as f:
+            forms = json.load(f)
+        out = os.path.join(tmp, "form.svg")
+        for form in forms:
+            label = f"tags: {form['name']}"
+            if wanted and wanted not in label:
+                continue
+            count += 1
+            done = subprocess.run(command + ["render", "-tags"] + form["args"] + ["-o", out, os.path.join(HERE, form["file"])], capture_output=True, text=True)
+            if done.returncode:
+                failures.append(f"{label}: failed: {done.stderr.strip()[:200]}")
+                continue
+            with open(out, encoding="utf-8") as f:
+                got = boxes_of_tags(resvg, f.read(), tmp)
+            if got.keys() != form["boxes"].keys():
+                failures.append(f"{label}: has tags {sorted(got)}, not {sorted(form['boxes'])}")
+                continue
+            for path, box in form["boxes"].items():
+                near = (box is None and got[path] is None) or (box and got[path] and all(abs(x - y) <= 2 for x, y in zip(box, got[path])))
+                if not near:
+                    failures.append(f"{label}: {path} draws in {got[path]}, not {box}")
+    return count
+
+
+def check_locate(command, wanted, failures):
+    """Every part of a document has to be found on the lines where it is, and each of those lines
+    has to lead back to the innermost part holding it."""
+    with open(os.path.join(HERE, "locate.json")) as f:
+        cases = json.load(f)
+    count = 0
+    for case in cases:
+        label = f"locate: {case['file']}"
+        if wanted and wanted not in label:
+            continue
+        count += 1
+        file = os.path.join(HERE, case["file"])
+        done = subprocess.run(command + ["locate", file], capture_output=True, text=True)
+        if done.returncode:
+            failures.append(f"{label}: failed: {done.stderr.strip()[:200]}")
+            continue
+        got = {s["path"]: [s["line"], s["endLine"]] for s in json.loads(done.stdout)}
+        if got != case["spans"]:
+            wrong = sorted(k for k in got.keys() | case["spans"].keys() if got.get(k) != case["spans"].get(k))
+            failures.append(f"{label}: differs at {wrong[:4]}: {[got.get(k) for k in wrong[:4]]}, not {[case['spans'].get(k) for k in wrong[:4]]}")
+            continue
+        for path, (start, end) in case["spans"].items():
+            for line in {start, end}:
+                # Whichever holds this line with the latest start is innermost.
+                holders = [p for p, (s, e) in case["spans"].items() if s <= line <= e]
+                best = max(case["spans"][p][0] for p in holders)
+                innermost = {p for p in holders if case["spans"][p][0] == best}
+                done = subprocess.run(command + ["locate", "-line", str(line), file], capture_output=True, text=True)
+                span = json.loads(done.stdout) if done.returncode == 0 and done.stdout.strip() else None
+                # Two on one line are told apart by their columns, which the line alone can't do.
+                if span is None or (span["path"] not in innermost):
+                    failures.append(f"{label}: line {line} leads to {span and span['path']}, not one of {sorted(innermost)[:3]}")
+    return count
+
+
+def check_share(command, wanted, failures):
+    """Share links have to mean the same to every library, for good, so these are made with zlib
+    rather than by a library, and what a library writes is read back with zlib."""
+    with open(os.path.join(HERE, "share.json")) as f:
+        cases = json.load(f)
+    with open(os.path.join(HERE, "..", cases["dictionary"]), "rb") as f:
+        dictionary = f.read()
+    count = 0
+    if hashlib.sha256(dictionary).hexdigest() != cases["sha256"]:
+        failures.append("share: the dictionary has changed, which breaks every link already sent")
+    for case in cases["accepted"]:
+        label = f"share: reading {case['name']}"
+        if wanted and wanted not in label:
+            continue
+        count += 1
+        done = subprocess.run(command + ["share", "decode", os.path.join(HERE, case["link"])], capture_output=True)
+        if done.returncode:
+            failures.append(f"{label}: failed: {done.stderr.decode(errors='replace').strip()[:200]}")
+        elif hashlib.sha256(done.stdout).hexdigest() != case["sha256"]:
+            failures.append(f"{label}: gave {len(done.stdout)} bytes that differ from the {case['bytes']} expected")
+    for case in cases["refused"]:
+        label = f"share: refusing {case['name']}"
+        if wanted and wanted not in label:
+            continue
+        count += 1
+        done = subprocess.run(command + ["share", "decode", os.path.join(HERE, case["link"])], capture_output=True, timeout=120)
+        if done.returncode == 0:
+            failures.append(f"{label}: it should be refused")
+    with tempfile.TemporaryDirectory() as tmp:
+        for file in cases["encode"]:
+            label = f"share: writing {file}"
+            if wanted and wanted not in label:
+                continue
+            count += 1
+            path = os.path.join(HERE, file)
+            done = subprocess.run(command + ["share", "encode", path], capture_output=True, text=True)
+            if done.returncode:
+                failures.append(f"{label}: failed: {done.stderr.strip()[:200]}")
+                continue
+            link = done.stdout.strip()
+            if not re.fullmatch(r"v1\.[A-Za-z0-9_-]+", link):
+                failures.append(f"{label}: isn't in the right form: {link[:40]}")
+                continue
+            body = link[3:]
+            raw = base64.urlsafe_b64decode(body + "=" * (-len(body) % 4))
+            with open(path, "rb") as f:
+                want = f.read()
+            try:
+                inflater = zlib.decompressobj(-15, zdict=dictionary)
+                back = inflater.decompress(raw) + inflater.flush()
+            except zlib.error as e:
+                failures.append(f"{label}: zlib can't read it: {e}")
+                continue
+            if back != want:
+                failures.append(f"{label}: it holds different bytes")
+            # It can't be doing this well unless it's using the dictionary.
+            reference = zlib.compressobj(9, zlib.DEFLATED, -15, 9, zlib.Z_DEFAULT_STRATEGY, dictionary)
+            size = len(reference.compress(want) + reference.flush())
+            if len(raw) > size * 1.15 + 16:
+                failures.append(f"{label}: {len(raw)} bytes where a dictionary gives {size}")
+            own = os.path.join(tmp, "own.link")
+            with open(own, "w") as f:
+                f.write(link)
+            done = subprocess.run(command + ["share", "decode", own], capture_output=True)
+            if done.returncode or done.stdout != want:
+                failures.append(f"{label}: it can't read its own link")
+        if not wanted or "share: refusing to write" in wanted:
+            count += 1
+            big = os.path.join(tmp, "big.kdl")
+            with open(big, "wb") as f:
+                f.write(b"a" * (cases["limit"] + 1))
+            done = subprocess.run(command + ["share", "encode", big], capture_output=True)
+            if done.returncode == 0:
+                failures.append("share: refusing to write a document over the limit: it wrote one")
+    return count
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--only", default="render,model,invalid,accepted,sanitize,distinct,options")
+    ap.add_argument("--only", default="render,model,invalid,accepted,sanitize,distinct,options,tags,locate,share")
     ap.add_argument("--filter", help="only cases whose names contain this")
     ap.add_argument("--resvg", default="resvg")
     ap.add_argument("command", nargs="+")
@@ -507,6 +760,12 @@ def main():
         totals["distinct pairs"] = check_distinct(command, args.filter, failures)
     if "options" in only:
         totals["option checks"] = check_options(command, manifest, args.resvg, manifest["tolerance"], args.filter, failures)
+    if "tags" in only:
+        totals["tagged renders"] = check_tags(command, manifest, args.resvg, args.filter, failures)
+    if "locate" in only:
+        totals["located documents"] = check_locate(command, args.filter, failures)
+    if "share" in only:
+        totals["share checks"] = check_share(command, args.filter, failures)
     for failure in failures:
         print("FAIL", failure)
     print(", ".join(f"{v} {k}" for k, v in totals.items()) + f": {len(failures)} failed")

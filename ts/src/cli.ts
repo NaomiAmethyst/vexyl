@@ -5,13 +5,17 @@
 /// <reference types="node" />
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { model, parse, svg, svgTree, validate, type Flag, type Options, type SvgElement } from "./index.js";
+import { layerAt, locate, model, parse, shareDecode, shareEncode, svg, svgTree, validate, type Flag, type Options, type SvgElement } from "./index.js";
 
 const usage = `usage:
   vexyl render [options] FILE   render a flag to SVG
   vexyl check [-json] FILE...   validate flags, with -json listing one file's problems
   vexyl model FILE              print a flag's parsed model as JSON
   vexyl tree [options] FILE     print a render as a tree of elements, as JSON
+  vexyl locate [-line N] FILE   print where each layer and part of a document is, as JSON,
+                                or just what's innermost at a line
+  vexyl share encode FILE       print a document as a share link's part after its #
+  vexyl share decode FILE       print the document in a file holding that part
 
 render options:
   -o FILE         write to a file instead of standard output
@@ -27,6 +31,7 @@ render options:
   -fold NAME      show one of the flag's folds
   -fold-step N    stop the fold after N steps
   -id-prefix TEXT start every ID in the output with this
+  -tags           mark each drawn element with the layer that drew it
 
 FILE can be - for standard input.
 `;
@@ -42,6 +47,7 @@ const alignments: ReadonlyMap<string, Options["align"]> = new Map([
 ]);
 
 const renderFlags = new Set(["o", "height", "ratio", "variant", "side", "fit", "align", "fold", "fold-step", "id-prefix"]);
+const renderSwitches = new Set(["tags"]);
 
 /** Reads the source as UTF-8, refusing anything that isn't rather than replacing it. */
 function readSource(path: string): string {
@@ -79,6 +85,10 @@ function render(args: string[], asTree: boolean): void {
 		const body = arg.replace(/^--?/, "");
 		const equals = body.indexOf("=");
 		const name = equals < 0 ? body : body.slice(0, equals);
+		if (renderSwitches.has(name) && equals < 0) {
+			given.set(name, "");
+			continue;
+		}
 		if (!renderFlags.has(name)) {
 			throw new Error(`unknown flag ${arg}\n${usage}`);
 		}
@@ -139,6 +149,9 @@ function render(args: string[], asTree: boolean): void {
 	if (idPrefix) {
 		opts.idPrefix = idPrefix;
 	}
+	if (given.has("tags")) {
+		opts.tags = true;
+	}
 	const out = asTree ? JSON.stringify(treeJson(svgTree(doc, opts))) + "\n" : svg(doc, opts);
 	const output = given.get("o");
 	if (output) {
@@ -188,6 +201,26 @@ function run(args: string[]): void {
 			if (failed > 0) {
 				throw new Error(`${failed} of ${paths.length} files failed`);
 			}
+			return;
+		}
+		case "locate": {
+			if (args[1] === "-line" && args.length === 4) {
+				const spans = locate(readSource(args[3]!));
+				process.stdout.write(JSON.stringify(layerAt(spans, Number(args[2])) ?? null) + "\n");
+				return;
+			}
+			if (args.length !== 2) {
+				throw new Error(`locate needs one file\n${usage}`);
+			}
+			process.stdout.write(JSON.stringify(locate(readSource(args[1]!))) + "\n");
+			return;
+		}
+		case "share": {
+			if (args.length !== 3 || (args[1] !== "encode" && args[1] !== "decode")) {
+				throw new Error(`share needs encode or decode, and one file\n${usage}`);
+			}
+			const text = readSource(args[2]!);
+			process.stdout.write(args[1] === "encode" ? shareEncode(text) + "\n" : shareDecode(text.replace(/\n+$/, "")));
 			return;
 		}
 		case "model":

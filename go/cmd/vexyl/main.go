@@ -25,6 +25,10 @@ const usage = `usage:
   vexyl model FILE              print a flag's parsed model as JSON
   vexyl tree [options] FILE     print a render as a tree of elements, as JSON
   vexyl info FILE               list a flag's details, colors, variants and folds
+  vexyl locate [-line N] FILE   print where each layer and part of a document is, as JSON,
+                                or just what's innermost at a line
+  vexyl share encode FILE       print a document as a share link's part after its #
+  vexyl share decode FILE       print the document in a file holding that part
 
 render options:
   -o FILE         write to a file instead of standard output
@@ -40,6 +44,7 @@ render options:
   -fold NAME      show one of the flag's folds
   -fold-step N    stop the fold after N steps
   -id-prefix TEXT start every ID in the output with this
+  -tags           mark each drawn element with the layer that drew it
 
 FILE can be - for standard input.
 `
@@ -69,6 +74,10 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 		return model(args[1:], stdin, stdout)
 	case "tree":
 		return render(args, stdin, stdout)
+	case "locate":
+		return locate(args[1:], stdin, stdout)
+	case "share":
+		return share(args[1:], stdin, stdout)
 	case "help", "-h", "--help":
 		_, err := io.WriteString(stdout, usage)
 		return err
@@ -90,6 +99,7 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	fold := fs.String("fold", "", "a fold's `name`")
 	foldStep := fs.Int("fold-step", 0, "stop the fold after this many steps")
 	idPrefix := fs.String("id-prefix", "", "start every ID with this")
+	tags := fs.Bool("tags", false, "mark each drawn element with the layer that drew it")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -113,7 +123,7 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 		return fmt.Errorf("-align must be left, right, top, bottom or center, got %q", *align)
 	}
 	opts := vexyl.Options{Height: height, Ratio: proportion, Variant: *variant, Side: *side,
-		Fit: *fit, Align: where, Fold: *fold, IDPrefix: *idPrefix}
+		Fit: *fit, Align: where, Fold: *fold, IDPrefix: *idPrefix, Tags: *tags}
 	fs.Visit(func(given *flag.Flag) {
 		if given.Name == "fold-step" {
 			opts.FoldStep = foldStep
@@ -136,6 +146,73 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 		return os.WriteFile(*output, out.Bytes(), 0o644)
 	}
 	_, err = stdout.Write(out.Bytes())
+	return err
+}
+
+func readAll(path string, stdin io.Reader) ([]byte, error) {
+	if path == "-" {
+		return io.ReadAll(stdin)
+	}
+	return os.ReadFile(path)
+}
+
+func locate(args []string, stdin io.Reader, stdout io.Writer) error {
+	fs := flag.NewFlagSet("locate", flag.ContinueOnError)
+	line := fs.Int("line", 0, "only what's innermost at this `line`")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 {
+		return fmt.Errorf("locate needs one file\n%s", usage)
+	}
+	src, err := readAll(fs.Arg(0), stdin)
+	if err != nil {
+		return err
+	}
+	spans := vexyl.Locate(string(src))
+	plain := func(s vexyl.Span) any {
+		return map[string]any{"path": s.Path, "node": s.Node, "line": s.Line, "column": s.Column, "endLine": s.EndLine, "endColumn": s.EndColumn}
+	}
+	var result any
+	if *line > 0 {
+		if s, ok := vexyl.LayerAt(spans, *line); ok {
+			result = plain(s)
+		}
+	} else {
+		all := make([]any, len(spans))
+		for i, s := range spans {
+			all[i] = plain(s)
+		}
+		result = all
+	}
+	data, err := json.Marshal(result)
+	if err != nil {
+		return err
+	}
+	_, err = stdout.Write(append(data, '\n'))
+	return err
+}
+
+func share(args []string, stdin io.Reader, stdout io.Writer) error {
+	if len(args) != 2 || (args[0] != "encode" && args[0] != "decode") {
+		return fmt.Errorf("share needs encode or decode, and one file\n%s", usage)
+	}
+	src, err := readAll(args[1], stdin)
+	if err != nil {
+		return err
+	}
+	var out string
+	if args[0] == "encode" {
+		if out, err = vexyl.ShareEncode(string(src)); err == nil {
+			out += "\n"
+		}
+	} else {
+		out, err = vexyl.ShareDecode(strings.TrimRight(string(src), "\n"))
+	}
+	if err != nil {
+		return err
+	}
+	_, err = io.WriteString(stdout, out)
 	return err
 }
 

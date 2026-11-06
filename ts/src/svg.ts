@@ -8,6 +8,7 @@ import {
 	regionBounds, regionCenter, regionCorners, rotate, shapeGeom, type Geom, type Region, type Vec,
 } from "./geometry.js";
 import { inLimits } from "./limits.js";
+import { encodePathName, tagAttribute } from "./paths.js";
 import { idMark } from "./sanitize.js";
 import { circlePath, forRegion, outlineGeom, panelEdge, panelRect, rayPolys } from "./shapes.js";
 import { esc, hash, num } from "./text.js";
@@ -66,6 +67,10 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	const height = opts.height ?? defaultHeight;
 	const { flag: f, turn, upright, mirror, canvas } = resolve(flag, opts);
 	const r = new Renderer(f, opts.idPrefix ?? flag.idPrefix);
+	if (opts.tags === true) {
+		r.tagging = true;
+		r.scope = tagScope(flag, opts);
+	}
 	const asked = [opts.ratio, opts.variant, opts.side, opts.fit, opts.align, opts.fold, opts.foldStep];
 	if (opts.idPrefix === undefined && asked.some((v) => v !== undefined)) {
 		// A page can show several forms of one flag, which mustn't share definitions.
@@ -139,6 +144,16 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	return r.text();
 }
 
+/** Where a render's layers are from, as the start of each one's path. */
+function tagScope(flag: Flag, opts: Options): TagScope {
+	const own = opts.variant !== undefined ? flag.variants[opts.variant] : undefined;
+	const variant = own !== undefined ? `variant/${encodePathName(opts.variant!)}/` : "";
+	return {
+		layers: own !== undefined && own.layers.length > 0 ? variant : opts.side === "reverse" && flag.reverse !== undefined ? "reverse/" : "",
+		border: own?.border !== undefined ? variant : "",
+	};
+}
+
 /** Renders the flag as a tree of SVG elements. Only a `title` or `desc` holds any text. */
 export function svgTree(flag: Flag, opts: Options = {}): SvgElement {
 	const dec = new XmlDecoder(svg(flag, opts));
@@ -203,9 +218,21 @@ export function bounds(poly: Vec[]): [number, number, number, number] {
 
 const strokeScale = (g: Geom): number => (g.scale !== undefined && g.scale > 0 ? g.scale : 1);
 
+interface TagScope {
+	layers: string;
+	border: string;
+}
+
 class Renderer {
 	idPrefix: string;
 	depth = 0;
+	/** Whether to mark each drawn element with the path of the layer that drew it. */
+	tagging = false;
+	scope: TagScope = { layers: "", border: "" };
+	/** The path of the layer being drawn. */
+	private tag = "";
+	/** How many `use` layers this is inside, whose paths stand for all they draw. */
+	private using = 0;
 	/** The transform that undoes a turned variant's rotation. */
 	upright = "";
 	private readonly flag: Flag;
@@ -280,6 +307,7 @@ class Renderer {
 			// A curved outline has no outside to offset. A plain render has refused by now, but a
 			// fold gets here, and as in the reference it then draws no border.
 			const shape = boundary(f);
+			this.tag = this.scope.border + "border";
 			this.geom({ poly: shape === null ? [] : outerBorder(f) }, `fill="${this.fill(f.border.color)}"`);
 		}
 		const root: Region = { w: f.fly, h: f.hoist };
@@ -287,27 +315,32 @@ class Renderer {
 		const flagClip = this.id("flag");
 		this.line(`<clipPath id="${flagClip}">`);
 		this.depth++;
-		this.geom(shape, "");
+		this.unmarked(shape, "");
 		this.depth--;
 		this.line("</clipPath>");
 		this.line(`<g clip-path="url(#${flagClip})">`);
 		this.depth++;
-		this.layers(f.layers, root);
+		this.layers(f.layers, root, this.scope.layers);
 		if (f.border !== undefined && f.border.side !== "outside") {
 			// Half of the stroke falls outside the outline, and the clip removes it.
+			this.tag = this.scope.border + "border";
 			this.geom(shape, `fill="none" stroke="${this.fill(f.border.color)}" stroke-width="${num(2 * f.border.width)}" ${miter}`);
 		}
 		this.depth--;
 		this.line("</g>");
 	}
 
-	private layers(layers: Layer[], reg: Region): void {
-		for (const l of layers) {
-			this.layer(l, reg);
-		}
+	/** Paints layers, whose paths start with `base`: a scope, or a parent's path and a dot. */
+	private layers(layers: Layer[], reg: Region, base: string): void {
+		layers.forEach((l, i) => {
+			this.layer(l, reg, base + i);
+		});
 	}
 
-	private layer(l: Layer, reg: Region): void {
+	private layer(l: Layer, reg: Region, path: string): void {
+		if (this.using === 0) {
+			this.tag = path;
+		}
 		const { attrs, style } = this.effects(l, reg);
 		if (l.layer === "group") {
 			// A group composites as a unit, so its children blend only with each other.
@@ -320,7 +353,7 @@ class Renderer {
 			this.line(`<g ${attrs.join(" ")}>`);
 			this.depth++;
 		}
-		this.content(l, reg);
+		this.content(l, reg, path);
 		if (attrs.length > 0) {
 			this.depth--;
 			this.line("</g>");
@@ -342,7 +375,7 @@ class Renderer {
 			this.line(`<clipPath id="${id}">`);
 			this.depth++;
 			const clip = forRegion(e.clip, reg);
-			this.geom(shapeGeom(clip, position(clip, reg), 0), "");
+			this.unmarked(shapeGeom(clip, position(clip, reg), 0), "");
 			this.depth--;
 			this.line("</clipPath>");
 			attrs.push(`clip-path="url(#${id})"`);
@@ -352,10 +385,10 @@ class Renderer {
 			const [x, y, w, h] = regionBounds(reg);
 			this.line(`<mask id="${id}" maskUnits="userSpaceOnUse" x="${num(x)}" y="${num(y)}" width="${num(w)}" height="${num(h)}">`);
 			this.depth++;
-			this.geom({ poly: rectPoly(x, y, x + w, y + h) }, 'fill="#fff"');
+			this.unmarked({ poly: rectPoly(x, y, x + w, y + h) }, 'fill="#fff"');
 			for (const c of e.cuts) {
 				const cut = forRegion(c, reg);
-				this.geom(shapeGeom(cut, position(cut, reg), 0), 'fill="#000"');
+				this.unmarked(shapeGeom(cut, position(cut, reg), 0), 'fill="#000"');
 			}
 			this.depth--;
 			this.line("</mask>");
@@ -364,7 +397,7 @@ class Renderer {
 		return { attrs, style };
 	}
 
-	private content(l: Layer, reg: Region): void {
+	private content(l: Layer, reg: Region, path: string): void {
 		switch (l.layer) {
 			case "field":
 				this.paint(l.color, undefined, undefined, [], [{ poly: rectPoly(0, 0, reg.w, reg.h) }]);
@@ -453,24 +486,28 @@ class Renderer {
 				this.charge(l, reg);
 				break;
 			case "emblem":
-				this.emblem(l, reg);
+				this.emblem(l, reg, path);
 				break;
 			case "group":
-				this.layers(l.layers, reg);
+				this.layers(l.layers, reg, path + ".");
 				break;
 			case "panel":
-				this.panel(l, reg);
+				this.panel(l, reg, path);
 				break;
 			case "use": {
 				const d = l.define;
+				// Everything a `use` draws is marked with its path, since it's the use in the document.
+				this.using++;
 				if (d.fly === undefined || d.hoist === undefined) {
-					this.layers(d.layers, reg);
+					this.layers(d.layers, reg, "");
+					this.using--;
 					return;
 				}
 				// A design with its own grid is scaled to fill the region it's used in.
 				this.line(`<g transform="scale(${num(reg.w / d.fly)} ${num(reg.h / d.hoist)})">`);
 				this.depth++;
-				this.layers(d.layers, { w: d.fly, h: d.hoist });
+				this.layers(d.layers, { w: d.fly, h: d.hoist }, "");
+				this.using--;
 				this.depth--;
 				this.line("</g>");
 				break;
@@ -478,18 +515,18 @@ class Renderer {
 		}
 	}
 
-	private panel(p: PanelLayer, reg: Region): void {
+	private panel(p: PanelLayer, reg: Region, path: string): void {
 		const [x, y, w, h] = panelRect(p, reg);
 		const shape: Geom = { poly: p.edge !== undefined ? panelEdge(p, w, h) : rectPoly(0, 0, w, h) };
 		const id = this.id("panel");
 		this.line(`<clipPath id="${id}">`);
 		this.depth++;
-		this.geom(shape, "");
+		this.unmarked(shape, "");
 		this.depth--;
 		this.line("</clipPath>");
 		this.line(`<g transform="translate(${num(x)} ${num(y)})" clip-path="url(#${id})" style="isolation:isolate">`);
 		this.depth++;
-		this.layers(p.layers, { w, h });
+		this.layers(p.layers, { w, h }, path + ".");
 		this.depth--;
 		this.line("</g>");
 	}
@@ -543,7 +580,7 @@ class Renderer {
 		const id = this.id("clip");
 		this.line(`<clipPath id="${id}">`);
 		this.depth++;
-		this.geom({
+		this.unmarked({
 			poly: [
 				c, { x: reg.w, y: c.y }, { x: reg.w, y: reg.h },
 				c, { x: c.x, y: reg.h }, { x: 0, y: reg.h },
@@ -563,7 +600,7 @@ class Renderer {
 		this.line("</g>");
 	}
 
-	private emblem(e: EmblemLayer, reg: Region): void {
+	private emblem(e: EmblemLayer, reg: Region, path: string): void {
 		const at = e.at !== undefined ? { x: e.at.fly, y: e.at.hoist } : regionCenter(reg);
 		let angle = e.rotate;
 		if (e.along !== undefined) {
@@ -581,9 +618,9 @@ class Renderer {
 			// Charges in an emblem turn with it, so they aren't each kept upright as well.
 			const upright = this.upright;
 			this.upright = "";
-			for (const c of e.charges) {
-				this.layer(c, { w: 0, h: 0, local: reach });
-			}
+			e.charges.forEach((c, i) => {
+				this.layer(c, { w: 0, h: 0, local: reach }, `${path}.${i}`);
+			});
 			this.upright = upright;
 			this.depth--;
 			this.line("</g>");
@@ -692,7 +729,7 @@ class Renderer {
 		// Each time it's drawn gets its own prefix, since a definition can draw it many times.
 		const prefix = this.id("svg") + "-";
 		this.line(
-			`<svg x="${num(at.x - s.fly / 2)}" y="${num(at.y - s.hoist / 2)}" width="${num(s.fly)}" height="${num(s.hoist)}" viewBox="${esc(s.embedded.viewBox)}" preserveAspectRatio="xMidYMid meet"${s.embedded.attrs.replaceAll(idMark, prefix)}>${s.embedded.body.replaceAll(idMark, prefix)}</svg>`,
+			`<svg${this.mark()} x="${num(at.x - s.fly / 2)}" y="${num(at.y - s.hoist / 2)}" width="${num(s.fly)}" height="${num(s.hoist)}" viewBox="${esc(s.embedded.viewBox)}" preserveAspectRatio="xMidYMid meet"${s.embedded.attrs.replaceAll(idMark, prefix)}>${s.embedded.body.replaceAll(idMark, prefix)}</svg>`,
 		);
 		if (attrs.length > 0) {
 			this.depth--;
@@ -721,8 +758,21 @@ class Renderer {
 		}
 	}
 
+	/** The attribute that marks a drawn element, if this render has them. */
+	private mark(): string {
+		return this.tagging ? ` ${tagAttribute}="${esc(this.tag)}"` : "";
+	}
+
+	/** Writes what's only part of a definition, which no layer drew. */
+	private unmarked(g: Geom, attrs: string): void {
+		const tagging = this.tagging;
+		this.tagging = false;
+		this.geom(g, attrs);
+		this.tagging = tagging;
+	}
+
 	private geom(g: Geom, attrsIn: string): void {
-		let attrs = attrsIn !== "" ? " " + attrsIn : "";
+		let attrs = this.mark() + (attrsIn !== "" ? " " + attrsIn : "");
 		if (g.transform !== undefined && g.transform !== "") {
 			attrs += ` transform="${g.transform}"`;
 		}
@@ -770,7 +820,10 @@ class Renderer {
 			back = this.id("back");
 			this.line(`<g id="${back}">`);
 			this.depth++;
+			const scope = this.scope;
+			this.scope = { ...scope, layers: "reverse/" };
 			this.flagArt({ ...f, layers: f.reverse.layers });
+			this.scope = scope;
 			this.depth--;
 			this.line("</g>");
 		}
@@ -782,7 +835,7 @@ class Renderer {
 			const id = this.id("facet");
 			this.line(`<clipPath id="${id}">`);
 			this.depth++;
-			this.geom({ poly: fc.poly }, "");
+			this.unmarked({ poly: fc.poly }, "");
 			this.depth--;
 			this.line("</clipPath>");
 			let art = front;
@@ -793,7 +846,7 @@ class Renderer {
 				place = then({ a: -1, b: 0, c: 0, d: 1, e: f.fly, f: 0 }, fc.place);
 			}
 			this.line(`<g clip-path="url(#${id})"><use href="#${art}" transform="matrix(${num(place.a)} ${num(place.b)} ${num(place.c)} ${num(place.d)} ${num(place.e)} ${num(place.f)})"/></g>`);
-			this.geom({ poly: fc.poly }, crease);
+			this.unmarked({ poly: fc.poly }, crease);
 		}
 		this.depth--;
 		this.line("</svg>");

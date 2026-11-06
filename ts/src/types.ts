@@ -559,6 +559,8 @@ export interface Options {
 	 * documents it doesn't trust should pass one that it knows is unique.
 	 */
 	idPrefix?: string;
+	/** Marks each drawn element with the path of the layer that drew it. SDK.md section 7 says how. */
+	tags?: boolean;
 }
 
 /** A node of an SVG document. */

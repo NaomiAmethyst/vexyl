@@ -24,6 +24,10 @@ Names follow each language's conventions: `svgTree`, `SVGTree`, `svg_tree`.
 | `model` | A flag | The flag as plain data, in the canonical form of section 4 |
 | `svg` | A flag and options | An SVG document as a string, or an error |
 | `svgTree` | A flag and options | The same document as a tree of elements, or an error |
+| `locate` | A document as a string | Where each of its layers and other parts is, as in section 7 |
+| `layerAt` | What `locate` gives, and a line | The innermost of them holding that line |
+| `shareEncode` | A document as a string | The document as a share link, as in section 8, or an error |
+| `shareDecode` | A share link | The document it holds, or an error |
 
 A library MUST NOT read the network or the filesystem to do any of these, because a document
 is self-contained. It MUST enforce the limits in section 15 of the format when reading a document. It MAY offer conveniences that read files, separately.
@@ -67,6 +71,7 @@ Every option is optional, and rendering with none gives the flag as it is. A com
 | `fold` | A fold's name | None | Show the flag folded |
 | `foldStep` | A whole number | All of them | Stop a fold after that many steps |
 | `idPrefix` | What an `id` can start with | Worked out from the document | Start every ID in the output with this |
+| `tags` | `true`, `false` | `false` | Mark each drawn element with the layer that drew it, as in section 7 |
 
 Section 11.1 of the format says what `ratio`, `fit` and `align` do. A flag that can't reach a
 proportion MUST be refused unless `fit` is `pad`, so that nothing distorts or silently changes
@@ -219,8 +224,106 @@ at the suite's version for the format's version, which `manifest.json` gives as 
 | Invalid documents | Each is refused, with a problem on the expected line |
 | Accepted documents | Each is valid, including those exactly at a limit |
 | Sanitizer output | Each piece of artwork comes out as expected, in the model and in a render |
+| Tagged renders | Each render draws exactly what the plain one does, and says which layer drew what |
+| Locations | Each part of a document is found on its lines, and those lines lead back to it |
+| Share links | Each library reads the suite's links, refuses its bad ones, and writes links that zlib can read |
 
 Every render is also checked for what mustn't be in it, such as an element or attribute off the
 allowlist or a reference leaving the document, since pixels can't show those.
 
 Each library offers a small command for the suite to run, as the `vexyl` command does.
+
+## 7. Layers and where they are
+
+A program that shows a flag beside its source has to go from something on the image to the term that
+drew it, and to its lines, and back. Layers have paths for this.
+
+### 7.1 Paths
+
+A layer's path is its position among the layers of whatever holds it, from 0, with a dot for each
+level: `3` is the fourth layer at the top of the flag, and `3.1` the second layer inside it. Only
+layers count, so a panel's `fly` doesn't use up a number, and neither does a `clip`. A path starts
+with a scope if its layers aren't the flag's own:
+
+| Path | Is |
+|---|---|
+| `3`, `3.1` | The flag's own layers |
+| `reverse/0` | A layer of the flag's `reverse` |
+| `variant/NAME/0` | A layer of a variant with its own layers |
+| `border`, `variant/NAME/border` | The flag's or a variant's border |
+
+In a name, `%` is written `%25` and `/` is written `%2F`, and nothing else changes, so any name can
+be in a path, including `__proto__`. As in section 2, these are keys to keep away from a language's own
+properties. Paths are only as stable as the document: adding a layer renumbers those after it.
+
+### 7.2 Tagged renders
+
+With the option `tags`, every element that draws something MUST have an attribute
+`data-vexyl-layer` holding the path of the layer that drew it. That's any shape, and each piece
+of inline SVG, which is marked on its own root as one thing. Whatever's only a definition isn't marked, such
+as what's in a `clipPath` or a `mask`. Nothing else in a render changes, so it MUST draw the same pixels
+as without the option.
+
+These keep a path through whatever changes the drawing but not the layer:
+
+- A charge's copies from a `repeat` or several `at`s all have the charge's path.
+- A variant without its own layers, a mirrored reverse, another proportion, padding, and a fold, all
+  have the paths of the layers they show.
+- Everything drawn through a `use` has the path of the `use`, however deep it is in the definition,
+  since the `use` is what's in the document at that place.
+- A layer that holds others, such as a `panel`, draws nothing of its own, so only its children's paths
+  appear. Its own path is the part of theirs before the last dot.
+
+A fold's crease lines are the one thing no layer draws, so they aren't marked. The attribute is off the
+sanitizer's allowlist on purpose: it can't be in artwork, so only a renderer can have written one.
+
+### 7.3 Locations
+
+`locate` gives a list in document order, with each part's `path`, its `node`, and where it starts and ends, as `line`,
+`column`, `endLine` and `endColumn`, counted as a problem's are in section 2. A part ends at its last
+character, not counting a `;` or line ending. As well as each layer by its path, these are there:
+
+| Path | Is |
+|---|---|
+| `vexyl`, `meta`, `palette`, `proportion`, `outline`, `border`, `reverse`, `adapt` | That top-level node |
+| `palette/NAME` | One color |
+| `define/NAME`, `define/NAME/0` | A definition, and its layers |
+| `variant/NAME`, `variant/NAME/outline`, `variant/NAME/border` | A variant, and what it replaces |
+| `fold/NAME` | A fold |
+
+It reads only the document's syntax, so that a program can still find its way around a document with
+other problems, and it gives nothing for one that isn't KDL. It doesn't check that a layer's name or a part's
+place is valid, since `validate` does that. `layerAt` gives what holds a line: of those that do, the one that
+starts latest, and in a tie, whichever comes last.
+
+## 8. Share links
+
+A share link holds a whole document in the fragment of a URL, so that it can be passed around and
+opened without any server storing it or even seeing it:
+
+```
+#v1.<base64url of raw DEFLATE with a preset dictionary>
+```
+
+`shareEncode` gives the part after the `#`, and `shareDecode` takes it. A library MUST follow these,
+so that each reads the others' links:
+
+- The compression is raw DEFLATE (RFC 1951), with no zlib or gzip wrapper, of the document's exact bytes
+  in UTF-8. Line endings and a byte order mark are kept.
+- The base64url (RFC 4648 section 5) has no padding. Anything else MUST be refused: `=`, a character
+  outside the alphabet, whitespace, an impossible length, or stray bits in the last character.
+- The preset dictionary of version 1 is the file [`share/v1.dict`](share/v1.dict), of 8,192 bytes, with a SHA-256
+  of `92062df2fd010bea13d1aefb30c2cfbb2ad6aee5a60e8f8e2d2455516c1c6b97`. This file is normative. A
+  dictionary can never change once it's released, because every link ever sent depends on every byte of it, so
+  a better one would be a new version, with a new prefix, read beside this one.
+- A decoder MUST refuse a stream that's corrupt, ends early, or has anything after its end, apart from
+  the bits that fill its last byte, and one holding anything but UTF-8. It MUST refuse a version it doesn't know.
+- A link can hold up to 8 MiB (8,388,608 bytes). A decoder MUST stop as soon as its output passes
+  that, rather than finding out afterward, since a few kilobytes of link can inflate to gigabytes.
+  An encoder MUST refuse a larger document.
+
+What's in a link is untrusted, like any other document. It's held only in the fragment so that opening it sends
+nothing to a server, but a page has to keep it that way. How long a link can be before a browser or a
+chat program breaks it isn't part of this, and is the program's to say.
+
+`tools/build_share_dict.py` records how the dictionary was curated, from the grammar and from real flags.

@@ -761,7 +761,7 @@ test("the library stays free of Node's modules, so that browsers can run it", ()
 		const text = readFileSync(join(dist, name), "utf8");
 		const imports = [...text.matchAll(/(?:^|\s)(?:import|export)\s[^;]*?from\s+["']([^"']+)["']/g), ...text.matchAll(/import\(["']([^"']+)["']\)/g)].map((m) => m[1]!);
 		for (const target of imports) {
-			assert.ok(target.startsWith("./") || target === "@bgotink/kdl", `${name} imports ${target}`);
+			assert.ok(target.startsWith("./") || target === "@bgotink/kdl" || target === "fflate", `${name} imports ${target}`);
 		}
 		for (const global of ["process.", "Buffer.", "require(", "__dirname", "crypto."]) {
 			assert.ok(!text.includes(global), `${name} uses ${global}`);

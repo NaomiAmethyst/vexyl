@@ -3,7 +3,7 @@
 Every Vexyl library has to pass this. [SDK.md](../SDK.md) says what the suite checks, and why.
 
 ```
-python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct,options] [--filter TEXT] [--resvg PATH] COMMAND...
+python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct,options,tags,locate,share] [--filter TEXT] [--resvg PATH] COMMAND...
 ```
 
 It needs Python with numpy, Pillow and jsonschema, and resvg at the version in `manifest.json`, since
@@ -16,6 +16,11 @@ COMMAND model FILE                prints the canonical model as JSON
 COMMAND check -json FILE          prints problems as JSON, and exits nonzero if there are any
 COMMAND tree FILE                 prints the render as a tree of elements as JSON, each with a
                                   name, attrs of a name and value, any text, and children
+COMMAND render -tags ...          marks each drawn element with the layer that drew it
+COMMAND locate FILE               prints each part of a document, as SDK.md section 7.3 says, as JSON
+COMMAND locate -line N FILE       prints what's innermost at that line, as JSON
+COMMAND share encode FILE         prints the document as a share link's part after its #
+COMMAND share decode FILE         prints the document held by the link in a file, exiting nonzero if it's refused
 ```
 
 A render that's refused exits nonzero. `-ratio` is written hoist then fly, as flags' proportions
@@ -36,6 +41,9 @@ are, so `1:2` is the option `ratio` of 2. `-align` takes `start`, `center` or `e
 | `invalid/NAME.kdl` | Those documents |
 | `accepted.json`, `accepted/NAME.kdl` | Documents that must be valid, many exactly at a limit |
 | `sanitize.json`, `sanitize/NAME.kdl` | Documents with inline SVG, and the canonical markup each must come to |
+| `tags.json`, `tags/NAME.kdl` | Forms of a document, with the box of pixels that each layer's path has to draw alone |
+| `locate.json` | The lines each part of some documents has to be found on |
+| `share.json`, `share/NAME.link` | Share links that have to be read, as bytes and a hash, and those that have to be refused |
 
 The flags here are copies of those in `flags/` and `go/testdata/`, with the terms in their own
 `license` fields. Files in `invalid/` and everything else here are under this project's Apache
@@ -68,6 +76,24 @@ passing also takes all of these:
   no reference leaving the document, no function in a paint, no stray text and no repeated `id`.
 - Each document in `sanitize.json` gives exactly its canonical markup in the model, and draws that
   same artwork, with each ID and reference having gained a prefix.
+
+## How tagged renders, locations and share links are checked
+
+For every render of every flag, a tagged render has to draw exactly the same pixels as the plain one, with no
+tolerance at all. Each shape and piece of artwork it draws has to have a tag, a fold's crease lines apart, and
+each tag has to be a path that `locate` gives for that document. A plain render can't have any tag in
+it. So that a wrong path can't pass, `tags.json` draws each path of one document alone, in several forms, and
+compares the box it fills, within 2 pixels at a height of 128. Each line where a located part starts or ends
+has to lead back to what's innermost there.
+
+Share links are made and read with zlib, not with a library under test. A library has to give the exact bytes of each
+accepted link, including one that needs every byte of the dictionary and one exactly at the limit, and refuse each bad
+one, including a compression bomb. What it writes has to inflate to the exact document, and be
+within 15% of what zlib manages with the dictionary, which it can't be without using it. If the dictionary
+file changes at all, this fails.
+
+`conformance/prove.py` shows that all of these can fail, by running the suite against a library with one thing wrong
+at a time, through `conformance/mutant.py`. It's `make conformance-prove`.
 
 ## What else is checked
 
