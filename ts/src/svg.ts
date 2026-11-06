@@ -7,6 +7,7 @@ import {
 	add, axis, bandPoly, barPolys, boundary, chevronPolys, crossPolys, mul, offsetPolygon, position, rawChevrons, rectPoly,
 	regionBounds, regionCenter, regionCorners, rotate, shapeGeom, type Geom, type Region, type Vec,
 } from "./geometry.js";
+import { inLimits } from "./limits.js";
 import { idMark } from "./sanitize.js";
 import { circlePath, forRegion, outlineGeom, panelEdge, panelRect, rayPolys } from "./shapes.js";
 import { esc, hash, num } from "./text.js";
@@ -22,22 +23,43 @@ const miter = 'stroke-linejoin="miter" stroke-miterlimit="10"';
 
 type GradientBox = [number, number, number, number];
 
-function checkOptions(opts: Options): void {
+/** Refuses what would otherwise be silently ignored, or can't be drawn. */
+function checkOptions(flag: Flag, opts: Options): void {
 	const { height, ratio, foldStep } = opts;
-	if (height !== undefined && !(height > 0 && Number.isFinite(height))) {
-		throw new RenderError("height must be a positive number");
+	if (height !== undefined && !(height > 0 && inLimits(height))) {
+		throw new RenderError("height must be a positive number of a reasonable size");
 	}
-	if (ratio !== undefined && !(ratio > 0 && Number.isFinite(ratio))) {
-		throw new RenderError("ratio must be a positive number");
+	if (ratio !== undefined && !(ratio > 0 && inLimits(ratio))) {
+		throw new RenderError("ratio must be a positive number of a reasonable size");
 	}
-	if (foldStep !== undefined && !(Number.isInteger(foldStep) && foldStep >= 0)) {
-		throw new RenderError("foldStep must be a whole number");
+	const variantRatio = opts.variant !== undefined ? flag.variants[opts.variant]?.ratio : undefined;
+	if (opts.fit !== undefined && ratio === undefined && !variantRatio) {
+		throw new RenderError("fit says what to do about a ratio, and there isn't one");
+	}
+	if (opts.align !== undefined && opts.fit !== "pad") {
+		throw new RenderError("align places a padded flag, so it needs a fit of pad");
+	}
+	if (opts.fold === undefined) {
+		if (foldStep !== undefined) {
+			throw new RenderError("foldStep needs a fold");
+		}
+		return;
+	}
+	if (opts.side === "reverse") {
+		throw new RenderError("a fold shows both sides, so it can't be asked for the reverse");
+	}
+	if (opts.fit === "pad") {
+		throw new RenderError("a fold is cropped to its pieces, so it can't be padded");
+	}
+	const fold = flag.folds[opts.fold];
+	if (fold !== undefined && foldStep !== undefined && !(Number.isInteger(foldStep) && foldStep >= 1 && foldStep <= fold.steps.length)) {
+		throw new RenderError(`foldStep must be from 1 to ${fold.steps.length}`);
 	}
 }
 
 /** Renders the flag as a standalone SVG document. */
 export function svg(flag: Flag, opts: Options = {}): string {
-	checkOptions(opts);
+	checkOptions(flag, opts);
 	const height = opts.height ?? defaultHeight;
 	const { flag: f, turn, upright, mirror, canvas } = resolve(flag, opts);
 	const r = new Renderer(f, flag.idPrefix);
@@ -46,7 +68,7 @@ export function svg(flag: Flag, opts: Options = {}): string {
 		// A page can show several forms of one flag, which mustn't share definitions.
 		r.idPrefix += hash(asked.join("|")).slice(0, 4) + "-";
 	}
-	if (opts.fold !== undefined && opts.fold !== "") {
+	if (opts.fold !== undefined) {
 		const fold = f.folds[opts.fold];
 		if (fold === undefined) {
 			throw new RenderError(`${f.meta.name} has no fold "${opts.fold}"`);
@@ -477,16 +499,13 @@ class Renderer {
 			c = { x: q.split.fly, y: q.split.hoist };
 		}
 		const [a, b, d, e] = q.colors;
-		if (q.colors.includes(noColor)) {
-			this.paint(a, undefined, undefined, [], [{ poly: rectPoly(0, 0, c.x, c.y) }]);
-			this.paint(b, undefined, undefined, [], [{ poly: rectPoly(c.x, 0, reg.w, c.y) }]);
-			this.paint(d, undefined, undefined, [], [{ poly: rectPoly(0, c.y, c.x, reg.h) }]);
-		} else {
-			// Each runs on beneath the next, so antialiasing can't leave a seam.
-			this.paint(a, undefined, undefined, [], [{ poly: rectPoly(0, 0, reg.w, reg.h) }]);
-			this.paint(b, undefined, undefined, [], [{ poly: rectPoly(c.x, 0, reg.w, reg.h) }]);
-			this.paint(d, undefined, undefined, [], [{ poly: rectPoly(0, c.y, reg.w, reg.h) }]);
-		}
+		// Each runs on beneath the next, so antialiasing can't leave a seam, unless gaps have to
+		// show or a gradient has to span its own quarter.
+		const gaps = q.colors.includes(noColor);
+		const exact = (color: string): boolean => gaps || this.flag.gradients[color] !== undefined;
+		this.paint(a, undefined, undefined, [], [{ poly: rectPoly(0, 0, exact(a) ? c.x : reg.w, exact(a) ? c.y : reg.h) }]);
+		this.paint(b, undefined, undefined, [], [{ poly: rectPoly(c.x, 0, reg.w, exact(b) ? c.y : reg.h) }]);
+		this.paint(d, undefined, undefined, [], [{ poly: rectPoly(0, c.y, exact(d) ? c.x : reg.w, reg.h) }]);
 		this.paint(e, undefined, undefined, [], [{ poly: rectPoly(c.x, c.y, reg.w, reg.h) }]);
 	}
 
@@ -500,9 +519,11 @@ class Renderer {
 				const i = ch.flow === "bend" ? col - row + ch.rows * n : row + col;
 				const x = col * cellW;
 				const y = row * cellH;
-				// Each cell runs on beneath the next ones, unless gaps have to show.
-				const right = gaps ? x + cellW : reg.w;
-				const bottom = gaps ? y + cellH : reg.h;
+				// Each cell runs on beneath the next ones, unless gaps have to show or a gradient has
+				// to span its own cell.
+				const exact = gaps || this.flag.gradients[ch.colors[i % n]!] !== undefined;
+				const right = exact ? x + cellW : reg.w;
+				const bottom = exact ? y + cellH : reg.h;
 				this.paint(ch.colors[i % n]!, undefined, undefined, [], [{ poly: rectPoly(x, y, right, bottom) }]);
 			}
 		}

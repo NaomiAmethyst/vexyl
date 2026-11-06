@@ -1,0 +1,24 @@
+vexyl 1
+meta {
+  name "KDL strings"
+  description """
+    \u{41}\n
+    """
+  note """
+    An escape can make a newline,\nand indentation comes off first.
+    The rest of the string isn't lost.
+    """
+  note """
+    A "quote", a tab\there, and a line \
+      carried on.
+    """
+  note #"""
+    A raw string has no \n escapes.
+    """#
+  note "-inf"
+}
+palette {
+  blue "#003399"
+}
+proportion hoist=2 fly=3
+field blue

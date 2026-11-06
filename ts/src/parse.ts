@@ -3,7 +3,7 @@
 
 import { getLocation, InvalidKdlError, parse as parseKdl, type Document, type Node } from "@bgotink/kdl";
 import { foldFacets, foldShape } from "./fold.js";
-import { boundary, offsetPolygon, type Vec } from "./geometry.js";
+import { boundary, offsetPolygon } from "./geometry.js";
 import { addSize, inLimits, layersHeight, layersSize, maxCopies, maxSize, waves } from "./limits.js";
 import { canonical, sanitizeSvg, usesCurrentColor } from "./sanitize.js";
 import { dict, formatNumber, hash, numbersIn } from "./text.js";
@@ -48,6 +48,9 @@ interface ShapeDraft {
 	kind: string;
 	/** Records an explicit `at`, even `at center`. */
 	placed?: boolean;
+	/** Record values worked out from the shape's others, which change if a charge using a definition changes those. */
+	autoInner?: boolean;
+	autoSpread?: boolean;
 	at?: Point | undefined;
 	ats?: (Point | null)[] | undefined;
 	rotate?: number;
@@ -185,12 +188,15 @@ const stageOutline = 4;
 const stageBorder = 5;
 const stageDefine = 6;
 const stageLayers = 7;
-const stageTail = 8;
+const stageReverse = 8;
+const stageAdapt = 9;
+const stageVariant = 10;
+const stageFold = 11;
 
 const stages: ReadonlyMap<string, number> = new Map([
 	["vexyl", stageVersion], ["meta", stageMeta], ["palette", stagePalette], ["proportion", stageProportion],
 	["outline", stageOutline], ["border", stageBorder], ["define", stageDefine],
-	["reverse", stageTail], ["adapt", stageTail], ["variant", stageTail], ["fold", stageTail],
+	["reverse", stageReverse], ["adapt", stageAdapt], ["variant", stageVariant], ["fold", stageFold],
 ]);
 
 class Parser {
@@ -242,10 +248,12 @@ class Parser {
 			idPrefix: this.idPrefix,
 		};
 		let stage = -1;
+		const seen = new Set<number>();
+		this.prepare(doc.nodes);
 		for (const n of doc.nodes) {
 			const name = n.getName();
 			const s = stages.get(name) ?? stageLayers;
-			if (s < stage || (s === stage && s !== stageLayers && s !== stageDefine && s !== stageTail)) {
+			if (s < stage || (s === stage && s !== stageLayers && s !== stageDefine && s !== stageVariant && s !== stageFold)) {
 				this.errf(n, "out of order or repeated");
 				continue;
 			}
@@ -260,14 +268,14 @@ class Parser {
 				return flag;
 			}
 			stage = s;
+			seen.add(s);
 			switch (name) {
 				case "vexyl":
-					this.plain(n);
-					flag.version = Math.trunc(this.number(n));
-					if (flag.version !== formatVersion) {
+					if (this.number(n) !== formatVersion) {
 						this.errf(n, `unsupported format version; this renderer reads ${formatVersion}`);
 						return flag;
 					}
+					flag.version = formatVersion;
 					break;
 				case "meta":
 					this.meta(n, flag.meta);
@@ -286,9 +294,10 @@ class Parser {
 					break;
 				}
 				case "border": {
-					const border = this.border(n, boundary(flag));
+					const border = this.border(n);
 					if (border !== undefined) {
 						flag.border = border;
+						this.checkOutside(n, flag.outline, flag.fly, flag.hoist, border);
 					}
 					break;
 				}
@@ -320,8 +329,13 @@ class Parser {
 				}
 			}
 		}
-		if (stage < stageProportion) {
-			this.problems.push({ message: "document needs `vexyl`, `meta`, `palette` and `proportion`" });
+		if (!seen.has(stageVersion)) {
+			this.problems.push({ message: `document must start with \`vexyl ${formatVersion}\`` });
+		}
+		for (const [stageNeeded, needed] of [[stageMeta, "meta"], [stagePalette, "palette"], [stageProportion, "proportion"]] as const) {
+			if (!seen.has(stageNeeded)) {
+				this.problems.push({ message: `document needs \`${needed}\`` });
+			}
 		}
 		for (const [name, v] of Object.entries(flag.variants)) {
 			if (v.ratio !== undefined && v.ratio !== 0 && flag.adapt === undefined) {
@@ -353,6 +367,7 @@ class Parser {
 	}
 
 	private meta(n: Node, m: Meta): void {
+		this.noValues(n);
 		this.children(n, ["designer", "encoder", "source", "note", "law", "restriction", "adapted-from"], {
 			name: (c) => { m.name = this.str(c); },
 			description: (c) => { m.description = this.str(c); },
@@ -429,13 +444,11 @@ class Parser {
 			return null;
 		}
 		const a: Adaptation = { url, authors: [] };
-		if (n.children !== null) {
-			this.children(n, ["author"], {
-				author: (c) => { a.authors.push(this.str(c)); },
-				license: (c) => { a.license = this.str(c); },
-				part: (c) => { a.part = this.str(c); },
-			});
-		}
+		this.children(n, ["author"], {
+			author: (c) => { a.authors.push(this.str(c)); },
+			license: (c) => { a.license = this.str(c); },
+			part: (c) => { a.part = this.str(c); },
+		});
 		return a;
 	}
 
@@ -443,9 +456,6 @@ class Parser {
 		this.noValues(n);
 		this.palette = flag.palette;
 		this.gradients = flag.gradients;
-		if (n.children === null) {
-			return;
-		}
 		// Gradients can name colors defined after them, so they're read second.
 		const gradients: Node[] = [];
 		const seen = new Set<string>();
@@ -481,7 +491,6 @@ class Parser {
 
 	/** Reads `name gradient COLOR... along=AXIS { stops N... }`. */
 	private gradient(n: Node): Gradient {
-		this.plain(n);
 		const g: Gradient = { colors: [], stops: [], along: "fly" };
 		for (const a of args(n).slice(1)) {
 			if (typeof a !== "string") {
@@ -531,7 +540,6 @@ class Parser {
 	}
 
 	private proportion(n: Node, flag: Flag): void {
-		this.plain(n);
 		this.only(n, 0, ["hoist", "fly"]);
 		flag.hoist = this.positive(n, this.prop(n, "hoist"));
 		flag.fly = this.positive(n, this.prop(n, "fly"));
@@ -544,7 +552,6 @@ class Parser {
 			this.errf(n, `nested more than ${maxDepth} levels deep`);
 			return null;
 		}
-		this.plain(n);
 		switch (n.getName()) {
 			case "field": {
 				const l: FieldLayer = { layer: "field", ...newEffects(), color: this.colorArg(n) };
@@ -609,9 +616,6 @@ class Parser {
 	private container(n: Node, depth: number, e: Effects, layers: Layer[], settings: Handlers): void {
 		const handlers = this.withEffects(e, settings);
 		const seen = new Set<string>();
-		if (n.children === null) {
-			return;
-		}
 		for (const c of childNodes(n)) {
 			const name = c.getName();
 			if (!has(handlers, name)) {
@@ -625,7 +629,6 @@ class Parser {
 				this.errf(c, "given more than once");
 			}
 			seen.add(name);
-			this.plain(c);
 			handlers[name]!(c);
 		}
 	}
@@ -660,12 +663,11 @@ class Parser {
 	private maskShape(n: Node): Shape | null {
 		this.noValues(n);
 		const nodes = childNodes(n);
-		if (n.children === null || nodes.length !== 1) {
+		if (nodes.length !== 1) {
 			this.errf(n, "needs exactly one shape");
 			return null;
 		}
 		const c = nodes[0]!;
-		this.plain(c);
 		this.noValues(c);
 		if (c.getName() === "svg") {
 			this.errf(c, "inline SVG can't be used as a clip or cut");
@@ -673,6 +675,9 @@ class Parser {
 		}
 		const s = this.namedShape(c.getName());
 		this.shapeBody(c, s, null);
+		if ((s.hollow ?? 0) > 0 || (s.lines ?? 0) > 0) {
+			this.errf(c, "a clip or cut uses a shape's whole area, so it can't be `hollow` or `lines`");
+		}
 		return finishShape(s);
 	}
 
@@ -851,6 +856,10 @@ class Parser {
 			this.errf(n, "needs a shape");
 			return null;
 		}
+		if (shapeName === "pile" || shapeName === "pall") {
+			this.errf(n, `a ${shapeName} is a layer of its own, not a charge's shape`);
+			return null;
+		}
 		const s = this.namedShape(shapeName);
 		const l: ChargeLayer = { layer: "charge", ...newEffects(), shape: s as unknown as Shape };
 		if (s.kind === "svg" && a0.length === 1) {
@@ -880,6 +889,8 @@ class Parser {
 			this.errf(n, "inline SVG uses currentColor, so it needs a palette color");
 		} else if (s.kind === "svg" && l.fimbriate !== undefined) {
 			this.errf(n, "inline SVG can't be fimbriated");
+		} else if (l.fimbriate !== undefined && ((s.hollow ?? 0) > 0 || (s.lines ?? 0) > 0)) {
+			this.errf(n, "fimbriation edges a filled shape, so it can't go with `hollow` or `lines`");
 		} else if (s.kind === "svg" && l.repeat !== undefined) {
 			this.errf(n, "inline SVG can't be repeated");
 		} else if (s.kind === "polygon" && l.repeat !== undefined) {
@@ -920,6 +931,13 @@ class Parser {
 					if (held.repeat?.kind === "grid") {
 						this.errf(c, "a grid repeat needs a region, which an emblem doesn't have");
 					}
+					this.frameShape(c, held.shape);
+					if (held.clip !== undefined) {
+						this.frameShape(c, held.clip);
+					}
+					for (const cut of held.cuts) {
+						this.frameShape(c, cut);
+					}
 					l.charges.push(held);
 				}
 				continue;
@@ -932,7 +950,6 @@ class Parser {
 				this.errf(c, "given more than once");
 			}
 			seen.add(name);
-			this.plain(c);
 			placed[name]!(c);
 		}
 		if (l.charges.length === 0) {
@@ -941,8 +958,16 @@ class Parser {
 		return l;
 	}
 
+	/** Refuses what needs a region's size, which an emblem's frame doesn't have. */
+	private frameShape(n: Node, s: Shape): void {
+		if (s.kind === "lozenge" && (!s.fly || !s.hoist)) {
+			this.errf(n, "a lozenge in an emblem needs `fly` and `hoist`, since a frame has no size to take");
+		} else if (s.kind === "pile" || s.kind === "pall") {
+			this.errf(n, `a ${s.kind} needs a region's edges, which an emblem doesn't have`);
+		}
+	}
+
 	private repeat(n: Node): Repeat | null {
-		this.plain(n);
 		this.noChildren(n);
 		const a0 = args(n);
 		const kind = a0[0];
@@ -1015,6 +1040,15 @@ class Parser {
 		};
 		s.placed = false;
 		s.ats = undefined;
+		// What was only worked out from a definition's other values is worked out again.
+		if (s.autoInner) {
+			delete s.inner;
+			s.autoInner = false;
+		}
+		if (s.autoSpread) {
+			delete s.spread;
+			s.autoSpread = false;
+		}
 		const radius: Handler = (c) => { s.radius = this.positive(c, this.number(c)); };
 		const inner: Handler = (c) => { s.inner = this.positive(c, this.number(c)); };
 		const sizeFly: Handler = (c) => { s.fly = this.positive(c, this.number(c)); };
@@ -1031,8 +1065,8 @@ class Parser {
 				handlers.offset = (c) => { s.offset = this.positive(c, this.number(c)); };
 				break;
 			case "sun":
-				s.points = 12;
-				s.spread = 1;
+				s.points ??= 12;
+				s.spread ??= 1;
 				handlers.radius = radius;
 				handlers.disc = (c) => { s.disc = this.positive(c, this.number(c)); };
 				handlers.gap = (c) => { s.gap = this.positive(c, this.number(c)); };
@@ -1102,7 +1136,7 @@ class Parser {
 				handlers.width = (c) => { s.width = this.positive(c, this.number(c)); };
 				break;
 			case "star":
-				s.points = 5;
+				s.points ??= 5;
 				handlers.radius = radius;
 				handlers.inner = inner;
 				handlers.lines = (c) => { s.lines = this.positive(c, this.number(c)); };
@@ -1117,7 +1151,6 @@ class Parser {
 				delete handlers.at;
 				delete handlers.rotate;
 				handlers.point = (c) => {
-					this.plain(c);
 					this.only(c, 0, ["fly", "hoist"]);
 					this.noChildren(c);
 					(s.vertices ??= []).push({ fly: this.prop(c, "fly"), hoist: this.prop(c, "hoist") });
@@ -1159,6 +1192,9 @@ class Parser {
 				if (inner === 0 || inner >= radius) {
 					this.errf(n, "needs an `inner` smaller than its `radius`");
 				}
+				if (s.arc !== undefined && (s.arc.to - s.arc.from) % 360 === 0) {
+					this.errf(n, "`from` and `to` are the same place, so there's no arc to draw");
+				}
 				break;
 			case "star": {
 				const points = s.points ?? 0;
@@ -1173,6 +1209,7 @@ class Parser {
 				}
 				if (inner === 0) {
 					s.inner = (radius * Math.cos((2 * Math.PI) / points)) / Math.cos(Math.PI / points);
+					s.autoInner = true;
 				}
 				break;
 			}
@@ -1233,6 +1270,7 @@ class Parser {
 			case "heart":
 				if (!s.spread) {
 					s.spread = radius * Math.SQRT2;
+					s.autoSpread = true;
 				}
 				if (s.spread >= 2 * radius && radius > 0) {
 					this.errf(n, "`spread` must be less than twice `radius`, so that the lobes meet");
@@ -1269,7 +1307,6 @@ class Parser {
 	}
 
 	private at(n: Node): Point | null {
-		this.plain(n);
 		this.noChildren(n);
 		const a0 = args(n);
 		if (a0.length > 0) {
@@ -1282,11 +1319,8 @@ class Parser {
 		return { fly: this.prop(n, "fly"), hoist: this.prop(n, "hoist") };
 	}
 
-	/**
-	 * Reads `border COLOR W`, with an optional side of inside or outside. A shape given to it is
-	 * checked for having an outside at all.
-	 */
-	private border(n: Node, shape: Vec[] | null): Border | undefined {
+	/** Reads `border COLOR W`, with an optional side of inside or outside. */
+	private border(n: Node): Border | undefined {
 		let a0 = args(n);
 		let side: Border["side"] = "inside";
 		if (a0.length === 3) {
@@ -1298,17 +1332,24 @@ class Parser {
 			a0 = a0.slice(0, 2);
 		}
 		const edge = this.edgeArgs(n, a0);
-		if (edge === null) {
-			return undefined;
+		return edge === null ? undefined : { ...edge, side };
+	}
+
+	/** Refuses an outside border that can't go around the shape it's given. */
+	private checkOutside(n: Node, outline: Outline | undefined, fly: number, hoist: number, border: Border | undefined): void {
+		if (border === undefined || border.side !== "outside" || border.width <= 0 || fly <= 0 || hoist <= 0) {
+			return;
 		}
-		if (edge.width > 0 && side === "outside" && shape !== null) {
-			try {
-				offsetPolygon(shape, edge.width);
-			} catch (e) {
-				this.errf(n, (e as Error).message);
-			}
+		const shape = outline === undefined ? boundary({ fly, hoist }) : boundary({ fly, hoist, outline });
+		if (shape === null) {
+			this.errf(n, "an outside border can't go around a `path` outline");
+			return;
 		}
-		return { ...edge, side };
+		try {
+			offsetPolygon(shape, border.width);
+		} catch (e) {
+			this.errf(n, (e as Error).message);
+		}
 	}
 
 	private edge(n: Node): Fimbriation | null {
@@ -1316,7 +1357,6 @@ class Parser {
 	}
 
 	private edgeArgs(n: Node, a0: KdlValue[]): Fimbriation | null {
-		this.plain(n);
 		this.noProps(n);
 		this.noChildren(n);
 		if (a0.length !== 2 || typeof a0[0] !== "string") {
@@ -1339,14 +1379,17 @@ class Parser {
 				this.errf(c, "given more than once");
 			}
 			seen.add(name);
-			this.plain(c);
 			handlers[name]!(c);
 		}
 	}
 
-	private plain(n: Node): void {
-		if (n.getTag() !== null) {
-			this.errf(n, "type annotations aren't used by this format");
+	/** Checks what's the same wherever it is in a document. */
+	private prepare(nodes: Node[]): void {
+		for (const n of nodes) {
+			if (n.getTag() !== null || n.entries.some((e) => e.getTag() !== null)) {
+				this.errf(n, "type annotations aren't used by this format");
+			}
+			this.prepare(childNodes(n));
 		}
 	}
 
@@ -1637,7 +1680,6 @@ class Parser {
 		let ratio: number[] | undefined;
 		this.children(n, ["cut"], this.withEffects(l, {
 			from: (c) => {
-				this.plain(c);
 				if (c.hasArguments()) {
 					l.from = this.oneOf(c, rayFromNames) as RayOrigin;
 				} else {
@@ -1654,6 +1696,9 @@ class Parser {
 			rotate: (c) => { l.rotate = this.number(c); },
 			measure: (c) => { l.measure = this.oneOf(c, ["angle", "edge"]) === "edge" ? "edge" : "angle"; },
 		}));
+		if (l.measure === "edge" && l.rotate !== 0) {
+			this.errf(n, "`measure edge` follows the region's edges, so it can't also have a `rotate`");
+		}
 		if (l.colors.length === 0) {
 			return l;
 		}
@@ -1673,6 +1718,9 @@ class Parser {
 		this.shapeBody(n, s, this.withEffects(l, {
 			fimbriate: (c) => this.setFimbriate(l, c),
 		}));
+		if (l.fimbriate !== undefined && (s.hollow ?? 0) > 0) {
+			this.errf(n, "fimbriation edges a filled shape, so it can't go with `hollow` or `lines`");
+		}
 		l.shape = finishShape(s);
 		return l;
 	}
@@ -1753,7 +1801,6 @@ class Parser {
 
 	/** Reads a reusable shape or design: `define NAME hoist=H fly=F { ... }`. */
 	private define(n: Node): void {
-		this.plain(n);
 		const a0 = args(n);
 		const name = a0[0];
 		if (a0.length !== 1 || typeof name !== "string") {
@@ -1777,7 +1824,6 @@ class Parser {
 		}
 		if (nodes.length === 1 && shapeKinds.includes(nodes[0]!.getName())) {
 			const c = nodes[0]!;
-			this.plain(c);
 			const s: ShapeDraft = { kind: c.getName() };
 			if (s.kind === "path" && c.hasArguments()) {
 				// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
@@ -1819,7 +1865,6 @@ class Parser {
 
 	/** Reads a flag's silhouette: a polygon or path inside it, or a named form. */
 	private outline(n: Node): Outline | undefined {
-		this.plain(n);
 		this.noProps(n);
 		const a0 = args(n);
 		if (a0.length > 1 || (a0.length === 1 && typeof a0[0] !== "string")) {
@@ -1881,7 +1926,6 @@ class Parser {
 	}
 
 	private reverse(n: Node, flag: Flag): void {
-		this.plain(n);
 		const a0 = args(n);
 		if (a0.length === 1 && a0[0] === "mirror") {
 			// The default, for saying so outright.
@@ -1933,7 +1977,6 @@ class Parser {
 	}
 
 	private variant(n: Node, flag: Flag): void {
-		this.plain(n);
 		const a0 = args(n);
 		const name = a0[0];
 		if (a0.length !== 1 || typeof name !== "string") {
@@ -1963,7 +2006,7 @@ class Parser {
 				}
 			},
 			border: (c) => {
-				const border = this.border(c, null);
+				const border = this.border(c);
 				if (border !== undefined) {
 					v.border = border;
 				}
@@ -1983,7 +2026,6 @@ class Parser {
 				this.errf(c, "given more than once");
 			}
 			seen.add(child);
-			this.plain(c);
 			settings[child]!(c);
 		}
 		if (seen.has("proportion")) {
@@ -1993,6 +2035,11 @@ class Parser {
 			if (v.layers.length === 0) {
 				this.errf(n, "with a `proportion` needs its own layers");
 			}
+		}
+		if (v.outline !== undefined || v.border !== undefined || v.fly !== undefined) {
+			// What it draws within is its own or the flag's, as it would be when rendered.
+			const own = v.fly !== undefined;
+			this.checkOutside(n, v.outline ?? (own ? undefined : flag.outline), v.fly ?? flag.fly, v.hoist ?? flag.hoist, v.border ?? (own ? undefined : flag.border));
 		}
 		this.count(n, v.layers);
 		flag.variants[name] = v;
@@ -2064,7 +2111,6 @@ class Parser {
 
 	/** Reads a named sequence of folds. */
 	private fold(n: Node, flag: Flag): void {
-		this.plain(n);
 		const a0 = args(n);
 		const name = a0[0];
 		if (a0.length !== 1 || typeof name !== "string") {

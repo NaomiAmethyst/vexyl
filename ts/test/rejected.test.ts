@@ -11,7 +11,7 @@ const tests: [string, string, string][] = [
 	["no version", `meta { name "T"; }`, "must start with"],
 	["wrong version", `vexyl 2`, "unsupported format version"],
 	["missing meta name", "vexyl 1\nmeta { description \"x\"; }\n", "needs a `name`"],
-	["incomplete", "vexyl 1\n", "needs `vexyl`"],
+	["incomplete", "vexyl 1\n", "needs `meta`"],
 	["out of order", "vexyl 1\npalette { a \"#112233\"; }\nmeta { name \"T\"; }\n", "out of order"],
 	["unknown layer", header + `sparkle a`, "unknown layer"],
 	["unknown child", header + `bars a { sparkle 1; }`, "unknown here"],

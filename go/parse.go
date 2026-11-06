@@ -13,6 +13,8 @@ import (
 	"math"
 	"regexp"
 	"slices"
+	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	kdl "github.com/calico32/kdl-go"
@@ -30,6 +32,7 @@ const (
 
 var (
 	colorValue = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+	kdlLines   = regexp.MustCompile("\n|\u0085|\v|\f|\u2028|\u2029")
 
 	alongValues  = []string{"fly", "hoist", "bend", "bend-sinister"}
 	fromValues   = []string{"hoist", "fly", "top", "bottom"}
@@ -58,7 +61,8 @@ func Parse(r io.Reader, name string) (*Flag, error) {
 		return nil, err
 	}
 	sum := sha256.Sum256(src)
-	p := &parser{}
+	p := &parser{src: src}
+	p.prepare(doc.Nodes)
 	flag := p.document(doc)
 	flag.idPrefix = "vx-" + hex.EncodeToString(sum[:4]) + "-"
 	if len(p.errs) > 0 {
@@ -77,6 +81,7 @@ func Parse(r io.Reader, name string) (*Flag, error) {
 }
 
 type parser struct {
+	src       []byte
 	errs      []error
 	defines   map[string]*Define
 	palette   map[string]string
@@ -107,24 +112,28 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 		stageBorder
 		stageDefine
 		stageLayers
-		stageTail
+		stageReverse
+		stageAdapt
+		stageVariant
+		stageFold
 	)
 	stages := map[string]int{
 		"vexyl": stageVersion, "meta": stageMeta, "palette": stagePalette,
 		"proportion": stageProportion, "outline": stageOutline, "border": stageBorder,
-		"define": stageDefine, "reverse": stageTail, "adapt": stageTail, "variant": stageTail, "fold": stageTail,
+		"define": stageDefine, "reverse": stageReverse, "adapt": stageAdapt, "variant": stageVariant, "fold": stageFold,
 	}
 	flag.Defines = map[string]*Define{}
 	p.defines = flag.Defines
 	flag.Variants = map[string]*Variant{}
 	flag.Folds = map[string]*Fold{}
 	stage := -1
+	seen := map[int]bool{}
 	for _, n := range doc.Nodes {
 		s, named := stages[n.Name()]
 		if !named {
 			s = stageLayers
 		}
-		if s < stage || (s == stage && s != stageLayers && s != stageDefine && s != stageTail) {
+		if s < stage || (s == stage && s != stageLayers && s != stageDefine && s != stageVariant && s != stageFold) {
 			p.errf(n, "out of order or repeated")
 			continue
 		}
@@ -134,14 +143,15 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 			return flag
 		}
 		stage = s
+		seen[s] = true
 		switch n.Name() {
 		case "vexyl":
-			p.plain(n)
-			flag.Version = int(p.number(n))
-			if flag.Version != FormatVersion {
+			version := p.number(n)
+			if version != FormatVersion {
 				p.errf(n, "unsupported format version; this renderer reads %d", FormatVersion)
 				return flag
 			}
+			flag.Version = FormatVersion
 		case "meta":
 			p.meta(n, &flag.Meta)
 		case "palette":
@@ -151,7 +161,8 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 		case "outline":
 			flag.Outline = p.outline(n)
 		case "border":
-			flag.Border, flag.BorderOutside = p.border(n, flag.boundary())
+			flag.Border, flag.BorderOutside = p.border(n)
+			p.checkOutside(n, flag.Outline, flag.Fly, flag.Hoist, flag.Border, flag.BorderOutside)
 		case "define":
 			p.define(n)
 		case "reverse":
@@ -173,8 +184,16 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 			}
 		}
 	}
-	if stage < stageProportion {
-		p.errs = append(p.errs, errors.New("document needs `vexyl`, `meta`, `palette` and `proportion`"))
+	if !seen[stageVersion] {
+		p.errs = append(p.errs, fmt.Errorf("document must start with `vexyl %d`", FormatVersion))
+	}
+	for _, need := range []struct {
+		stage int
+		name  string
+	}{{stageMeta, "meta"}, {stagePalette, "palette"}, {stageProportion, "proportion"}} {
+		if !seen[need.stage] {
+			p.errs = append(p.errs, fmt.Errorf("document needs `%s`", need.name))
+		}
 	}
 	for name, v := range flag.Variants {
 		if v.Ratio != 0 && flag.Adapt == nil {
@@ -205,7 +224,110 @@ func (p *parser) count(n *kdl.Node, layers []Layer) {
 	}
 }
 
+// prepare checks what's the same wherever it is in a document, and makes what the KDL
+// parser gave agree with KDL's own rules where it doesn't.
+func (p *parser) prepare(nodes []*kdl.Node) {
+	for _, n := range nodes {
+		if _, annotated := n.TypeAnnotation(); annotated {
+			p.errf(n, "type annotations aren't used by this format")
+		}
+		if n.Name() == "-inf" && p.bare(n.Location()) {
+			p.errf(n, "`-inf` has to be quoted to be a string, or written `#-inf` to be a number")
+		}
+		for i, v := range n.Arguments() {
+			if fixed, ok := p.value(n, v); ok {
+				n.SetArg(i, kdl.NewString(fixed))
+			}
+		}
+		for _, key := range n.PropertyOrder() {
+			if start, _, ok := n.PropertyKeyLocation(key); ok && key == "-inf" && p.bare(start) {
+				p.errf(n, "`-inf` has to be quoted to be a string, or written `#-inf` to be a number")
+			}
+			if fixed, ok := p.value(n, n.Prop(key)); ok {
+				n.SetProp(key, kdl.NewString(fixed))
+			}
+		}
+		p.prepare(n.Children().Nodes)
+	}
+}
+
+// bare says whether what's at a place is written with no quotes.
+func (p *parser) bare(at kdl.Location) bool {
+	o := int(at.Offset)
+	return o < len(p.src) && p.src[o] != '"' && p.src[o] != '#'
+}
+
+// value checks a value, and gives the text a multi-line string should have had if kdl-go
+// got it wrong.
+func (p *parser) value(n *kdl.Node, v kdl.Value) (string, bool) {
+	if _, annotated := v.TypeAnnotation(); annotated {
+		p.errf(n, "type annotations aren't used by this format")
+	}
+	if v.Kind() != kdl.String {
+		return "", false
+	}
+	if v.String() == "-inf" && p.bare(v.Location()) {
+		p.errf(n, "`-inf` has to be quoted to be a string, or written `#-inf` to be a number")
+	}
+	literal, ok := v.Literal()
+	if !ok || !strings.HasPrefix(literal, `"""`) || !strings.Contains(literal, `\`) {
+		return "", false
+	}
+	return multilineString(literal)
+}
+
+// multilineString reads a quoted multi-line string that has escapes. KDL removes the
+// indentation before it resolves escapes, while kdl-go does it after, which loses text when
+// an escape makes a newline. So this removes it, and has kdl-go read what's left as a
+// string on one line.
+func multilineString(literal string) (string, bool) {
+	body := strings.TrimSuffix(strings.TrimPrefix(literal, `"""`), `"""`)
+	lines := kdlLines.Split(body, -1)
+	if len(lines) < 2 {
+		return "", false
+	}
+	prefix := lines[len(lines)-1]
+	lines = lines[1 : len(lines)-1]
+	var b strings.Builder
+	b.WriteString(`x "`)
+	continued := false
+	for i, line := range lines {
+		blank := strings.TrimFunc(line, unicode.IsSpace) == ""
+		text := strings.TrimPrefix(line, prefix)
+		if blank {
+			text = ""
+		}
+		if i > 0 {
+			if continued {
+				b.WriteByte('\n')
+			} else {
+				b.WriteString(`\n`)
+			}
+		}
+		escaped := false
+		for _, r := range text {
+			switch {
+			case escaped:
+				escaped = false
+			case r == '\\':
+				escaped = true
+			case r == '"':
+				b.WriteByte('\\')
+			}
+			b.WriteRune(r)
+		}
+		continued = escaped || (continued && blank)
+	}
+	b.WriteByte('"')
+	doc, err := kdl.Parse(strings.NewReader(b.String()), kdl.WithVersion(kdl.Version2))
+	if err != nil || len(doc.Nodes) != 1 || len(doc.Nodes[0].Arguments()) != 1 {
+		return "", false
+	}
+	return doc.Nodes[0].Arguments()[0].String(), true
+}
+
 func (p *parser) meta(n *kdl.Node, m *Meta) {
+	p.noValues(n)
 	str := func(dst *string) func(*kdl.Node) {
 		return func(c *kdl.Node) { *dst = p.str(c) }
 	}
@@ -287,13 +409,11 @@ func (p *parser) adaptation(n *kdl.Node) *Adaptation {
 		return nil
 	}
 	a := &Adaptation{URL: args[0].String()}
-	if n.Children() != nil {
-		p.children(n, []string{"author"}, map[string]func(*kdl.Node){
-			"author":  func(c *kdl.Node) { a.Authors = append(a.Authors, p.str(c)) },
-			"license": func(c *kdl.Node) { a.License = p.str(c) },
-			"part":    func(c *kdl.Node) { a.Part = p.str(c) },
-		})
-	}
+	p.children(n, []string{"author"}, map[string]func(*kdl.Node){
+		"author":  func(c *kdl.Node) { a.Authors = append(a.Authors, p.str(c)) },
+		"license": func(c *kdl.Node) { a.License = p.str(c) },
+		"part":    func(c *kdl.Node) { a.Part = p.str(c) },
+	})
 	return a
 }
 
@@ -303,9 +423,6 @@ func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 	flag.Gradients = map[string]*Gradient{}
 	p.palette = flag.Palette
 	p.gradients = flag.Gradients
-	if n.Children() == nil {
-		return
-	}
 	// Gradients can name colors defined after them, so they're read second.
 	var gradients []*kdl.Node
 	seen := map[string]bool{}
@@ -339,7 +456,6 @@ func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 
 // gradient reads `name gradient COLOR... along=AXIS { stops N... }`.
 func (p *parser) gradient(n *kdl.Node) *Gradient {
-	p.plain(n)
 	g := &Gradient{Along: "fly"}
 	for _, a := range n.Arguments()[1:] {
 		if a.Kind() != kdl.String {
@@ -392,7 +508,6 @@ func (p *parser) stops(n *kdl.Node, count int) []float64 {
 }
 
 func (p *parser) proportion(n *kdl.Node, flag *Flag) {
-	p.plain(n)
 	p.only(n, 0, "hoist", "fly")
 	flag.Hoist = p.positive(n, p.prop(n, "hoist"))
 	flag.Fly = p.positive(n, p.prop(n, "fly"))
@@ -405,7 +520,6 @@ func (p *parser) layer(n *kdl.Node, depth int) Layer {
 		p.errf(n, "nested more than %d levels deep", maxDepth)
 		return nil
 	}
-	p.plain(n)
 	switch n.Name() {
 	case "field":
 		l := &Field{Effects: newEffects()}
@@ -467,9 +581,6 @@ func (p *parser) layer(n *kdl.Node, depth int) Layer {
 func (p *parser) container(n *kdl.Node, depth int, e *Effects, layers *[]Layer, settings map[string]func(*kdl.Node)) {
 	handlers := p.withEffects(e, settings)
 	seen := map[string]bool{}
-	if n.Children() == nil {
-		return
-	}
 	for _, c := range n.Children().Nodes {
 		handler, isSetting := handlers[c.Name()]
 		if !isSetting {
@@ -482,7 +593,6 @@ func (p *parser) container(n *kdl.Node, depth int, e *Effects, layers *[]Layer, 
 			p.errf(c, "given more than once")
 		}
 		seen[c.Name()] = true
-		p.plain(c)
 		handler(c)
 	}
 }
@@ -519,12 +629,11 @@ func (p *parser) withEffects(e *Effects, handlers map[string]func(*kdl.Node)) ma
 // maskShape reads the single shape inside a clip or cut.
 func (p *parser) maskShape(n *kdl.Node) *Shape {
 	p.noValues(n)
-	if n.Children() == nil || len(n.Children().Nodes) != 1 {
+	if len(n.Children().Nodes) != 1 {
 		p.errf(n, "needs exactly one shape")
 		return nil
 	}
 	c := n.Children().Nodes[0]
-	p.plain(c)
 	p.noValues(c)
 	if c.Name() == "svg" {
 		p.errf(c, "inline SVG can't be used as a clip or cut")
@@ -532,6 +641,9 @@ func (p *parser) maskShape(n *kdl.Node) *Shape {
 	}
 	s := p.namedShape(c.Name())
 	p.shapeBody(c, &s, nil)
+	if s.Hollow > 0 || s.Lines > 0 {
+		p.errf(c, "a clip or cut uses a shape's whole area, so it can't be `hollow` or `lines`")
+	}
 	return &s
 }
 
@@ -706,6 +818,10 @@ func (p *parser) charge(n *kdl.Node) Layer {
 		p.errf(n, "needs a shape")
 		return nil
 	}
+	if name := args[0].String(); name == "pile" || name == "pall" {
+		p.errf(n, "a %s is a layer of its own, not a charge's shape", name)
+		return nil
+	}
 	l := &Charge{Effects: newEffects(), Shape: p.namedShape(args[0].String())}
 	if l.Shape.Kind == "svg" && len(args) == 1 {
 		// Inline SVG can bring its own colors.
@@ -729,6 +845,8 @@ func (p *parser) charge(n *kdl.Node) Layer {
 		p.errf(n, "inline SVG uses currentColor, so it needs a palette color")
 	case l.Shape.Kind == "svg" && l.Fimbriate != nil:
 		p.errf(n, "inline SVG can't be fimbriated")
+	case l.Fimbriate != nil && (l.Shape.Hollow > 0 || l.Shape.Lines > 0):
+		p.errf(n, "fimbriation edges a filled shape, so it can't go with `hollow` or `lines`")
 	case l.Shape.Kind == "svg" && l.Repeat != nil:
 		p.errf(n, "inline SVG can't be repeated")
 	case l.Shape.Kind == "polygon" && l.Repeat != nil:
@@ -752,29 +870,33 @@ func (p *parser) emblem(n *kdl.Node) Layer {
 		"rotate": func(c *kdl.Node) { l.Rotate = p.number(c) },
 	})
 	seen := map[string]bool{}
-	if n.Children() != nil {
-		for _, c := range n.Children().Nodes {
-			if c.Name() == "charge" {
-				if charge, ok := p.layer(c, 1).(*Charge); ok {
-					if charge.Repeat != nil && charge.Repeat.Kind == "grid" {
-						p.errf(c, "a grid repeat needs a region, which an emblem doesn't have")
-					}
-					l.Charges = append(l.Charges, charge)
+	for _, c := range n.Children().Nodes {
+		if c.Name() == "charge" {
+			if charge, ok := p.layer(c, 1).(*Charge); ok {
+				if charge.Repeat != nil && charge.Repeat.Kind == "grid" {
+					p.errf(c, "a grid repeat needs a region, which an emblem doesn't have")
 				}
-				continue
+				p.frameShape(c, &charge.Shape)
+				if charge.Clip != nil {
+					p.frameShape(c, charge.Clip)
+				}
+				for i := range charge.Cuts {
+					p.frameShape(c, &charge.Cuts[i])
+				}
+				l.Charges = append(l.Charges, charge)
 			}
-			handler, ok := placed[c.Name()]
-			if !ok {
-				p.errf(c, "an emblem can only hold charges")
-				continue
-			}
-			if seen[c.Name()] && c.Name() != "cut" {
-				p.errf(c, "given more than once")
-			}
-			seen[c.Name()] = true
-			p.plain(c)
-			handler(c)
+			continue
 		}
+		handler, ok := placed[c.Name()]
+		if !ok {
+			p.errf(c, "an emblem can only hold charges")
+			continue
+		}
+		if seen[c.Name()] && c.Name() != "cut" {
+			p.errf(c, "given more than once")
+		}
+		seen[c.Name()] = true
+		handler(c)
 	}
 	if len(l.Charges) == 0 {
 		p.errf(n, "needs at least one charge")
@@ -782,8 +904,17 @@ func (p *parser) emblem(n *kdl.Node) Layer {
 	return l
 }
 
+// frameShape refuses what needs a region's size, which an emblem's frame doesn't have.
+func (p *parser) frameShape(n *kdl.Node, s *Shape) {
+	switch {
+	case s.Kind == "lozenge" && (s.Fly == 0 || s.Hoist == 0):
+		p.errf(n, "a lozenge in an emblem needs `fly` and `hoist`, since a frame has no size to take")
+	case s.Kind == "pile" || s.Kind == "pall":
+		p.errf(n, "a %s needs a region's edges, which an emblem doesn't have", s.Kind)
+	}
+}
+
 func (p *parser) repeat(n *kdl.Node) *Repeat {
-	p.plain(n)
 	p.noChildren(n)
 	args := n.Arguments()
 	if len(args) != 1 || args[0].Kind() != kdl.String {
@@ -847,6 +978,13 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 		"hollow": func(c *kdl.Node) { s.Hollow = p.positive(c, p.number(c)) },
 	}
 	s.placed, s.Ats = false, nil
+	// What was only worked out from a definition's other values is worked out again.
+	if s.autoInner {
+		s.Inner, s.autoInner = 0, false
+	}
+	if s.autoSpread {
+		s.Spread, s.autoSpread = 0, false
+	}
 	radius := func(c *kdl.Node) { s.Radius = p.positive(c, p.number(c)) }
 	inner := func(c *kdl.Node) { s.Inner = p.positive(c, p.number(c)) }
 	sizeFly := func(c *kdl.Node) { s.Fly = p.positive(c, p.number(c)) }
@@ -858,7 +996,12 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 		handlers["radius"], handlers["inner"] = radius, inner
 		handlers["offset"] = func(c *kdl.Node) { s.Offset = p.positive(c, p.number(c)) }
 	case "sun":
-		s.Points, s.Spread = 12, 1
+		if s.Points == 0 {
+			s.Points = 12
+		}
+		if s.Spread == 0 {
+			s.Spread = 1
+		}
 		handlers["radius"] = radius
 		handlers["disc"] = func(c *kdl.Node) { s.Disc = p.positive(c, p.number(c)) }
 		handlers["gap"] = func(c *kdl.Node) { s.Gap = p.positive(c, p.number(c)) }
@@ -916,7 +1059,9 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 		handlers["radius"] = radius
 		handlers["width"] = func(c *kdl.Node) { s.Width = p.positive(c, p.number(c)) }
 	case "star":
-		s.Points = 5
+		if s.Points == 0 {
+			s.Points = 5
+		}
 		handlers["radius"], handlers["inner"] = radius, inner
 		handlers["lines"] = func(c *kdl.Node) { s.Lines = p.positive(c, p.number(c)) }
 		handlers["points"] = func(c *kdl.Node) {
@@ -929,7 +1074,6 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 		delete(handlers, "at")
 		delete(handlers, "rotate")
 		handlers["point"] = func(c *kdl.Node) {
-			p.plain(c)
 			p.only(c, 0, "fly", "hoist")
 			p.noChildren(c)
 			s.Vertices = append(s.Vertices, Point{p.prop(c, "fly"), p.prop(c, "hoist")})
@@ -964,6 +1108,9 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 		if s.Inner == 0 || s.Inner >= s.Radius {
 			p.errf(n, "needs an `inner` smaller than its `radius`")
 		}
+		if s.HasArc && math.Mod(s.To-s.From, 360) == 0 {
+			p.errf(n, "`from` and `to` are the same place, so there's no arc to draw")
+		}
 	case "star":
 		if s.Lines > 0 && s.Hollow > 0 {
 			p.errf(n, "`lines` and `hollow` can't be combined")
@@ -977,6 +1124,7 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 		if s.Inner == 0 {
 			n := float64(s.Points)
 			s.Inner = s.Radius * math.Cos(2*math.Pi/n) / math.Cos(math.Pi/n)
+			s.autoInner = true
 		}
 	case "rect", "ellipse":
 		if s.Fly == 0 || s.Hoist == 0 {
@@ -1023,6 +1171,7 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 	case "heart":
 		if s.Spread == 0 {
 			s.Spread = s.Radius * math.Sqrt2
+			s.autoSpread = true
 		}
 		if s.Spread >= 2*s.Radius && s.Radius > 0 {
 			p.errf(n, "`spread` must be less than twice `radius`, so that the lobes meet")
@@ -1055,7 +1204,6 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 }
 
 func (p *parser) at(n *kdl.Node) *Point {
-	p.plain(n)
 	p.noChildren(n)
 	if args := n.Arguments(); len(args) > 0 {
 		if len(args) != 1 || args[0].Kind() != kdl.String || args[0].String() != "center" || len(n.Properties()) > 0 {
@@ -1067,9 +1215,8 @@ func (p *parser) at(n *kdl.Node) *Point {
 	return &Point{p.prop(n, "fly"), p.prop(n, "hoist")}
 }
 
-// border reads `border COLOR W`, with an optional side of inside or outside. A
-// shape given to it is checked for having an outside at all.
-func (p *parser) border(n *kdl.Node, shape []vec) (*Edge, bool) {
+// border reads `border COLOR W`, with an optional side of inside or outside.
+func (p *parser) border(n *kdl.Node) (*Edge, bool) {
 	args := n.Arguments()
 	outside := false
 	if len(args) == 3 {
@@ -1080,14 +1227,25 @@ func (p *parser) border(n *kdl.Node, shape []vec) (*Edge, bool) {
 		outside = args[2].String() == "outside"
 		args = args[:2]
 	}
-	edge := p.edgeArgs(n, args)
-	if edge == nil || edge.Width <= 0 || !outside || shape == nil {
-		return edge, outside
+	return p.edgeArgs(n, args), outside
+}
+
+// checkOutside refuses an outside border that can't go around the shape it's given.
+func (p *parser) checkOutside(n *kdl.Node, o *Outline, fly, hoist float64, border *Edge, outside bool) {
+	if border == nil || !outside || border.Width <= 0 || fly <= 0 || hoist <= 0 {
+		return
 	}
-	if _, err := offsetPolygon(shape, edge.Width); err != nil {
+	shape := rectPoly(0, 0, fly, hoist)
+	if o != nil {
+		shape = o.points(fly, hoist)
+	}
+	if shape == nil {
+		p.errf(n, "an outside border can't go around a `path` outline")
+		return
+	}
+	if _, err := offsetPolygon(shape, border.Width); err != nil {
 		p.errf(n, "%v", err)
 	}
-	return edge, outside
 }
 
 func (p *parser) edge(n *kdl.Node) *Edge {
@@ -1095,7 +1253,6 @@ func (p *parser) edge(n *kdl.Node) *Edge {
 }
 
 func (p *parser) edgeArgs(n *kdl.Node, args []kdl.Value) *Edge {
-	p.plain(n)
 	p.noProps(n)
 	p.noChildren(n)
 	if len(args) != 2 || args[0].Kind() != kdl.String {
@@ -1108,9 +1265,6 @@ func (p *parser) edgeArgs(n *kdl.Node, args []kdl.Value) *Edge {
 // children dispatches n's children to handlers, rejecting unknown nodes and
 // repeats of anything not listed as repeatable.
 func (p *parser) children(n *kdl.Node, repeatable []string, handlers map[string]func(*kdl.Node)) {
-	if n.Children() == nil {
-		return
-	}
 	seen := map[string]bool{}
 	for _, c := range n.Children().Nodes {
 		handler, ok := handlers[c.Name()]
@@ -1122,14 +1276,7 @@ func (p *parser) children(n *kdl.Node, repeatable []string, handlers map[string]
 			p.errf(c, "given more than once")
 		}
 		seen[c.Name()] = true
-		p.plain(c)
 		handler(c)
-	}
-}
-
-func (p *parser) plain(n *kdl.Node) {
-	if _, annotated := n.TypeAnnotation(); annotated {
-		p.errf(n, "type annotations aren't used by this format")
 	}
 }
 
@@ -1147,7 +1294,7 @@ func (p *parser) noProps(n *kdl.Node) {
 }
 
 func (p *parser) noChildren(n *kdl.Node) {
-	if n.Children() != nil && len(n.Children().Nodes) > 0 {
+	if len(n.Children().Nodes) > 0 {
 		p.errf(n, "takes no children")
 	}
 }

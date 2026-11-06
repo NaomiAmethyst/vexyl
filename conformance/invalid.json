@@ -631,6 +631,197 @@
   "line": 5
  },
  {
+  "name": "no meta",
+  "file": "invalid/no-meta.kdl"
+ },
+ {
+  "name": "no palette",
+  "file": "invalid/no-palette.kdl"
+ },
+ {
+  "name": "no proportion",
+  "file": "invalid/no-proportion.kdl"
+ },
+ {
+  "name": "empty document",
+  "file": "invalid/empty-document.kdl"
+ },
+ {
+  "name": "meta with an argument",
+  "file": "invalid/meta-with-an-argument.kdl",
+  "line": 2
+ },
+ {
+  "name": "meta with a property",
+  "file": "invalid/meta-with-a-property.kdl",
+  "line": 2
+ },
+ {
+  "name": "outside border on a path outline",
+  "file": "invalid/outside-border-on-a-path-outline.kdl",
+  "line": 6
+ },
+ {
+  "name": "variant's outside border on the flag's path outline",
+  "file": "invalid/variant-s-outside-border-on-the-flag-s-path-outline.kdl",
+  "line": 7
+ },
+ {
+  "name": "variant's path outline with the flag's outside border",
+  "file": "invalid/variant-s-path-outline-with-the-flag-s-outside-border.kdl",
+  "line": 7
+ },
+ {
+  "name": "rays measured by edge with a rotation",
+  "file": "invalid/rays-measured-by-edge-with-a-rotation.kdl",
+  "line": 5
+ },
+ {
+  "name": "hollow with fimbriation",
+  "file": "invalid/hollow-with-fimbriation.kdl",
+  "line": 5
+ },
+ {
+  "name": "lines with fimbriation",
+  "file": "invalid/lines-with-fimbriation.kdl",
+  "line": 5
+ },
+ {
+  "name": "hollow pile with fimbriation",
+  "file": "invalid/hollow-pile-with-fimbriation.kdl",
+  "line": 5
+ },
+ {
+  "name": "hollow in a clip",
+  "file": "invalid/hollow-in-a-clip.kdl",
+  "line": 5
+ },
+ {
+  "name": "lines in a cut",
+  "file": "invalid/lines-in-a-cut.kdl",
+  "line": 5
+ },
+ {
+  "name": "fractional version",
+  "file": "invalid/fractional-version.kdl",
+  "line": 1
+ },
+ {
+  "name": "lozenge with no size in an emblem",
+  "file": "invalid/lozenge-with-no-size-in-an-emblem.kdl",
+  "line": 5
+ },
+ {
+  "name": "lozenge with half a size in an emblem",
+  "file": "invalid/lozenge-with-half-a-size-in-an-emblem.kdl",
+  "line": 5
+ },
+ {
+  "name": "lozenge with no size clipping in an emblem",
+  "file": "invalid/lozenge-with-no-size-clipping-in-an-emblem.kdl",
+  "line": 5
+ },
+ {
+  "name": "pile cutting in an emblem",
+  "file": "invalid/pile-cutting-in-an-emblem.kdl",
+  "line": 5
+ },
+ {
+  "name": "pile as a charge's shape",
+  "file": "invalid/pile-as-a-charge-s-shape.kdl",
+  "line": 5
+ },
+ {
+  "name": "pall as a charge's shape",
+  "file": "invalid/pall-as-a-charge-s-shape.kdl",
+  "line": 5
+ },
+ {
+  "name": "annotation on meta",
+  "file": "invalid/annotation-on-meta.kdl",
+  "line": 2
+ },
+ {
+  "name": "annotation on the palette",
+  "file": "invalid/annotation-on-the-palette.kdl",
+  "line": 3
+ },
+ {
+  "name": "annotation on a color",
+  "file": "invalid/annotation-on-a-color.kdl",
+  "line": 3
+ },
+ {
+  "name": "annotation on an argument",
+  "file": "invalid/annotation-on-an-argument.kdl",
+  "line": 5
+ },
+ {
+  "name": "annotation on a number",
+  "file": "invalid/annotation-on-a-number.kdl",
+  "line": 5
+ },
+ {
+  "name": "annotation on a property",
+  "file": "invalid/annotation-on-a-property.kdl",
+  "line": 4
+ },
+ {
+  "name": "annotation on a child",
+  "file": "invalid/annotation-on-a-child.kdl",
+  "line": 5
+ },
+ {
+  "name": "annotation in a define",
+  "file": "invalid/annotation-in-a-define.kdl",
+  "line": 5
+ },
+ {
+  "name": "bare negative infinity",
+  "file": "invalid/bare-negative-infinity.kdl",
+  "line": 5
+ },
+ {
+  "name": "bare negative infinity as a property",
+  "file": "invalid/bare-negative-infinity-as-a-property.kdl",
+  "line": 4
+ },
+ {
+  "name": "bare negative infinity as a node",
+  "file": "invalid/bare-negative-infinity-as-a-node.kdl",
+  "line": 5
+ },
+ {
+  "name": "reverse repeated",
+  "file": "invalid/reverse-repeated.kdl",
+  "line": 6
+ },
+ {
+  "name": "adapt repeated",
+  "file": "invalid/adapt-repeated.kdl",
+  "line": 6
+ },
+ {
+  "name": "adapt before reverse",
+  "file": "invalid/adapt-before-reverse.kdl",
+  "line": 6
+ },
+ {
+  "name": "variant before adapt",
+  "file": "invalid/variant-before-adapt.kdl",
+  "line": 6
+ },
+ {
+  "name": "fold before variant",
+  "file": "invalid/fold-before-variant.kdl",
+  "line": 7
+ },
+ {
+  "name": "ring with no arc",
+  "file": "invalid/ring-with-no-arc.kdl",
+  "line": 5
+ },
+ {
   "name": "not utf-8",
   "file": "invalid/not-utf-8.kdl"
  },

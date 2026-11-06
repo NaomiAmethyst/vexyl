@@ -476,7 +476,7 @@ func TestRejected(t *testing.T) {
 		{"no version", `meta { name "T"; }`, "must start with"},
 		{"wrong version", `vexyl 2`, "unsupported format version"},
 		{"missing meta name", "vexyl 1\nmeta { description \"x\"; }\n", "needs a `name`"},
-		{"incomplete", "vexyl 1\n", "needs `vexyl`"},
+		{"incomplete", "vexyl 1\n", "needs `meta`"},
 		{"out of order", "vexyl 1\npalette { a \"#112233\"; }\nmeta { name \"T\"; }\n", "out of order"},
 		{"unknown layer", header + `sparkle a`, "unknown layer"},
 		{"unknown child", header + `bars a { sparkle 1; }`, "unknown here"},
@@ -600,6 +600,45 @@ func TestRejected(t *testing.T) {
 		{"through with a no-break space", header + "field a\nfold f { over through=\"0\\u{a0}0 1 1\" move=\"0 1\"; }\n", "decimal numbers"},
 		{"number too small", header + `charge disc a { radius 1e-13; }`, "finite"},
 		{"number beyond the limit", header + `charge disc a { radius 1e13; }`, "finite"},
+		{"no meta", "vexyl 1\nproportion hoist=1 fly=1\n", "needs `meta`"},
+		{"no palette", "vexyl 1\nmeta { name \"T\"; }\nproportion hoist=1 fly=1\n", "needs `palette`"},
+		{"no proportion", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nadapt { wider extend; }\n", "needs `proportion`"},
+		{"empty document", "", "must start with"},
+		{"meta with an argument", "vexyl 1\nmeta \"junk\" { name \"T\"; }\n", "takes no arguments"},
+		{"meta with a property", "vexyl 1\nmeta nonsense=1 { name \"T\"; }\n", "takes no properties"},
+		{"outside border on a path outline", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=10 fly=20\noutline { path \"M0 0H1V1Z\" box=\"0 0 1 1\"; }\nborder a 1 outside\n", "can't go around"},
+		{"variant's outside border on the flag's path outline", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=10 fly=20\noutline { path \"M0 0H1V1Z\" box=\"0 0 1 1\"; }\nfield a\nvariant v { border a 1 outside; }\n", "can't go around"},
+		{"variant's path outline with the flag's outside border", header + "border a 1 outside\nfield a\nvariant v { outline { path \"M0 0H1V1Z\" box=\"0 0 1 1\"; }; }\n", "can't go around"},
+		{"rays measured by edge with a rotation", header + `rays a b { count 4; measure edge; rotate 45; }`, "can't also have a `rotate`"},
+		{"hollow with fimbriation", header + `charge disc a { radius 2; hollow 0.5; fimbriate b 1; }`, "can't go with"},
+		{"lines with fimbriation", header + `charge star a { radius 2; lines 0.5; fimbriate b 1; }`, "can't go with"},
+		{"hollow pile with fimbriation", header + `pile a { depth 2; hollow 1; fimbriate b 1; }`, "can't go with"},
+		{"hollow in a clip", header + `field a { clip { disc { radius 1; hollow 1; }; }; }`, "whole area"},
+		{"lines in a cut", header + `field a { cut { star { radius 1; lines 1; }; }; }`, "whole area"},
+		{"fractional version", "vexyl 1.9\n", "unsupported format version"},
+		{"lozenge with no size in an emblem", header + `emblem { charge lozenge a; }`, "needs `fly` and `hoist`"},
+		{"lozenge with half a size in an emblem", header + `emblem { charge lozenge a { fly 1; }; }`, "needs `fly` and `hoist`"},
+		{"lozenge with no size clipping in an emblem", header + `emblem { charge disc a { radius 1; clip { lozenge; }; }; }`, "needs `fly` and `hoist`"},
+		{"pile cutting in an emblem", header + `emblem { charge disc a { radius 1; cut { pile { depth 1; }; }; }; }`, "region's edges"},
+		{"pile as a charge's shape", header + `charge pile a { depth 2; }`, "layer of its own"},
+		{"pall as a charge's shape", header + `charge pall a { width 2; }`, "layer of its own"},
+		{"annotation on meta", "vexyl 1\n(x)meta { name \"T\"; }\n", "type annotations"},
+		{"annotation on the palette", "vexyl 1\nmeta { name \"T\"; }\n(x)palette { a \"#112233\"; }\n", "type annotations"},
+		{"annotation on a color", "vexyl 1\nmeta { name \"T\"; }\npalette { (x)a \"#112233\"; }\n", "type annotations"},
+		{"annotation on an argument", header + `field (x)a`, "type annotations"},
+		{"annotation on a number", header + `charge disc a { radius (u8)1; }`, "type annotations"},
+		{"annotation on a property", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=(u8)1 fly=1\n", "type annotations"},
+		{"annotation on a child", header + `bars a { (x)along hoist; }`, "type annotations"},
+		{"annotation in a define", header + `define d { (x)field a; }`, "type annotations"},
+		{"bare negative infinity", header + `field -inf`, "-inf"},
+		{"bare negative infinity as a property", "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=-inf fly=1\n", "-inf"},
+		{"bare negative infinity as a node", header + `-inf a`, "-inf"},
+		{"reverse repeated", header + "reverse { field a; }\nreverse { field b; }\n", "out of order"},
+		{"adapt repeated", header + "adapt { wider extend; }\nadapt { wider center; }\n", "out of order"},
+		{"adapt before reverse", header + "adapt { wider extend; }\nreverse mirror\n", "out of order"},
+		{"variant before adapt", header + "variant v { from rotate; }\nadapt { wider extend; }\n", "out of order"},
+		{"fold before variant", header + "field a\nfold f { over along=hoist at=5 move=fly; }\nvariant v { from rotate; }\n", "out of order"},
+		{"ring with no arc", header + `charge ring a { radius 2; inner 1; from 90; to 450; }`, "same place"},
 		{"not utf-8", header + "field \"\xff\"\n", "UTF-8"},
 		{"problem after crlf", "vexyl 1\r\nmeta { name \"T\"; }\r\npalette { a \"#112233\"; }\r\nproportion hoist=10 fly=20\r\nfield nope\r\n", "isn't in the palette"},
 		{"problem after cr", "vexyl 1\rmeta { name \"T\"; }\rpalette { a \"#112233\"; }\rproportion hoist=10 fly=20\rfield nope\r", "isn't in the palette"},
@@ -975,7 +1014,7 @@ func TestAdaptRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out := render(t, adaptHeader+tt.src, Options{Ratio: tt.ratio})
+			out := render(t, adaptHeader+tt.src, Options{Ratio: Float(tt.ratio)})
 			if !strings.Contains(out, tt.want) {
 				t.Errorf("no %q in %s", tt.want, out)
 			}
@@ -997,7 +1036,7 @@ func TestAdaptRefusals(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var out bytes.Buffer
-			err := parse(t, adaptHeader+tt.src).WriteSVG(&out, Options{Ratio: tt.ratio})
+			err := parse(t, adaptHeader+tt.src).WriteSVG(&out, Options{Ratio: Float(tt.ratio)})
 			if err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Errorf("err = %v, want %q", err, tt.want)
 			}
@@ -1006,7 +1045,7 @@ func TestAdaptRefusals(t *testing.T) {
 }
 
 func TestOwnProportionNeedsNoRules(t *testing.T) {
-	if out := render(t, adaptHeader+`field a`, Options{Ratio: 2}); !strings.Contains(out, `viewBox="0 0 20 10"`) {
+	if out := render(t, adaptHeader+`field a`, Options{Ratio: Float(2)}); !strings.Contains(out, `viewBox="0 0 20 10"`) {
 		t.Errorf("unexpected output: %s", out)
 	}
 }
@@ -1100,7 +1139,7 @@ func TestFormsOfAFlagHaveDistinctIDs(t *testing.T) {
 	src := adaptHeader + "field a\nadapt { wider extend; }\n"
 	id := regexp.MustCompile(` id="([^"]+)"`)
 	a := id.FindStringSubmatch(render(t, src, Options{}))[1]
-	b := id.FindStringSubmatch(render(t, src, Options{Ratio: 3}))[1]
+	b := id.FindStringSubmatch(render(t, src, Options{Ratio: Float(3)}))[1]
 	if a == b {
 		t.Errorf("both use id %q", a)
 	}
@@ -1113,12 +1152,12 @@ func TestFitPadding(t *testing.T) {
 		opts Options
 		want string
 	}{
-		{"center by default", Options{Ratio: 4, Fit: "pad"}, `viewBox="-10 0 40 10"`},
-		{"start", Options{Ratio: 4, Fit: "pad", Align: "start"}, `viewBox="0 0 40 10"`},
-		{"end", Options{Ratio: 4, Fit: "pad", Align: "end"}, `viewBox="-20 0 40 10"`},
-		{"taller, centered", Options{Ratio: 1, Fit: "pad"}, `viewBox="0 -5 20 20"`},
-		{"taller, top", Options{Ratio: 1, Fit: "pad", Align: "start"}, `viewBox="0 0 20 20"`},
-		{"taller, bottom", Options{Ratio: 1, Fit: "pad", Align: "end"}, `viewBox="0 -10 20 20"`},
+		{"center by default", Options{Ratio: Float(4), Fit: "pad"}, `viewBox="-10 0 40 10"`},
+		{"start", Options{Ratio: Float(4), Fit: "pad", Align: "start"}, `viewBox="0 0 40 10"`},
+		{"end", Options{Ratio: Float(4), Fit: "pad", Align: "end"}, `viewBox="-20 0 40 10"`},
+		{"taller, centered", Options{Ratio: Float(1), Fit: "pad"}, `viewBox="0 -5 20 20"`},
+		{"taller, top", Options{Ratio: Float(1), Fit: "pad", Align: "start"}, `viewBox="0 0 20 20"`},
+		{"taller, bottom", Options{Ratio: Float(1), Fit: "pad", Align: "end"}, `viewBox="0 -10 20 20"`},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1132,7 +1171,7 @@ func TestFitPadding(t *testing.T) {
 func TestFitPadsFromNearestProportion(t *testing.T) {
 	src := adaptHeader + "field a\nadapt { range 1 3; wider extend; }\n"
 	// The rules reach 3, so the flag is 30 wide, then padded to 4.
-	out := render(t, src, Options{Ratio: 4, Fit: "pad", Height: 100})
+	out := render(t, src, Options{Ratio: Float(4), Fit: "pad", Height: Float(100)})
 	if !strings.Contains(out, `viewBox="-5 0 40 10"`) || !strings.Contains(out, `points="0,0 30,0 30,10 0,10"`) {
 		t.Errorf("should adapt to 3, then pad: %s", out)
 	}
@@ -1143,7 +1182,7 @@ func TestFitPadsFromNearestProportion(t *testing.T) {
 
 func TestFitPadsFromOwnProportionWhenTheDesignCantReach(t *testing.T) {
 	src := adaptHeader + "cross a { fly 5 2 3; hoist 4 2 4; }\nadapt { narrower cut; }\n"
-	out := render(t, src, Options{Ratio: 0.5, Fit: "pad"})
+	out := render(t, src, Options{Ratio: Float(0.5), Fit: "pad"})
 	if !strings.Contains(out, `viewBox="0 -15 20 40"`) {
 		t.Errorf("should pad from the flag's own shape: %s", out)
 	}
@@ -1152,7 +1191,7 @@ func TestFitPadsFromOwnProportionWhenTheDesignCantReach(t *testing.T) {
 func TestFitPadsTurnedFlagsInTheirFinalShape(t *testing.T) {
 	src := adaptHeader + "field a\nvariant v { from transpose; }\n"
 	// A ratio of 4 before turning is a canvas 4 times taller than wide.
-	out := render(t, src, Options{Variant: "v", Ratio: 4, Fit: "pad"})
+	out := render(t, src, Options{Variant: "v", Ratio: Float(4), Fit: "pad"})
 	if !strings.Contains(out, `viewBox="0 -10 10 40"`) {
 		t.Errorf("unexpected canvas: %s", out)
 	}
@@ -1161,13 +1200,13 @@ func TestFitPadsTurnedFlagsInTheirFinalShape(t *testing.T) {
 func TestFitRefusals(t *testing.T) {
 	var out bytes.Buffer
 	f := parse(t, adaptHeader+"field a\n")
-	if err := f.WriteSVG(&out, Options{Ratio: 4}); err == nil || !strings.Contains(err.Error(), "doesn't say how") {
+	if err := f.WriteSVG(&out, Options{Ratio: Float(4)}); err == nil || !strings.Contains(err.Error(), "doesn't say how") {
 		t.Errorf("should refuse by default: %v", err)
 	}
-	if err := f.WriteSVG(&out, Options{Ratio: 4, Fit: "squash"}); err == nil {
+	if err := f.WriteSVG(&out, Options{Ratio: Float(4), Fit: "squash"}); err == nil {
 		t.Error("unknown fit accepted")
 	}
-	if err := f.WriteSVG(&out, Options{Ratio: 4, Fit: "pad", Align: "up"}); err == nil {
+	if err := f.WriteSVG(&out, Options{Ratio: Float(4), Fit: "pad", Align: "up"}); err == nil {
 		t.Error("unknown align accepted")
 	}
 }
@@ -1246,6 +1285,198 @@ func manyCreases(n int) string {
 		}
 	}
 	return b.String()
+}
+
+func TestDefinedShapesKeepTheirValues(t *testing.T) {
+	f := parse(t, header+`define hex { star { radius 2; points 6; }; }
+define ray { sun { radius 4; disc 1; points 8; spread 0.5; }; }
+define lobe { heart { radius 2; }; }
+charge hex a
+charge hex a { radius 4; }
+charge hex a { points 7; }
+charge ray a
+charge lobe a { radius 4; }
+`)
+	shape := func(i int) Shape { return f.Layers[i].(*Charge).Shape }
+	if s := shape(0); s.Points != 6 || math.Abs(s.Inner-2*math.Cos(2*math.Pi/6)/math.Cos(math.Pi/6)) > 1e-12 {
+		t.Errorf("star: %+v", s)
+	}
+	if s := shape(1); math.Abs(s.Inner-4*math.Cos(2*math.Pi/6)/math.Cos(math.Pi/6)) > 1e-12 {
+		t.Errorf("inner is stale: %+v", s)
+	}
+	if s := shape(2); s.Points != 7 || math.Abs(s.Inner-2*math.Cos(2*math.Pi/7)/math.Cos(math.Pi/7)) > 1e-12 {
+		t.Errorf("inner is stale for other points: %+v", s)
+	}
+	if s := shape(3); s.Points != 8 || s.Spread != 0.5 {
+		t.Errorf("sun: %+v", s)
+	}
+	if s := shape(4); math.Abs(s.Spread-4*math.Sqrt2) > 1e-12 {
+		t.Errorf("heart's spread is stale: %+v", s)
+	}
+	// A value that was given stays, even when what it could have come from changes.
+	given := parse(t, header+"define s { star { radius 2; inner 1; }; }\ncharge s a { radius 4; }\n")
+	if s := given.Layers[0].(*Charge).Shape; s.Inner != 1 {
+		t.Errorf("given inner changed: %+v", s)
+	}
+}
+
+func TestVariantsOwnLayersMirrorOnTheReverse(t *testing.T) {
+	f := parse(t, header+`field a
+reverse { field b; }
+variant own { field a; charge disc b { radius 1; }; }
+variant same { from none; }
+`)
+	obverse := svgWith(t, f, Options{Variant: "own"})
+	reverse := svgWith(t, f, Options{Variant: "own", Side: "reverse"})
+	if !strings.Contains(reverse, "matrix(-1 0 0 1 20 0)") || strings.Contains(obverse, "matrix(-1") {
+		t.Errorf("a variant's reverse isn't its mirror image:\n%s", reverse)
+	}
+	// One with no layers of its own keeps the flag's reverse, as written.
+	same := svgWith(t, f, Options{Variant: "same", Side: "reverse"})
+	if strings.Contains(same, "matrix(-1") || !strings.Contains(same, "#445566") {
+		t.Errorf("a variant with no layers lost the flag's reverse:\n%s", same)
+	}
+}
+
+func svgWith(t *testing.T, f *Flag, opts Options) string {
+	t.Helper()
+	out, err := f.SVG(opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return out
+}
+
+func TestGradientsSpanTheirOwnCell(t *testing.T) {
+	src := `vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; g gradient a b; }
+proportion hoist=10 fly=20
+`
+	checks := svgOf(t, parse(t, src+`checks g b { rows 2; columns 2; }`))
+	if !strings.Contains(checks, `points="0,0 10,0 10,5 0,5"`) {
+		t.Errorf("a gradient's cell isn't its own size:\n%s", checks)
+	}
+	if !strings.Contains(checks, `points="10,0 20,0 20,10 10,10"`) {
+		t.Errorf("a solid cell should run on beneath the next:\n%s", checks)
+	}
+	quarters := svgOf(t, parse(t, src+`quarters g b b g`))
+	for _, want := range []string{`points="0,0 10,0 10,5 0,5"`, `points="10,5 20,5 20,10 10,10"`} {
+		if !strings.Contains(quarters, want) {
+			t.Errorf("no %s in:\n%s", want, quarters)
+		}
+	}
+}
+
+func TestOptionCombinations(t *testing.T) {
+	f := parse(t, header+`field a
+adapt { wider extend; narrower extend; }
+variant v { ratio 3; }
+variant w { from none; }
+variant t { from rotate; }
+fold f { over along=hoist at=10 move=fly; under along=fly at=5 move=top; }
+`)
+	refused := []struct {
+		name string
+		opts Options
+	}{
+		{"zero height", Options{Height: Float(0)}},
+		{"negative height", Options{Height: Float(-1)}},
+		{"infinite height", Options{Height: Float(math.Inf(1))}},
+		{"height that isn't a number", Options{Height: Float(math.NaN())}},
+		{"zero ratio", Options{Ratio: Float(0)}},
+		{"negative ratio", Options{Ratio: Float(-1)}},
+		{"infinite ratio", Options{Ratio: Float(math.Inf(1))}},
+		{"ratio that isn't a number", Options{Ratio: Float(math.NaN())}},
+		{"unknown fit", Options{Ratio: Float(1), Fit: "stretch"}},
+		{"unknown align", Options{Ratio: Float(1), Fit: "pad", Align: "left"}},
+		{"unknown side", Options{Side: "front"}},
+		{"unknown variant", Options{Variant: "nope"}},
+		{"unknown fold", Options{Fold: "nope"}},
+		{"fit without a ratio", Options{Fit: "pad"}},
+		{"fit error without a ratio", Options{Fit: "error"}},
+		{"fit on a variant without a ratio", Options{Variant: "w", Fit: "pad"}},
+		{"align without a fit", Options{Ratio: Float(1), Align: "start"}},
+		{"align with fit error", Options{Ratio: Float(1), Fit: "error", Align: "center"}},
+		{"fold on the reverse", Options{Fold: "f", Side: "reverse"}},
+		{"fold padded", Options{Fold: "f", Ratio: Float(1), Fit: "pad"}},
+		{"fold on a turned variant", Options{Fold: "f", Variant: "t"}},
+		{"fold step without a fold", Options{FoldStep: Int(1)}},
+		{"fold step of 0", Options{Fold: "f", FoldStep: Int(0)}},
+		{"negative fold step", Options{Fold: "f", FoldStep: Int(-1)}},
+		{"too many fold steps", Options{Fold: "f", FoldStep: Int(3)}},
+	}
+	for _, tt := range refused {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := f.SVG(tt.opts); err == nil {
+				t.Error("accepted")
+			}
+		})
+	}
+	for _, opts := range []Options{
+		{Height: Float(100)},
+		{Variant: "v", Fit: "pad"},
+		{Ratio: Float(1), Fit: "error"},
+		{Ratio: Float(1), Fit: "pad", Align: "end"},
+		{Fold: "f", Side: "obverse"},
+		{Fold: "f", FoldStep: Int(1)},
+		{Fold: "f", FoldStep: Int(2)},
+		{Fold: "f", Ratio: Float(2)},
+	} {
+		if _, err := f.SVG(opts); err != nil {
+			t.Errorf("%+v: %v", opts, err)
+		}
+	}
+}
+
+func TestNothingNonFiniteReachesOutput(t *testing.T) {
+	// The smallest and largest numbers allowed, where any worked out from them are largest.
+	for _, body := range []string{
+		`charge path a { d "M0 0H1V1Z"; box "0 0 1e-12 1e-12"; fly 1e12; }`,
+		`define d hoist=1e-12 fly=1e-12 { field a; }` + "\nuse d\n",
+		`bars a b { rotate 1e12; ratio 1e12 1e-12; }`,
+		`chevrons a b { depth 1e12; angle 1e-12; rotate 1e12; }`,
+		`charge star a { radius 1e12; points 5; rotate 1e12; at fly=1e12 hoist=-1e12; }`,
+		`charge ring a { radius 2; inner 1; from 1e12; to -1e12; }`,
+	} {
+		out := svgOf(t, parse(t, header+body))
+		if regexp.MustCompile(`NaN|Inf`).MatchString(out) {
+			t.Errorf("%s:\n%s", body, out)
+		}
+	}
+	out := svgOf(t, parse(t, "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; }\nproportion hoist=1e-12 fly=1e12\nfield a\n"))
+	if regexp.MustCompile(`NaN|Inf`).MatchString(out) {
+		t.Error(out)
+	}
+}
+
+func TestShapedEdgeInALargerRegionIsRefusedWhenDrawn(t *testing.T) {
+	f := parse(t, header+"bars a b { edge wavy depth=1 period=0.002; }\nadapt { wider extend; }\n")
+	if _, err := f.SVG(Options{}); err != nil {
+		t.Error(err)
+	}
+	if _, err := f.SVG(Options{Ratio: Float(100)}); err == nil || !strings.Contains(err.Error(), "waves") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestMultilineStringsFollowKDL(t *testing.T) {
+	note := func(body string) string {
+		f := parse(t, "vexyl 1\nmeta {\n  name \"T\"\n  note \"\"\"\n"+body+"\n    \"\"\"\n}\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n")
+		return f.Meta.Notes[0]
+	}
+	for _, tt := range []struct{ body, want string }{
+		{"    plain\n    text", "plain\ntext"},
+		{`    \u{41}\n`, "A\n"},
+		{"    a\\n\n    b", "a\n\nb"},
+		{"    say \"hi\" \\t there", "say \"hi\" \t there"},
+		{"    a \\\n      b", "a b"},
+		{"    a\n\n    b\\\\", "a\n\nb\\"},
+	} {
+		if got := note(tt.body); got != tt.want {
+			t.Errorf("%q: got %q, want %q", tt.body, got, tt.want)
+		}
+	}
 }
 
 func TestValidateReportsWhere(t *testing.T) {
@@ -1445,7 +1676,7 @@ func TestFoldRendering(t *testing.T) {
 		t.Errorf("should place artwork through each facet: %s", out)
 	}
 	assertWellFormed(t, []byte(out))
-	first := render(t, foldHeader+`fold f { over along=hoist at=10 move=fly; over along=fly at=5 move=top; }`, Options{Fold: "f", FoldStep: 1})
+	first := render(t, foldHeader+`fold f { over along=hoist at=10 move=fly; over along=fly at=5 move=top; }`, Options{Fold: "f", FoldStep: Int(1)})
 	if !strings.Contains(first, `viewBox="0 0 10 10"`) {
 		t.Errorf("should stop after the step asked for: %s", first)
 	}
@@ -1628,7 +1859,7 @@ func FuzzParse(f *testing.F) {
 				assertWellFormed(t, out.Bytes())
 			}
 		}
-		for _, opts := range []Options{{Ratio: 1}, {Ratio: 3}, {Side: "reverse"}, {Ratio: 5, Fit: "pad"}} {
+		for _, opts := range []Options{{Ratio: Float(1)}, {Ratio: Float(3)}, {Side: "reverse"}, {Ratio: Float(5), Fit: "pad"}} {
 			out.Reset()
 			if err := flag.WriteSVG(&out, opts); err == nil {
 				assertWellFormed(t, out.Bytes())

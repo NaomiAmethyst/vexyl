@@ -1,0 +1,7 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; }
+proportion hoist=10 fly=20
+outline { path "M0 0H1V1Z" box="0 0 1 1"; }
+field a
+variant v { border a 1 outside; }

@@ -405,7 +405,10 @@ func view(kind string, x0, y0, width, tall float64) (transform, upright string) 
 // is the proportion to pad the result to.
 func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror bool, canvas float64, err error) {
 	out := *f
-	ratio := opts.Ratio
+	ratio := 0.0
+	if opts.Ratio != nil {
+		ratio = *opts.Ratio
+	}
 	turn = "none"
 	fail := func(err error) (*Flag, string, bool, bool, float64, error) {
 		return nil, "", false, false, 0, err
@@ -446,7 +449,9 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 			out.Outline, out.Border, out.BorderOutside = nil, nil, false
 		}
 		if len(variant.Layers) > 0 {
-			out.Layers = variant.Layers
+			// Its own design has nothing to do with the flag's reverse, so it's mirrored.
+			out.Layers, out.Reverse = variant.Layers, nil
+			mirror = opts.Side == "reverse"
 		}
 		if variant.Outline != nil {
 			out.Outline = variant.Outline

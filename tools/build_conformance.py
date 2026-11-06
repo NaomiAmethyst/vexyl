@@ -41,9 +41,13 @@ def main():
         wanted = [("default", {}), ("reverse", {"side": "reverse"})]
         for variant in sorted(model.get("variants", {})):
             wanted.append((f"variant-{variant}", {"variant": variant}))
+            wanted.append((f"variant-{variant}-reverse", {"variant": variant, "side": "reverse"}))
         for fold in sorted(model.get("folds", {})):
             wanted.append((f"fold-{fold}", {"fold": fold}))
             wanted.append((f"fold-{fold}-step-1", {"fold": fold, "fold_step": 1}))
+            for variant, form in sorted(model.get("variants", {}).items()):
+                if form.get("from", "none") == "none":
+                    wanted.append((f"variant-{variant}-fold-{fold}", {"variant": variant, "fold": fold}))
         # Other proportions: the same request is drawn or refused, depending on the flag's rules.
         wanted += [("ratio-1-1", {"ratio": "1:1"}), ("ratio-1-2", {"ratio": "1:2"}), ("pad-center", {"ratio": "1:1", "fit": "pad"})]
         if number % 5 == 0:

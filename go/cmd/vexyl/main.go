@@ -103,8 +103,13 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	if !ok {
 		return fmt.Errorf("-align must be left, right, top, bottom or center, got %q", *align)
 	}
-	opts := vexyl.Options{Height: *height, Ratio: proportion, Variant: *variant, Side: *side,
-		Fit: *fit, Align: where, Fold: *fold, FoldStep: *foldStep}
+	opts := vexyl.Options{Height: height, Ratio: proportion, Variant: *variant, Side: *side,
+		Fit: *fit, Align: where, Fold: *fold}
+	fs.Visit(func(given *flag.Flag) {
+		if given.Name == "fold-step" {
+			opts.FoldStep = foldStep
+		}
+	})
 	if err := doc.WriteSVG(&out, opts); err != nil {
 		return err
 	}
@@ -116,17 +121,17 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 }
 
 // parseRatio reads hoist:fly, as flag proportions are written, into fly over hoist.
-func parseRatio(text string) (float64, error) {
+func parseRatio(text string) (*float64, error) {
 	if text == "" {
-		return 0, nil
+		return nil, nil
 	}
 	h, f, ok := strings.Cut(text, ":")
 	hoist, err1 := strconv.ParseFloat(h, 64)
 	fly, err2 := strconv.ParseFloat(f, 64)
 	if !ok || err1 != nil || err2 != nil || hoist <= 0 || fly <= 0 {
-		return 0, fmt.Errorf("-ratio must look like 1:2, hoist then fly, got %q", text)
+		return nil, fmt.Errorf("-ratio must look like 1:2, hoist then fly, got %q", text)
 	}
-	return fly / hoist, nil
+	return vexyl.Float(fly / hoist), nil
 }
 
 func info(paths []string, stdin io.Reader, stdout io.Writer) error {

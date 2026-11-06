@@ -89,9 +89,17 @@ variant ...          optional and repeatable, §12
 fold ...             optional and repeatable, §13
 ```
 
+The nodes marked required MUST be there, even in a flag with nothing else. `vexyl` takes a whole
+number, so `1.9` isn't version 1.
+
 A renderer MUST reject an unknown format version, unknown nodes and unknown
-properties. Flags are exact constructions, so a silently ignored instruction
-would produce a wrong flag.
+properties, and any argument or property on a node that doesn't take one. Flags are exact
+constructions, so a silently ignored instruction would produce a wrong flag. For the same reason:
+
+- A property MUST NOT be given twice on one node. KDL would let the last one win, which would hide
+  a mistake.
+- Type annotations MUST NOT be used, on a node, an argument or a property. Nothing in this format
+  reads them.
 
 A few values are numbers written inside a string, such as a `box` or a fold's `through`. Those
 have one grammar, and there's no hexadecimal, underscore, `inf` or `nan`:
@@ -233,6 +241,7 @@ function t(point, box, along):
 What counts as the shape:
 
 - A bar is its own width and the part inside the region.
+- A quarter or a check is its own cell, and a wedge from `rays` is the part inside the region.
 - A chevron is the part inside the region, from its edge to its apex.
 - A `cross` or `saltire` is the whole region, because its arms are one shape.
 - Each copy from a `repeat` is its own shape.
@@ -301,7 +310,7 @@ or on the flag at the top level. A group or canton is composited as a unit, so
 its children never blend with anything outside it.
 
 `clip` and `cut` take any shape, including `pile` and `pall`, or a shape from a
-`define`. The shapes use the coordinates of the region the layer sits in. They apply to the layer as a whole, after any `repeat`.
+`define`. They use a shape's whole area, so it can't be `hollow` or have `lines`. The shapes use the coordinates of the region the layer sits in. They apply to the layer as a whole, after any `repeat`.
 
 ## 7. Divisions and ordinaries
 
@@ -505,7 +514,8 @@ one starting from up. `count N` cycles through the colors until there are N wedg
 
 `measure` says what `ratio` shares out: the angle (default), or the region's far edges
 by length, walking clockwise from the first wedge. Seychelles' rays are evenly spaced
-along its edges, for example, not by angle.
+along its edges, for example, not by angle. `measure edge` follows the region's own edges, so it
+can't also have a `rotate`.
 
 ### 7.10 pile, pall
 
@@ -544,7 +554,8 @@ at its low point, and a wave at its middle going outward, from the hoist or the 
 
 `fimbriate COLOR W` paints the ordinary or charge's shape, expanded outward by `W`
 grid units with mitered corners, in `COLOR` beneath the shape. For a cross or
-saltire, the expanded arms are one shape, so the edge never crosses the center.
+saltire, the expanded arms are one shape, so the edge never crosses the center. It edges a filled
+shape, so a shape with `hollow` or `lines` can't have it.
 
 ## 8. Charges
 
@@ -561,7 +572,8 @@ charge SHAPE COLOR {
 ### 8.1 Shapes
 
 These are written as they would appear in a `charge`, `clip` or `cut`. Each shape
-is centered on its position, except where noted.
+is centered on its position, except where noted. A `pile` or `pall` is a layer of its own (§7.10),
+and can be a `clip` or `cut`, but not a charge's shape.
 
 | Shape | Parameters | Geometry at rotation 0 |
 |---|---|---|
@@ -584,7 +596,8 @@ A `polygon` is already placed by its points, so it MUST NOT have `at`, `rotate`
 or `repeat`.
 
 A `ring` can take `from` and `to`, in degrees clockwise from up, to draw only that part
-of it, going clockwise, with straight ends along radii.
+of it, going clockwise, with straight ends along radii. Either defaults to 0 if the other is given,
+and they MUST NOT be the same place, since that leaves nothing to draw.
 
 `hollow W` draws any shape's outline at a width of `W` centered on its edge, instead of
 filling it. `lines W` draws a star as lines between its points, skipping one each time.
@@ -783,8 +796,9 @@ properties below are allowed as children, and it takes the common properties in
 
 Inside it, `fly` and `hoist` measure along the frame's own axes from its origin, so
 they can be negative, and a charge's default position is the origin. Shapes in a
-child's `clip` and `cut` use the same frame. A `repeat grid` isn't allowed, because
-a frame has no size to spread across.
+child's `clip` and `cut` use the same frame. Anything that needs a region's size isn't allowed,
+because a frame has none: a `repeat grid`, a `lozenge` without both its sizes, and a `pile` or
+`pall` in a `clip` or `cut`.
 
 ```
 function emblem_transform(emblem, region):
@@ -846,7 +860,8 @@ or along its rectangle if it has no outline. `SIDE` is `inside` (default) or
 An `inside` border lies within the shape, above every layer. Renderers can stroke
 the edge at `2 * W` and clip the stroke to the shape.
 
-An `outside` border can't go around a `path` outline. It is added around the shape, as Nepal's constitution constructs
+An `outside` border MUST NOT go around a `path` outline, including one that comes together only in
+a variant, from the flag's border and the variant's outline or the other way around. It is added around the shape, as Nepal's constitution constructs
 its flag. The proportion and grid still describe the shape inside the border, so
 the finished flag is larger than its grid and its coordinates can start below
 zero. The corners are mitered, so each outer angle equals the inner one:
@@ -871,6 +886,10 @@ point, or an edge that folds straight back on the previous one.
 By default, a flag's reverse is the mirror image of its obverse. `reverse mirror` says
 so outright. `reverse { <layers> }` gives a different back. Those layers are painted as
 written, as seen by someone looking at that side, with no mirroring.
+
+A variant with its own layers has a different design, so a flag's `reverse` doesn't apply to it,
+and its reverse is the mirror image of those layers. A variant without its own layers has the
+flag's reverse.
 
 ## 11. Other proportions
 

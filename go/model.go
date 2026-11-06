@@ -414,8 +414,11 @@ type Shape struct {
 	Markup string
 
 	// placed records an explicit `at`, even `at center`.
-	placed   bool
-	embedded *embeddedSVG
+	placed bool
+	// autoInner and autoSpread record values worked out from the shape's others, which
+	// change if a charge using a definition changes those.
+	autoInner, autoSpread bool
+	embedded              *embeddedSVG
 }
 
 // Repeat paints a charge several times.

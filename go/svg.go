@@ -22,10 +22,11 @@ const DefaultHeight = 600
 
 // Options controls SVG output.
 type Options struct {
-	// Height is the image's height in pixels. Its width follows the proportion.
-	Height float64
+	// Height is the image's height in pixels, or DefaultHeight if it's nil. Its width
+	// follows the proportion.
+	Height *float64
 	// Ratio asks for another proportion, as fly divided by hoist.
-	Ratio float64
+	Ratio *float64
 	// Variant names one of the flag's variants.
 	Variant string
 	// Side is obverse, the default, or reverse.
@@ -38,8 +39,52 @@ type Options struct {
 	Align string
 	// Fold names one of the flag's folds, to render it folded.
 	Fold string
-	// FoldStep stops a fold after that many steps, or finishes it if that's 0.
-	FoldStep int
+	// FoldStep stops a fold after that many steps, or finishes it if it's nil.
+	FoldStep *int
+}
+
+// Float gives an option's value, for Height and Ratio.
+func Float(v float64) *float64 { return &v }
+
+// Int gives an option's value, for FoldStep.
+func Int(v int) *int { return &v }
+
+// checkOptions refuses what would otherwise be silently ignored, or can't be drawn.
+func (f *Flag) checkOptions(opts Options) error {
+	if opts.Height != nil && (*opts.Height <= 0 || !inLimits(*opts.Height)) {
+		return errors.New("height must be a positive number of a reasonable size")
+	}
+	if opts.Ratio != nil && (*opts.Ratio <= 0 || !inLimits(*opts.Ratio)) {
+		return errors.New("ratio must be a positive number of a reasonable size")
+	}
+	hasRatio := opts.Ratio != nil
+	if opts.Variant != "" {
+		if v, ok := f.Variants[opts.Variant]; ok && v.Ratio != 0 {
+			hasRatio = true
+		}
+	}
+	if opts.Fit != "" && !hasRatio {
+		return errors.New("fit says what to do about a ratio, and there isn't one")
+	}
+	if opts.Align != "" && opts.Fit != "pad" {
+		return errors.New("align places a padded flag, so it needs a fit of pad")
+	}
+	if opts.Fold == "" {
+		if opts.FoldStep != nil {
+			return errors.New("foldStep needs a fold")
+		}
+		return nil
+	}
+	if opts.Side == "reverse" {
+		return errors.New("a fold shows both sides, so it can't be asked for the reverse")
+	}
+	if opts.Fit == "pad" {
+		return errors.New("a fold is cropped to its pieces, so it can't be padded")
+	}
+	if fold, ok := f.Folds[opts.Fold]; ok && opts.FoldStep != nil && (*opts.FoldStep < 1 || *opts.FoldStep > len(fold.Steps)) {
+		return fmt.Errorf("foldStep must be from 1 to %d", len(fold.Steps))
+	}
+	return nil
 }
 
 // renderRefusal stops a render that turns out to be too much, deep inside geometry that
@@ -57,9 +102,12 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 			err = errors.New(string(refusal))
 		}
 	}()
-	height := opts.Height
-	if height == 0 {
-		height = DefaultHeight
+	if err := f.checkOptions(opts); err != nil {
+		return err
+	}
+	height := float64(DefaultHeight)
+	if opts.Height != nil {
+		height = *opts.Height
 	}
 	original := f
 	f, turn, upright, mirror, canvas, err := f.resolve(opts)
@@ -69,7 +117,14 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 	r := &renderer{flag: f, idPrefix: original.idPrefix}
 	if opts != (Options{Height: opts.Height}) {
 		// A page can show several forms of one flag, which mustn't share definitions.
-		sum := sha256.Sum256([]byte(fmt.Sprintf("%v|%s|%s|%s|%s|%s|%d", opts.Ratio, opts.Variant, opts.Side, opts.Fit, opts.Align, opts.Fold, opts.FoldStep)))
+		ratio, step := 0.0, 0
+		if opts.Ratio != nil {
+			ratio = *opts.Ratio
+		}
+		if opts.FoldStep != nil {
+			step = *opts.FoldStep
+		}
+		sum := sha256.Sum256([]byte(fmt.Sprintf("%v|%s|%s|%s|%s|%s|%d", ratio, opts.Variant, opts.Side, opts.Fit, opts.Align, opts.Fold, step)))
 		r.idPrefix += hex.EncodeToString(sum[:2]) + "-"
 	}
 	if opts.Fold != "" {
@@ -152,7 +207,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 // flagArt paints a flag's outside border, then everything within its outline.
 func (r *renderer) flagArt(f *Flag) {
 	if f.Border != nil && f.BorderOutside {
-		// Worked out once for its bounds, so this can't fail here.
+		// Reading the flag refused any that fails, and its bounds were worked out from this.
 		outer, _ := offsetPolygon(f.boundary(), f.Border.Width)
 		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.fill(f.Border.Color, nil)))
 	}
@@ -451,22 +506,35 @@ func (r *renderer) quarters(q *Quarters, reg region) {
 	if q.Split != nil {
 		c = vec{q.Split.Fly, q.Split.Hoist}
 	}
-	if slices.Contains(q.Colors[:], noColor) {
-		r.paint(q.Colors[0], nil, nil, nil, []geom{{poly: rectPoly(0, 0, c.x, c.y)}})
-		r.paint(q.Colors[1], nil, nil, nil, []geom{{poly: rectPoly(c.x, 0, reg.w, c.y)}})
-		r.paint(q.Colors[2], nil, nil, nil, []geom{{poly: rectPoly(0, c.y, c.x, reg.h)}})
-	} else {
-		// Each runs on beneath the next, so antialiasing can't leave a seam.
-		r.paint(q.Colors[0], nil, nil, nil, []geom{{poly: rectPoly(0, 0, reg.w, reg.h)}})
-		r.paint(q.Colors[1], nil, nil, nil, []geom{{poly: rectPoly(c.x, 0, reg.w, reg.h)}})
-		r.paint(q.Colors[2], nil, nil, nil, []geom{{poly: rectPoly(0, c.y, reg.w, reg.h)}})
+	// Each runs on beneath the next, so antialiasing can't leave a seam, unless gaps have to
+	// show or a gradient has to span its own quarter.
+	gaps := slices.Contains(q.Colors[:], noColor)
+	exact := func(i int) bool {
+		_, isGradient := r.flag.Gradients[q.Colors[i]]
+		return gaps || isGradient
 	}
+	right, bottom := reg.w, reg.h
+	if exact(0) {
+		right, bottom = c.x, c.y
+	}
+	r.paint(q.Colors[0], nil, nil, nil, []geom{{poly: rectPoly(0, 0, right, bottom)}})
+	bottom = reg.h
+	if exact(1) {
+		bottom = c.y
+	}
+	r.paint(q.Colors[1], nil, nil, nil, []geom{{poly: rectPoly(c.x, 0, reg.w, bottom)}})
+	right = reg.w
+	if exact(2) {
+		right = c.x
+	}
+	r.paint(q.Colors[2], nil, nil, nil, []geom{{poly: rectPoly(0, c.y, right, reg.h)}})
 	r.paint(q.Colors[3], nil, nil, nil, []geom{{poly: rectPoly(c.x, c.y, reg.w, reg.h)}})
 }
 
 func (r *renderer) checks(ch *Checks, reg region) {
 	n := len(ch.Colors)
 	cellW, cellH := reg.w/float64(ch.Columns), reg.h/float64(ch.Rows)
+	gaps := slices.Contains(ch.Colors, noColor)
 	for row := range ch.Rows {
 		for col := range ch.Columns {
 			i := row + col
@@ -474,9 +542,10 @@ func (r *renderer) checks(ch *Checks, reg region) {
 				i = col - row + ch.Rows*n
 			}
 			x, y := float64(col)*cellW, float64(row)*cellH
-			// Each cell runs on beneath the next ones, unless gaps have to show.
+			// Each cell runs on beneath the next ones, unless gaps have to show or a gradient
+			// has to span its own cell.
 			right, bottom := reg.w, reg.h
-			if slices.Contains(ch.Colors, noColor) {
+			if _, isGradient := r.flag.Gradients[ch.Colors[i%n]]; gaps || isGradient {
 				right, bottom = x+cellW, y+cellH
 			}
 			r.paint(ch.Colors[i%n], nil, nil, nil, []geom{{poly: rectPoly(x, y, right, bottom)}})

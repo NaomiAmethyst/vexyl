@@ -65,7 +65,7 @@ flag, err := vexyl.Parse(file, "sweden.kdl")
 if err != nil {
 	return err
 }
-err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
+err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: vexyl.Float(1200)})
 ```
 
 ## Contents

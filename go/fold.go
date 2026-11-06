@@ -90,7 +90,7 @@ func polyArea(poly []vec) float64 {
 }
 
 // foldFacets folds a flat shape through a number of steps, or all of them if steps
-// is 0.
+// is 0, which reading a document does to check them.
 func foldFacets(shape []vec, fold *Fold, steps int) ([]facet, error) {
 	stack := []facet{{poly: shape, place: matrix{a: 1, d: 1}}}
 	limit := polyArea(shape) * 1e-9
@@ -170,7 +170,11 @@ func (r *renderer) writeFolded(f *Flag, fold *Fold, opts Options, height float64
 	if err != nil {
 		return err
 	}
-	stack, err := foldFacets(shape, fold, opts.FoldStep)
+	steps := 0
+	if opts.FoldStep != nil {
+		steps = *opts.FoldStep
+	}
+	stack, err := foldFacets(shape, fold, steps)
 	if err != nil {
 		return err
 	}

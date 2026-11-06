@@ -173,7 +173,6 @@ func (p *parser) rays(n *kdl.Node) Layer {
 	count := 0
 	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
 		"from": func(c *kdl.Node) {
-			p.plain(c)
 			if len(c.Arguments()) > 0 {
 				l.From = p.oneOf(c, rayFromNames)
 			} else {
@@ -187,6 +186,9 @@ func (p *parser) rays(n *kdl.Node) Layer {
 			l.ByEdge = p.oneOf(c, []string{"angle", "edge"}) == "edge"
 		},
 	}))
+	if l.ByEdge && l.Rotate != 0 {
+		p.errf(n, "`measure edge` follows the region's edges, so it can't also have a `rotate`")
+	}
 	if len(l.Colors) == 0 {
 		return l
 	}
@@ -209,6 +211,9 @@ func (p *parser) ordinaryShape(n *kdl.Node) Layer {
 	p.shapeBody(n, &l.Shape, p.withEffects(&l.Effects, map[string]func(*kdl.Node){
 		"fimbriate": func(c *kdl.Node) { l.Fimbriate = p.edge(c) },
 	}))
+	if l.Fimbriate != nil && l.Shape.Hollow > 0 {
+		p.errf(n, "fimbriation edges a filled shape, so it can't go with `hollow` or `lines`")
+	}
 	return l
 }
 
@@ -276,7 +281,6 @@ func (p *parser) use(n *kdl.Node, depth int) Layer {
 
 // define reads a reusable shape or design: `define NAME hoist=H fly=F { ... }`.
 func (p *parser) define(n *kdl.Node) {
-	p.plain(n)
 	args := n.Arguments()
 	if len(args) != 1 || args[0].Kind() != kdl.String {
 		p.errf(n, "needs a name")
@@ -292,14 +296,13 @@ func (p *parser) define(n *kdl.Node) {
 	if n.Prop("fly").IsValid() || n.Prop("hoist").IsValid() {
 		d.Fly, d.Hoist = p.positive(n, p.prop(n, "fly")), p.positive(n, p.prop(n, "hoist"))
 	}
-	if n.Children() == nil || len(n.Children().Nodes) == 0 {
+	if len(n.Children().Nodes) == 0 {
 		p.errf(n, "needs a shape or layers")
 		return
 	}
 	nodes := n.Children().Nodes
 	if len(nodes) == 1 && slices.Contains(shapeKinds, nodes[0].Name()) {
 		c := nodes[0]
-		p.plain(c)
 		s := Shape{Kind: c.Name()}
 		if s.Kind == "path" && len(c.Arguments()) > 0 {
 			// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
@@ -337,7 +340,6 @@ func (p *parser) define(n *kdl.Node) {
 
 // outline reads a flag's silhouette: a polygon or path inside it, or a named form.
 func (p *parser) outline(n *kdl.Node) *Outline {
-	p.plain(n)
 	p.noProps(n)
 	o := &Outline{}
 	args := n.Arguments()
@@ -397,7 +399,6 @@ func (p *parser) outline(n *kdl.Node) *Outline {
 }
 
 func (p *parser) reverse(n *kdl.Node, flag *Flag) {
-	p.plain(n)
 	args := n.Arguments()
 	if len(args) == 1 && args[0].Kind() == kdl.String && args[0].String() == "mirror" {
 		// The default, for saying so outright.
@@ -407,11 +408,9 @@ func (p *parser) reverse(n *kdl.Node, flag *Flag) {
 	}
 	p.noValues(n)
 	r := &Reverse{}
-	if n.Children() != nil {
-		for _, c := range n.Children().Nodes {
-			if l := p.layer(c, 2); l != nil {
-				r.Layers = append(r.Layers, l)
-			}
+	for _, c := range n.Children().Nodes {
+		if l := p.layer(c, 2); l != nil {
+			r.Layers = append(r.Layers, l)
 		}
 	}
 	if len(r.Layers) == 0 {
@@ -449,7 +448,6 @@ func (p *parser) adapt(n *kdl.Node, flag *Flag) {
 }
 
 func (p *parser) variant(n *kdl.Node, flag *Flag) {
-	p.plain(n)
 	args := n.Arguments()
 	if len(args) != 1 || args[0].Kind() != kdl.String {
 		p.errf(n, "needs a name")
@@ -475,25 +473,22 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 			p.noChildren(c)
 		},
 		"outline": func(c *kdl.Node) { v.Outline = p.outline(c) },
-		"border":  func(c *kdl.Node) { v.Border, v.BorderOutside = p.border(c, nil) },
+		"border":  func(c *kdl.Node) { v.Border, v.BorderOutside = p.border(c) },
 	}
 	seen := map[string]bool{}
-	if n.Children() != nil {
-		for _, c := range n.Children().Nodes {
-			handler, isSetting := settings[c.Name()]
-			if !isSetting {
-				if l := p.layer(c, 2); l != nil {
-					v.Layers = append(v.Layers, l)
-				}
-				continue
+	for _, c := range n.Children().Nodes {
+		handler, isSetting := settings[c.Name()]
+		if !isSetting {
+			if l := p.layer(c, 2); l != nil {
+				v.Layers = append(v.Layers, l)
 			}
-			if seen[c.Name()] {
-				p.errf(c, "given more than once")
-			}
-			seen[c.Name()] = true
-			p.plain(c)
-			handler(c)
+			continue
 		}
+		if seen[c.Name()] {
+			p.errf(c, "given more than once")
+		}
+		seen[c.Name()] = true
+		handler(c)
 	}
 	if seen["proportion"] {
 		if seen["ratio"] {
@@ -502,6 +497,20 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 		if len(v.Layers) == 0 {
 			p.errf(n, "with a `proportion` needs its own layers")
 		}
+	}
+	if v.Outline != nil || v.Border != nil || v.Fly > 0 {
+		// What it draws within is its own or the flag's, as it would be when rendered.
+		fly, hoist, outline, border, outside := flag.Fly, flag.Hoist, flag.Outline, flag.Border, flag.BorderOutside
+		if v.Fly > 0 {
+			fly, hoist, outline, border, outside = v.Fly, v.Hoist, nil, nil, false
+		}
+		if v.Outline != nil {
+			outline = v.Outline
+		}
+		if v.Border != nil {
+			border, outside = v.Border, v.BorderOutside
+		}
+		p.checkOutside(n, outline, fly, hoist, border, outside)
 	}
 	p.count(n, v.Layers)
 	flag.Variants[name] = v
@@ -587,7 +596,6 @@ func (p *parser) color(n *kdl.Node, flag *Flag) string {
 
 // fold reads a named sequence of folds.
 func (p *parser) fold(n *kdl.Node, flag *Flag) {
-	p.plain(n)
 	args := n.Arguments()
 	if len(args) != 1 || args[0].Kind() != kdl.String {
 		p.errf(n, "needs a name")
@@ -612,7 +620,7 @@ func (p *parser) fold(n *kdl.Node, flag *Flag) {
 		"under":       step,
 		"tuck":        step,
 	})
-	if len(f.Steps) == 0 && n.Children() != nil {
+	if len(f.Steps) == 0 {
 		p.errf(n, "needs at least one step")
 	}
 	flag.Folds[name] = f

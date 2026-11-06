@@ -28,6 +28,14 @@
   "file": "accepted/a-box-with-every-way-to-write-a-number.kdl"
  },
  {
+  "name": "a quoted negative infinity is only text",
+  "file": "accepted/a-quoted-negative-infinity-is-only-text.kdl"
+ },
+ {
+  "name": "a meta's date within the same year as its end",
+  "file": "accepted/a-meta-s-date-within-the-same-year-as-its-end.kdl"
+ },
+ {
   "name": "a number at each end of what's allowed",
   "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
  }

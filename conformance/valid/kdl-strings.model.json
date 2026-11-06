@@ -1,0 +1,26 @@
+{
+ "fly": 3,
+ "hoist": 2,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "description": "A\n",
+  "name": "KDL strings",
+  "notes": [
+   "An escape can make a newline,\nand indentation comes off first.\nThe rest of the string isn't lost.",
+   "A \"quote\", a tab\there, and a line carried on.",
+   "A raw string has no \\n escapes.",
+   "-inf"
+  ]
+ },
+ "palette": {
+  "blue": "#003399"
+ },
+ "version": 1
+}

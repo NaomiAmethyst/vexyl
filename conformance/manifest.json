@@ -485,6 +485,14 @@
      "svg": "valid/germany/variant-hanging.svg"
     },
     {
+     "name": "variant-hanging-reverse",
+     "options": {
+      "variant": "hanging",
+      "side": "reverse"
+     },
+     "svg": "valid/germany/variant-hanging-reverse.svg"
+    },
+    {
      "name": "fold-storage",
      "options": {
       "fold": "storage"
@@ -564,6 +572,14 @@
       "variant": "sea"
      },
      "svg": "valid/guyana/variant-sea.svg"
+    },
+    {
+     "name": "variant-sea-reverse",
+     "options": {
+      "variant": "sea",
+      "side": "reverse"
+     },
+     "svg": "valid/guyana/variant-sea-reverse.svg"
     },
     {
      "name": "ratio-1-1",
@@ -1183,6 +1199,14 @@
      "svg": "valid/qatar/variant-international-1-2.svg"
     },
     {
+     "name": "variant-international-1-2-reverse",
+     "options": {
+      "variant": "international-1-2",
+      "side": "reverse"
+     },
+     "svg": "valid/qatar/variant-international-1-2-reverse.svg"
+    },
+    {
      "name": "variant-international-2-3",
      "options": {
       "variant": "international-2-3"
@@ -1190,11 +1214,27 @@
      "svg": "valid/qatar/variant-international-2-3.svg"
     },
     {
+     "name": "variant-international-2-3-reverse",
+     "options": {
+      "variant": "international-2-3",
+      "side": "reverse"
+     },
+     "svg": "valid/qatar/variant-international-2-3-reverse.svg"
+    },
+    {
      "name": "variant-international-3-5",
      "options": {
       "variant": "international-3-5"
      },
      "svg": "valid/qatar/variant-international-3-5.svg"
+    },
+    {
+     "name": "variant-international-3-5-reverse",
+     "options": {
+      "variant": "international-3-5",
+      "side": "reverse"
+     },
+     "svg": "valid/qatar/variant-international-3-5-reverse.svg"
     },
     {
      "name": "ratio-1-1",
@@ -1750,6 +1790,14 @@
      "svg": "valid/united-states/variant-vertical.svg"
     },
     {
+     "name": "variant-vertical-reverse",
+     "options": {
+      "variant": "vertical",
+      "side": "reverse"
+     },
+     "svg": "valid/united-states/variant-vertical-reverse.svg"
+    },
+    {
      "name": "fold-triangle",
      "options": {
       "fold": "triangle"
@@ -1871,6 +1919,65 @@
    ]
   },
   {
+   "name": "defined-shapes",
+   "file": "valid/defined-shapes.kdl",
+   "model": "valid/defined-shapes.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/defined-shapes/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/defined-shapes/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/defined-shapes/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/defined-shapes/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/defined-shapes/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/defined-shapes/pad-end.svg"
+    }
+   ]
+  },
+  {
    "name": "effects",
    "file": "valid/effects.kdl",
    "model": "valid/effects.model.json",
@@ -1908,24 +2015,47 @@
       "fit": "pad"
      },
      "svg": "valid/effects/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "gradient-cells",
+   "file": "valid/gradient-cells.kdl",
+   "model": "valid/gradient-cells.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/gradient-cells/default.svg"
     },
     {
-     "name": "pad-start",
+     "name": "reverse",
      "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
+      "side": "reverse"
      },
-     "svg": "valid/effects/pad-start.svg"
+     "svg": "valid/gradient-cells/reverse.svg"
     },
     {
-     "name": "pad-end",
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/gradient-cells/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
      "options": {
       "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
+      "fit": "pad"
      },
-     "svg": "valid/effects/pad-end.svg"
+     "svg": "valid/gradient-cells/pad-center.svg"
     }
    ]
   },
@@ -2049,6 +2179,65 @@
       "fit": "pad"
      },
      "svg": "valid/inline-svg/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/inline-svg/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/inline-svg/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "kdl-strings",
+   "file": "valid/kdl-strings.kdl",
+   "model": "valid/kdl-strings.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/kdl-strings/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/kdl-strings/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/kdl-strings/pad-center.svg"
     }
    ]
   },
@@ -2094,6 +2283,108 @@
    ]
   },
   {
+   "name": "variant-reverse",
+   "file": "valid/variant-reverse.kdl",
+   "model": "valid/variant-reverse.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/variant-reverse/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/variant-reverse/reverse.svg"
+    },
+    {
+     "name": "variant-own",
+     "options": {
+      "variant": "own"
+     },
+     "svg": "valid/variant-reverse/variant-own.svg"
+    },
+    {
+     "name": "variant-own-reverse",
+     "options": {
+      "variant": "own",
+      "side": "reverse"
+     },
+     "svg": "valid/variant-reverse/variant-own-reverse.svg"
+    },
+    {
+     "name": "variant-same",
+     "options": {
+      "variant": "same"
+     },
+     "svg": "valid/variant-reverse/variant-same.svg"
+    },
+    {
+     "name": "variant-same-reverse",
+     "options": {
+      "variant": "same",
+      "side": "reverse"
+     },
+     "svg": "valid/variant-reverse/variant-same-reverse.svg"
+    },
+    {
+     "name": "fold-half",
+     "options": {
+      "fold": "half"
+     },
+     "svg": "valid/variant-reverse/fold-half.svg"
+    },
+    {
+     "name": "fold-half-step-1",
+     "options": {
+      "fold": "half",
+      "fold_step": 1
+     },
+     "svg": "valid/variant-reverse/fold-half-step-1.svg"
+    },
+    {
+     "name": "variant-own-fold-half",
+     "options": {
+      "variant": "own",
+      "fold": "half"
+     },
+     "svg": "valid/variant-reverse/variant-own-fold-half.svg"
+    },
+    {
+     "name": "variant-same-fold-half",
+     "options": {
+      "variant": "same",
+      "fold": "half"
+     },
+     "svg": "valid/variant-reverse/variant-same-fold-half.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/variant-reverse/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/variant-reverse/pad-center.svg"
+    }
+   ]
+  },
+  {
    "name": "variants",
    "file": "valid/variants.kdl",
    "model": "valid/variants.model.json",
@@ -2118,6 +2409,14 @@
      "svg": "valid/variants/variant-banner.svg"
     },
     {
+     "name": "variant-banner-reverse",
+     "options": {
+      "variant": "banner",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-banner-reverse.svg"
+    },
+    {
      "name": "variant-plain",
      "options": {
       "variant": "plain"
@@ -2125,11 +2424,27 @@
      "svg": "valid/variants/variant-plain.svg"
     },
     {
+     "name": "variant-plain-reverse",
+     "options": {
+      "variant": "plain",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-plain-reverse.svg"
+    },
+    {
      "name": "variant-vertical",
      "options": {
       "variant": "vertical"
      },
      "svg": "valid/variants/variant-vertical.svg"
+    },
+    {
+     "name": "variant-vertical-reverse",
+     "options": {
+      "variant": "vertical",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-vertical-reverse.svg"
     },
     {
      "name": "ratio-1-1",
@@ -2152,24 +2467,6 @@
       "fit": "pad"
      },
      "svg": "valid/variants/pad-center.svg"
-    },
-    {
-     "name": "pad-start",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
-     },
-     "svg": "valid/variants/pad-start.svg"
-    },
-    {
-     "name": "pad-end",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
-     },
-     "svg": "valid/variants/pad-end.svg"
     }
    ]
   },
@@ -2211,6 +2508,24 @@
       "fit": "pad"
      },
      "svg": "valid/vocabulary/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/vocabulary/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/vocabulary/pad-end.svg"
     }
    ]
   }

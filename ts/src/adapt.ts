@@ -378,7 +378,7 @@ export function resolve(f: Flag, opts: Options): Resolved {
 	let upright = false;
 	let mirror = false;
 	let variant: Variant | undefined;
-	if (opts.variant !== undefined && opts.variant !== "") {
+	if (opts.variant !== undefined) {
 		variant = f.variants[opts.variant];
 		if (variant === undefined) {
 			throw new RenderError(`${f.meta.name} has no variant "${opts.variant}"`);
@@ -415,7 +415,10 @@ export function resolve(f: Flag, opts: Options): Resolved {
 			delete out.border;
 		}
 		if (variant.layers.length > 0) {
+			// Its own design has nothing to do with the flag's reverse, so it's mirrored.
 			out.layers = variant.layers;
+			delete out.reverse;
+			mirror = opts.side === "reverse";
 		}
 		if (variant.outline !== undefined) {
 			out.outline = variant.outline;

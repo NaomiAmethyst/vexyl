@@ -48,10 +48,9 @@ func sunPath(s *Shape, center vec, place func(vec) vec) string {
 
 // ringArcPath draws part of a ring, clockwise from one angle to another.
 func ringArcPath(s *Shape, center vec, rotation float64) string {
-	from, to := s.From+rotation, s.To+rotation
-	for to <= from {
-		to += 360
-	}
+	from := s.From + rotation
+	// Clockwise from one to the other, by less than a full turn.
+	to := from + math.Mod(math.Mod(s.To-s.From, 360)+360, 360)
 	point := func(r, a float64) vec { return center.add(vec{0, -r}.rotate(a)) }
 	large := 0
 	if to-from > 180 {

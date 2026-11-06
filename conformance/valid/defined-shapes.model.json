@@ -1,0 +1,160 @@
+{
+ "defines": {
+  "hexagram": {
+   "shape": {
+    "inner": 2.3094010767585034,
+    "kind": "star",
+    "points": 6,
+    "radius": 4
+   }
+  },
+  "lobe": {
+   "shape": {
+    "kind": "heart",
+    "radius": 1,
+    "spread": 1.4142135623730951
+   }
+  },
+  "rising": {
+   "shape": {
+    "disc": 2,
+    "gap": 0.5,
+    "kind": "sun",
+    "points": 8,
+    "radius": 4,
+    "spread": 0.5
+   }
+  }
+ },
+ "fly": 40,
+ "hoist": 20,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 8,
+     "hoist": 10
+    },
+    "ats": [
+     {
+      "fly": 8,
+      "hoist": 10
+     }
+    ],
+    "inner": 2.3094010767585034,
+    "kind": "star",
+    "points": 6,
+    "radius": 4
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 20,
+     "hoist": 10
+    },
+    "ats": [
+     {
+      "fly": 20,
+      "hoist": 10
+     }
+    ],
+    "inner": 1.1547005383792517,
+    "kind": "star",
+    "points": 6,
+    "radius": 2
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 32,
+     "hoist": 5
+    },
+    "ats": [
+     {
+      "fly": 32,
+      "hoist": 5
+     }
+    ],
+    "inner": 2.0760644148902876,
+    "kind": "star",
+    "points": 7,
+    "radius": 3
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 32,
+     "hoist": 15
+    },
+    "ats": [
+     {
+      "fly": 32,
+      "hoist": 15
+     }
+    ],
+    "disc": 2,
+    "gap": 0.5,
+    "kind": "sun",
+    "points": 8,
+    "radius": 4,
+    "spread": 0.5
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 8,
+     "hoist": 16
+    },
+    "ats": [
+     {
+      "fly": 8,
+      "hoist": 16
+     }
+    ],
+    "kind": "heart",
+    "radius": 2,
+    "spread": 2.8284271247461903
+   }
+  }
+ ],
+ "meta": {
+  "description": "A definition keeps what it says, and what was worked out follows a charge's changes",
+  "name": "Defined shapes"
+ },
+ "palette": {
+  "blue": "#003399",
+  "gold": "#ffcc00",
+  "red": "#cc0000"
+ },
+ "version": 1
+}

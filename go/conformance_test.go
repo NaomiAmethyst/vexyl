@@ -504,6 +504,8 @@ var acceptedDocuments = []invalidCase{
 	{"nests exactly the limit through uses", header + nestedUses(32)},
 	{"a box with every separator", header + "charge path a { d \"M0 0H1V1Z\"; box \" 0,0\\t1 , 1\\n\"; fly 1; }\n"},
 	{"a box with every way to write a number", header + "charge path a { d \"M0 0H1V1Z\"; box \"+1. -.5 1e0 1.5E+0\"; fly 1; }\n"},
+	{"a quoted negative infinity is only text", header + `define "-inf" { field a; }` + "\nuse \"-inf\"\n"},
+	{"a meta's date within the same year as its end", "vexyl 1\nmeta { name \"T\"; date \"2000\"; until \"2001\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
 	{"a number at each end of what's allowed", header + "charge disc a { radius 1e12; at fly=1e-12 hoist=-1e12; }\n"},
 }
 

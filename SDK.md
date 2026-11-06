@@ -62,8 +62,17 @@ Every option is optional, and rendering with none gives the flag as it is.
 
 Section 11.1 of the format says what `ratio`, `fit` and `align` do. A flag that can't reach a
 proportion MUST be refused unless `fit` is `pad`, so that nothing distorts or silently changes
-shape. Asking for a variant or a fold that the flag doesn't have, or an unknown value, MUST be an
-error. So MUST a fold on a turned variant.
+shape.
+
+These MUST be errors, so that no option is ever silently ignored:
+
+- Asking for a variant or a fold that the flag doesn't have, or an unknown value.
+- A `height` or `ratio` that isn't a positive number within the format's limits, including 0.
+- `fit` with neither a `ratio` nor a variant that has one, and `align` unless `fit` is `pad`.
+- `foldStep` without `fold`, or that isn't from 1 to the fold's number of steps.
+- A `fold` on a turned variant, with `side` of `reverse`, or with `fit` of `pad`. A fold shows
+  both sides and is cropped to its pieces, so neither has a meaning. A `fold` with a `ratio` folds
+  the flag at that proportion.
 
 ## 4. The model
 

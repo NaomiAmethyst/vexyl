@@ -1,0 +1,87 @@
+{
+ "fly": 40,
+ "folds": {
+  "half": {
+   "steps": [
+    {
+     "a": {
+      "fly": 20
+     },
+     "b": {
+      "fly": 20,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 21
+     }
+    }
+   ]
+  }
+ },
+ "hoist": 20,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "green",
+   "layer": "field",
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "description": "A variant with its own layers mirrors them, and one without has the flag's reverse",
+  "name": "A variant's reverse"
+ },
+ "palette": {
+  "green": "#006633",
+  "red": "#cc0000",
+  "white": "#ffffff"
+ },
+ "reverse": {
+  "layers": [
+   {
+    "blend": "normal",
+    "color": "red",
+    "layer": "field",
+    "opacity": 1
+   }
+  ]
+ },
+ "variants": {
+  "own": {
+   "from": "none",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "white",
+     "layer": "field",
+     "opacity": 1
+    },
+    {
+     "blend": "normal",
+     "color": "red",
+     "layer": "charge",
+     "opacity": 1,
+     "shape": {
+      "at": {
+       "fly": 8,
+       "hoist": 10
+      },
+      "ats": [
+       {
+        "fly": 8,
+        "hoist": 10
+       }
+      ],
+      "kind": "disc",
+      "radius": 4
+     }
+    }
+   ]
+  },
+  "same": {
+   "from": "none"
+  }
+ },
+ "version": 1
+}

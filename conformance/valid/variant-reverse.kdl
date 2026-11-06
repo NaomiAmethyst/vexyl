@@ -1,0 +1,28 @@
+vexyl 1
+meta {
+  name "A variant's reverse"
+  description "A variant with its own layers mirrors them, and one without has the flag's reverse"
+}
+palette {
+  green "#006633"
+  white "#ffffff"
+  red "#cc0000"
+}
+proportion hoist=20 fly=40
+field green
+reverse {
+  field red
+}
+variant own {
+  field white
+  charge disc red {
+    at fly=8 hoist=10
+    radius 4
+  }
+}
+variant same {
+  from none
+}
+fold half {
+  over along=hoist at=20 move=fly
+}

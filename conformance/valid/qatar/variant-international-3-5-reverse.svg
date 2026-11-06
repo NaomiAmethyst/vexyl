@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 45" width="1000" height="600">
+  <title>Qatar</title>
+  <g transform="matrix(-1 0 0 1 75 0)">
+    <clipPath id="vx-8a6180a6-ca37-flag1">
+      <polygon points="0,0 75,0 75,45 0,45"/>
+    </clipPath>
+    <g clip-path="url(#vx-8a6180a6-ca37-flag1)">
+      <polygon points="0,0 75,0 75,45 0,45" fill="#8a1538"/>
+      <clipPath id="vx-8a6180a6-ca37-panel2">
+        <polygon points="0,0 21,0 29,2.5 21,5 29,7.5 21,10 29,12.5 21,15 29,17.5 21,20 29,22.5 21,25 29,27.5 21,30 29,32.5 21,35 29,37.5 21,40 29,42.5 21,45 0,45"/>
+      </clipPath>
+      <g transform="translate(0 0)" clip-path="url(#vx-8a6180a6-ca37-panel2)" style="isolation:isolate">
+        <polygon points="0,0 29,0 29,45 0,45" fill="#ffffff"/>
+      </g>
+    </g>
+  </g>
+</svg>

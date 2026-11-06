@@ -1,0 +1,4 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; }
+proportion hoist=-inf fly=1

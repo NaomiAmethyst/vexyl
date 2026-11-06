@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" width="900" height="600">
+  <title>KDL strings</title>
+  <desc>A&#xA;</desc>
+  <clipPath id="vx-8a91f1df-flag1">
+    <polygon points="0,0 3,0 3,2 0,2"/>
+  </clipPath>
+  <g clip-path="url(#vx-8a91f1df-flag1)">
+    <polygon points="0,0 3,0 3,2 0,2" fill="#003399"/>
+  </g>
+</svg>

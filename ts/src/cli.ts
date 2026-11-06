@@ -128,8 +128,8 @@ function render(args: string[]): void {
 		opts.fold = fold;
 	}
 	const foldStep = given.get("fold-step");
-	if (foldStep) {
-		opts.foldStep = Number(foldStep);
+	if (foldStep !== undefined) {
+		opts.foldStep = foldStep === "" ? NaN : Number(foldStep);
 	}
 	const out = svg(doc, opts);
 	const output = given.get("o");

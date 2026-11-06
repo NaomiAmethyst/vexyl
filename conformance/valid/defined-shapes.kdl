@@ -1,0 +1,51 @@
+vexyl 1
+meta {
+  name "Defined shapes"
+  description "A definition keeps what it says, and what was worked out follows a charge's changes"
+}
+palette {
+  blue "#003399"
+  gold "#ffcc00"
+  red "#cc0000"
+}
+proportion hoist=20 fly=40
+define hexagram {
+  star {
+    radius 4
+    points 6
+  }
+}
+define rising {
+  sun {
+    radius 4
+    disc 2
+    gap 0.5
+    points 8
+    spread 0.5
+  }
+}
+define lobe {
+  heart {
+    radius 1
+  }
+}
+field blue
+charge hexagram gold {
+  at fly=8 hoist=10
+}
+charge hexagram gold {
+  at fly=20 hoist=10
+  radius 2
+}
+charge hexagram red {
+  at fly=32 hoist=5
+  points 7
+  radius 3
+}
+charge rising gold {
+  at fly=32 hoist=15
+}
+charge lobe red {
+  at fly=8 hoist=16
+  radius 2
+}

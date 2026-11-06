@@ -72,11 +72,10 @@ export function sunPath(s: SunShape, center: Vec, place: (v: Vec) => Vec): strin
 
 /** Part of a ring, clockwise from one angle to another. */
 export function ringArcPath(s: RingShape, center: Vec, rotation: number): string {
-	const from = (s.arc?.from ?? 0) + rotation;
-	let to = (s.arc?.to ?? 0) + rotation;
-	while (to <= from) {
-		to += 360;
-	}
+	const start = s.arc?.from ?? 0;
+	const from = start + rotation;
+	// Clockwise from one to the other, by less than a full turn.
+	const to = from + ((((s.arc?.to ?? 0) - start) % 360) + 360) % 360;
 	const point = (r: number, a: number): Vec => add(center, rotate({ x: 0, y: -r }, a));
 	const large = to - from > 180 ? 1 : 0;
 	const a = point(s.radius, from);

@@ -319,10 +319,9 @@ test("a sun's gap is optional", () => {
 	assert.ok(!out.includes("NaN"), out);
 });
 
-test("a fold of a flag with a curved outline and an outside border draws no border", () => {
+test("an outside border around a curved outline is refused", () => {
 	const src = `${header}outline { path "M0 0H1V1Z" box="0 0 1 1"; }\nborder a 1 outside\nfield a\nfold f { over along=hoist at=10 move=fly; }\n`;
-	assert.throws(() => render(src), RenderError);
-	contains(render(src, { fold: "f" }), '<polygon points=""');
+	assert.ok(validate(src).length > 0);
 });
 
 test("checks flow along their diagonal", () => {
@@ -764,4 +763,108 @@ test("the library stays free of Node's modules, so that browsers can run it", ()
 			assert.ok(!text.includes(global), `${name} uses ${global}`);
 		}
 	}
+});
+
+test("defined shapes keep their values, and what was worked out follows a charge's changes", () => {
+	const f = parse(header + `define hex { star { radius 2; points 6; }; }
+define ray { sun { radius 4; disc 1; points 8; spread 0.5; }; }
+define lobe { heart { radius 2; }; }
+charge hex a
+charge hex a { radius 4; }
+charge hex a { points 7; }
+charge ray a
+charge lobe a { radius 4; }
+`);
+	const shape = (i: number): any => (f.layers[i] as ChargeLayer).shape;
+	const inner = (radius: number, n: number): number => radius * Math.cos((2 * Math.PI) / n) / Math.cos(Math.PI / n);
+	assert.equal(shape(0).points, 6);
+	assert.ok(Math.abs(shape(0).inner - inner(2, 6)) < 1e-12);
+	assert.ok(Math.abs(shape(1).inner - inner(4, 6)) < 1e-12);
+	assert.ok(Math.abs(shape(2).inner - inner(2, 7)) < 1e-12);
+	assert.equal(shape(3).points, 8);
+	assert.equal(shape(3).spread, 0.5);
+	assert.ok(Math.abs(shape(4).spread - 4 * Math.SQRT2) < 1e-12);
+	const given = parse(header + "define s { star { radius 2; inner 1; }; }\ncharge s a { radius 4; }\n");
+	assert.equal(((given.layers[0] as ChargeLayer).shape as any).inner, 1);
+});
+
+test("a variant's own layers mirror on the reverse", () => {
+	const f = parse(header + `field a
+reverse { field b; }
+variant own { field a; charge disc b { radius 1; }; }
+variant same { from none; }
+`);
+	assert.ok(svg(f, { variant: "own", side: "reverse" }).includes("matrix(-1 0 0 1 20 0)"));
+	assert.ok(!svg(f, { variant: "own" }).includes("matrix(-1"));
+	const same = svg(f, { variant: "same", side: "reverse" });
+	assert.ok(!same.includes("matrix(-1") && same.includes("#445566"));
+});
+
+test("gradients span their own cell", () => {
+	const src = 'vexyl 1\nmeta { name "T"; }\npalette { a "#112233"; b "#445566"; g gradient a b; }\nproportion hoist=10 fly=20\n';
+	const checks = svg(parse(src + "checks g b { rows 2; columns 2; }"));
+	assert.ok(checks.includes('points="0,0 10,0 10,5 0,5"'), checks);
+	assert.ok(checks.includes('points="10,0 20,0 20,10 10,10"'), checks);
+	const quarters = svg(parse(src + "quarters g b b g"));
+	assert.ok(quarters.includes('points="0,0 10,0 10,5 0,5"'), quarters);
+	assert.ok(quarters.includes('points="10,5 20,5 20,10 10,10"'), quarters);
+});
+
+test("option combinations are defined or refused", () => {
+	const f = parse(header + `field a
+adapt { wider extend; narrower extend; }
+variant v { ratio 3; }
+variant w { from none; }
+variant t { from rotate; }
+fold f { over along=hoist at=10 move=fly; under along=fly at=5 move=top; }
+`);
+	const refused: Options[] = [
+		{ height: 0 }, { height: -1 }, { height: Infinity }, { height: NaN },
+		{ ratio: 0 }, { ratio: -1 }, { ratio: Infinity }, { ratio: NaN },
+		{ ratio: 1, fit: "stretch" as "pad" }, { ratio: 1, fit: "pad", align: "left" as "start" },
+		{ side: "front" as "obverse" }, { variant: "nope" }, { fold: "nope" },
+		{ fit: "pad" }, { fit: "error" }, { variant: "w", fit: "pad" },
+		{ ratio: 1, align: "start" }, { ratio: 1, fit: "error", align: "center" },
+		{ fold: "f", side: "reverse" }, { fold: "f", ratio: 1, fit: "pad" }, { fold: "f", variant: "t" },
+		{ foldStep: 1 }, { fold: "f", foldStep: 0 }, { fold: "f", foldStep: -1 }, { fold: "f", foldStep: 3 }, { fold: "f", foldStep: 1.5 },
+	];
+	for (const opts of refused) {
+		assert.throws(() => svg(f, opts), RenderError, JSON.stringify(opts));
+	}
+	const allowed: Options[] = [
+		{ height: 100 }, { variant: "v", fit: "pad" }, { ratio: 1, fit: "error" }, { ratio: 1, fit: "pad", align: "end" },
+		{ fold: "f", side: "obverse" }, { fold: "f", foldStep: 1 }, { fold: "f", foldStep: 2 }, { fold: "f", ratio: 2 },
+	];
+	for (const opts of allowed) {
+		svg(f, opts);
+	}
+});
+
+test("nothing non-finite reaches output", () => {
+	for (const body of [
+		`charge path a { d "M0 0H1V1Z"; box "0 0 1e-12 1e-12"; fly 1e12; }`,
+		`define d hoist=1e-12 fly=1e-12 { field a; }\nuse d\n`,
+		"bars a b { rotate 1e12; ratio 1e12 1e-12; }",
+		"chevrons a b { depth 1e12; angle 1e-12; rotate 1e12; }",
+		"charge star a { radius 1e12; points 5; rotate 1e12; at fly=1e12 hoist=-1e12; }",
+		"charge ring a { radius 2; inner 1; from 1e12; to -1e12; }",
+	]) {
+		assert.ok(!/NaN|Inf/.test(svg(parse(header + body))), body);
+	}
+});
+
+test("a shaped edge in a larger region is refused when it's drawn", () => {
+	const f = parse(header + "bars a b { edge wavy depth=1 period=0.002; }\nadapt { wider extend; }\n");
+	svg(f);
+	assert.throws(() => svg(f, { ratio: 100 }), /waves/);
+});
+
+test("a problem's line doesn't depend on how lines end", () => {
+	const doc = 'vexyl 1\nmeta { name "T"; }\npalette { a "#112233"; }\nproportion hoist=1 fly=1\nfield nope\n';
+	for (const end of ["\r\n", "\r"]) {
+		assert.equal(validate(doc.replaceAll("\n", end))[0]!.line, 5);
+	}
+	const note = (end: string) => parse(`vexyl 1${end}meta {${end}name "T"${end}note """${end}  a${end}  b${end}  """${end}}${end}palette { a "#112233"; }${end}proportion hoist=1 fly=1${end}`).meta.notes[0];
+	assert.equal(note("\r\n"), "a\nb");
+	assert.equal(note("\r"), "a\nb");
 });
