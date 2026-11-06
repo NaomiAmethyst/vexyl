@@ -1,22 +1,39 @@
+// From Article 1 of Decree-Law 4 of 2002, on a length of 20:
+//   width 3/5 of the length, so 12; white 1/4 of the length, so 5; red 3/4, so 15
+//   five sections along the dividing line, each the base of an isosceles white triangle
+//     reaching into the red by 1/5 of the red, so 3 and its tips at 8
+// A zigzag is centered on its line, so this panel is 5 + 3/2 = 6.5 wide.
 vexyl 1
 meta {
   name "Bahrain"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Bahrain.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://www.lloc.gov.bh/Legislation/HTM/L0402"
+  source "https://www.edunet.bh/e_content/level_1/stage_1/subject_ID_4/Part_3/e_books/Flag--guide---Arabic/Flag--guide---Arabic.pdf"
+  source "https://www.crwflags.com/fotw/flags/bh.html"
+  note "The proportion, division and triangles are Article 1 of the decree-law, which also refers to an attached model that wasn't in the text read."
+  note "The law says only a deep red. The Pantone, CMYK and hex are the specification in the Arabic flag guide on the government's education portal, page 25, which isn't a law. Its RGB is misprinted as 21,0 4,1 28. The Album des Pavillons 2023, as reported by FOTW, agrees on the Pantone and RGB 218-41-28."
+  restriction "Article 8: the flag may not be used for commercial purposes, in particular in patents, trademarks or advertising. Article 9 sets the penalties." {
+    source "https://www.lloc.gov.bh/Legislation/HTM/L0402"
+  }
+  law "Decree-Law No. 4 of 2002 on the flag of the Kingdom of Bahrain" {
+    source "https://www.lloc.gov.bh/Legislation/HTM/L0402"
+  }
 }
 palette {
   white "#ffffff"
-  red "#da291c"
+  red "#da291c" {
+    pantone "485 C"
+    cmyk 0 95 100 0
+  }
 }
-proportion hoist=60 fly=100
+proportion hoist=12 fly=20
 
 field red
 panel {
   side hoist
-  width 32.5
-  edge zigzag depth=15 count=5
+  width 6.5
+  edge zigzag depth=3 count=5
   field white
 }

@@ -1,22 +1,45 @@
-// Widths are 13/48 of the hoist for the black band and 3/48 for each gold edge, per
-// FOTW citing Album des Pavillons rather than a government document. It doesn't say
-// which way they're measured, so they're taken across the band, as Commons draws it.
-// Colors follow Commons.
+// On a 6 ft by 4 ft flag, 72 by 48 inches: the black band 13 and each gold band 3, each
+// measured across the band and centered on the diagonal.
 vexyl 1
 meta {
   name "Tanzania"
+  date "1964-04-26"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://www.fotw.info/flags/tz.html"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Tanzania.svg"
-  note "Band widths follow FOTW citing Album des Pavillons rather than a government document. It doesn't say which way they're measured, so they're taken across the band, as the Commons drawing does."
+  source "https://ictpolicyafrica.org/api/files/15651659425474op0jpjk2b3.pdf"
+  source "https://web.archive.org/web/20251207044628/https://tanzlii.org/en/akn/tz/act/1971/15/eng@2002-07-31"
+  source "https://www.crwflags.com/fotw/flags/tz.html"
+  note "The First Schedule gives the two equal diagonal portions, green over blue, and golden, black and golden bands with the golden ones smaller. Its drawing has no measurements, and the law gives no proportion or shades."
+  note "2:3 and the band widths come from the undated pamphlet Tanzania National Symbols, from the Prime Minister's office, and Album des Pavillons 2000, both as reported by FOTW. Neither was read. The pamphlet says 13/48 and 1/16 of the fly but also 13 and 3 inches on a flag of 6 by 4 feet, which only works as a share of the hoist, as FOTW's contributor reads it."
+  note "Hex, Pantone and CMYK are the Album des Pavillons 2023, as reported by FOTW. The pamphlet's British Standard codes are kept as references."
+  law "National Flag and Coat of Arms Act, No. 15 of 1971, now part of the National Emblems Act, Chapter 10" {
+    source "https://ictpolicyafrica.org/api/files/15651659425474op0jpjk2b3.pdf"
+    source "https://web.archive.org/web/20251207044628/https://tanzlii.org/en/akn/tz/act/1971/15/eng@2002-07-31"
+  }
+  restriction "Section 6: the flag or its likeness may not be used as a trade mark, in advertising or on articles for sale, or on other articles except for a purpose the Minister approves, unless the Minister exempts it." {
+    source "https://ictpolicyafrica.org/api/files/15651659425474op0jpjk2b3.pdf"
+  }
 }
 palette {
-  green "#1eb53a"
-  blue "#00a3dd"
-  gold "#fcd116"
-  black "#000000"
+  green "#12ad2b" {
+    pantone "361 C"
+    cmyk 78 0 100 0
+    reference "British Standard 2660" "0-010"
+  }
+  blue "#00a0e2" {
+    pantone "299 C"
+    cmyk 75 20 0 0
+    reference "British Standard 2660" "0-012"
+  }
+  gold "#ffce00" {
+    pantone "116 C"
+    cmyk 0 19 93 0
+    reference "British Standard 2660" "0-002"
+  }
+  black "#000000" {
+    reference "British Standard 2660" "9-103"
+  }
 }
 proportion hoist=48 fly=72
 

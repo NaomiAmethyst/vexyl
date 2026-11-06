@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 48" width="900" height="600">
   <title>Tanzania</title>
-  <clipPath id="vx-c7b6da40-flag1">
+  <clipPath id="vx-66033ee6-flag1">
     <polygon points="0,0 72,0 72,48 0,48"/>
   </clipPath>
-  <g clip-path="url(#vx-c7b6da40-flag1)">
-    <polygon points="0,48 0,0 0,0 72,0 72,48 72,48" fill="#1eb53a"/>
-    <polygon points="0,48 0,48 72,0 72,48 72,48" fill="#00a3dd"/>
-    <polygon points="-39.605551,66.591673 104.394449,-29.408327 111.605551,-18.591673 -32.394449,77.408327" fill="#fcd116" stroke="#fcd116" stroke-width="6" stroke-linejoin="miter" stroke-miterlimit="10"/>
+  <g clip-path="url(#vx-66033ee6-flag1)">
+    <polygon points="0,48 0,0 0,0 72,0 72,48 72,48" fill="#12ad2b"/>
+    <polygon points="0,48 0,48 72,0 72,48 72,48" fill="#00a0e2"/>
+    <polygon points="-39.605551,66.591673 104.394449,-29.408327 111.605551,-18.591673 -32.394449,77.408327" fill="#ffce00" stroke="#ffce00" stroke-width="6" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="0,48 0,40.187972 60.281958,0 72,0 72,7.812028 11.718042,48" fill="#000000"/>
   </g>
 </svg>

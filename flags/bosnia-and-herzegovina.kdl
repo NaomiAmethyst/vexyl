@@ -1,27 +1,48 @@
+// From the law's annex, as FOTW reproduces its sheet, on 1000 x 2000: 530 + 1000 + 470
+// along the top, a right triangle with sides of 1000, stars in circles of diameter 190.
+// From elsewhere: the sheet doesn't place the stars against the triangle, so their
+// position and spacing come from the Commons drawing: a step of 125 from fly 350, hoist -11.25.
 vexyl 1
 meta {
   name "Bosnia and Herzegovina"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://www.crwflags.com/fotw/flags/ba-law.html"
+  source "https://www.crwflags.com/fotw/flags/ba.html"
+  source "https://www.crwflags.com/fotw/images/b/ba'.gif"
+  source "https://web.archive.org/web/2024/https://www.ohr.int/decision-imposing-the-law-on-the-flag-of-bih-4/"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Bosnia_and_Herzegovina.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "The law's text and annex were read only as FOTW reproduces them. FOTW says its sheet fills in blanks in the official one, and that the official one doesn't place the stars against the triangle."
+  note "FOTW reports changes to the flag law adopted in 2004, and a later text is cited elsewhere as Official Gazette 19/01. Neither was read, so this design rests on the 1998 text."
+  note "The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW, and aren't legal. The annex sheet gives PMS Reflex Blue and 116. The Album itself wasn't read."
+  law "Law on the Flag of Bosnia and Herzegovina, imposed by the High Representative's decision of 4 February 1998" {
+    source "https://www.crwflags.com/fotw/flags/ba-law.html"
+    source "https://web.archive.org/web/2024/https://www.ohr.int/decision-imposing-the-law-on-the-flag-of-bih-4/"
+  }
 }
 palette {
-  blue "#002395"
-  yellow "#fecb00"
+  blue "#00249c" {
+    pantone "Dark Blue C"
+    cmyk 100 87 11 1
+    reference "Annex sheet, as reported by FOTW" "PMS Reflex Blue"
+  }
+  yellow "#ffcc00" {
+    pantone "116 C"
+    cmyk 0 21 93 0
+  }
   white "#ffffff"
 }
-proportion hoist=8 fly=16
+proportion hoist=1000 fly=2000
 
 field blue
 pile yellow {
   from top
-  base 4.24 12.24
-  tip 12.24 8
+  base 530 1530
+  tip 1530 1000
 }
 charge star white {
-  radius 0.76
-  at fly=2.8 hoist=-0.09
-  repeat line count=9 fly=1 hoist=1
+  radius 95
+  at fly=350 hoist=-11.25
+  repeat line count=9 fly=125 hoist=125
 }

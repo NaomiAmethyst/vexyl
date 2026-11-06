@@ -1,18 +1,39 @@
+// From the specification, as FOTW quotes New Zealand's government flag page, in sixtieths
+// of the hoist, so 60 by 120:
+//   long limb on the line midway between the Union and the fly, so at 90; its stars 36
+//     apart and equally far from the edges, at 12 and 48
+//   short limb crossing at 82 degrees, 12 below the top star, so at (90, 24); stars 12
+//     toward the fly and 14 toward the Union: at 90 + 12 sin 82 = 101.8832, 24 - 12 cos 82 =
+//     22.3299, and 90 - 14 sin 82 = 76.1362, 24 + 14 cos 82 = 25.9484
+//   across the red points, 5 (fly), 6 (top, Union side) and 7 (bottom); across is 2 r sin 72,
+//     so r = 2.6287, 3.1544 and 3.6803 (derived); white borders 1/120 of the hoist, 0.5
+// The Act gives only the flag as depicted in its Schedule 1.
+// From elsewhere: the Union Flag's proportions here are the usual British ones.
 vexyl 1
 meta {
   name "New Zealand"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_New_Zealand.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://www.wipo.int/wipolex/en/text/497108"
+  source "https://www.crwflags.com/fotw/flags/nz.html"
+  note "The Act declares the flag depicted in its Schedule 1, and its section 10 lets standard dimensions be set under it. The measurements here are from the government's flag specification as quoted by FOTW. That page blocked access, so it wasn't read directly."
+  note "Schedule 1's picture wasn't seen, because the copy read is text only. Section 5 was read in the 2014 reprint at WIPO; later versions were blocked."
+  note "Pantone 186 C and 280 C are the government page's, as FOTW reports them. The hex values are those Flag Color Codes gives for these Pantones, as reported by FOTW. The Album des Pavillons's blue is a different Pantone, 287 C, set aside because the government page names 280 C."
+  law "Flags, Emblems, and Names Protection Act 1981, section 5 and Schedule 1" {
+    source "https://www.wipo.int/wipolex/en/text/497108"
+  }
 }
 palette {
-  blue "#012169"
+  blue "#012169" {
+    pantone "280 C"
+  }
   white "#ffffff"
-  red "#c8102e"
+  red "#c8102e" {
+    pantone "186 C"
+  }
 }
-proportion hoist=600 fly=1200
+proportion hoist=60 fly=120
 
 define union hoist=30 fly=60 {
   field blue
@@ -32,23 +53,23 @@ define union hoist=30 fly=60 {
 
 field blue
 canton {
-  fly 600
-  hoist 300
+  fly 60
+  hoist 30
   use union
 }
 charge star red {
-  radius 31.545
-  at fly=900 hoist=120
-  at fly=761.362 hoist=259.484
-  fimbriate white 5
+  radius 3.1544
+  at fly=90 hoist=12
+  at fly=76.1362 hoist=25.9484
+  fimbriate white 0.5
 }
 charge star red {
-  radius 26.288
-  at fly=1018.832 hoist=223.299
-  fimbriate white 5
+  radius 2.6287
+  at fly=101.8832 hoist=22.3299
+  fimbriate white 0.5
 }
 charge star red {
-  radius 36.803
-  at fly=900 hoist=480
-  fimbriate white 5
+  radius 3.6803
+  at fly=90 hoist=48
+  fimbriate white 0.5
 }

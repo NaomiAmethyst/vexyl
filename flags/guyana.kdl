@@ -1,29 +1,66 @@
+// From the law: the Second Schedule's blazon, a gold pile throughout from the hoist edged
+// white, on it a red pile edged black on the same base, and 3:5 on land, 1:2 at sea.
+// From elsewhere: Hemendra Bhola's sheet on FOTW, hoist 30, length 50 or 60, the black's
+// point at the flag's center, the white's at the fly, both edgings 1 wide.
+// Derived here, so that each edging's outer line meets the hoist corners, for an edge at
+// angle t from the center line: base inset 1 / cos t, depth (apex distance) - 1 / sin t.
 vexyl 1
 meta {
   name "Guyana"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Guyana.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://parliament.gov.gy/Constitution%20of%20the%20Cooperatiive%20Republic%20of%20Guyana.pdf"
+  source "https://www.crwflags.com/fotw/flags/gy.html"
+  note "The Schedule's drawing is only illustrative, and it gives no sizes. Its 'colour proportions' (printed as green 50, gold 24, white 67, black 1 in the Laws of Guyana, L.R.O. 1/2012) omit red and can't be built into this geometry, so they aren't used."
+  note "The edging width of 1 on a hoist of 30 is from Hemendra Bhola's approximate sheet on FOTW, not the law. Christopher Southworth recalled 3/50 of the width from a 1966 brochure he couldn't recheck. That is set aside because Bhola worked from the Constitution Amendment Act, a College of Arms scan and flags, and found the edgings narrower than usually drawn."
+  note "The colors are the Album des Pavillons 2023 as FOTW reports it. FOTW records that no official shades exist, and that Bhola and Horvath prefer darker ones, Pantone 200 C, 123 C and 356 C."
+  law "Constitution of the Co-operative Republic of Guyana, Article 4 and Second Schedule" {
+    source "https://parliament.gov.gy/Constitution%20of%20the%20Cooperatiive%20Republic%20of%20Guyana.pdf"
+  }
 }
 palette {
-  green "#2a936a"
-  gold "#ffc20e"
+  green "#009530" {
+    pantone "355 C"
+    cmyk 84 12 100 1
+  }
+  gold "#ffcc00" {
+    pantone "116 C"
+    cmyk 0 21 93 0
+  }
+  red "#c8102e" {
+    pantone "186 C"
+    cmyk 14 100 79 4
+  }
   white "#ffffff"
-  red "#be1e2d"
   black "#000000"
 }
-proportion hoist=60 fly=100
+proportion hoist=30 fly=50
 
 field green
-chevrons gold {
-  depth 93.0398
-  angle 16.6992
-  fimbriate white 2
+pile gold {
+  base 1.044 28.956
+  depth 46.5199
+  fimbriate white 1
 }
-chevrons red {
-  depth 46.1127
-  angle 30.9638
-  fimbriate black 2
+pile red {
+  base 1.1662 28.8338
+  depth 23.0563
+  fimbriate black 1
+}
+
+// Second Schedule: 1:2 at sea.
+variant sea {
+  proportion hoist=30 fly=60
+  field green
+  pile gold {
+    base 1.0308 28.9692
+    depth 55.8769
+    fimbriate white 1
+  }
+  pile red {
+    base 1.118 28.882
+    depth 27.7639
+    fimbriate black 1
+  }
 }

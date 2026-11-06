@@ -1,25 +1,49 @@
+// From the law, Law 34 of 1949, Articles 4 and 5: quartered, 1 high by 1.5 long, a star in the
+// center of each white quarter, one point up, each star a quarter of the height.
+// On this grid each star is 2 tall, so its radius is 2 / (1 + cos 36) = 1.10557 (derived).
+// Decree 337's drawing marks the 0.25 from the star's top to its feet. Its stars don't settle
+// the centering: the blue star's own center is on the quarter's center, and the red star's
+// bounding box is. This uses the star's own center.
 vexyl 1
 meta {
   name "Panama"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Panama.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  design-rights "Article 2 of Law 34 of 1949 makes the State of Panama the holder of the intellectual property in the national symbols."
+  source "https://web.archive.org/web/20210831190006/https://www.gacetaoficial.gob.pa/pdfTemp/26981_A/37116.pdf"
+  source "https://web.archive.org/web/20220422095100/https://www.gacetaoficial.gob.pa/pdfTemp/28432_A/65219.pdf"
+  source "https://www.crwflags.com/fotw/flags/pa_law.html"
+  note "The hex, RGB, Pantone and CMYK values are in the Manual of Executive Decree 337 of 2017. The law itself only says that silk reference flags are kept."
+  note "The law says a star is a quarter of the height or a sixth of the length without saying how a star is measured. Decree 337's drawing measures it from top to feet, which is what this follows."
+  law "Single Text of Law No. 34 of 1949 on the symbols of the Nation, with the amendments of Law No. 2 of 2012, Official Gazette 26981-A" {
+    source "https://web.archive.org/web/20210831190006/https://www.gacetaoficial.gob.pa/pdfTemp/26981_A/37116.pdf"
+  }
+  law "Executive Decree No. 337 of 22 December 2017 approving the Manual on the symbols of the Nation, Official Gazette 28432-A" {
+    source "https://web.archive.org/web/20220422095100/https://www.gacetaoficial.gob.pa/pdfTemp/28432_A/65219.pdf"
+  }
 }
 palette {
   white "#ffffff"
-  red "#da121a"
-  blue "#072357"
+  red "#da121a" {
+    pantone "187 C"
+    cmyk 0 100 79 20
+    reference "Pantone uncoated, Decree 337" "186 U"
+  }
+  blue "#072357" {
+    pantone "295 C"
+    cmyk 100 46 0 70
+    reference "Pantone uncoated, Decree 337" "296 U"
+  }
 }
 proportion hoist=8 fly=12
 
 quarters white red blue white
 charge star blue {
-  radius 1.105
-  at fly=3 hoist=2.105
+  radius 1.10557
+  at fly=3 hoist=2
 }
 charge star red {
-  radius 1.105
-  at fly=9 hoist=6.105
+  radius 1.10557
+  at fly=9 hoist=6
 }

@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" width="1000" height="600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 30" width="1000" height="600">
   <title>Guyana</title>
-  <clipPath id="vx-fd475b83-flag1">
-    <polygon points="0,0 100,0 100,60 0,60"/>
+  <clipPath id="vx-d3fb3c83-flag1">
+    <polygon points="0,0 50,0 50,30 0,30"/>
   </clipPath>
-  <g clip-path="url(#vx-fd475b83-flag1)">
-    <polygon points="0,0 100,0 100,60 0,60" fill="#2a936a"/>
-    <polygon points="93.0398,30 -295.691417,146.619038 -412.310455,146.619038 -412.310455,-86.619038 -295.691417,-86.619038" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="miter" stroke-miterlimit="10"/>
-    <polygon points="0,2.088138 93.0398,30 0,57.911862" fill="#ffc20e"/>
-    <polygon points="46.1127,30 -148.252029,146.619038 -264.871067,146.619038 -264.871067,-86.619038 -148.252029,-86.619038" fill="#000000" stroke="#000000" stroke-width="4" stroke-linejoin="miter" stroke-miterlimit="10"/>
-    <polygon points="0,2.332332 46.1127,30 0,57.667668" fill="#be1e2d"/>
+  <g clip-path="url(#vx-d3fb3c83-flag1)">
+    <polygon points="0,0 50,0 50,30 0,30" fill="#009530"/>
+    <polygon points="-58.309519,-16.448893 46.5199,15 46.5199,15 -58.309519,46.448893" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <polygon points="-58.309519,-16.448893 46.5199,15 46.5199,15 -58.309519,46.448893" fill="#ffcc00"/>
+    <polygon points="-58.309519,-33.819562 23.0563,15 23.0563,15 -58.309519,63.819562" fill="#000000" stroke="#000000" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <polygon points="-58.309519,-33.819562 23.0563,15 23.0563,15 -58.309519,63.819562" fill="#c8102e"/>
   </g>
 </svg>

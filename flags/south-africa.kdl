@@ -1,19 +1,55 @@
+// From the law, Schedule 1 of the Constitution, with the width 60 and the length 90:
+//   the green Y band is 1/5 of the width: 12
+//   its white edges and gold edge are each 1/15 of the width: 4
+//   its center lines run from the hoist corners to the flag's center (45, 30), so they
+//     lie at atan(30/45) = 33.6901 degrees
+//   the red and blue bands each show 1/3 of the width: 20 = 30 - 6 - 4
+// Derived: the white arms are 12 + 2 x 4 = 20 wide. The black triangle's edge lies
+// 6 + 4 = 10 from the center line, so its point is at 45 - 10 / sin(33.6901) = 26.9722.
 vexyl 1
 meta {
   name "South Africa"
+  date "1994-04-27"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://www.justice.gov.za/constitution/SAConstitution-web-eng.pdf"
+  source "https://www.gov.za/about-sa/national-flag-0"
+  source "https://www.crwflags.com/fotw/flags/za.html"
+  note "The geometry and color names are from Schedule 1 of the Constitution. The date is when the government's page says the flag was first used."
+  note "The Pantone values are the approximate equivalents on the government's page, and the CKS textile colors are from the same page. Neither is in the Constitution."
+  note "The hex and CMYK values are the Album des Pavillons 2023's, as reported by FOTW, except that FOTW's Album RGB for blue, 0-20-187, looks like a typo: the others match Pantone's own values, so blue uses 0-20-137, which FOTW also reports from Flag Color Codes. Black and white are plain."
+  law "Constitution of the Republic of South Africa, 1996, section 5 and Schedule 1" {
+    source "https://www.justice.gov.za/constitution/SAConstitution-web-eng.pdf"
+  }
 }
 palette {
-  red "#e03c31"
-  blue "#001489"
-  white "#ffffff"
-  gold "#ffb81c"
-  black "#000000"
-  green "#007749"
+  red "#e03c31" {
+    pantone "179 C"
+    cmyk 5 87 82 0
+    reference "CKS" "750 C, chilli red"
+  }
+  blue "#001489" {
+    pantone "Reflex Blue C"
+    cmyk 100 91 24 7
+    reference "CKS" "762 C, national flag blue"
+  }
+  white "#ffffff" {
+    reference "CKS" "701 C, national flag white"
+  }
+  gold "#ffb81c" {
+    pantone "1235 C"
+    cmyk 0 32 89 0
+    reference "CKS" "724 C, gold yellow"
+  }
+  black "#000000" {
+    reference "CKS" "401 C, blue black"
+  }
+  green "#007749" {
+    pantone "3415 C"
+    cmyk 88 27 83 15
+    reference "CKS" "42 C, spectrum green"
+  }
 }
 proportion hoist=60 fly=90
 

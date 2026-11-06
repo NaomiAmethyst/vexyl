@@ -1,23 +1,46 @@
+// From the law, the 1948 proclamation: 220 cm by 160, white, two blue stripes 25 broad
+// and 15 from each edge, and a Star of David centered between them, of two equilateral
+// triangles in stripes 5.5 broad, with bases parallel to the stripes.
+// From elsewhere: Heimer's sheet on FOTW sets the star 66 high, so 33 to a point. A line star's
+// outer tip is one stripe's width past its center line, so the radius is 33 - 5.5 = 27.5.
 vexyl 1
 meta {
   name "Israel"
+  date "1948-10-28"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Israel.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://web.archive.org/web/20031002100810/http://www.israel-mfa.gov.il/mfa/go.asp?MFAH0cph0"
+  source "https://he.wikisource.org/wiki/%D7%97%D7%95%D7%A7_%D7%94%D7%93%D7%92%D7%9C_%D7%95%D7%94%D7%A1%D7%9E%D7%9C"
+  source "https://www.crwflags.com/fotw/flags/il'.html"
+  source "https://www.crwflags.com/fotw/flags/il_color.html"
+  note "The proclamation was read as the Foreign Ministry's site reproduced it. It says 'as illustrated', and the illustration wasn't seen, so the star's overall size of 66 cm is from a FOTW contributor's sheet, not the text."
+  note "The proclamation says only dark sky-blue. FOTW reports a 1948 sub-committee's choice of the dye Indanthren Calidon, never gazetted. The hex is the Album des Pavillons 2023 as FOTW reports it, which lists a darker Pantone 280 C and this lighter one. Taking the lighter for the national flag is an inference from FOTW's report that naval and police flags use a darker shade."
+  law "Proclamation of the Flag of the State of Israel, Provisional Council of State, 28 October 1948" {
+    source "https://web.archive.org/web/20031002100810/http://www.israel-mfa.gov.il/mfa/go.asp?MFAH0cph0"
+  }
+  law "Flag, Emblem and National Anthem Law, 5709-1949" {
+    source "https://he.wikisource.org/wiki/%D7%97%D7%95%D7%A7_%D7%94%D7%93%D7%92%D7%9C_%D7%95%D7%94%D7%A1%D7%9E%D7%9C"
+  }
+  restriction "Section 2: the State flag may not be used for commerce, business or a profession without a licence from the Minister of the Interior, though flying, making and selling flags is excepted." {
+    source "https://he.wikisource.org/wiki/%D7%97%D7%95%D7%A7_%D7%94%D7%93%D7%92%D7%9C_%D7%95%D7%94%D7%A1%D7%9E%D7%9C"
+  }
 }
 palette {
   white "#ffffff"
-  blue "#0038b8"
+  blue "#0047b6" {
+    pantone "2728 C"
+    cmyk 94 73 0 0
+    dye "Indanthren Calidon (GCDN), a 1948 sub-committee's choice, never gazetted"
+  }
 }
-proportion hoist=800 fly=1100
+proportion hoist=160 fly=220
 
 bars white blue white blue white {
-  ratio 75 125 400 125 75
+  ratio 15 25 80 25 15
 }
 charge star blue {
-  radius 145.7
+  radius 27.5
   points 6
-  lines 27.5
+  lines 5.5
 }

@@ -1,20 +1,47 @@
+// From the law, Dahir 1-05-99, Article 1: red; hoist two thirds of the length, so 60 by 90.
+//   a star of five branches in one continuous line, one point up, within an unseen circle
+//     of radius 1/6 of the length (15), centered where the diagonals cross
+//   each branch 1/20 of its length wide
+// Derived here, not stated in the law:
+//   a branch runs between two tips of that circle, so its length is 2 x 15 x sin 72 = 28.5317
+//     and its width is 1.4266
+//   the lines are mitered, so a tip stands (1.4266 / 2) / sin 18 = 2.3082 past the center
+//     line's point, and the center lines have radius 15 - 2.3082 = 12.6918
+// From elsewhere: the law says bright red and palm green with no shade. These are the
+// Album des Pavillons 2023's values, as FOTW reports it.
 vexyl 1
 meta {
   name "Morocco"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Morocco.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "http://www.sgg.gov.ma/BO/bo_fr/2005/BO_5378_Fr.pdf"
+  source "https://www.constituteproject.org/constitution/Morocco_2011"
+  source "https://www.crwflags.com/fotw/flags/ma.html"
+  note "The law says rouge vif and vert palmier, with no shade. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW. The Album itself wasn't read."
+  note "The law's star is formed of five branches in a continuous line, so this draws no interlacing, though flags with an interlaced star are in official use according to FOTW's contributors."
+  note "Reading the circle as enclosing the star's outer tips, and the branch's length as tip to tip, is this file's interpretation of the law's wording."
+  law "Constitution of the Kingdom of Morocco, 2011, Article 4" {
+    source "https://www.constituteproject.org/constitution/Morocco_2011"
+  }
+  law "Dahir No. 1-05-99 of 23 November 2005 on the characteristics of the emblem of the Kingdom and the national anthem, Article 1" {
+    source "http://www.sgg.gov.ma/BO/bo_fr/2005/BO_5378_Fr.pdf"
+  }
 }
 palette {
-  red "#c1272d"
-  green "#006233"
+  red "#d21034" {
+    pantone "186 C"
+    cmyk 10 100 74 2
+  }
+  green "#12ad2b" {
+    pantone "361 C"
+    cmyk 78 0 100 0
+  }
 }
-proportion hoist=60000 fly=90000
+proportion hoist=60 fly=90
 
 field red
 charge star green {
-  radius 12692
-  lines 1426
+  radius 12.6918
+  lines 1.4266
 }

@@ -1,29 +1,52 @@
+// From the constitution: on a length of 180, the black triangle is 1/3 of the length, 60, and
+// the yellow is 1/2, 90. The star is at the center of the black triangle, which this file
+// reads as its centroid, 60 / 3 = 20 from the hoist, with a point at the upper hoist corner,
+// so turned atan(20 / 45) = 23.96 degrees (derived).
+// From the UNTAET note: 180 by 90, and the star 29 from point to point, so its radius is
+// 29 / 1.902 = 15.25 (derived).
 vexyl 1
 meta {
   name "Timor-Leste"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_East_Timor.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://timor-leste.gov.tl/wp-content/uploads/2010/03/Constituicao_RDTL_PT.pdf"
+  source "https://www.wipo.int/edocs/lexdocs/laws/pt/tl/tl018pt.pdf"
+  source "https://www.crwflags.com/fotw/flags/tl'un.html"
+  source "https://www.crwflags.com/fotw/flags/tl.html"
+  source "https://www.flagcolorcodes.com/east-timor"
+  note "The constitution gives the triangles and the star's place and direction, but no proportion or star size."
+  note "The 1:2 proportion and the star's size are from the technical note of the UNTAET Independence Day committee of May 2002, as reported on FOTW, which isn't a law. FOTW reports that 2:3 flags are also used officially."
+  note "Law 2/2007 refers to the constitution for the design, and to an official picture in its Annex A. The copy read lacks that annex. FOTW describes it as a crude picture of about 7:12, and Wikipedia reports it as 1:2."
+  note "Pantone 123 and 485 are from the same UNTAET note. The hex values are Flag Color Codes', and aren't official. The constitution names only the colors."
+  law "Constitution of the Democratic Republic of Timor-Leste, Section 15" {
+    source "https://timor-leste.gov.tl/wp-content/uploads/2010/03/Constituicao_RDTL_PT.pdf"
+  }
+  law "Law No. 2/2007 on National Symbols, Articles 3 and 4" {
+    source "https://www.wipo.int/edocs/lexdocs/laws/pt/tl/tl018pt.pdf"
+  }
 }
 palette {
-  red "#da291c"
-  gold "#ffc72c"
+  red "#da291c" {
+    pantone "485"
+  }
+  gold "#ffc72c" {
+    pantone "123"
+  }
   black "#000000"
   white "#ffffff"
 }
-proportion hoist=18 fly=36
+proportion hoist=90 fly=180
 
 field red
 chevrons gold {
-  depth 18
+  depth 90
 }
 chevrons black {
-  depth 12
+  depth 60
 }
 charge star white {
-  radius 3
+  radius 15.25
   rotate -23.96
-  at fly=4 hoist=9
+  at fly=20 hoist=45
 }

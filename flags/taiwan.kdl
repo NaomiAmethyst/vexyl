@@ -1,15 +1,42 @@
+// From the law, Articles 3 and 4 and the annexed drawing and table:
+//   length to height 3:2, so 120 by 80; the canton is half of each, 60 by 40, a quarter
+//   of the flag
+//   sun's radius to the canton's length 1:8, so 7.5, centered on the canton
+//   center to ray tip twice the sun's radius, 15; blue ring 1/15 of the sun's diameter, 1
+//   each ray's apex 30 degrees, one pointing straight up
+// The annex draws the rays by joining each of 12 points to the fifth one along, the star
+// {12/5}, whose inner radius is 15 cos 75 / cos 60 = 7.7646 (derived here).
 vexyl 1
 meta {
   name "Taiwan"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Republic_of_China.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0020020"
+  source "https://law.moj.gov.tw/LawClass/LawGetFile.ashx?FileId=0000020524&lan=C"
+  source "https://www.moi.gov.tw/cp.aspx?n=10621"
+  source "https://www.crwflags.com/fotw/flags/tw.html"
+  note "All the geometry is the law and its annex. The law's database lists the 1954 text as the latest amendment."
+  note "The Ministry of the Interior says no color standard exists, and offers CMYK values for reference only. Those are kept as references. The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW."
+  law "Act on the National Emblem and National Flag of the Republic of China (中華民國國徽國旗法), as amended 23 October 1954" {
+    source "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0020020"
+    source "https://law.moj.gov.tw/LawClass/LawGetFile.ashx?FileId=0000020524&lan=C"
+  }
+  restriction "Article 20: no symbols may be added to the flag unless a law provides for it. Article 21: its design may not be used as an exclusive commercial mark or made into any undignified article." {
+    source "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0020020"
+  }
 }
 palette {
-  red "#fe0000"
-  blue "#000094"
+  red "#d21034" {
+    pantone "186 C"
+    cmyk 10 100 74 2
+    reference "Ministry of the Interior, for reference only" "M100 Y100 K5-10"
+  }
+  blue "#00529b" {
+    pantone "301 C"
+    cmyk 97 68 6 0
+    reference "Ministry of the Interior, for reference only" "C100 M80 K20"
+  }
   white "#ffffff"
 }
 proportion hoist=80 fly=120
@@ -19,11 +46,15 @@ canton {
   fly 60
   hoist 40
   field blue
-  charge sun white {
+  charge star white {
     radius 15
-    disc 7.5
-    gap 1
     points 12
-    spread 0.786
+    inner 7.7646
+  }
+  charge disc blue {
+    radius 8.5
+  }
+  charge disc white {
+    radius 7.5
   }
 }

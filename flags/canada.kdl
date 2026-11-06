@@ -1,23 +1,46 @@
-// Sizes follow the drawing on Commons, without the slight trim where it joins the red to
-// the white.
+// From the proclamation: a red flag two by one, with a white square the width of the flag
+// in its center, bearing one red maple leaf. Canadian Heritage's grid is 32 x 64.
+// From elsewhere: the leaf's outline, and the shade of red.
 vexyl 1
 meta {
   name "Canada"
+  date "1965-02-15"
   encoder "Naomi Persephone Amethyst"
   license "LicenseRef-Public-Domain"
   adapted-from "https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg" {
     author "MapGrid"
     author "Illegitimate Barrister"
     license "LicenseRef-Public-Domain"
-    part "the maple leaf"
+    part "the maple leaf's outline"
   }
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg"
+  source "https://people.stfx.ca/lstanley/stanley/flagbook/AppendixA.htm"
+  source "https://web.archive.org/web/2025/https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html"
+  source "https://laws-lois.justice.gc.ca/eng/acts/N-9/page-1.html"
+  source "https://crwflags.com/fotw/flags/ca_fact.html"
+  note "The proclamation was read as George Stanley's book reprints it. It says only that the leaf is a single red maple leaf. Canadian Heritage calls it the stylized 11-point leaf and gives the 32 x 64 grid, which isn't law."
+  note "The leaf's outline is the path of the Commons file named above, copied without change, and isn't from the law. Canadian Heritage's own leaf files weren't reachable to compare."
+  note "The Manufacturing Standards Act leaves manufacture to the CGSB standards CAN/CGSB-98.1, .2 and .3, which weren't read. They'd be the place to look for an official red."
+  note "The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW. The Album itself wasn't read. FOTW's other sources give PMS 032 for the flag, and PMS 485 for screens."
+  restriction "Canadian Heritage says the flag and its maple leaf are protected symbols under the Trademarks Act." {
+    source "https://web.archive.org/web/2025/https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html"
+  }
+  law "Royal Proclamation of the National Flag of Canada, 28 January 1965" {
+    source "https://people.stfx.ca/lstanley/stanley/flagbook/AppendixA.htm"
+  }
+  law "National Flag of Canada Manufacturing Standards Act, R.S.C. 1985, c. N-9" {
+    source "https://laws-lois.justice.gc.ca/eng/acts/N-9/page-1.html"
+  }
 }
 palette {
-  red "#d52b1e"
+  red "#da291c" {
+    pantone "485 C"
+    cmyk 6 94 96 0
+    reference "Flags and Anthems Manual, London 2012, as reported by FOTW" "PMS 032"
+  }
   white "#ffffff"
 }
-proportion hoist=4800 fly=9600
+proportion hoist=32 fly=64
 
 define leaf {
   path "M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z" box="0 0 9600 4800"
@@ -28,6 +51,6 @@ bars red white red {
   ratio 1 2 1
 }
 charge leaf red {
-  fly 9600
-  hoist 4800
+  fly 64
+  hoist 32
 }

@@ -1,16 +1,33 @@
+// 2:3, with vertical stripes of blue, yellow and green at 1:2:1, and three green lozenges in
+// a V, as the Album des Pavillons 2000 describes it on FOTW. The lozenges' sizes and places
+// are measured from the Commons drawing. Each is 30 wide and 51.962 tall.
 vexyl 1
 meta {
   name "Saint Vincent and the Grenadines"
+  designer "Julien van der Wal"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://www.crwflags.com/fotw/flags/vc.html"
+  source "https://web.archive.org/web/20230418185825/http://foreign.gov.vc/foreign/index.php/the-national-flag"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Saint_Vincent_and_the_Grenadines.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "No law defining this flag was found. FOTW's contributor also found no legal document on its colors. The foreign ministry's page gives only the adoption date of 12 October 1985 and the meanings."
+  note "The proportion and stripes are the Album des Pavillons 2000's, as FOTW reports them. The lozenges' sizes and places aren't from any written source: they follow the Commons drawing."
+  note "The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as FOTW reports them. Sources disagree on the blue: the London 2012 manual has a darker Pantone 286, as Commons draws it."
 }
 palette {
-  blue "#002674"
-  yellow "#fcd022"
-  green "#007c2e"
+  blue "#0067c6" {
+    pantone "300 C"
+    cmyk 88 57 0 0
+  }
+  yellow "#ffce00" {
+    pantone "116 C"
+    cmyk 0 19 93 0
+  }
+  green "#009543" {
+    pantone "347 C"
+    cmyk 84 12 94 1
+  }
 }
 proportion hoist=160 fly=240
 

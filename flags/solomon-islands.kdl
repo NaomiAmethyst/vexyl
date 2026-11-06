@@ -1,16 +1,32 @@
+// No law defines this flag. On a 100 by 200 grid:
+//   the diagonal is 1/10 of the hoist wide (10), and the stars fit circles 2/10 across
+//   (radius 10): both FOTW's estimates
+//   the stars' positions are measured from the Commons drawing
 vexyl 1
 meta {
   name "Solomon Islands"
+  date "1977-11-18"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://www.crwflags.com/fotw/flags/sb.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_the_Solomon_Islands.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "No law defining this flag was found. The chairman of the Law Reform Commission wrote in 2008, as FOTW quotes him, that the flag should be described in an Act of Parliament. FOTW gives the adoption date from the same letter."
+  note "The 1:2 proportion and the star positions are as the Commons drawing has them, not from any official sheet. The widths are FOTW's estimates, and Commons draws the diagonal a little narrower, at 9."
+  note "The hex and Pantone values are the Album des Pavillons 2023's, as reported by FOTW. Its CMYK for green looks like a mistake, so it's left out."
 }
 palette {
-  blue "#0051ba"
-  green "#215b33"
-  gold "#fcd116"
+  blue "#0047b6" {
+    pantone "293 C"
+    cmyk 94 73 0 0
+  }
+  green "#0f4d2a" {
+    pantone "357 C"
+  }
+  gold "#ffce00" {
+    pantone "116 C"
+    cmyk 0 19 93 0
+  }
   white "#ffffff"
 }
 proportion hoist=100 fly=200
@@ -20,7 +36,7 @@ bars blue green {
 }
 band gold {
   along bend-sinister
-  width 9
+  width 10
 }
 charge star white {
   radius 10

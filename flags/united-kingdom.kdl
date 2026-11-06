@@ -1,19 +1,33 @@
-// The Union Flag at 1:2, on the usual 30 by 60 construction: a white saltire 6 wide,
-// a red one showing 2 wide on one side of each diagonal, then a red cross 6 wide with
-// a white edge of 2. There's no statutory construction
-// sheet that was found; this follows the common drawing on Commons, which it matches.
+// On 30 by 60: each diagonal 6 wide in total, white 3, red 2, white 1, with its center
+// line on the flag's corners; a red cross 6 wide with a white edge of 2, centered.
 vexyl 1
 meta {
   name "United Kingdom"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Kingdom_(1-2).svg"
+  source "https://archive.org/stream/cihm_20863/cihm_20863_djvu.txt"
+  source "https://www.flaginstitute.org/wp/uk-flags/union-flag-specification/"
+  source "https://www.crwflags.com/fotw/flags/gb_var.html"
+  source "https://www.crwflags.com/fotw/flags/gb_col.html"
+  note "The Proclamation gives the design in heraldic words only: no measurements, proportion or shades. The Flag Institute calls this the only national flag with no basis in law, and the Admiralty's reply quoted by FOTW said there is no statutory authority beyond custom for its proportions."
+  note "The widths are the Flag Institute's specification, a recommendation. It matches FOTW's account of the official 1/30 units."
+  note "1:2 is custom, not law. FOTW's contributor Graham Bartram says government uses 1:2, with 1:2 and 3:5 both in the government's flag book BR20, which wasn't read. The Flag Institute calls 3:5 normal on land and 1:2 customary at sea. 3:5 isn't included because no law fixes it."
+  note "Hex, Pantone and CMYK are the Album des Pavillons 2023, as reported by FOTW. The Pantones match the Flag Institute's recommended 280 C and 186 C."
+  law "Proclamation of 1 January 1801 declaring His Majesty's pleasure concerning the royal stile and titles, and the ensigns, armorial flags and banners" {
+    source "https://archive.org/stream/cihm_20863/cihm_20863_djvu.txt"
+  }
 }
 palette {
-  blue "#012169"
+  blue "#00267f" {
+    pantone "280 C"
+    cmyk 100 89 27 8
+  }
   white "#ffffff"
-  red "#c8102e"
+  red "#d21034" {
+    pantone "186 C"
+    cmyk 10 100 74 2
+  }
 }
 proportion hoist=30 fly=60
 
@@ -21,7 +35,6 @@ field blue
 saltire white {
   width 6
 }
-
 saltire red {
   width 2
   counterchange
@@ -30,10 +43,4 @@ cross red {
   fly 27 6 27
   hoist 12 6 12
   fimbriate white 2
-}
-
-// The diagonals follow the corners, and the cross stays centered at its own width.
-adapt {
-  wider center
-  narrower center
 }

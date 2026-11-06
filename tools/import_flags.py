@@ -46,6 +46,7 @@ EXCLUDE = re.compile(r"hitler|nazi|nsdap|swastika|schutzstaffel|sturmabteilung|k
                      r"wassersportflagge|flagge-drv|die-rechte|the-right-germany|free-german-workers-party|iii-path|"
                      r"(?<!\d-)(193[3-9]|194[0-4])(-\d|$)|"
                      r"national-front-spain|nsjap|t-h-kai|confederate-states|"
+                     r"state-of-georgia-(1956-2001|2001-2003)|mississippi-1996-2020|state-of-mississippi-1894-1906|"
                      r"/no-flag|/copyrighted-flag|nuvola-|quasar")
 # Only these years in a German flag's name start the period in question, and these are safe.
 PERIOD = re.compile(r"^(?!germany/|europe/[^/]*german|europe/[^/]*reich)")

@@ -1,26 +1,87 @@
-// Sizes follow the drawing on Commons, whose rays run slightly past the center before
-// the disc hides their tips.
+// From the law, Article 2: red, 1:2, sun centered where the diagonals cross, disc diameter
+// L/7 = 40 on this 140 by 280 grid.
+// From the annexed drawing, as redrawn by others (not stated in Article 2), at the flag's edge:
+//   vertical and horizontal rays 28 wide, 0.2 of the hoist; diagonal rays 42 along the top
+//   and bottom, 0.3 of the hoist, with one edge on the flag's diagonal
+//   horizontal rays meet at the center; vertical rays stop 10 short of it
+//   the other edge of each diagonal ray aims 2.5 past the center
+//   red ring outside the disc d/8 = 5 wide
 vexyl 1
 meta {
   name "North Macedonia"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://www.crwflags.com/fotw/flags/mk.html"
+  source "https://heraldika.org.mk/en/news/drzhavnoto-zname/"
+  source "https://heraldika.org.mk/wp-content/uploads/2017/09/Konstrukcija-na-znameto-na-Republika-Makedonija-1024x390.png"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_North_Macedonia.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "The law's Article 2 was read only in English, as FOTW and the Macedonian Heraldic Society reproduce it. The Official Gazette wasn't read."
+  note "Article 2 gives only the proportion, the disc and the sun's position. The rays and the red ring come from the drawing annexed to the law, which wasn't read directly: the sizes are from the Macedonian Heraldic Society's construction sheet and from Zeljko Heimer's reconstruction on FOTW, which agree on them. The aim of each ray's edge inside the disc doesn't show."
+  note "The Pantone and CMYK values are the Album des Pavillons 2000's, as FOTW reports them, and are approximate. No source read gives a screen color for this flag, so the hex values are the Commons drawing's and aren't official."
+  law "Law on the Flag of the Republic of Macedonia, 5 October 1995, Official Gazette 47/95" {
+    source "https://www.crwflags.com/fotw/flags/mk.html"
+    source "https://heraldika.org.mk/en/news/drzhavnoto-zname/"
+  }
 }
 palette {
-  red "#d82126"
-  yellow "#f8e92e"
+  red "#d82126" {
+    pantone "485 C"
+    cmyk 0 100 90 0
+  }
+  yellow "#f8e92e" {
+    pantone "108 C"
+    cmyk 0 0 100 0
+  }
 }
 proportion hoist=140 fly=280
 
-rays yellow red {
-  count 17
-  measure edge
-  ratio 14 84 42 56 28 56 42 84 28 84 42 56 28 56 42 84 14
+field red
+charge polygon yellow {
+  point fly=0 hoist=56
+  point fly=0 hoist=84
+  point fly=140 hoist=70
+}
+charge polygon yellow {
+  point fly=280 hoist=56
+  point fly=280 hoist=84
+  point fly=140 hoist=70
+}
+charge polygon yellow {
+  point fly=126 hoist=0
+  point fly=154 hoist=0
+  point fly=140 hoist=60
+}
+charge polygon yellow {
+  point fly=126 hoist=140
+  point fly=154 hoist=140
+  point fly=140 hoist=80
+}
+charge polygon yellow {
+  point fly=0 hoist=0
+  point fly=42 hoist=0
+  point fly=142.5 hoist=70
+  point fly=140 hoist=70
+}
+charge polygon yellow {
+  point fly=280 hoist=0
+  point fly=238 hoist=0
+  point fly=137.5 hoist=70
+  point fly=140 hoist=70
+}
+charge polygon yellow {
+  point fly=0 hoist=140
+  point fly=42 hoist=140
+  point fly=142.5 hoist=70
+  point fly=140 hoist=70
+}
+charge polygon yellow {
+  point fly=280 hoist=140
+  point fly=238 hoist=140
+  point fly=137.5 hoist=70
+  point fly=140 hoist=70
 }
 charge disc yellow {
-  radius 22.5
-  fimbriate red 2.5
+  radius 20
+  fimbriate red 5
 }

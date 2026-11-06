@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90000 60000" width="900" height="600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="900" height="600">
   <title>Morocco</title>
-  <clipPath id="vx-cffaa713-flag1">
-    <polygon points="0,0 90000,0 90000,60000 0,60000"/>
+  <clipPath id="vx-94367b21-flag1">
+    <polygon points="0,0 90,0 90,60 0,60"/>
   </clipPath>
-  <g clip-path="url(#vx-cffaa713-flag1)">
-    <polygon points="0,0 90000,0 90000,60000 0,60000" fill="#c1272d"/>
-    <path d="M45000 17308L52460.170422 40268.043693L32929.190695 26077.956307L57070.809305 26077.956307L37539.829578 40268.043693Z" fill="none" stroke="#006233" stroke-width="1426" stroke-linejoin="miter" stroke-miterlimit="10"/>
+  <g clip-path="url(#vx-94367b21-flag1)">
+    <polygon points="0,0 90,0 90,60 0,60" fill="#d21034"/>
+    <path d="M45 17.3082L52.460053 40.267882L32.929381 26.078018L57.070619 26.078018L37.539947 40.267882Z" fill="none" stroke="#12ad2b" stroke-width="1.4266" stroke-linejoin="miter" stroke-miterlimit="10"/>
   </g>
 </svg>

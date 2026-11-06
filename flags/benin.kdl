@@ -1,22 +1,43 @@
+// From the law: green against the hoist for the full height and 2/5 of the length, then
+// two equal horizontal bands, yellow over red. On a length of 15 the green is 6.
+// From elsewhere: the 2:3 proportion and the colors are the Album des Pavillons.
 vexyl 1
 meta {
   name "Benin"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Benin.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://sgg.gouv.bj/doc/loi-90-020/download"
+  source "https://www.constituteproject.org/constitution/Benin_1990"
+  source "https://www.crwflags.com/fotw/flags/bj.html"
+  note "The law fixes the bands but no overall proportion. The 2:3 is the Album des Pavillons 2000, as reported by FOTW, and isn't legal."
+  note "The law names colors only. The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW. The Album itself wasn't read."
+  law "Law No. 90-020 of 27 July 1990 defining the flag of the Republic of Benin" {
+    source "https://sgg.gouv.bj/doc/loi-90-020/download"
+  }
+  law "Constitution of 11 December 1990, Article 1" {
+    source "https://www.constituteproject.org/constitution/Benin_1990"
+  }
 }
 palette {
-  yellow "#fcd116"
-  red "#e8112d"
-  green "#008751"
+  yellow "#ffcc00" {
+    pantone "116 C"
+    cmyk 0 21 93 0
+  }
+  red "#e4002b" {
+    pantone "185 C"
+    cmyk 0 100 81 0
+  }
+  green "#00843d" {
+    pantone "348 C"
+    cmyk 87 22 96 7
+  }
 }
-proportion hoist=600 fly=900
+proportion hoist=10 fly=15
 
 bars yellow red
 panel {
   side hoist
-  width 360
+  width 6
   field green
 }

@@ -1,18 +1,45 @@
+// From the Act: the flag is the drawing in Part I of its Schedule, with no numbers.
+// Measured there, and as FOTW reads it: 1:2, with rays meeting at the lower hoist corner
+// and dividing the top edge and the fly into thirds. Going clockwise, in thirds of each edge:
+//   blue 1 of the top, yellow 1 of the top, red 1 of the top and 1 of the fly,
+//   white 1 of the fly, green 1 of the fly
+// So on this grid the top edge is 6 and the fly 3, and the rays take 2 2 3 1 1 of those 9.
 vexyl 1
 meta {
   name "Seychelles"
+  date "1996-06-18"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Seychelles.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  source "https://web.archive.org/web/20240821222841id_/https://seylii.org/akn/sc/act/1996/3/eng@1996-06-18/source.pdf"
+  source "https://www.crwflags.com/fotw/flags/sc.html"
+  note "The law's Schedule defines the flag by a small drawing. The proportion and divisions are measured from that drawing, and they agree with FOTW's reading of it."
+  note "The Pantone and CMYK values are the Act's. The hex values are the Album des Pavillons 2023's, as reported by FOTW. They aren't legal, and the Album's own CMYK differs from the Act's. The Act gives no value for white."
+  law "National Symbols Act, Act 3 of 1996, Chapter 145A, section 3 and Schedule Part I" {
+    source "https://web.archive.org/web/20240821222841id_/https://seylii.org/akn/sc/act/1996/3/eng@1996-06-18/source.pdf"
+  }
+  restriction "Section 8 of the Act: without the President's written authorisation, the flag or a deceptively similar design can't be applied to goods, or used or registered as a trade mark or design." {
+    source "https://web.archive.org/web/20240821222841id_/https://seylii.org/akn/sc/act/1996/3/eng@1996-06-18/source.pdf"
+  }
 }
 palette {
-  blue "#002f6c"
-  yellow "#fed141"
-  red "#d22730"
+  blue "#003580" {
+    pantone "294"
+    cmyk 100 70 0 0
+  }
+  yellow "#fdd44f" {
+    pantone "122"
+    cmyk 0 20 100 0
+  }
+  red "#d81f2a" {
+    pantone "1795"
+    cmyk 0 100 100 0
+  }
   white "#ffffff"
-  green "#007a33"
+  green "#007229" {
+    pantone "356"
+    cmyk 100 0 100 0
+  }
 }
 proportion hoist=3 fly=6
 
