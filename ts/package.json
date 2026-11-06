@@ -1,0 +1,39 @@
+{
+  "name": "vexyl",
+  "version": "0.1.0",
+  "description": "A KDL format for describing flags the way a flag specification does, and a renderer to SVG",
+  "license": "Apache-2.0",
+  "author": "Naomi Persephone Amethyst",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "vexyl": "./dist/cli.js"
+  },
+  "files": [
+    "dist/*.js",
+    "dist/*.d.ts"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && tsc -p tsconfig.test.json && node --test \"dist/test-build/test/*.test.js\""
+  },
+  "dependencies": {
+    "@bgotink/kdl": "0.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "5.9.3"
+  }
+}

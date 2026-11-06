@@ -76,6 +76,7 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
   [`conformance/`](conformance/README.md) is the suite that they have to pass.
 - [`go/`](go) is the Go reference implementation, with the `vexyl` command in
   [`go/cmd/vexyl`](go/cmd/vexyl).
+- [`ts/`](ts/README.md) is the TypeScript library, which runs in browsers and Node.
 - [`flags/`](flags) holds flags written by hand and checked against official
   sources where possible, with notes on what each relies on.
 - [`vexyl-flags`](https://github.com/NaomiAmethyst/vexyl-flags), a separate repo, holds

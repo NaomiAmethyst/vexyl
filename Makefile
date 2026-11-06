@@ -6,10 +6,11 @@ BINDIR  ?= $(PREFIX)/bin
 DESTDIR ?=
 
 GO      ?= go
+NPM     ?= npm
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check conformance conformance-fixtures fuzz install uninstall clean
+.PHONY: all test check check-ts conformance conformance-ts conformance-fixtures fuzz install uninstall clean
 
 all: vexyl
 
@@ -26,6 +27,18 @@ check: test
 
 conformance: vexyl
 	python3 conformance/run.py ./vexyl
+
+# These need Node, so `check` leaves them out.
+ts/node_modules: ts/package.json ts/package-lock.json
+	cd ts && $(NPM) ci --no-audit --no-fund
+	touch $@
+
+check-ts: ts/node_modules
+	cd ts && $(NPM) test
+
+conformance-ts: ts/node_modules
+	cd ts && $(NPM) run build
+	python3 conformance/run.py node ts/dist/cli.js
 
 # Changes what every implementation must do, so review the diff.
 conformance-fixtures: vexyl
