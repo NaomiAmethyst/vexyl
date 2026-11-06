@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="600" height="600">
   <title>Israel</title>
-  <clipPath id="vx-91127b62-9e2f-flag1">
+  <clipPath id="vx-91127b62dfb2b9e4-9e2f-flag1">
     <polygon points="0,0 220,0 220,160 0,160"/>
   </clipPath>
-  <g clip-path="url(#vx-91127b62-9e2f-flag1)">
+  <g clip-path="url(#vx-91127b62dfb2b9e4-9e2f-flag1)">
     <polygon points="0,0 220,0 220,160 0,160" fill="#ffffff"/>
     <polygon points="0,15 220,15 220,160 0,160" fill="#0047b6"/>
     <polygon points="0,40 220,40 220,160 0,160" fill="#ffffff"/>

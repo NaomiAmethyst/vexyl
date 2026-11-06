@@ -23,19 +23,23 @@ const usage = `usage:
   vexyl render [options] FILE   render a flag to SVG
   vexyl check [-json] FILE...   validate flags, with -json listing one file's problems
   vexyl model FILE              print a flag's parsed model as JSON
+  vexyl tree [options] FILE     print a render as a tree of elements, as JSON
   vexyl info FILE               list a flag's details, colors, variants and folds
 
 render options:
   -o FILE         write to a file instead of standard output
   -height PIXELS  the image's height
-  -ratio H:F      another proportion, by the flag's adapt rules, such as 1:2
+  -ratio H:F      another proportion, by the flag's adapt rules, written hoist
+                  then fly, such as 1:2
   -variant NAME   one of the flag's variants, such as vertical or banner
   -side SIDE      obverse or reverse
   -fit FIT        error, the default, or pad with transparency if the flag
                   can't reach the ratio
-  -align WHERE    place a padded flag: left, right, top, bottom or center
+  -align WHERE    place a padded flag: left, top or start; center; or right,
+                  bottom or end
   -fold NAME      show one of the flag's folds
   -fold-step N    stop the fold after N steps
+  -id-prefix TEXT start every ID in the output with this
 
 FILE can be - for standard input.
 `
@@ -53,7 +57,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 	}
 	switch args[0] {
 	case "render":
-		return render(args[1:], stdin, stdout)
+		return render(args, stdin, stdout)
 	case "check":
 		if len(args) > 1 && args[1] == "-json" {
 			return checkJSON(args[2:], stdin, stdout)
@@ -63,6 +67,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 		return info(args[1:], stdin, stdout)
 	case "model":
 		return model(args[1:], stdin, stdout)
+	case "tree":
+		return render(args, stdin, stdout)
 	case "help", "-h", "--help":
 		_, err := io.WriteString(stdout, usage)
 		return err
@@ -71,6 +77,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 }
 
 func render(args []string, stdin io.Reader, stdout io.Writer) error {
+	asTree := args[0] == "tree"
+	args = args[1:]
 	fs := flag.NewFlagSet("render", flag.ContinueOnError)
 	output := fs.String("o", "", "output `file`")
 	height := fs.Float64("height", vexyl.DefaultHeight, "image height in `pixels`")
@@ -81,6 +89,7 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	align := fs.String("align", "", "left, right, top, bottom or center")
 	fold := fs.String("fold", "", "a fold's `name`")
 	foldStep := fs.Int("fold-step", 0, "stop the fold after this many steps")
+	idPrefix := fs.String("id-prefix", "", "start every ID with this")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -104,13 +113,23 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 		return fmt.Errorf("-align must be left, right, top, bottom or center, got %q", *align)
 	}
 	opts := vexyl.Options{Height: height, Ratio: proportion, Variant: *variant, Side: *side,
-		Fit: *fit, Align: where, Fold: *fold}
+		Fit: *fit, Align: where, Fold: *fold, IDPrefix: *idPrefix}
 	fs.Visit(func(given *flag.Flag) {
 		if given.Name == "fold-step" {
 			opts.FoldStep = foldStep
 		}
 	})
-	if err := doc.WriteSVG(&out, opts); err != nil {
+	if asTree {
+		tree, err := doc.SVGTree(opts)
+		if err != nil {
+			return err
+		}
+		enc := json.NewEncoder(&out)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(treeJSON(tree)); err != nil {
+			return err
+		}
+	} else if err := doc.WriteSVG(&out, opts); err != nil {
 		return err
 	}
 	if *output != "" {
@@ -118,6 +137,22 @@ func render(args []string, stdin io.Reader, stdout io.Writer) error {
 	}
 	_, err = stdout.Write(out.Bytes())
 	return err
+}
+
+func treeJSON(e *vexyl.Element) map[string]any {
+	attrs := make([]any, len(e.Attrs))
+	for i, a := range e.Attrs {
+		attrs[i] = map[string]any{"name": a.Name, "value": a.Value}
+	}
+	children := make([]any, len(e.Children))
+	for i, c := range e.Children {
+		children[i] = treeJSON(c)
+	}
+	out := map[string]any{"name": e.Name, "attrs": attrs, "children": children}
+	if e.Text != "" {
+		out["text"] = e.Text
+	}
+	return out
 }
 
 // parseRatio reads hoist:fly, as flag proportions are written, into fly over hoist.
@@ -214,7 +249,14 @@ func checkJSON(paths []string, stdin io.Reader, stdout io.Writer) error {
 	problems := vexyl.Validate(in, paths[0])
 	list := make([]map[string]any, len(problems))
 	for i, p := range problems {
-		list[i] = map[string]any{"line": p.Line, "column": p.Column, "node": p.Node, "message": p.Message}
+		item := map[string]any{"message": p.Message}
+		if p.Line > 0 {
+			item["line"], item["column"] = p.Line, p.Column
+		}
+		if p.Node != "" {
+			item["node"] = p.Node
+		}
+		list[i] = item
 	}
 	enc := json.NewEncoder(stdout)
 	enc.SetEscapeHTML(false)

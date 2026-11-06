@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="600" height="600">
   <title>Defined shapes</title>
   <desc>A definition keeps what it says, and what was worked out follows a charge&#39;s changes</desc>
-  <clipPath id="vx-e266f93f-9e2f-flag1">
+  <clipPath id="vx-e266f93fc9c2bdc7-9e2f-flag1">
     <polygon points="0,0 40,0 40,20 0,20"/>
   </clipPath>
-  <g clip-path="url(#vx-e266f93f-9e2f-flag1)">
+  <g clip-path="url(#vx-e266f93fc9c2bdc7-9e2f-flag1)">
     <polygon points="0,0 40,0 40,20 0,20" fill="#003399"/>
     <polygon points="8,6 9.154701,8 11.464102,8 10.309401,10 11.464102,12 9.154701,12 8,14 6.845299,12 4.535898,12 5.690599,10 4.535898,8 6.845299,8" fill="#ffcc00"/>
     <polygon points="20,8 20.57735,9 21.732051,9 21.154701,10 21.732051,11 20.57735,11 20,12 19.42265,11 18.267949,11 18.845299,10 18.267949,9 19.42265,9" fill="#ffcc00"/>

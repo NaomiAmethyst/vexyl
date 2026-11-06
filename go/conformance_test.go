@@ -307,7 +307,7 @@ func svgDocument(markup string) string {
 func sanitizerCases() []invalidCase {
 	var cases []invalidCase
 	add := func(name, markup string) {
-		cases = append(cases, invalidCase{"sanitizer: " + name, svgDocument(markup)})
+		cases = append(cases, invalidCase{name: "sanitizer: " + name, src: svgDocument(markup)})
 	}
 	for _, tt := range refusedBodies {
 		add(tt.name, svgOpen+tt.body+`</svg>`)
@@ -321,7 +321,7 @@ func sanitizerCases() []invalidCase {
 	for _, tt := range malformedMarkup {
 		add(tt.name, tt.markup)
 	}
-	return cases
+	return append(cases, placedCases...)
 }
 
 func TestSanitizerRefusals(t *testing.T) {
@@ -390,7 +390,19 @@ func TestArtworkDrawnTwiceHasDistinctIDs(t *testing.T) {
 	}
 }
 
-type invalidCase struct{ name, src string }
+type invalidCase struct {
+	name, src string
+	// place says to record the column of its first problem as well.
+	place bool
+}
+
+// placedCases test how lines and columns count: code points, and only LF ends a line.
+var placedCases = []invalidCase{
+	{"column after characters beyond the basic plane", header + "/* 𝒳é */ field nope\n", true},
+	{"line after a next line and a line separator", header + "/*\u0085\u2028*/ field nope\n", true},
+	{"line after a form feed", header + "/*\f*/ field nope\n", true},
+	{"column in a crlf document", strings.ReplaceAll(header, "\n", "\r\n") + "  field nope\r\n", true},
+}
 
 var slugChars = regexp.MustCompile(`[^a-z0-9]+`)
 
@@ -425,6 +437,8 @@ func writeInvalidFixtures(t *testing.T, cases []invalidCase) {
 		Name string `json:"name"`
 		File string `json:"file"`
 		Line int    `json:"line,omitempty"`
+		// Column is only there for documents that test how columns count.
+		Column int `json:"column,omitempty"`
 	}
 	seen := map[string]bool{}
 	var list []entry
@@ -440,6 +454,9 @@ func writeInvalidFixtures(t *testing.T, cases []invalidCase) {
 		e := entry{Name: c.name, File: "invalid/" + name + ".kdl"}
 		if ps := Validate(strings.NewReader(c.src), name); len(ps) > 0 && ps[0].Node != "" {
 			e.Line = ps[0].Line
+			if c.place {
+				e.Column = ps[0].Column
+			}
 		}
 		list = append(list, e)
 	}
@@ -604,16 +621,17 @@ func TestCMYKIsNumbers(t *testing.T) {
 // acceptedDocuments have to be valid, and are too big or too odd to be worth drawing. Many
 // sit exactly at a limit, with their neighbors over it in TestRejected.
 var acceptedDocuments = []invalidCase{
-	{"paints exactly the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 20)},
-	{"paints exactly the limit with star points", header + "charge star a { radius 1; points 10000; repeat grid rows=5 columns=4; }\n"},
-	{"paints exactly the limit with path data", header + strings.Repeat(pathCopies(127), 10)},
-	{"inline svg counted by its bytes", header + svgChain(16)},
-	{"nests exactly the limit through uses", header + nestedUses(32)},
-	{"a box with every separator", header + "charge path a { d \"M0 0H1V1Z\"; box \" 0,0\\t1 , 1\\n\"; fly 1; }\n"},
-	{"a box with every way to write a number", header + "charge path a { d \"M0 0H1V1Z\"; box \"+1. -.5 1e0 1.5E+0\"; fly 1; }\n"},
-	{"a quoted negative infinity is only text", header + `define "-inf" { field a; }` + "\nuse \"-inf\"\n"},
-	{"a meta's date within the same year as its end", "vexyl 1\nmeta { name \"T\"; date \"2000\"; until \"2001\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
-	{"a number at each end of what's allowed", header + "charge disc a { radius 1e12; at fly=1e-12 hoist=-1e12; }\n"},
+	{name: "paints exactly the limit", src: header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 20)},
+	{name: "paints exactly the limit with star points", src: header + "charge star a { radius 1; points 10000; repeat grid rows=5 columns=4; }\n"},
+	{name: "paints exactly the limit with path data", src: header + strings.Repeat(pathCopies(127), 10)},
+	{name: "inline svg counted by its bytes", src: header + svgChain(16)},
+	{name: "nests exactly the limit through uses", src: header + nestedUses(32)},
+	{name: "a box with every separator", src: header + "charge path a { d \"M0 0H1V1Z\"; box \" 0,0\\t1 , 1\\n\"; fly 1; }\n"},
+	{name: "a box with every way to write a number", src: header + "charge path a { d \"M0 0H1V1Z\"; box \"+1. -.5 1e0 1.5E+0\"; fly 1; }\n"},
+	{name: "a quoted negative infinity is only text", src: header + `define "-inf" { field a; }` + "\nuse \"-inf\"\n"},
+	{name: "a meta's date within the same year as its end", src: "vexyl 1\nmeta { name \"T\"; date \"2000\"; until \"2001\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
+	{name: "an end known only to the year of its beginning", src: "vexyl 1\nmeta { name \"T\"; date \"2000-06\"; until \"2000\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
+	{name: "a number at each end of what's allowed", src: header + "charge disc a { radius 1e12; at fly=1e-12 hoist=-1e12; }\n"},
 }
 
 // pathCopies is 10000 copies of a path of about that many bytes.

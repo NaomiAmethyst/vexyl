@@ -26,6 +26,9 @@ type GradientBox = [number, number, number, number];
 /** Refuses what would otherwise be silently ignored, or can't be drawn. */
 function checkOptions(flag: Flag, opts: Options): void {
 	const { height, ratio, foldStep } = opts;
+	if (opts.idPrefix !== undefined && !/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(opts.idPrefix)) {
+		throw new RenderError(`idPrefix "${opts.idPrefix}" isn't what an ID can start with`);
+	}
 	if (height !== undefined && !(height > 0 && inLimits(height))) {
 		throw new RenderError("height must be a positive number of a reasonable size");
 	}
@@ -62,9 +65,9 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	checkOptions(flag, opts);
 	const height = opts.height ?? defaultHeight;
 	const { flag: f, turn, upright, mirror, canvas } = resolve(flag, opts);
-	const r = new Renderer(f, flag.idPrefix);
+	const r = new Renderer(f, opts.idPrefix ?? flag.idPrefix);
 	const asked = [opts.ratio, opts.variant, opts.side, opts.fit, opts.align, opts.fold, opts.foldStep];
-	if (asked.some((v) => v !== undefined)) {
+	if (opts.idPrefix === undefined && asked.some((v) => v !== undefined)) {
 		// A page can show several forms of one flag, which mustn't share definitions.
 		r.idPrefix += hash(asked.join("|")).slice(0, 4) + "-";
 	}
@@ -136,7 +139,7 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	return r.text();
 }
 
-/** Renders the flag as a tree of SVG elements. A `title` or `desc` element's text isn't kept. */
+/** Renders the flag as a tree of SVG elements. Only a `title` or `desc` holds any text. */
 export function svgTree(flag: Flag, opts: Options = {}): SvgElement {
 	const dec = new XmlDecoder(svg(flag, opts));
 	let root: SvgElement | undefined;
@@ -155,6 +158,11 @@ export function svgTree(flag: Flag, opts: Options = {}): SvgElement {
 				parent.children.push(e);
 			}
 			open.push(e);
+		} else if (t.type === "text") {
+			const e = open.at(-1);
+			if (e !== undefined && (e.name === "title" || e.name === "desc")) {
+				e.text = (e.text ?? "") + t.data;
+			}
 		} else if (t.type === "end") {
 			open.pop();
 		}
@@ -165,10 +173,10 @@ export function svgTree(flag: Flag, opts: Options = {}): SvgElement {
 /** Writes a tree from `svgTree` out as an SVG document. */
 export function treeToSvg(e: SvgElement): string {
 	const attrs = e.attrs.map((a) => ` ${a.name}="${esc(a.value)}"`).join("");
-	if (e.children.length === 0) {
+	if (e.children.length === 0 && !e.text) {
 		return `<${e.name}${attrs}/>`;
 	}
-	return `<${e.name}${attrs}>${e.children.map(treeToSvg).join("")}</${e.name}>`;
+	return `<${e.name}${attrs}>${esc(e.text ?? "")}${e.children.map(treeToSvg).join("")}</${e.name}>`;
 }
 
 function outerBorder(f: Flag): Vec[] {

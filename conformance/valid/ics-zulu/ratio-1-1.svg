@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2" width="600" height="600">
   <title>International code signal flag Z</title>
-  <clipPath id="vx-da0195e0-5f79-flag1">
+  <clipPath id="vx-da0195e048748e2e-5f79-flag1">
     <polygon points="0,0 2,0 2,2 0,2"/>
   </clipPath>
-  <g clip-path="url(#vx-da0195e0-5f79-flag1)">
+  <g clip-path="url(#vx-da0195e048748e2e-5f79-flag1)">
     <polygon points="1,1 0,0 2,0" fill="#ffff00"/>
     <polygon points="1,1 2,0 2,2" fill="#0000ff"/>
     <polygon points="1,1 2,2 0,2" fill="#ff0000"/>

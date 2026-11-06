@@ -2,10 +2,10 @@
   <title>KDL strings</title>
   <desc>A&#xA;</desc>
   <g transform="matrix(-1 0 0 1 3 0)">
-    <clipPath id="vx-8a91f1df-b34d-flag1">
+    <clipPath id="vx-8a91f1dfff911f85-b34d-flag1">
       <polygon points="0,0 3,0 3,2 0,2"/>
     </clipPath>
-    <g clip-path="url(#vx-8a91f1df-b34d-flag1)">
+    <g clip-path="url(#vx-8a91f1dfff911f85-b34d-flag1)">
       <polygon points="0,0 3,0 3,2 0,2" fill="#003399"/>
     </g>
   </g>

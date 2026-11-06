@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 50" width="900" height="600">
   <title>Qatar</title>
   <g transform="matrix(-1 0 0 1 75 0)">
-    <clipPath id="vx-8a6180a6-19df-flag1">
+    <clipPath id="vx-8a6180a6afe46e90-19df-flag1">
       <polygon points="0,0 75,0 75,50 0,50"/>
     </clipPath>
-    <g clip-path="url(#vx-8a6180a6-19df-flag1)">
+    <g clip-path="url(#vx-8a6180a6afe46e90-19df-flag1)">
       <polygon points="0,0 75,0 75,50 0,50" fill="#8a1538"/>
-      <clipPath id="vx-8a6180a6-19df-panel2">
+      <clipPath id="vx-8a6180a6afe46e90-19df-panel2">
         <polygon points="0,0 20.5,0 29.5,2.777778 20.5,5.555556 29.5,8.333333 20.5,11.111111 29.5,13.888889 20.5,16.666667 29.5,19.444444 20.5,22.222222 29.5,25 20.5,27.777778 29.5,30.555556 20.5,33.333333 29.5,36.111111 20.5,38.888889 29.5,41.666667 20.5,44.444444 29.5,47.222222 20.5,50 0,50"/>
       </clipPath>
-      <g transform="translate(0 0)" clip-path="url(#vx-8a6180a6-19df-panel2)" style="isolation:isolate">
+      <g transform="translate(0 0)" clip-path="url(#vx-8a6180a6afe46e90-19df-panel2)" style="isolation:isolate">
         <polygon points="0,0 29.5,0 29.5,50 0,50" fill="#ffffff"/>
       </g>
     </g>

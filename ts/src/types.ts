@@ -554,12 +554,19 @@ export interface Options {
 	fold?: string;
 	/** Stops a fold after that many steps. */
 	foldStep?: number;
+	/**
+	 * Starts every ID in the output, in place of one worked out from the document. A page showing
+	 * documents it doesn't trust should pass one that it knows is unique.
+	 */
+	idPrefix?: string;
 }
 
-/** A node of an SVG document. Vexyl's SVG has no text content, apart from a title and description. */
+/** A node of an SVG document. */
 export interface SvgElement {
 	name: string;
 	attrs: SvgAttr[];
+	/** What's inside a `title` or `desc`, the only elements that hold any. */
+	text?: string;
 	children: SvgElement[];
 }
 

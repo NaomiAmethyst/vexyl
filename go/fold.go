@@ -216,7 +216,7 @@ func (r *renderer) writeFolded(f *Flag, fold *Fold, opts Options, height float64
 	}
 	r.depth--
 	r.line(`</defs>`)
-	// A crease line reads at any scale, without hiding the design.
+	// A crease line reads at any scale, without hiding the design. SPEC section 13 fixes it.
 	crease := fmt.Sprintf(`fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="%s"`, num(max(w, h)*0.004))
 	for _, fc := range stack {
 		id := r.id("facet")

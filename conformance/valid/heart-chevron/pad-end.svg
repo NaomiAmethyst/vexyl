@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -4 10 10" width="600" height="600">
   <title>Heart and Apex Test</title>
-  <clipPath id="vx-9fa80f70-4908-flag1">
+  <clipPath id="vx-9fa80f70959a3d08-4908-flag1">
     <polygon points="0,0 10,0 10,6 0,6"/>
   </clipPath>
-  <g clip-path="url(#vx-9fa80f70-4908-flag1)">
+  <g clip-path="url(#vx-9fa80f70959a3d08-4908-flag1)">
     <polygon points="0,0 10,0 10,6 0,6" fill="#1b1035"/>
     <polygon points="0,2 10,2 10,6 0,6" fill="#7b4fd6"/>
     <polygon points="0,4 10,4 10,6 0,6" fill="#f0a0c8"/>

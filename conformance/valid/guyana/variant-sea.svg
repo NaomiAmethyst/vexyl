@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="1200" height="600">
   <title>Guyana</title>
-  <clipPath id="vx-d3fb3c83-bc0a-flag1">
+  <clipPath id="vx-d3fb3c83e13677ac-bc0a-flag1">
     <polygon points="0,0 60,0 60,30 0,30"/>
   </clipPath>
-  <g clip-path="url(#vx-d3fb3c83-bc0a-flag1)">
+  <g clip-path="url(#vx-d3fb3c83e13677ac-bc0a-flag1)">
     <polygon points="0,0 60,0 60,30 0,30" fill="#009530"/>
     <polygon points="-67.082039,-15.73968 55.8769,15 55.8769,15 -67.082039,45.73968" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="-67.082039,-15.73968 55.8769,15 55.8769,15 -67.082039,45.73968" fill="#ffcc00"/>

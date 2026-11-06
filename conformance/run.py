@@ -3,14 +3,15 @@
 # Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 """Runs Vexyl's conformance suite against an implementation.
 
-    run.py [--only render,model,invalid,accepted,sanitize,distinct] [--filter TEXT] [--resvg PATH] COMMAND...
+    run.py [--only render,model,invalid,accepted,sanitize,distinct,options] [--filter TEXT] [--resvg PATH] COMMAND...
 
 COMMAND is how to run the implementation, which has to offer these, as `vexyl` does:
 
-    COMMAND render [-ratio H:F] [-variant NAME] [-side SIDE] [-fit FIT] [-align WHERE]
-                   [-fold NAME] [-fold-step N] -o OUT.svg FILE
+    COMMAND render [-height PIXELS] [-ratio H:F] [-variant NAME] [-side SIDE] [-fit FIT] [-align WHERE]
+                   [-fold NAME] [-fold-step N] [-id-prefix TEXT] -o OUT.svg FILE
     COMMAND model FILE
     COMMAND check -json FILE
+    COMMAND tree FILE
 
 Renders are compared as pixels using the pinned resvg, never as text, so implementations
 are free to write their SVG differently.
@@ -322,6 +323,8 @@ def check_invalid(command, wanted, failures):
                 continue
             if case["line"] not in lines:
                 failures.append(f"{case['name']}: no problem on line {case['line']}: {lines}")
+            if "column" in case and not any(p.get("line") == case["line"] and p.get("column") == case["column"] for p in json.loads(done.stdout)):
+                failures.append(f"{case['name']}: no problem at column {case['column']} of line {case['line']}")
     return count
 
 
@@ -378,9 +381,105 @@ def check_sanitize(command, wanted, failures):
     return count
 
 
+def write_tree(e):
+    """Writes a tree of elements out, as a library has to be able to."""
+    def esc(text):
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+    attrs = "".join(f' {a["name"]}="{esc(a["value"])}"' for a in e["attrs"])
+    return f'<{e["name"]}{attrs}>{esc(e.get("text", ""))}{"".join(write_tree(c) for c in e["children"])}</{e["name"]}>'
+
+
+def ids_of(text):
+    return [el.attrib["id"] for el in ET.fromstring(text).iter() if "id" in el.attrib]
+
+
+def check_options(command, manifest, resvg, tolerance, wanted, failures):
+    """Checks what a render's options do beyond what a flag's own forms show."""
+    with open(os.path.join(HERE, "options.json")) as f:
+        cases = json.load(f)
+    path = os.path.join(HERE, cases["file"])
+    count = 0
+    with tempfile.TemporaryDirectory() as tmp:
+        out, got, want = (os.path.join(tmp, n) for n in ("out.svg", "got.png", "want.png"))
+        for args in cases["refused"]:
+            label = "options: " + " ".join(args)
+            if wanted and wanted not in label:
+                continue
+            count += 1
+            if subprocess.run(command + ["render"] + args + ["-o", out, path], capture_output=True, text=True).returncode == 0:
+                failures.append(f"{label}: should be refused")
+        for args in cases["accepted"]:
+            label = "options: " + " ".join(args)
+            if wanted and wanted not in label:
+                continue
+            count += 1
+            done = subprocess.run(command + ["render"] + args + ["-o", out, path], capture_output=True, text=True)
+            if done.returncode:
+                failures.append(f"{label}: failed: {done.stderr.strip()[:200]}")
+        def rendered(args, file=path):
+            done = subprocess.run(command + ["render"] + args + ["-o", out, file], capture_output=True, text=True)
+            if done.returncode:
+                failures.append(f"options: {args}: failed: {done.stderr.strip()[:200]}")
+                return ""
+            with open(out, encoding="utf-8") as f:
+                return f.read()
+        if not wanted or wanted in "options: height":
+            count += 1
+            text = rendered(["-height", "100"])
+            root = ET.fromstring(text) if text else None
+            if root is not None and (float(root.attrib["height"]) != 100 or abs(float(root.attrib["width"]) - 200) > 1e-6):
+                failures.append(f"options: height: an image of {root.attrib['width']} by {root.attrib['height']}")
+        if not wanted or wanted in "options: id prefix":
+            count += 1
+            text = rendered(["-id-prefix", "mine-"])
+            found = ids_of(text) if text else []
+            if not found or not all(i.startswith("mine-") for i in found):
+                failures.append(f"options: id prefix: gave {found[:4]}")
+        if not wanted or wanted in "options: distinct ids":
+            count += 1
+            a, b = (rendered([], os.path.join(HERE, "valid", n + ".kdl")) for n in ("effects", "inline-svg"))
+            shared = set(ids_of(a)) & set(ids_of(b)) if a and b else set()
+            if shared:
+                failures.append(f"options: distinct ids: two documents share {sorted(shared)[:3]}")
+            forms = set(ids_of(rendered(["-side", "reverse"], os.path.join(HERE, "valid", "effects.kdl")))) & set(ids_of(a))
+            if forms:
+                failures.append(f"options: distinct ids: two forms of a document share {sorted(forms)[:3]}")
+        for case in manifest["cases"][::7]:
+            label = f"tree: {case['name']}"
+            if wanted and wanted not in label:
+                continue
+            count += 1
+            file = os.path.join(HERE, case["file"])
+            done = subprocess.run(command + ["tree", file], capture_output=True, text=True)
+            if done.returncode:
+                failures.append(f"{label}: failed: {done.stderr.strip()[:200]}")
+                continue
+            tree = json.loads(done.stdout)
+            titles = [c for c in tree["children"] if c["name"] == "title"]
+            with open(os.path.join(HERE, case["model"])) as f:
+                name = json.load(f)["meta"]["name"]
+            if len(titles) != 1 or titles[0].get("text") != name:
+                failures.append(f"{label}: has no title of {name!r}")
+            with open(out, "w", encoding="utf-8") as f:
+                f.write(write_tree(tree))
+            for problem in output_problems(write_tree(tree))[:3]:
+                failures.append(f"{label}: output: {problem}")
+            svg = next(r["svg"] for r in case["renders"] if r["name"] == "default")
+            for height in tolerance["heights"]:
+                try:
+                    result = difference(rasterize(resvg, out, height, got), rasterize(resvg, os.path.join(HERE, svg), height, want), tolerance["threshold"])
+                except subprocess.CalledProcessError as e:
+                    failures.append(f"{label}: resvg failed: {e.stderr[:200]}")
+                    break
+                if not within(result, tolerance, height):
+                    failures.append(f"{label} at {height}px: written out, it draws differently")
+                    break
+    return count
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--only", default="render,model,invalid,accepted,sanitize,distinct")
+    ap.add_argument("--only", default="render,model,invalid,accepted,sanitize,distinct,options")
     ap.add_argument("--filter", help="only cases whose names contain this")
     ap.add_argument("--resvg", default="resvg")
     ap.add_argument("command", nargs="+")
@@ -406,6 +505,8 @@ def main():
         totals["sanitizer outputs"] = check_sanitize(command, args.filter, failures)
     if "distinct" in only:
         totals["distinct pairs"] = check_distinct(command, args.filter, failures)
+    if "options" in only:
+        totals["option checks"] = check_options(command, manifest, args.resvg, manifest["tolerance"], args.filter, failures)
     for failure in failures:
         print("FAIL", failure)
     print(", ".join(f"{v} {k}" for k, v in totals.items()) + f": {len(failures)} failed")

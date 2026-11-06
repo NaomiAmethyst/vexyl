@@ -13,6 +13,7 @@ const flag = parse(source);                 // throws a ParseError holding every
 const image = svg(flag, { height: 1200 });  // an SVG document as a string
 const back = svg(flag, { side: "reverse" });
 const tree = svgTree(flag);                 // the same document as a tree of elements
+const own = svg(flag, { idPrefix: "mine-" });  // for a page showing documents it doesn't trust
 const data = model(flag);                   // plain data, in the suite's canonical form
 ```
 
@@ -26,6 +27,7 @@ vexyl render -o sweden.svg flags/sweden.kdl
 vexyl render -ratio 1:1 -fit pad -align left flags/sweden.kdl
 vexyl check -json flags/sweden.kdl
 vexyl model flags/sweden.kdl
+vexyl tree flags/sweden.kdl
 ```
 
 It takes the same options as the Go command, apart from `info`, which it doesn't have.

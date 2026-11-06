@@ -41,6 +41,9 @@ type Options struct {
 	Fold string
 	// FoldStep stops a fold after that many steps, or finishes it if it's nil.
 	FoldStep *int
+	// IDPrefix starts every ID in the output, in place of one worked out from the document.
+	// A page showing documents it doesn't trust should pass one that it knows is unique.
+	IDPrefix string
 }
 
 // Float gives an option's value, for Height and Ratio.
@@ -56,6 +59,9 @@ func (f *Flag) checkOptions(opts Options) error {
 	}
 	if opts.Ratio != nil && (*opts.Ratio <= 0 || !inLimits(*opts.Ratio)) {
 		return errors.New("ratio must be a positive number of a reasonable size")
+	}
+	if opts.IDPrefix != "" && !localID.MatchString(opts.IDPrefix) {
+		return fmt.Errorf("idPrefix %q isn't what an ID can start with", opts.IDPrefix)
 	}
 	hasRatio := opts.Ratio != nil
 	if opts.Variant != "" {
@@ -115,7 +121,9 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 		return err
 	}
 	r := &renderer{flag: f, idPrefix: original.idPrefix}
-	if opts != (Options{Height: opts.Height}) {
+	if opts.IDPrefix != "" {
+		r.idPrefix = opts.IDPrefix
+	} else if opts != (Options{Height: opts.Height}) {
 		// A page can show several forms of one flag, which mustn't share definitions.
 		ratio, step := 0.0, 0
 		if opts.Ratio != nil {

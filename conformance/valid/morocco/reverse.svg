@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="900" height="600">
   <title>Morocco</title>
   <g transform="matrix(-1 0 0 1 90 0)">
-    <clipPath id="vx-94367b21-b34d-flag1">
+    <clipPath id="vx-94367b215ace2723-b34d-flag1">
       <polygon points="0,0 90,0 90,60 0,60"/>
     </clipPath>
-    <g clip-path="url(#vx-94367b21-b34d-flag1)">
+    <g clip-path="url(#vx-94367b215ace2723-b34d-flag1)">
       <polygon points="0,0 90,0 90,60 0,60" fill="#d21034"/>
       <path d="M45 17.3082L52.460053 40.267882L32.929381 26.078018L57.070619 26.078018L37.539947 40.267882Z" fill="none" stroke="#12ad2b" stroke-width="1.4266" stroke-linejoin="miter" stroke-miterlimit="10"/>
     </g>

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -1095 6000 6000" width="600" height="600">
   <title>Progress Pride Flag</title>
-  <clipPath id="vx-37211615-b554-flag1">
+  <clipPath id="vx-3721161590af409e-b554-flag1">
     <polygon points="0,0 6000,0 6000,3810 0,3810"/>
   </clipPath>
-  <g clip-path="url(#vx-37211615-b554-flag1)">
+  <g clip-path="url(#vx-3721161590af409e-b554-flag1)">
     <polygon points="0,0 6000,0 6000,3810 0,3810" fill="#e40303"/>
     <polygon points="0,635 6000,635 6000,3810 0,3810" fill="#ff8c00"/>
     <polygon points="0,1270 6000,1270 6000,3810 0,3810" fill="#ffed00"/>

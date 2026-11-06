@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1000" width="1200" height="600">
   <title>Bosnia and Herzegovina</title>
-  <clipPath id="vx-bf1bbe78-09b4-flag1">
+  <clipPath id="vx-bf1bbe784123891c-09b4-flag1">
     <polygon points="0,0 2000,0 2000,1000 0,1000"/>
   </clipPath>
-  <g clip-path="url(#vx-bf1bbe78-09b4-flag1)">
+  <g clip-path="url(#vx-bf1bbe784123891c-09b4-flag1)">
     <polygon points="0,0 2000,0 2000,1000 0,1000" fill="#00249c"/>
     <polygon points="-1706.067977,-2236.067977 1530,1000 1530,1000 1530,-2236.067977" fill="#ffcc00"/>
     <polygon points="350,-106.25 371.328829,-40.606614 440.350369,-40.606614 384.51077,-0.036771 405.839599,65.606614 350,25.036771 294.160401,65.606614 315.48923,-0.036771 259.649631,-40.606614 328.671171,-40.606614" fill="#ffffff"/>

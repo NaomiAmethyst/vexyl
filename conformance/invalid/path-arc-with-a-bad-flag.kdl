@@ -1,0 +1,5 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+charge path a { d "M0 0A1 1 0 2 0 1 1"; box "0 0 1 1"; fly 1; }

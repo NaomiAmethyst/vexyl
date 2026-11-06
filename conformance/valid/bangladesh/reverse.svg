@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6" width="1000" height="600">
   <title>Bangladesh</title>
   <g transform="matrix(-1 0 0 1 10 0)">
-    <clipPath id="vx-d1873d60-b34d-flag1">
+    <clipPath id="vx-d1873d606b17f36d-b34d-flag1">
       <polygon points="0,0 10,0 10,6 0,6"/>
     </clipPath>
-    <g clip-path="url(#vx-d1873d60-b34d-flag1)">
+    <g clip-path="url(#vx-d1873d606b17f36d-b34d-flag1)">
       <polygon points="0,0 10,0 10,6 0,6" fill="#006a52"/>
       <circle cx="4.5" cy="3" r="2" fill="#f4364c"/>
     </g>

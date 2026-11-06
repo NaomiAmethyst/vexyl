@@ -33,11 +33,12 @@ when rendered, so one flag can render with many options.
 
 ## 2. Problems
 
-`validate` and `parse` report every problem they can find in a document, not just the first.
+`validate` and `parse` report every problem they can find in a document, not just the first. A
+KDL parser may stop at its first syntax error, so a document with one MAY report only that.
 
 | Field | Meaning |
 |---|---|
-| `line`, `column` | Where it is, from 1, or absent if it has no one place |
+| `line`, `column` | Where it is, from 1, or absent if it has no one place. A line ends at LF, once line endings are normalized, even though KDL also counts others as newlines. A column counts code points |
 | `node` | The KDL node it's about, or absent |
 | `message` | What's wrong, for a person to read |
 
@@ -45,9 +46,15 @@ Wording and order are the library's own, so programs MUST NOT depend on them. A 
 MUST have no problems. An invalid one MUST have at least one, and for a problem that isn't a
 syntax error, one on the line that the suite records.
 
+A document can name its colors, definitions, variants and folds anything but the empty string,
+including `__proto__`, `constructor` or `toString`, and those names are keys in the model. A library
+MUST NOT let them reach its language's own properties, and code reading a model has to take the
+same care: in JavaScript, not copying one of its maps with `Object.assign` to a plain object, say.
+
 ## 3. Options
 
-Every option is optional, and rendering with none gives the flag as it is.
+Every option is optional, and rendering with none gives the flag as it is. A command line can write
+`ratio` as hoist then fly, as flags' proportions are, but the option itself is fly divided by hoist.
 
 | Option | Values | Default | Meaning |
 |---|---|---|---|
@@ -59,6 +66,7 @@ Every option is optional, and rendering with none gives the flag as it is.
 | `side` | `obverse`, `reverse` | `obverse` | Which side of the flag |
 | `fold` | A fold's name | None | Show the flag folded |
 | `foldStep` | A whole number | All of them | Stop a fold after that many steps |
+| `idPrefix` | What an `id` can start with | Worked out from the document | Start every ID in the output with this |
 
 Section 11.1 of the format says what `ratio`, `fit` and `align` do. A flag that can't reach a
 proportion MUST be refused unless `fit` is `pad`, so that nothing distorts or silently changes
@@ -182,12 +190,16 @@ tolerance. It needn't give the same text, so the order of elements, IDs and numb
 are its own. It SHOULD write coordinates to at least 6 decimal places, because the tolerance is
 calibrated for rounding to 4.
 
-`svgTree` gives elements with a name, attributes in order and children. Vexyl's SVG has no text
-content, because SVG lettering isn't allowed. Writing the tree out MUST give a document that
-draws the same as `svg`.
+`svgTree` gives elements with a name, attributes in order, text and children. Only a `title` or
+`desc` holds any text, because SVG lettering isn't allowed. Writing the tree out MUST give a
+document that draws the same as `svg`, with the same title and description.
 
-IDs in a document MUST NOT collide with those of a different document, so that several flags can
-be inlined in one page.
+IDs in a document SHOULD NOT collide with those of a different document, or a different form of
+the same one, so that several flags can be inlined in one page. A library works them out from a
+hash of the document, which is enough for documents that aren't trying to collide. A hostile one
+can search for a hash that lets its definitions capture another flag's references, so a page showing
+documents it doesn't trust MUST pass an `idPrefix` that it knows is unique. Each is then an `id`'s
+first characters, and within one render, IDs MUST be unique.
 
 Inline SVG MUST be sanitized as section 8.3 of the format says, in every library. It's the one
 place where a document can carry another format's markup, and a gap here is a security problem.

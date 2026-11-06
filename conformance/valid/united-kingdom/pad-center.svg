@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -15 60 60" width="600" height="600">
   <title>United Kingdom</title>
-  <clipPath id="vx-53840e1a-b554-flag1">
+  <clipPath id="vx-53840e1a4361c35d-b554-flag1">
     <polygon points="0,0 60,0 60,30 0,30"/>
   </clipPath>
-  <g clip-path="url(#vx-53840e1a-b554-flag1)">
+  <g clip-path="url(#vx-53840e1a4361c35d-b554-flag1)">
     <polygon points="0,0 60,0 60,30 0,30" fill="#00267f"/>
     <polygon points="0,0 0,3.354102 53.291796,30 60,30 60,26.645898 6.708204,0" fill="#ffffff"/>
     <polygon points="0,30 0,26.645898 53.291796,0 60,0 60,3.354102 6.708204,30" fill="#ffffff"/>
-    <clipPath id="vx-53840e1a-b554-clip2">
+    <clipPath id="vx-53840e1a4361c35d-b554-clip2">
       <polygon points="30,15 60,15 60,30 30,15 30,30 0,30 30,15 0,15 0,0 30,15 30,0 60,0"/>
     </clipPath>
-    <g clip-path="url(#vx-53840e1a-b554-clip2)">
+    <g clip-path="url(#vx-53840e1a4361c35d-b554-clip2)">
       <polygon points="0,0 0,2.236068 55.527864,30 60,30 60,27.763932 4.472136,0" fill="#d21034"/>
       <polygon points="0,30 0,27.763932 55.527864,0 60,0 60,2.236068 4.472136,30" fill="#d21034"/>
     </g>

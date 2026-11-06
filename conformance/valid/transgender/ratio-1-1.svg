@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 3" width="600" height="600">
   <title>Transgender Pride Flag</title>
-  <clipPath id="vx-2f7f3cec-5f79-flag1">
+  <clipPath id="vx-2f7f3cec46610484-5f79-flag1">
     <polygon points="0,0 3,0 3,3 0,3"/>
   </clipPath>
-  <g clip-path="url(#vx-2f7f3cec-5f79-flag1)">
+  <g clip-path="url(#vx-2f7f3cec46610484-5f79-flag1)">
     <polygon points="0,0 3,0 3,3 0,3" fill="#5bcefa"/>
     <polygon points="0,0.6 3,0.6 3,3 0,3" fill="#f5a9b8"/>
     <polygon points="0,1.2 3,1.2 3,3 0,3" fill="#ffffff"/>

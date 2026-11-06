@@ -58,13 +58,13 @@ func Parse(r io.Reader, name string) (*Flag, error) {
 		kdl.WithSourceName(name),
 		kdl.WithDuplicateProperties(kdl.DupError))
 	if err != nil {
-		return nil, err
+		return nil, Problems{syntaxProblem(err, src)}
 	}
 	sum := sha256.Sum256(src)
 	p := &parser{src: src}
 	p.prepare(doc.Nodes)
 	flag := p.document(doc)
-	flag.idPrefix = "vx-" + hex.EncodeToString(sum[:4]) + "-"
+	flag.idPrefix = "vx-" + hex.EncodeToString(sum[:8]) + "-"
 	if len(p.errs) > 0 {
 		problems := make(Problems, len(p.errs))
 		for i, err := range p.errs {
@@ -97,7 +97,17 @@ type parser struct {
 
 func (p *parser) errf(n *kdl.Node, format string, args ...any) {
 	at := n.Location()
-	p.errs = append(p.errs, Problem{at.Filename, at.Line, at.Column, n.Name(), fmt.Sprintf(format, args...)})
+	line, column := place(p.src, int(at.Offset))
+	p.errs = append(p.errs, Problem{at.Filename, line, column, n.Name(), fmt.Sprintf(format, args...)})
+}
+
+// place finds where a byte is, as SDK section 2 says to: lines end at LF, and a column
+// counts code points.
+func place(src []byte, offset int) (line, column int) {
+	offset = min(offset, len(src))
+	before := src[:offset]
+	start := bytes.LastIndexByte(before, '\n') + 1
+	return bytes.Count(before, []byte{'\n'}) + 1, utf8.RuneCount(before[start:]) + 1
 }
 
 // document walks the top level, whose nodes have a fixed order.
@@ -139,7 +149,8 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 		}
 		if s > stageVersion && stage < stageVersion {
 			at := n.Location()
-			p.errs = append(p.errs, Problem{at.Filename, at.Line, at.Column, "", fmt.Sprintf("document must start with `vexyl %d`", FormatVersion)})
+			line, column := place(p.src, int(at.Offset))
+			p.errs = append(p.errs, Problem{at.Filename, line, column, "", fmt.Sprintf("document must start with `vexyl %d`", FormatVersion)})
 			return flag
 		}
 		stage = s
@@ -392,8 +403,12 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 	if m.Name == "" {
 		p.errf(n, "needs a `name`")
 	}
-	if m.Date != "" && m.Until != "" && m.Until < m.Date {
-		p.errf(n, "`until` comes before `date`")
+	if m.Date != "" && m.Until != "" {
+		// Each is only known to its own precision, so they compare only as far as both go.
+		shared := min(len(m.Date), len(m.Until))
+		if m.Until[:shared] < m.Date[:shared] {
+			p.errf(n, "`until` comes before `date`")
+		}
 	}
 }
 
@@ -433,6 +448,10 @@ func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 		}
 		if c.Name() == noColor {
 			p.errf(c, "%q is reserved for leaving a gap", noColor)
+			continue
+		}
+		if c.Name() == "" {
+			p.errf(c, "a color's name can't be empty")
 			continue
 		}
 		seen[c.Name()] = true

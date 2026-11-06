@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.7 13" width="1140" height="600">
   <title>United States</title>
-  <clipPath id="vx-029d1618-flag1">
+  <clipPath id="vx-029d1618b1163ef4-flag1">
     <polygon points="0,0 24.7,0 24.7,13 0,13"/>
   </clipPath>
-  <g clip-path="url(#vx-029d1618-flag1)">
+  <g clip-path="url(#vx-029d1618b1163ef4-flag1)">
     <polygon points="0,0 24.7,0 24.7,13 0,13" fill="#b31942"/>
     <polygon points="0,1 24.7,1 24.7,13 0,13" fill="#ffffff"/>
     <polygon points="0,2 24.7,2 24.7,13 0,13" fill="#b31942"/>
@@ -17,10 +17,10 @@
     <polygon points="0,10 24.7,10 24.7,13 0,13" fill="#b31942"/>
     <polygon points="0,11 24.7,11 24.7,13 0,13" fill="#ffffff"/>
     <polygon points="0,12 24.7,12 24.7,13 0,13" fill="#b31942"/>
-    <clipPath id="vx-029d1618-panel2">
+    <clipPath id="vx-029d1618b1163ef4-panel2">
       <polygon points="0,0 9.88,0 9.88,7 0,7"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-029d1618-panel2)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-029d1618b1163ef4-panel2)" style="isolation:isolate">
       <polygon points="0,0 9.88,0 9.88,7 0,7" fill="#0a3161"/>
       <polygon points="0.823333,0.2996 0.913229,0.57627 1.204136,0.57627 0.968787,0.747261 1.058683,1.02393 0.823333,0.852939 0.587984,1.02393 0.67788,0.747261 0.44253,0.57627 0.733438,0.57627" fill="#ffffff"/>
       <polygon points="2.47,0.2996 2.559895,0.57627 2.850803,0.57627 2.615454,0.747261 2.705349,1.02393 2.47,0.852939 2.234651,1.02393 2.324546,0.747261 2.089197,0.57627 2.380105,0.57627" fill="#ffffff"/>

@@ -1,52 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 21" width="1000" height="600">
   <title>Gradient Test</title>
-  <clipPath id="vx-4068f8ac-flag1">
+  <clipPath id="vx-4068f8acf10255bd-flag1">
     <polygon points="0,0 35,0 35,21 0,21"/>
   </clipPath>
-  <g clip-path="url(#vx-4068f8ac-flag1)">
+  <g clip-path="url(#vx-4068f8acf10255bd-flag1)">
     <polygon points="0,0 35,0 35,21 0,21" fill="#7f7f7f"/>
-    <linearGradient id="vx-4068f8ac-gradient2" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="vx-4068f8acf10255bd-gradient2" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#ffb0ca"/>
       <stop offset="0.5" stop-color="#f6f1ad"/>
       <stop offset="1" stop-color="#9bdaec"/>
     </linearGradient>
-    <polygon points="0,3 35,3 35,6 0,6" fill="url(#vx-4068f8ac-gradient2)"/>
+    <polygon points="0,3 35,3 35,6 0,6" fill="url(#vx-4068f8acf10255bd-gradient2)"/>
     <polygon points="0,6 35,6 35,21 0,21" fill="#ffffff"/>
-    <linearGradient id="vx-4068f8ac-gradient3" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="vx-4068f8acf10255bd-gradient3" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0.25" stop-color="#ffb0ca"/>
       <stop offset="1" stop-color="#7f7f7f"/>
     </linearGradient>
-    <polygon points="0,9 35,9 35,12 0,12" fill="url(#vx-4068f8ac-gradient3)"/>
+    <polygon points="0,9 35,9 35,12 0,12" fill="url(#vx-4068f8acf10255bd-gradient3)"/>
     <polygon points="0,12 35,12 35,21 0,21" fill="#ffffff"/>
-    <polygon points="0,15 35,15 35,18 0,18" fill="url(#vx-4068f8ac-gradient2)"/>
+    <polygon points="0,15 35,15 35,18 0,18" fill="url(#vx-4068f8acf10255bd-gradient2)"/>
     <polygon points="0,18 35,18 35,21 0,21" fill="#7f7f7f"/>
-    <linearGradient id="vx-4068f8ac-gradient4" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="vx-4068f8acf10255bd-gradient4" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#9bdaec"/>
       <stop offset="1" stop-color="#ffb0ca"/>
     </linearGradient>
-    <polygon points="0,0 0,0 10,10.5 0,21" fill="url(#vx-4068f8ac-gradient4)"/>
-    <linearGradient id="vx-4068f8ac-gradient5" x1="0" y1="1" x2="1" y2="0">
+    <polygon points="0,0 0,0 10,10.5 0,21" fill="url(#vx-4068f8acf10255bd-gradient4)"/>
+    <linearGradient id="vx-4068f8acf10255bd-gradient5" x1="0" y1="1" x2="1" y2="0">
       <stop offset="0" stop-color="#7f7f7f"/>
       <stop offset="1" stop-color="#f6f1ad"/>
     </linearGradient>
-    <polygon points="0,3.5 6.666667,10.5 0,17.5" fill="url(#vx-4068f8ac-gradient5)"/>
+    <polygon points="0,3.5 6.666667,10.5 0,17.5" fill="url(#vx-4068f8acf10255bd-gradient5)"/>
     <polygon points="-17.757248,-10.071254 52.242752,31.928746 52.757248,31.071254 -17.242752,-10.928746" fill="#ffffff" stroke="#ffffff" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="-17.757248,31.071254 52.242752,-10.928746 52.757248,-10.071254 -17.242752,31.928746" fill="#ffffff" stroke="#ffffff" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
-    <linearGradient id="vx-4068f8ac-gradient6" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(35 21)">
+    <linearGradient id="vx-4068f8acf10255bd-gradient6" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(35 21)">
       <stop offset="0.25" stop-color="#ffb0ca"/>
       <stop offset="1" stop-color="#7f7f7f"/>
     </linearGradient>
-    <polygon points="0,0 0,0.583095 34.028175,21 35,21 35,20.416905 0.971825,0" fill="url(#vx-4068f8ac-gradient6)"/>
-    <polygon points="0,21 0,20.416905 34.028175,0 35,0 35,0.583095 0.971825,21" fill="url(#vx-4068f8ac-gradient6)"/>
-    <clipPath id="vx-4068f8ac-panel7">
+    <polygon points="0,0 0,0.583095 34.028175,21 35,21 35,20.416905 0.971825,0" fill="url(#vx-4068f8acf10255bd-gradient6)"/>
+    <polygon points="0,21 0,20.416905 34.028175,0 35,0 35,0.583095 0.971825,21" fill="url(#vx-4068f8acf10255bd-gradient6)"/>
+    <clipPath id="vx-4068f8acf10255bd-panel7">
       <polygon points="0,0 6,0 6,6 0,6"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-4068f8ac-panel7)" style="isolation:isolate">
-      <polygon points="0,0 6,0 6,6 0,6" fill="url(#vx-4068f8ac-gradient4)"/>
+    <g transform="translate(0 0)" clip-path="url(#vx-4068f8acf10255bd-panel7)" style="isolation:isolate">
+      <polygon points="0,0 6,0 6,6 0,6" fill="url(#vx-4068f8acf10255bd-gradient4)"/>
     </g>
-    <polygon points="28,2 28.449028,3.381966 29.902113,3.381966 28.726543,4.236068 29.175571,5.618034 28,4.763932 26.824429,5.618034 27.273457,4.236068 26.097887,3.381966 27.550972,3.381966" fill="url(#vx-4068f8ac-gradient3)" stroke="url(#vx-4068f8ac-gradient3)" stroke-width="0.4" stroke-linejoin="miter" stroke-miterlimit="10"/>
-    <polygon points="28,2 28.449028,3.381966 29.902113,3.381966 28.726543,4.236068 29.175571,5.618034 28,4.763932 26.824429,5.618034 27.273457,4.236068 26.097887,3.381966 27.550972,3.381966" fill="url(#vx-4068f8ac-gradient2)"/>
-    <path d="M28 20.242641L30.828427 17.414214A2 2 0 0 0 28 14.585786A2 2 0 0 0 25.171573 17.414214Z" fill="url(#vx-4068f8ac-gradient5)"/>
-    <path d="M22 20.242641L24.828427 17.414214A2 2 0 0 0 22 14.585786A2 2 0 0 0 19.171573 17.414214Z" fill="url(#vx-4068f8ac-gradient5)"/>
+    <polygon points="28,2 28.449028,3.381966 29.902113,3.381966 28.726543,4.236068 29.175571,5.618034 28,4.763932 26.824429,5.618034 27.273457,4.236068 26.097887,3.381966 27.550972,3.381966" fill="url(#vx-4068f8acf10255bd-gradient3)" stroke="url(#vx-4068f8acf10255bd-gradient3)" stroke-width="0.4" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <polygon points="28,2 28.449028,3.381966 29.902113,3.381966 28.726543,4.236068 29.175571,5.618034 28,4.763932 26.824429,5.618034 27.273457,4.236068 26.097887,3.381966 27.550972,3.381966" fill="url(#vx-4068f8acf10255bd-gradient2)"/>
+    <path d="M28 20.242641L30.828427 17.414214A2 2 0 0 0 28 14.585786A2 2 0 0 0 25.171573 17.414214Z" fill="url(#vx-4068f8acf10255bd-gradient5)"/>
+    <path d="M22 20.242641L24.828427 17.414214A2 2 0 0 0 22 14.585786A2 2 0 0 0 19.171573 17.414214Z" fill="url(#vx-4068f8acf10255bd-gradient5)"/>
   </g>
 </svg>

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 3" width="1200" height="600">
   <title>Seychelles</title>
-  <clipPath id="vx-5350b874-flag1">
+  <clipPath id="vx-5350b8748a666b75-flag1">
     <polygon points="0,0 6,0 6,3 0,3"/>
   </clipPath>
-  <g clip-path="url(#vx-5350b874-flag1)">
+  <g clip-path="url(#vx-5350b8748a666b75-flag1)">
     <polygon points="0,0 6,0 6,3 0,3" fill="#003580"/>
     <polygon points="0,3 0,0 2,0" fill="#003580"/>
     <polygon points="0,3 2,0 4,0" fill="#fdd44f"/>

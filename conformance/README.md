@@ -3,20 +3,23 @@
 Every Vexyl library has to pass this. [SDK.md](../SDK.md) says what the suite checks, and why.
 
 ```
-python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct] [--filter TEXT] [--resvg PATH] COMMAND...
+python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct,options] [--filter TEXT] [--resvg PATH] COMMAND...
 ```
 
 It needs Python with numpy, Pillow and jsonschema, and resvg at the version in `manifest.json`, since
 different rasterizers draw differently. COMMAND runs the library under test, and has to offer:
 
 ```
-COMMAND render [-ratio H:F] [-variant NAME] [-side SIDE] [-fit FIT] [-align WHERE]
-               [-fold NAME] [-fold-step N] -o OUT.svg FILE
+COMMAND render [-height PIXELS] [-ratio H:F] [-variant NAME] [-side SIDE] [-fit FIT] [-align WHERE]
+               [-fold NAME] [-fold-step N] [-id-prefix TEXT] -o OUT.svg FILE
 COMMAND model FILE                prints the canonical model as JSON
 COMMAND check -json FILE          prints problems as JSON, and exits nonzero if there are any
+COMMAND tree FILE                 prints the render as a tree of elements as JSON, each with a
+                                  name, attrs of a name and value, any text, and children
 ```
 
-A render that's refused exits nonzero.
+A render that's refused exits nonzero. `-ratio` is written hoist then fly, as flags' proportions
+are, so `1:2` is the option `ratio` of 2. `-align` takes `start`, `center` or `end`.
 
 ## Files
 
@@ -24,6 +27,7 @@ A render that's refused exits nonzero.
 |---|---|
 | `manifest.json` | The suite's `version`, the `format` version it's for, the tolerance, and each flag with its renders |
 | `model.schema.json` | The canonical model as a JSON Schema, which every library's models and every fixture have to fit |
+| `options.json`, `options.kdl` | A render's options that have to be refused, and those that have to work |
 | `distinct.json` | Pairs of document bodies that mean different things, so their models have to differ |
 | `valid/NAME.kdl` | A flag |
 | `valid/NAME.model.json` | Its expected model |
@@ -64,6 +68,14 @@ passing also takes all of these:
   no reference leaving the document, no function in a paint, no stray text and no repeated `id`.
 - Each document in `sanitize.json` gives exactly its canonical markup in the model, and draws that
   same artwork, with each ID and reference having gained a prefix.
+
+## What else is checked
+
+Beyond those, every library is run for its options: each refusal in `options.json`, the size that
+`-height` gives, `-id-prefix` starting every ID, and two documents or two forms of one not sharing
+an ID. Every seventh flag's `tree` has to keep its title and draw the same when written out.
+
+A flag not changing when it's rendered can't be seen from outside, so each library tests that itself.
 
 ## Changing the fixtures
 

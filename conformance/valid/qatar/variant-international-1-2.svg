@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 15" width="1200" height="600">
   <title>Qatar</title>
-  <clipPath id="vx-8a6180a6-8d27-flag1">
+  <clipPath id="vx-8a6180a6afe46e90-8d27-flag1">
     <polygon points="0,0 30,0 30,15 0,15"/>
   </clipPath>
-  <g clip-path="url(#vx-8a6180a6-8d27-flag1)">
+  <g clip-path="url(#vx-8a6180a6afe46e90-8d27-flag1)">
     <polygon points="0,0 30,0 30,15 0,15" fill="#8a1538"/>
-    <clipPath id="vx-8a6180a6-8d27-panel2">
+    <clipPath id="vx-8a6180a6afe46e90-8d27-panel2">
       <polygon points="0,0 8.5,0 11.5,0.833333 8.5,1.666667 11.5,2.5 8.5,3.333333 11.5,4.166667 8.5,5 11.5,5.833333 8.5,6.666667 11.5,7.5 8.5,8.333333 11.5,9.166667 8.5,10 11.5,10.833333 8.5,11.666667 11.5,12.5 8.5,13.333333 11.5,14.166667 8.5,15 0,15"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-8a6180a6-8d27-panel2)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-8a6180a6afe46e90-8d27-panel2)" style="isolation:isolate">
       <polygon points="0,0 11.5,0 11.5,15 0,15" fill="#ffffff"/>
     </g>
   </g>

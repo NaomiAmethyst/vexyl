@@ -50,7 +50,8 @@ vexyl render -ratio 1:2 -o sweden-long.svg flags/sweden.kdl
 vexyl render -variant vertical -o us-vertical.svg flags/united-states.kdl
 vexyl render -side reverse -o us-back.svg flags/united-states.kdl
 
-# A shape the flag can't reach, padded with transparency
+# A shape the flag can't reach, padded with transparency. -align takes
+# left, top or start; center; or right, bottom or end
 vexyl render -ratio 1:1 -fit pad -align left -o sweden-square.svg flags/sweden.kdl
 
 # Folded, or partway through folding

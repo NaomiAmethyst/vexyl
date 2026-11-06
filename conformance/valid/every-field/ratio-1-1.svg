@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="600" height="600">
   <title>Every field</title>
   <desc>Uses every field the canonical model has, so a library can&#39;t guess one</desc>
-  <clipPath id="vx-ff608d82-5f79-flag1">
+  <clipPath id="vx-ff608d82e80305dc-5f79-flag1">
     <polygon points="0,0 40,1 36,20 40,39 0,40"/>
   </clipPath>
-  <g clip-path="url(#vx-ff608d82-5f79-flag1)">
+  <g clip-path="url(#vx-ff608d82e80305dc-5f79-flag1)">
     <g opacity="0">
       <polygon points="0,0 40,0 40,40 0,40" fill="#003399"/>
     </g>
-    <clipPath id="vx-ff608d82-5f79-clip2">
+    <clipPath id="vx-ff608d82e80305dc-5f79-clip2">
       <polygon points="19.5,19.5 20.5,19.5 20.5,20.5 19.5,20.5"/>
     </clipPath>
-    <mask id="vx-ff608d82-5f79-mask3" maskUnits="userSpaceOnUse" x="0" y="0" width="40" height="40">
+    <mask id="vx-ff608d82e80305dc-5f79-mask3" maskUnits="userSpaceOnUse" x="0" y="0" width="40" height="40">
       <polygon points="0,0 40,0 40,40 0,40" fill="#fff"/>
       <polygon points="-1131.37085,-56.568542 20,1 20,1 1171.37085,-56.568542" fill="#000"/>
       <polygon points="-40.035355,-40.106066 20.020711,19.95 96.668542,19.95 96.668542,20.05 20.020711,20.05 -40.035355,80.106066 -40.106066,80.035355 19.929289,20 -40.106066,-40.035355" fill="#000"/>
     </mask>
-    <g opacity="0.5" clip-path="url(#vx-ff608d82-5f79-clip2)" mask="url(#vx-ff608d82-5f79-mask3)" style="mix-blend-mode:multiply">
+    <g opacity="0.5" clip-path="url(#vx-ff608d82e80305dc-5f79-clip2)" mask="url(#vx-ff608d82e80305dc-5f79-mask3)" style="mix-blend-mode:multiply">
       <polygon points="0,0 40,0 40,40 0,40" fill="#ffffff"/>
     </g>
     <polygon points="-1.355341,-36.949918 -3.329856,76.169935 41.355341,76.949918 43.329856,-36.169935" fill="#003399"/>
@@ -36,10 +36,10 @@
     <polygon points="-20.353553,59.646447 59.646447,-20.353553 60.353553,-19.646447 -19.646447,60.353553" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="0,0 0,0.707107 39.292893,40 40,40 40,39.292893 0.707107,0" fill="#cc0000"/>
     <polygon points="0,40 0,39.292893 39.292893,0 40,0 40,0.707107 0.707107,40" fill="#cc0000"/>
-    <clipPath id="vx-ff608d82-5f79-clip4">
+    <clipPath id="vx-ff608d82e80305dc-5f79-clip4">
       <polygon points="20,20 40,20 40,40 20,20 20,40 0,40 20,20 0,20 0,0 20,20 20,0 40,0"/>
     </clipPath>
-    <g clip-path="url(#vx-ff608d82-5f79-clip4)">
+    <g clip-path="url(#vx-ff608d82e80305dc-5f79-clip4)">
       <polygon points="0,0 0,1.414214 38.585786,40 40,40 40,38.585786 1.414214,0" fill="#cc0000"/>
       <polygon points="0,40 0,38.585786 38.585786,0 40,0 40,1.414214 1.414214,40" fill="#cc0000"/>
     </g>
@@ -107,28 +107,28 @@
         <polygon points="0,0 40,0 40,40 0,40" fill="#ffffff"/>
       </g>
     </g>
-    <clipPath id="vx-ff608d82-5f79-panel6">
+    <clipPath id="vx-ff608d82e80305dc-5f79-panel6">
       <polygon points="0,0 0,0.75 5,1.25 10,0.75 15,1.25 20,0.75 25,1.25 30,0.75 35,1.25 40,0.75 40,0"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-ff608d82-5f79-panel6)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-ff608d82e80305dc-5f79-panel6)" style="isolation:isolate">
       <polygon points="0,0 40,0 40,1.25 0,1.25" fill="#cc0000"/>
     </g>
-    <clipPath id="vx-ff608d82-5f79-panel7">
+    <clipPath id="vx-ff608d82e80305dc-5f79-panel7">
       <polygon points="0,0 2,0 2,2 0,2"/>
     </clipPath>
-    <g transform="translate(38 0)" clip-path="url(#vx-ff608d82-5f79-panel7)" style="isolation:isolate">
+    <g transform="translate(38 0)" clip-path="url(#vx-ff608d82e80305dc-5f79-panel7)" style="isolation:isolate">
       <polygon points="0,0 2,0 2,2 0,2" fill="#cc0000"/>
     </g>
-    <clipPath id="vx-ff608d82-5f79-panel8">
+    <clipPath id="vx-ff608d82e80305dc-5f79-panel8">
       <polygon points="0,0 2,0 2,2 0,2"/>
     </clipPath>
-    <g transform="translate(4 14)" clip-path="url(#vx-ff608d82-5f79-panel8)" style="isolation:isolate">
+    <g transform="translate(4 14)" clip-path="url(#vx-ff608d82e80305dc-5f79-panel8)" style="isolation:isolate">
       <polygon points="0,0 2,0 2,2 0,2" fill="#cc0000"/>
     </g>
-    <clipPath id="vx-ff608d82-5f79-panel9">
+    <clipPath id="vx-ff608d82e80305dc-5f79-panel9">
       <polygon points="0,0 4,0 4,4 0,4"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-ff608d82-5f79-panel9)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-ff608d82e80305dc-5f79-panel9)" style="isolation:isolate">
       <g transform="scale(2 2)">
         <polygon points="0,0 2,0 2,2 0,2" fill="#ffffff"/>
       </g>

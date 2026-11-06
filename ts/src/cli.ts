@@ -5,24 +5,28 @@
 /// <reference types="node" />
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { model, parse, svg, validate, type Flag, type Options } from "./index.js";
+import { model, parse, svg, svgTree, validate, type Flag, type Options, type SvgElement } from "./index.js";
 
 const usage = `usage:
   vexyl render [options] FILE   render a flag to SVG
   vexyl check [-json] FILE...   validate flags, with -json listing one file's problems
   vexyl model FILE              print a flag's parsed model as JSON
+  vexyl tree [options] FILE     print a render as a tree of elements, as JSON
 
 render options:
   -o FILE         write to a file instead of standard output
   -height PIXELS  the image's height
-  -ratio H:F      another proportion, by the flag's adapt rules, such as 1:2
+  -ratio H:F      another proportion, by the flag's adapt rules, written hoist
+                  then fly, such as 1:2
   -variant NAME   one of the flag's variants, such as vertical or banner
   -side SIDE      obverse or reverse
   -fit FIT        error, the default, or pad with transparency if the flag
                   can't reach the ratio
-  -align WHERE    place a padded flag: left, right, top, bottom or center
+  -align WHERE    place a padded flag: left, top or start; center; or right,
+                  bottom or end
   -fold NAME      show one of the flag's folds
   -fold-step N    stop the fold after N steps
+  -id-prefix TEXT start every ID in the output with this
 
 FILE can be - for standard input.
 `;
@@ -37,7 +41,7 @@ const alignments: ReadonlyMap<string, Options["align"]> = new Map([
 	["end", "end"],
 ]);
 
-const renderFlags = new Set(["o", "height", "ratio", "variant", "side", "fit", "align", "fold", "fold-step"]);
+const renderFlags = new Set(["o", "height", "ratio", "variant", "side", "fit", "align", "fold", "fold-step", "id-prefix"]);
 
 /** Reads the source as UTF-8, refusing anything that isn't rather than replacing it. */
 function readSource(path: string): string {
@@ -60,7 +64,7 @@ function parseRatio(text: string): number {
 	return fly / hoist;
 }
 
-function render(args: string[]): void {
+function render(args: string[], asTree: boolean): void {
 	const given = new Map<string, string>();
 	let i = 0;
 	for (; i < args.length; i++) {
@@ -131,7 +135,11 @@ function render(args: string[]): void {
 	if (foldStep !== undefined) {
 		opts.foldStep = foldStep === "" ? NaN : Number(foldStep);
 	}
-	const out = svg(doc, opts);
+	const idPrefix = given.get("id-prefix");
+	if (idPrefix) {
+		opts.idPrefix = idPrefix;
+	}
+	const out = asTree ? JSON.stringify(treeJson(svgTree(doc, opts))) + "\n" : svg(doc, opts);
 	const output = given.get("o");
 	if (output) {
 		writeFileSync(output, out);
@@ -140,10 +148,17 @@ function render(args: string[]): void {
 	}
 }
 
+function treeJson(e: SvgElement): unknown {
+	return { ...e, children: e.children.map(treeJson) };
+}
+
 function run(args: string[]): void {
 	switch (args[0]) {
 		case "render":
-			render(args.slice(1));
+			render(args.slice(1), false);
+			return;
+		case "tree":
+			render(args.slice(1), true);
 			return;
 		case "check": {
 			if (args[1] === "-json") {

@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 10" width="900" height="600">
   <title>Benin</title>
   <g transform="matrix(-1 0 0 1 15 0)">
-    <clipPath id="vx-91af8bd1-b34d-flag1">
+    <clipPath id="vx-91af8bd1e335fae2-b34d-flag1">
       <polygon points="0,0 15,0 15,10 0,10"/>
     </clipPath>
-    <g clip-path="url(#vx-91af8bd1-b34d-flag1)">
+    <g clip-path="url(#vx-91af8bd1e335fae2-b34d-flag1)">
       <polygon points="0,0 15,0 15,10 0,10" fill="#ffcc00"/>
       <polygon points="0,5 15,5 15,10 0,10" fill="#e4002b"/>
-      <clipPath id="vx-91af8bd1-b34d-panel2">
+      <clipPath id="vx-91af8bd1e335fae2-b34d-panel2">
         <polygon points="0,0 6,0 6,10 0,10"/>
       </clipPath>
-      <g transform="translate(0 0)" clip-path="url(#vx-91af8bd1-b34d-panel2)" style="isolation:isolate">
+      <g transform="translate(0 0)" clip-path="url(#vx-91af8bd1e335fae2-b34d-panel2)" style="isolation:isolate">
         <polygon points="0,0 6,0 6,10 0,10" fill="#00843d"/>
       </g>
     </g>

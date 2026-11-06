@@ -6,7 +6,7 @@ import { foldFacets, foldShape } from "./fold.js";
 import { boundary, offsetPolygon } from "./geometry.js";
 import { addSize, inLimits, layersHeight, layersSize, maxCopies, maxSize, waves } from "./limits.js";
 import { canonical, sanitizeSvg, usesCurrentColor } from "./sanitize.js";
-import { dict, formatNumber, hash, numbersIn } from "./text.js";
+import { decimalForm, dict, formatNumber, hash, numbersIn } from "./text.js";
 import type {
 	Adapt, AdaptRule, Adaptation, Anchor, Axis, BandLayer, BarsLayer, BlendMode, Border, Box, ChargeLayer, ChecksLayer, ChevronsLayer,
 	ColorRef, CornerName, CrossLayer, Define, EdgeName, Effects, EmblemLayer, EmbeddedSvg, FieldLayer, Fimbriation, Flag, Fold, FoldStep,
@@ -23,8 +23,6 @@ const noColor = "none";
 
 const colorValue = /^#[0-9a-fA-F]{6}$/;
 const seriesValue = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-// \s is spelled out, because JavaScript's also matches Unicode spaces and the format's doesn't.
-const pathValue = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\-\t\n\f\r ]+$/;
 
 const alongValues = ["fly", "hoist", "bend", "bend-sinister"];
 const fromValues = ["hoist", "fly", "top", "bottom"];
@@ -91,6 +89,89 @@ function newEffects(): Effects {
 	return { opacity: 1, blend: "normal", cuts: [] };
 }
 
+const pathNumber = new RegExp(`^${decimalForm}`);
+const pathArguments: ReadonlyMap<string, number> = new Map([["M", 2], ["L", 2], ["H", 1], ["V", 1], ["C", 6], ["S", 4], ["Q", 4], ["T", 2], ["A", 7], ["Z", 0]]);
+
+/**
+ * Checks a path against SVG's grammar for path data, within the format's limits on numbers, so that
+ * a bad one can't silently draw part of a shape or nothing.
+ */
+export function validPath(d: string): boolean {
+	let i = 0;
+	const space = (): void => {
+		while (i < d.length && " \t\n\f\r".includes(d[i]!)) {
+			i++;
+		}
+	};
+	/** Skips whitespace and at most one comma, and says if there was a comma. */
+	const separator = (): boolean => {
+		space();
+		if (d[i] === ",") {
+			i++;
+			space();
+			return true;
+		}
+		return false;
+	};
+	const number = (): boolean => {
+		// A window keeps this from copying the rest of a long path, unless the number fills it.
+		let m = pathNumber.exec(d.slice(i, i + 64));
+		if (m !== null && m[0].length === 64) {
+			m = pathNumber.exec(d.slice(i));
+		}
+		if (m === null || Math.abs(Number(m[0])) > 1e12) {
+			return false;
+		}
+		i += m[0].length;
+		return true;
+	};
+	space();
+	if (d[i] !== "M" && d[i] !== "m") {
+		return false;
+	}
+	while (i < d.length) {
+		const c = d[i]!.toUpperCase();
+		const count = pathArguments.get(c);
+		if (count === undefined) {
+			return false;
+		}
+		i++;
+		space();
+		// A command can repeat its arguments with no letter, except for Z, which has none.
+		for (let first = true; count > 0 && (first || (i < d.length && !"MmLlHhVvCcSsQqTtAaZz".includes(d[i]!))); first = false) {
+			for (let arg = 0; arg < count; arg++) {
+				if (c === "A" && (arg === 3 || arg === 4)) {
+					if (d[i] !== "0" && d[i] !== "1") {
+						return false;
+					}
+					i++;
+				} else if (!number()) {
+					return false;
+				}
+				if (arg < count - 1) {
+					separator();
+				}
+			}
+			if (separator() && (i >= d.length || "MmLlHhVvCcSsQqTtAaZz".includes(d[i]!))) {
+				return false;
+			}
+		}
+		space();
+	}
+	return true;
+}
+
+/** Finds where something is, as SDK section 2 says to: lines end at LF, and a column counts code points. */
+function place(source: string, offset: number): { line: number; column: number } {
+	const before = source.slice(0, offset);
+	const start = before.lastIndexOf("\n") + 1;
+	let line = 1;
+	for (let i = before.indexOf("\n"); i >= 0; i = before.indexOf("\n", i + 1)) {
+		line++;
+	}
+	return { line, column: [...before.slice(start)].length + 1 };
+}
+
 function validDate(text: string): boolean {
 	const m = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(text);
 	if (m === null) {
@@ -122,20 +203,20 @@ export function read(text: string, name?: string): { flag?: Flag; problems: Prob
 		doc = parseKdl(source, { storeLocations: true });
 	} catch (e) {
 		if (e instanceof InvalidKdlError) {
-			return { problems: syntaxProblems(e, name) };
+			return { problems: syntaxProblems(e, source, name) };
 		}
 		throw e;
 	}
-	const duplicates = duplicateProperties(doc, name);
+	const duplicates = duplicateProperties(doc, source, name);
 	if (duplicates.length > 0) {
 		return { problems: duplicates };
 	}
-	const p = new Parser(`vx-${hash(source)}-`, name);
+	const p = new Parser(`vx-${hash(source)}-`, source, name);
 	const flag = p.document(doc);
 	return p.problems.length > 0 ? { problems: p.problems } : { flag, problems: [] };
 }
 
-function syntaxProblems(e: InvalidKdlError, name?: string): Problem[] {
+function syntaxProblems(e: InvalidKdlError, source: string, name?: string): Problem[] {
 	const problems: Problem[] = [];
 	for (const one of e.flat()) {
 		const problem: Problem = { message: one.message };
@@ -143,8 +224,7 @@ function syntaxProblems(e: InvalidKdlError, name?: string): Problem[] {
 			problem.source = name;
 		}
 		if (one.start !== undefined) {
-			problem.line = one.start.line;
-			problem.column = one.start.column;
+			Object.assign(problem, place(source, one.start.offset));
 		}
 		problems.push(problem);
 	}
@@ -152,7 +232,7 @@ function syntaxProblems(e: InvalidKdlError, name?: string): Problem[] {
 }
 
 /** KDL lets a later property win, and for a flag's exact numbers that would hide a mistake. */
-function duplicateProperties(doc: Document, name?: string): Problem[] {
+function duplicateProperties(doc: Document, source: string, name?: string): Problem[] {
 	const problems: Problem[] = [];
 	const visit = (nodes: Node[]): void => {
 		for (const n of nodes) {
@@ -165,8 +245,7 @@ function duplicateProperties(doc: Document, name?: string): Problem[] {
 						problem.source = name;
 					}
 					if (at !== undefined) {
-						problem.line = at.line;
-						problem.column = at.column;
+						Object.assign(problem, place(source, at.offset));
 					}
 					problem.node = n.getName();
 					problems.push(problem);
@@ -202,6 +281,7 @@ const stages: ReadonlyMap<string, number> = new Map([
 class Parser {
 	readonly problems: Problem[] = [];
 	private readonly idPrefix: string;
+	private readonly source: string;
 	private readonly name: string | undefined;
 	private defines: Record<string, Define> = dict();
 	private palette: Record<string, string> = dict();
@@ -213,8 +293,9 @@ class Parser {
 	/** The longer side of the flag's own grid, for counting shaped edges. */
 	private longer = 0;
 
-	constructor(idPrefix: string, name?: string) {
+	constructor(idPrefix: string, source: string, name?: string) {
 		this.idPrefix = idPrefix;
+		this.source = source;
 		this.name = name;
 	}
 
@@ -225,8 +306,7 @@ class Parser {
 			problem.source = this.name;
 		}
 		if (at !== undefined) {
-			problem.line = at.line;
-			problem.column = at.column;
+			Object.assign(problem, place(this.source, at.offset));
 		}
 		this.problems.push(problem);
 	}
@@ -261,8 +341,7 @@ class Parser {
 				const at = getLocation(n)?.start;
 				const problem: Problem = { message: `document must start with \`vexyl ${formatVersion}\`` };
 				if (at !== undefined) {
-					problem.line = at.line;
-					problem.column = at.column;
+					Object.assign(problem, place(this.source, at.offset));
 				}
 				this.problems.push(problem);
 				return flag;
@@ -430,8 +509,12 @@ class Parser {
 		if (m.name === "") {
 			this.errf(n, "needs a `name`");
 		}
-		if (m.date && m.until && m.until < m.date) {
-			this.errf(n, "`until` comes before `date`");
+		if (m.date && m.until) {
+			// Each is only known to its own precision, so they compare only as far as both go.
+			const shared = Math.min(m.date.length, m.until.length);
+			if (m.until.slice(0, shared) < m.date.slice(0, shared)) {
+				this.errf(n, "`until` comes before `date`");
+			}
 		}
 	}
 
@@ -467,6 +550,10 @@ class Parser {
 			}
 			if (name === noColor) {
 				this.errf(c, `"${noColor}" is reserved for leaving a gap`);
+				continue;
+			}
+			if (name === "") {
+				this.errf(c, "a color's name can't be empty");
 				continue;
 			}
 			seen.add(name);
@@ -1585,7 +1672,7 @@ class Parser {
 
 	private pathData(n: Node): string {
 		const d = this.str(n);
-		if (!pathValue.test(d)) {
+		if (!validPath(d)) {
 			this.errf(n, "isn't SVG path data");
 			return "";
 		}
@@ -1809,7 +1896,7 @@ class Parser {
 	private define(n: Node): void {
 		const a0 = args(n);
 		const name = a0[0];
-		if (a0.length !== 1 || typeof name !== "string") {
+		if (a0.length !== 1 || typeof name !== "string" || name === "") {
 			this.errf(n, "needs a name");
 			return;
 		}
@@ -1837,7 +1924,7 @@ class Parser {
 			if (s.kind === "path" && c.hasArguments()) {
 				// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
 				const a1 = args(c);
-				if (a1.length === 1 && typeof a1[0] === "string" && pathValue.test(a1[0])) {
+				if (a1.length === 1 && typeof a1[0] === "string" && validPath(a1[0])) {
 					s.d = a1[0];
 				} else {
 					this.errf(c, "isn't SVG path data");
@@ -1919,7 +2006,7 @@ class Parser {
 			path: (c) => {
 				const a1 = args(c);
 				const d = a1[0];
-				if (a1.length !== 1 || typeof d !== "string" || !pathValue.test(d)) {
+				if (a1.length !== 1 || typeof d !== "string" || !validPath(d)) {
 					this.errf(c, "isn't SVG path data");
 					return;
 				}
@@ -1991,7 +2078,7 @@ class Parser {
 	private variant(n: Node, flag: Flag): void {
 		const a0 = args(n);
 		const name = a0[0];
-		if (a0.length !== 1 || typeof name !== "string") {
+		if (a0.length !== 1 || typeof name !== "string" || name === "") {
 			this.errf(n, "needs a name");
 			return;
 		}
@@ -2125,7 +2212,7 @@ class Parser {
 	private fold(n: Node, flag: Flag): void {
 		const a0 = args(n);
 		const name = a0[0];
-		if (a0.length !== 1 || typeof name !== "string") {
+		if (a0.length !== 1 || typeof name !== "string" || name === "") {
 			this.errf(n, "needs a name");
 			return;
 		}

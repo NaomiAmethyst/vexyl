@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" width="600" height="600">
   <title>Turkey</title>
-  <clipPath id="vx-b13d4ded-9e2f-flag1">
+  <clipPath id="vx-b13d4dedc7ce2624-9e2f-flag1">
     <polygon points="0,0 360,0 360,240 0,240"/>
   </clipPath>
-  <g clip-path="url(#vx-b13d4ded-9e2f-flag1)">
+  <g clip-path="url(#vx-b13d4dedc7ce2624-9e2f-flag1)">
     <polygon points="0,0 360,0 360,240 0,240" fill="#d21034"/>
     <path d="M170.7 87.914022A60 60 0 1 0 170.7 152.085978A48 48 0 1 1 170.7 87.914022Z" fill="#ffffff"/>
     <polygon points="167,120 187.72949,113.26458 187.72949,91.468305 200.54102,109.101862 221.27051,102.366442 208.45898,120 221.27051,137.633558 200.54102,130.898138 187.72949,148.531695 187.72949,126.73542" fill="#ffffff"/>

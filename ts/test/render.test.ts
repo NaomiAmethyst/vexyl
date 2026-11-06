@@ -10,6 +10,7 @@ import { foldFacets, foldShape } from "../src/fold.js";
 import {
 	axis, bandPoly, barPolys, boundary, cardioidPoints, chevronPolys, clipConvex, crossPolys, dot, offsetPolygon, position, rectPoly, regionCenter, shapeGeom, sub, type Region, type Vec,
 } from "../src/geometry.js";
+import { validPath } from "../src/parse.js";
 import { pallPoints, rayPolys } from "../src/shapes.js";
 import { model, parse, RenderError, svg, svgTree, treeToSvg, validate, type BarsLayer, type ChargeLayer, type ChevronsLayer, type CrossLayer, type EmblemLayer, type Options, type RaysLayer, type StarShape } from "../src/index.js";
 import { num } from "../src/text.js";
@@ -870,4 +871,46 @@ test("a problem's line doesn't depend on how lines end", () => {
 	const note = (end: string) => parse(`vexyl 1${end}meta {${end}name "T"${end}note """${end}  a${end}  b${end}  """${end}}${end}palette { a "#112233"; }${end}proportion hoist=1 fly=1${end}`).meta.notes[0];
 	assert.equal(note("\r\n"), "a\nb");
 	assert.equal(note("\r"), "a\nb");
+});
+
+test("path data follows SVG's grammar", () => {
+	for (const d of ["M0 0", "m1,2", " M 0 0 L 1 1 ", "M0 0 1 1 2 2z", "M0 0H1V1Z", "M0 0h1v1z M1 1", "M0-1.5.5.5", "M0 0C1 2 3 4 5 6 7 8 9 10 11 12", "M0 0S1 2 3 4Q1 2 3 4T1 2", "M0 0A1 1 0 0 1 2 2", "M0 0a1 1 0 012 2", "M1e2 -1E-2", "M0 0Zm1 1l1 1"]) {
+		assert.ok(validPath(d), d);
+	}
+	for (const d of ["", " ", "Z", "L0 0", "M", "M0", "M0 0 1", "M0 0L", "M0 0H", "eee", "M0 0X1", "M0,,0", "M0 0,", "M0 0,L1 1", "M0 0Z1", "M0 0A1 1 0 2 0 1 1", "M.", "M1e 0", "M+ 1", "M0x1 0", "M1_0 0", "M1\u00a00"]) {
+		assert.ok(!validPath(d), d);
+	}
+});
+
+test("a problem's place counts code points, and only LF ends a line", () => {
+	const at = (body: string) => validate(header + body)[0]!;
+	assert.deepEqual([at("/* 𝒳é */ field nope\n").line, at("/* 𝒳é */ field nope\n").column], [5, 10]);
+	assert.deepEqual([at("/*\u0085\u2028*/ field nope\n").line, at("/*\u0085\u2028*/ field nope\n").column], [5, 8]);
+});
+
+test("an ID prefix starts every ID", () => {
+	const f = parse(header + "field a { clip { disc { radius 1; }; }; }\ncharge svg { fly 1; hoist 1; markup \"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect id='r'/></svg>\"; }\n");
+	const ids = [...svg(f, { idPrefix: "mine-", side: "reverse" }).matchAll(/ id="([^"]+)"/g)].map((m) => m[1]!);
+	assert.ok(ids.length >= 3);
+	assert.ok(ids.every((id) => id.startsWith("mine-")), `${ids}`);
+	for (const bad of ["1a", "a b", 'a"', "a<", ""]) {
+		assert.throws(() => svg(f, { idPrefix: bad }), RenderError, bad);
+	}
+});
+
+test("a tree keeps the title and description", () => {
+	const f = parse('vexyl 1\nmeta { name "A & B"; description "<C>"; }\npalette { a "#112233"; }\nproportion hoist=1 fly=1\nfield a\n');
+	const root = svgTree(f);
+	assert.equal(root.children[0]!.name, "title");
+	assert.equal(root.children[0]!.text, "A & B");
+	assert.equal(root.children[1]!.text, "<C>");
+	const written = treeToSvg(root);
+	assert.ok(written.includes("<title>A &amp; B</title>") && written.includes("<desc>&lt;C&gt;</desc>"), written);
+});
+
+test("an end date compares only as far as both dates go", () => {
+	const doc = (date: string, until: string) => `vexyl 1\nmeta { name "T"; date "${date}"; until "${until}"; }\npalette { a "#112233"; }\nproportion hoist=1 fly=1\n`;
+	assert.deepEqual(validate(doc("2000-06", "2000")), []);
+	assert.ok(validate(doc("2000-06", "1999")).length > 0);
+	assert.ok(validate(doc("2000-06-15", "2000-05")).length > 0);
 });

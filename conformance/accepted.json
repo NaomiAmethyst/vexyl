@@ -36,6 +36,10 @@
   "file": "accepted/a-meta-s-date-within-the-same-year-as-its-end.kdl"
  },
  {
+  "name": "an end known only to the year of its beginning",
+  "file": "accepted/an-end-known-only-to-the-year-of-its-beginning.kdl"
+ },
+ {
   "name": "a number at each end of what's allowed",
   "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
  }

@@ -5,6 +5,7 @@ package vexyl
 
 import (
 	"errors"
+	"math"
 	"regexp"
 	"slices"
 	"strconv"
@@ -16,10 +17,10 @@ import (
 
 var (
 	seriesValue  = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
-	pathValue    = regexp.MustCompile(`^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\-\s]+$`)
 	decimalWhole = regexp.MustCompile(`^` + decimalForm + `$`)
 	numberList   = regexp.MustCompile(`^\s*` + decimalForm + `(?:[\s,]+` + decimalForm + `)*\s*$`)
 	numberSplit  = regexp.MustCompile(`[\s,]+`)
+	pathNumber   = regexp.MustCompile(`^` + decimalForm)
 	cornerValues = []string{"upper-hoist", "upper-fly", "lower-hoist", "lower-fly"}
 	rayFromNames = append([]string{"center", "hoist", "fly", "top", "bottom"}, cornerValues...)
 	shapeKinds   = []string{"disc", "ring", "rect", "plus", "triangle", "star", "heart", "cardioid",
@@ -45,7 +46,7 @@ func (p *parser) flagValue(n *kdl.Node) bool {
 
 func (p *parser) pathData(n *kdl.Node) string {
 	d := p.str(n)
-	if !pathValue.MatchString(d) {
+	if !validPath(d) {
 		p.errf(n, "isn't SVG path data")
 		return ""
 	}
@@ -88,6 +89,79 @@ func numbersIn(text string) ([]float64, bool) {
 		out[i] = v
 	}
 	return out, true
+}
+
+// pathArguments is how many numbers each of SVG's path commands takes.
+var pathArguments = map[byte]int{'M': 2, 'L': 2, 'H': 1, 'V': 1, 'C': 6, 'S': 4, 'Q': 4, 'T': 2, 'A': 7, 'Z': 0}
+
+// validPath checks a path against SVG's grammar for path data, within the format's limits
+// on numbers, so that a bad one can't silently draw part of a shape or nothing.
+func validPath(d string) bool {
+	i := 0
+	space := func() {
+		for i < len(d) && strings.IndexByte(asciiSpace, d[i]) >= 0 {
+			i++
+		}
+	}
+	// separator skips whitespace and at most one comma, and says if there was a comma.
+	separator := func() bool {
+		space()
+		if i < len(d) && d[i] == ',' {
+			i++
+			space()
+			return true
+		}
+		return false
+	}
+	number := func() bool {
+		m := pathNumber.FindString(d[i:])
+		if m == "" {
+			return false
+		}
+		v, err := strconv.ParseFloat(m, 64)
+		if (err != nil && !errors.Is(err, strconv.ErrRange)) || math.Abs(v) > numberLimit {
+			return false
+		}
+		i += len(m)
+		return true
+	}
+	space()
+	if i >= len(d) || (d[i] != 'M' && d[i] != 'm') {
+		return false
+	}
+	for i < len(d) {
+		c := d[i]
+		if c >= 'a' && c <= 'z' {
+			c -= 'a' - 'A'
+		}
+		count, ok := pathArguments[c]
+		if !ok {
+			return false
+		}
+		i++
+		space()
+		// A command can repeat its arguments with no letter, except for Z, which has none.
+		for first := true; count > 0 && (first || (i < len(d) && strings.IndexByte("MmLlHhVvCcSsQqTtAaZz", d[i]) < 0)); first = false {
+			for arg := range count {
+				if c == 'A' && (arg == 3 || arg == 4) {
+					if i >= len(d) || (d[i] != '0' && d[i] != '1') {
+						return false
+					}
+					i++
+				} else if !number() {
+					return false
+				}
+				if arg < count-1 {
+					separator()
+				}
+			}
+			if separator() && (i >= len(d) || strings.IndexByte("MmLlHhVvCcSsQqTtAaZz", d[i]) >= 0) {
+				return false
+			}
+		}
+		space()
+	}
+	return true
 }
 
 func (p *parser) boxValue(n *kdl.Node, text string) [4]float64 {
@@ -293,6 +367,10 @@ func (p *parser) define(n *kdl.Node) {
 		return
 	}
 	name := args[0].String()
+	if name == "" {
+		p.errf(n, "needs a name")
+		return
+	}
 	if _, dup := p.defines[name]; dup || slices.Contains(shapeKinds, name) || name == "svg" || name == "pile" || name == "pall" {
 		p.errf(n, "%q is already taken", name)
 		return
@@ -315,7 +393,7 @@ func (p *parser) define(n *kdl.Node) {
 		s := Shape{Kind: c.Name()}
 		if s.Kind == "path" && len(c.Arguments()) > 0 {
 			// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
-			if a := c.Arguments(); len(a) == 1 && a[0].Kind() == kdl.String && pathValue.MatchString(a[0].String()) {
+			if a := c.Arguments(); len(a) == 1 && a[0].Kind() == kdl.String && validPath(a[0].String()) {
 				s.D = a[0].String()
 			} else {
 				p.errf(c, "isn't SVG path data")
@@ -390,7 +468,7 @@ func (p *parser) outline(n *kdl.Node) *Outline {
 		},
 		"path": func(c *kdl.Node) {
 			a := c.Arguments()
-			if len(a) != 1 || a[0].Kind() != kdl.String || !pathValue.MatchString(a[0].String()) {
+			if len(a) != 1 || a[0].Kind() != kdl.String || !validPath(a[0].String()) {
 				p.errf(c, "isn't SVG path data")
 				return
 			}
@@ -467,6 +545,10 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 	}
 	p.noProps(n)
 	name := args[0].String()
+	if name == "" {
+		p.errf(n, "needs a name")
+		return
+	}
 	if _, dup := flag.Variants[name]; dup {
 		p.errf(n, "%q is defined twice", name)
 		return
@@ -615,6 +697,10 @@ func (p *parser) fold(n *kdl.Node, flag *Flag) {
 	}
 	p.noProps(n)
 	name := args[0].String()
+	if name == "" {
+		p.errf(n, "needs a name")
+		return
+	}
 	if _, dup := flag.Folds[name]; dup {
 		p.errf(n, "%q is defined twice", name)
 		return

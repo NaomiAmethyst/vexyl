@@ -852,6 +852,85 @@
   "line": 5
  },
  {
+  "name": "not path data",
+  "file": "invalid/not-path-data.kdl",
+  "line": 5
+ },
+ {
+  "name": "path with no moveto",
+  "file": "invalid/path-with-no-moveto.kdl",
+  "line": 5
+ },
+ {
+  "name": "path moveto with too few numbers",
+  "file": "invalid/path-moveto-with-too-few-numbers.kdl",
+  "line": 5
+ },
+ {
+  "name": "path curve with too few numbers",
+  "file": "invalid/path-curve-with-too-few-numbers.kdl",
+  "line": 5
+ },
+ {
+  "name": "path arc with a bad flag",
+  "file": "invalid/path-arc-with-a-bad-flag.kdl",
+  "line": 5
+ },
+ {
+  "name": "path number beyond the limit",
+  "file": "invalid/path-number-beyond-the-limit.kdl",
+  "line": 5
+ },
+ {
+  "name": "path number past what a number can hold",
+  "file": "invalid/path-number-past-what-a-number-can-hold.kdl",
+  "line": 5
+ },
+ {
+  "name": "path number after a close",
+  "file": "invalid/path-number-after-a-close.kdl",
+  "line": 5
+ },
+ {
+  "name": "path in a define that isn't path data",
+  "file": "invalid/path-in-a-define-that-isn-t-path-data.kdl",
+  "line": 5
+ },
+ {
+  "name": "path outline that isn't path data",
+  "file": "invalid/path-outline-that-isn-t-path-data.kdl",
+  "line": 5
+ },
+ {
+  "name": "empty color name",
+  "file": "invalid/empty-color-name.kdl"
+ },
+ {
+  "name": "empty define name",
+  "file": "invalid/empty-define-name.kdl",
+  "line": 5
+ },
+ {
+  "name": "empty variant name",
+  "file": "invalid/empty-variant-name.kdl",
+  "line": 5
+ },
+ {
+  "name": "empty fold name",
+  "file": "invalid/empty-fold-name.kdl",
+  "line": 6
+ },
+ {
+  "name": "until a year before the date's",
+  "file": "invalid/until-a-year-before-the-date-s.kdl",
+  "line": 2
+ },
+ {
+  "name": "until a month before the date's",
+  "file": "invalid/until-a-month-before-the-date-s.kdl",
+  "line": 2
+ },
+ {
   "name": "not utf-8",
   "file": "invalid/not-utf-8.kdl"
  },
@@ -1889,5 +1968,29 @@
   "name": "sanitizer: another encoding",
   "file": "invalid/sanitizer-another-encoding.kdl",
   "line": 5
+ },
+ {
+  "name": "column after characters beyond the basic plane",
+  "file": "invalid/column-after-characters-beyond-the-basic-plane.kdl",
+  "line": 5,
+  "column": 10
+ },
+ {
+  "name": "line after a next line and a line separator",
+  "file": "invalid/line-after-a-next-line-and-a-line-separator.kdl",
+  "line": 5,
+  "column": 8
+ },
+ {
+  "name": "line after a form feed",
+  "file": "invalid/line-after-a-form-feed.kdl",
+  "line": 5,
+  "column": 7
+ },
+ {
+  "name": "column in a crlf document",
+  "file": "invalid/column-in-a-crlf-document.kdl",
+  "line": 5,
+  "column": 3
  }
 ]

@@ -121,7 +121,7 @@ whitespace around the whole. Each is subject to the limits in §15.
 | `description` | no | Prose description |
 | `version` | no | Names this version of the flag, such as `"50-star"` |
 | `date` | no | When this version took effect: `YYYY`, `YYYY-MM` or `YYYY-MM-DD` |
-| `until` | no | When this version stopped being current, in the same form |
+| `until` | no | When this version stopped being current, in the same form, and not before `date` as far as both are known |
 | `series` | no | A stable ID linking the versions of one flag, in lowercase words joined by hyphens |
 | `note` | no, repeatable | A remark for anyone reading or using the flag or this file |
 | `law` | no, repeatable | An instrument that defines or governs the flag, with any number of `source` children |
@@ -569,6 +569,9 @@ charge SHAPE COLOR {
 }
 ```
 
+A charge can repeat `at`, placing a copy at each position, as a constellation does. That can't be
+combined with `repeat`.
+
 ### 8.1 Shapes
 
 These are written as they would appear in a `charge`, `clip` or `cut`. Each shape
@@ -608,7 +611,9 @@ circles MUST cross. A `sun`'s `disc` is its radius, and `radius` reaches the tip
 rays, which start at `disc + gap`. `points` defaults to 12, and `spread` is the share
 from 0 to 1 of its slot that each ray fills at its base, which defaults to 1.
 
-A `path` is for shapes that have no other name. `d` is SVG path data, and `box` is
+A `path` is for shapes that have no other name. `d` is path data by SVG's grammar, with its numbers
+within the largest magnitude in §15, and anything else MUST be rejected rather than drawn as far as
+it goes. `box` is
 `"x y width height"`, the area of its coordinates that fits within `fly` by `hoist`,
 keeping its shape and centered on the charge's position. Either size can be left out to
 take its size from the other. It keeps a palette color and everything else a charge has,
@@ -777,9 +782,6 @@ A renderer MUST rewrite every `id` and reference with a prefix unique to each ti
 drawn, or otherwise isolate it, so that one piece of artwork can't refer to the flag's own
 definitions or another's. A `style` keeps its declarations in their order, because a later one
 can override an earlier one.
-
-A charge can also repeat `at`, placing a copy at each position, as a constellation does.
-That can't be combined with `repeat`.
 
 ## 9. Emblems, groups, panels, definitions and outlines
 
@@ -1098,17 +1100,19 @@ facets instead, first mirrored across the flag so that it's in the same coordina
 (x, y) -> (fly - x, y)
 ```
 
-Renderers SHOULD mark each facet's edge with a faint line so the folds can be seen. The
-image is cropped to the facets' bounds. Rendering takes a fold's name and optionally a number
+So that the folds can be seen, a renderer MUST mark each facet's edge with a black line of 35%
+opacity with round joins, as wide as 0.4% of the longer side of the facets' bounds. It's drawn
+above that facet and beneath the next. The image is cropped to the facets' bounds. Rendering takes a fold's name and optionally a number
 of steps to stop after, which makes step-by-step instructions. A fold can't be applied
 to a turned variant.
 
 ## 14. Output
 
-Renderers targeting SVG or a similar format SHOULD make any generated IDs unique
-to the document, for example with a hash of its source. Several flags are often
-inlined in one page, where IDs share a single namespace and a collision would
-make one flag use another's clip paths.
+Renderers targeting SVG or a similar format MUST make any generated IDs unique within what they
+draw, and SHOULD make them unique to the document, for example with a hash of its source. Several
+flags are often inlined in one page, where IDs share a single namespace and a collision would
+make one flag use another's clip paths. A hash can't rule that out against a document trying to
+collide, so a renderer SHOULD let whatever embeds it give the IDs a prefix of its own.
 
 ## 15. Limits
 
@@ -1171,6 +1175,5 @@ of this format's vocabulary.
 - **Cuts on repeats:** a cut applies after `repeat`, so a repeated crescent needs
   several cuts. It might be better to have a `cut` inside a charge travel with it.
 - **Cardioid anchor:** placing it by its cusp is exact but awkward for centering.
-- **Ellipses:** there's no native shape, so they're paths.
 - **Emblem upright rules:** `upright` applies to a whole variant, but some flags may
   keep only some charges upright. A variant can replace its layers for now.

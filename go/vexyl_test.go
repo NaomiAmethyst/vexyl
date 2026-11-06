@@ -5,6 +5,7 @@ package vexyl
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"flag"
@@ -645,6 +646,22 @@ func TestRejected(t *testing.T) {
 		{"edge with both a period and a count", header + `bars a b { edge wavy depth=1 period=1 count=2; }`, "not both"},
 		{"a shape definition with its own grid", header + "define d hoist=1 fly=1 { disc { radius 1; }; }\n", "only a design"},
 		{"corner panel with a width", header + `panel { corner upper-fly; fly 1; hoist 1; width 1; field a; }`, "only a side panel"},
+		{"not path data", header + `charge path a { d "eee"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path with no moveto", header + `charge path a { d "L1 1"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path moveto with too few numbers", header + `charge path a { d "M1"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path curve with too few numbers", header + `charge path a { d "M0 0C1 2 3 4 5"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path arc with a bad flag", header + `charge path a { d "M0 0A1 1 0 2 0 1 1"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path number beyond the limit", header + `charge path a { d "M1e13 0"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path number past what a number can hold", header + `charge path a { d "M1e999 0"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path number after a close", header + `charge path a { d "M0 0Z1 1"; box "0 0 1 1"; fly 1; }`, "isn't SVG path data"},
+		{"path in a define that isn't path data", header + `define d { path "x" box="0 0 1 1"; }`, "isn't SVG path data"},
+		{"path outline that isn't path data", header + `outline { path "M0" box="0 0 1 1"; }`, "isn't SVG path data"},
+		{"empty color name", "vexyl 1\nmeta { name \"T\"; }\npalette { \"\" \"#112233\"; }\n", "can't be empty"},
+		{"empty define name", header + `define "" { field a; }`, "needs a name"},
+		{"empty variant name", header + `variant ""`, "needs a name"},
+		{"empty fold name", header + "field a\nfold \"\" { over along=hoist at=5 move=fly; }\n", "needs a name"},
+		{"until a year before the date's", "vexyl 1\nmeta { name \"T\"; date \"2000-06\"; until \"1999\"; }\n", "comes before"},
+		{"until a month before the date's", "vexyl 1\nmeta { name \"T\"; date \"2000-06-15\"; until \"2000-05\"; }\n", "comes before"},
 		{"not utf-8", header + "field \"\xff\"\n", "UTF-8"},
 		{"problem after crlf", "vexyl 1\r\nmeta { name \"T\"; }\r\npalette { a \"#112233\"; }\r\nproportion hoist=10 fly=20\r\nfield nope\r\n", "isn't in the palette"},
 		{"problem after cr", "vexyl 1\rmeta { name \"T\"; }\rpalette { a \"#112233\"; }\rproportion hoist=10 fly=20\rfield nope\r", "isn't in the palette"},
@@ -652,7 +669,7 @@ func TestRejected(t *testing.T) {
 	if *update {
 		var cases []invalidCase
 		for _, tt := range tests {
-			cases = append(cases, invalidCase{tt.name, tt.src})
+			cases = append(cases, invalidCase{name: tt.name, src: tt.src})
 		}
 		writeInvalidFixtures(t, append(cases, sanitizerCases()...))
 	}
@@ -1498,6 +1515,86 @@ func TestValidateReportsWhere(t *testing.T) {
 	}
 }
 
+func TestValidPathData(t *testing.T) {
+	for _, d := range []string{"M0 0", "m1,2", " M 0 0 L 1 1 ", "M0 0 1 1 2 2z", "M0 0H1V1Z", "M0 0h1v1z M1 1", "M0-1.5.5.5", "M0 0C1 2 3 4 5 6 7 8 9 10 11 12", "M0 0S1 2 3 4Q1 2 3 4T1 2", "M0 0A1 1 0 0 1 2 2", "M0 0a1 1 0 012 2", "M1e2 -1E-2", "M0 0Zm1 1l1 1"} {
+		if !validPath(d) {
+			t.Errorf("%q refused", d)
+		}
+	}
+	for _, d := range []string{"", " ", "Z", "L0 0", "M", "M0", "M0 0 1", "M0 0L", "M0 0H", "eee", "M0 0X1", "M0,,0", "M0 0,", "M0 0,L1 1", "M0 0Z1", "M0 0A1 1 0 2 0 1 1", "M.", "M1e 0", "M+ 1", "M0x1 0", "M1_0 0", "M1\u00a00"} {
+		if validPath(d) {
+			t.Errorf("%q accepted", d)
+		}
+	}
+}
+
+func TestProblemsCountCodePoints(t *testing.T) {
+	ps := Validate(strings.NewReader(header+"/* 𝒳é */ field nope\n"), "f")
+	if len(ps) != 1 || ps[0].Line != 5 || ps[0].Column != 10 {
+		t.Errorf("%+v", ps)
+	}
+	// A next line or a line separator is a newline to KDL, but not to a problem's place.
+	ps = Validate(strings.NewReader(header+"/*\u0085\u2028*/ field nope\n"), "f")
+	if len(ps) != 1 || ps[0].Line != 5 || ps[0].Column != 8 {
+		t.Errorf("%+v", ps)
+	}
+	if ps = Validate(strings.NewReader("vexyl 1\né \"\n"), "f"); len(ps) != 1 || ps[0].Line != 2 {
+		t.Errorf("syntax error: %+v", ps)
+	}
+}
+
+func TestIDPrefix(t *testing.T) {
+	f := parse(t, header+`field a { clip { disc { radius 1; }; }; }`+"\n"+"charge svg { fly 1; hoist 1; markup \"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect id='r'/></svg>\"; }\n")
+	out := svgWith(t, f, Options{IDPrefix: "mine-", Side: "reverse"})
+	ids := regexp.MustCompile(` id="([^"]+)"`).FindAllStringSubmatch(out, -1)
+	if len(ids) < 3 {
+		t.Fatalf("ids: %v", ids)
+	}
+	for _, id := range ids {
+		if !strings.HasPrefix(id[1], "mine-") {
+			t.Errorf("id %q", id[1])
+		}
+	}
+	for _, bad := range []string{"1a", "a b", `a"`, "a<"} {
+		if _, err := f.SVG(Options{IDPrefix: bad}); err == nil {
+			t.Errorf("%q accepted", bad)
+		}
+	}
+}
+
+func TestRenderingDoesNotChangeTheFlag(t *testing.T) {
+	src, err := os.ReadFile("testdata/every-field.kdl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := parse(t, string(src))
+	before, _ := json.Marshal(f.Model())
+	for _, opts := range []Options{{}, {Ratio: Float(2.5)}, {Ratio: Float(1.5), Fit: "pad"}, {Side: "reverse"}, {Variant: "turned"}, {Variant: "official", Side: "reverse"}, {Fold: "storage"}} {
+		if _, err := f.SVGTree(opts); err != nil {
+			t.Errorf("%+v: %v", opts, err)
+		}
+	}
+	if after, _ := json.Marshal(f.Model()); !bytes.Equal(before, after) {
+		t.Error("rendering changed the flag")
+	}
+}
+
+func TestSVGTreeKeepsTitleAndDescription(t *testing.T) {
+	f := parse(t, "vexyl 1\nmeta { name \"A & B\"; description \"<C>\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\nfield a\n")
+	root, err := f.SVGTree(Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if root.Children[0].Name != "title" || root.Children[0].Text != "A & B" || root.Children[1].Name != "desc" || root.Children[1].Text != "<C>" {
+		t.Errorf("%+v %+v", root.Children[0], root.Children[1])
+	}
+	written := root.String()
+	assertWellFormed(t, []byte(written))
+	if !strings.Contains(written, "<title>A &amp; B</title>") || !strings.Contains(written, "<desc>&lt;C&gt;</desc>") {
+		t.Error(written)
+	}
+}
+
 func TestSVGTree(t *testing.T) {
 	f := parse(t, header+`field a`)
 	root, err := f.SVGTree(Options{})
@@ -1846,6 +1943,9 @@ func FuzzSanitize(f *testing.F) {
 	})
 }
 
+// nonFinite finds a number that isn't one, in a tag rather than in a title.
+var nonFinite = regexp.MustCompile(`[ ,("][-+]?(?:NaN|Inf)[ ,)"]`)
+
 func FuzzParse(f *testing.F) {
 	f.Add(header + `bars a b { ratio 1 2; }`)
 	f.Add(header + `charge star a { radius 1; repeat ring count=5 radius=2; }`)
@@ -1867,6 +1967,9 @@ func FuzzParse(f *testing.F) {
 			return
 		}
 		assertWellFormed(t, out.Bytes())
+		if !strings.Contains(src, "markup") && nonFinite.Match(out.Bytes()) {
+			t.Errorf("non-finite number in %s", out.Bytes())
+		}
 		for name := range flag.Folds {
 			out.Reset()
 			if err := flag.WriteSVG(&out, Options{Fold: name}); err == nil {

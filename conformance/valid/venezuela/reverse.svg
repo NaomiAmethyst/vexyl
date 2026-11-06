@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" width="900" height="600">
   <title>Venezuela</title>
   <g transform="matrix(-1 0 0 1 180 0)">
-    <clipPath id="vx-3f37270c-b34d-flag1">
+    <clipPath id="vx-3f37270c266098ec-b34d-flag1">
       <polygon points="0,0 180,0 180,120 0,120"/>
     </clipPath>
-    <g clip-path="url(#vx-3f37270c-b34d-flag1)">
+    <g clip-path="url(#vx-3f37270c266098ec-b34d-flag1)">
       <polygon points="0,0 180,0 180,120 0,120" fill="#ffce00"/>
       <polygon points="0,40 180,40 180,120 0,120" fill="#0035ad"/>
       <polygon points="0,80 180,80 180,120 0,120" fill="#d21034"/>
