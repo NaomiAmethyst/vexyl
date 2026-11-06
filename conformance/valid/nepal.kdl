@@ -3,25 +3,33 @@
 //   AB 60, AC 80, E and F at hoist 37.5736, AH 15
 //   L at hoist 18.7868, M at 23.4835, T at 29.0446, U at 58.7868
 //   MN 8.1434, LN 12.8401, MQ 11.9503, TN 2.5823, TS 7.7231, TM 5.5611
-// The outline runs C, G, E, B, A. With its border, the flag reaches the known
-// 1:1.219. The constitution names crimson and deep blue; these values are the
-// conventional ones.
+// The outline runs C, G, E, B, A. With its border, the render is 71.5713 by 87.2463,
+// which is 1:1.219.
 vexyl 1
 meta {
   name "Nepal"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://crwflags.com/fotw/flags/np-law.html"
+  source "https://www.crwflags.com/fotw/flags/np.html"
+  source "https://www.crwflags.com/fotw/flags/np-law.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Nepal.svg"
-  note "The constitution names crimson and deep blue. These values are the conventional ones."
-  law "Constitution of Nepal, Schedule 1" {
-    source "https://crwflags.com/fotw/flags/np-law.html"
+  note "From the law: the whole shape, moon, sun and border, by the construction in Schedule-1, and the words crimson, deep blue and white in Article 8. The lengths are derived from that construction, and 1:1.219 is derived, not stated."
+  note "From elsewhere: the law gives no shades, and the only Pantone report found is London 2012's. The hex values are the Commons drawing's, which is the weakest source. They aren't legal."
+  note "Omitted: Schedule-1 lets the border on AC be extended for a pole. This file draws the plain border."
+  note "Amendments: the text read is the 2015 translation. The 2016 revision's translation has the same construction. The 2020 amendment was reported as changing Schedule-3, the coat of arms, but its text wasn't read."
+  law "Constitution of Nepal, 2015, Article 8 and Schedule-1" {
+    source "https://web.archive.org/web/20221206114838/https://ag.gov.np/files/Constitution-of-Nepal_2072_Eng_www.moljpa.gov_.npDate-72_11_16.pdf"
+    source "https://www.constituteproject.org/constitution/Nepal_2016"
   }
 }
 palette {
-  crimson "#dc143c"
-  blue "#003893"
+  crimson "#dc143c" {
+    reference "Flags and Anthems Manual London 2012, as reported by FOTW" "PMS 186"
+  }
+  blue "#003893" {
+    reference "Flags and Anthems Manual London 2012, as reported by FOTW" "PMS 287"
+  }
   white "#ffffff"
 }
 proportion hoist=80 fly=60

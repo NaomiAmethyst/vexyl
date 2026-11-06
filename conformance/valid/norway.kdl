@@ -1,20 +1,35 @@
-// The 6:1:2:1:12 and 6:1:2:1:6 of the 1898 flag law, with the white as fimbriation.
-// The law names no color system. These are the de facto Pantone 200 and 281 values,
-// and sources conflict.
+// Width 16, length 22. Along the length 6:1:2:1:12, and across it 6:1:2:1:6. The white
+// is fimbriation of the blue cross, so the grid's 7 is 6 + 1, and its 13 is 1 + 12.
 vexyl 1
 meta {
   name "Norway"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://en.wikipedia.org/wiki/Flag_of_Norway"
-  note "The law names no color system. These are the de facto values, and sources conflict."
-  law "Lov om Norges Flag, 1898"
+  source "https://www.crwflags.com/fotw/flags/no_fact.html"
+  source "https://web.archive.org/web/20240919145929/https://www.regjeringen.no/no/dep/ud/dep/forbindelser/norges-flagg-forskrift/id449230/"
+  note "From the law: every proportion, in section 1, and the colors in words, høirødt, mørkeblaat and white. The 1927 flag regulation repeats the same figures."
+  note "From elsewhere: the law names no color system. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW."
+  note "FOTW also reports semi-official Pantone matches from the Foreign Ministry and a de facto Pantone 200 among flag makers, kept as references. Sources conflict, and none of these is legal."
+  note "Amendments: Lovdata's current text shows no amending law, only a 2023 correction of the commencement date."
+  law "Lov om Norges Flag (flaggloven), LOV-1898-12-10-1, section 1" {
+    source "https://lovdata.no/dokument/NL/lov/1898-12-10-1"
+  }
 }
 palette {
-  red "#ba0c2f"
+  red "#e62d23" {
+    pantone "032 C"
+    cmyk 0 92 89 0
+    reference "Foreign Ministry, semi-official, as reported by FOTW" "printing PMS 032U, textiles PMS 186"
+    reference "De facto among flag makers, as reported by FOTW" "PMS 200"
+  }
   white "#ffffff"
-  blue "#00205b"
+  blue "#002569" {
+    pantone "281 C"
+    cmyk 100 89 34 21
+    reference "Foreign Ministry, semi-official, as reported by FOTW" "printing PMS 281U, textiles PMS 2874"
+    reference "De facto among flag makers, as reported by FOTW" "PMS 281"
+  }
 }
 proportion hoist=16 fly=22
 

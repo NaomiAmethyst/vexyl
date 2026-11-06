@@ -1,4 +1,40 @@
 {
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "282 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "100 68 0 54"
+   },
+   {
+    "system": "Federal Specification DDD-F-416F",
+    "value": "Old Glory Blue"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "193 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 100 66 13"
+   },
+   {
+    "system": "Federal Specification DDD-F-416F",
+    "value": "Old Glory Red"
+   }
+  ],
+  "white": [
+   {
+    "system": "cmyk",
+    "value": "0 0 0 0"
+   }
+  ]
+ },
  "fly": 24.7,
  "folds": {
   "triangle": {
@@ -304,28 +340,34 @@
   "laws": [
    {
     "sources": [
-     "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+     "https://www.govinfo.gov/content/pkg/FR-1959-08-25/pdf/FR-1959-08-25.pdf",
+     "https://www.archives.gov/federal-register/codification/executive-order/10834.html",
+     "https://www.archives.gov/federal-register/executive-orders/1959.html"
     ],
     "text": "Executive Order 10834"
    },
    {
     "sources": [
-     "https://www.law.cornell.edu/uscode/text/4/chapter-1"
+     "https://www.law.cornell.edu/uscode/text/4/1",
+     "https://www.law.cornell.edu/uscode/text/4/2",
+     "https://www.law.cornell.edu/uscode/text/4/7"
     ],
-    "text": "United States Flag Code"
+    "text": "United States Flag Code, 4 U.S.C. 1, 2 and 7"
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "United States",
   "notes": [
-   "The hex values are the State Department ECA bureau's for Old Glory Red and Blue. Government sources disagree on them."
+   "From the law: every proportion and the stars' positions, in the table and drawing attached to Executive Order 10834, and the red, white and blue in words, in 4 U.S.C. 1. The display rule is 4 U.S.C. 7(i). The order also authorizes other sizes for executive agencies, which aren't drawn here.",
+   "From elsewhere: no law gives a shade. The hex, Pantone and CMYK values are the State Department ECA bureau's 2017 design guide, a government page and not law. Federal Specification DDD-F-416F names the colors as Old Glory Red and Blue from the Standard Color Reference of America, 10th edition, for procurement. FOTW reports the same RGB from the Album des Pavillons 2023, with different Pantones.",
+   "Amendments: the National Archives' disposition table lists nothing that amends or revokes Executive Order 10834. 4 U.S.C. 1 and 2 stand as enacted in 1947. Section 7 was amended in 2007 and 2018, in its half-staff subsection only."
   ],
   "render-license": "CC0-1.0",
   "series": "united-states",
   "sources": [
-   "https://www.archives.gov/federal-register/codification/executive-order/10834.html",
-   "https://www.law.cornell.edu/uscode/text/4/7",
-   "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
+   "https://web.archive.org/web/20231226213113/https://eca.state.gov/files/bureau/eca_design_guide.pdf",
+   "https://everyspec.com/FED_SPECS/F/download.php?spec=DDD-F-416F.049205.pdf",
+   "https://www.crwflags.com/fotw/flags/us.html"
   ],
   "version": "50-star"
  },

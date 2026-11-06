@@ -1,5 +1,11 @@
 {
  "color-refs": {
+  "black": [
+   {
+    "system": "munsell",
+    "value": "N 0.5"
+   }
+  ],
   "blue": [
    {
     "system": "munsell",
@@ -26,6 +32,12 @@
    {
     "system": "CIE xyY",
     "value": "0.5640 0.3194 15.3"
+   }
+  ],
+  "white": [
+   {
+    "system": "munsell",
+    "value": "N 9.5"
    }
   ]
  },
@@ -300,21 +312,31 @@
   "laws": [
    {
     "sources": [
+     "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=150692"
+    ],
+    "text": "National Flag Act (대한민국국기법), Article 7"
+   },
+   {
+    "sources": [
+     "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=195596",
+     "https://www.law.go.kr/LSW/flDownload.do?flSeq=30715691",
      "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
     ],
-    "text": "Enforcement decree of the National Flag Act, Art. 6"
+    "text": "Enforcement Decree of the National Flag Act (대한민국국기법 시행령), Articles 6 and 8 and Annex 2"
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "South Korea",
   "notes": [
-   "The decree's color table is an annex that wasn't available to check. These values are Wikipedia's conversions from the CIE specification."
+   "From the law: the proportion, in Article 7 of the Act, the construction, in Article 6 of the decree, and the CIE and Munsell values, in the decree's Annex 2.",
+   "Derived: the red and blue hex values were converted for this file from Annex 2's CIE values to sRGB, assuming D65, since the annex doesn't name an illuminant. Black and white are plain, and Annex 2 gives them only as Munsell values.",
+   "From elsewhere: the Pantone values aren't in the law. FOTW reports them from a 1997 ministry document and from the Album des Pavillons.",
+   "Article 5 of the decree lets the proportion differ at celebrations and along streets, with no figures, so this file has no variant for that.",
+   "Amendments: the national law center's current texts are the Act as of 28 January 2014 (No. 12342) and the decree as of 26 July 2017 (No. 28211). Wikisource's 2014 decree has the same Article 6."
   ],
   "render-license": "CC0-1.0",
   "sources": [
-   "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9",
-   "https://en.wikipedia.org/wiki/Flag_of_South_Korea",
-   "https://commons.wikimedia.org/wiki/File:Flag_of_South_Korea.svg"
+   "https://www.crwflags.com/fotw/flags/kr.html"
   ]
  },
  "palette": {

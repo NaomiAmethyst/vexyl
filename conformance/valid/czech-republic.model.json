@@ -1,4 +1,26 @@
 {
+ "color-refs": {
+  "blue": [
+   {
+    "system": "Interior Ministry 2019, non-binding",
+    "value": "CMYK 99-64-9-0, RGB 3-92-232"
+   },
+   {
+    "system": "Album des Pavillons 2023",
+    "value": "Pantone 286c, CMYK 99-80-0-0, RGB 0-53-173"
+   }
+  ],
+  "red": [
+   {
+    "system": "Interior Ministry 2019, non-binding",
+    "value": "CMYK 0-100-100-0, RGB 255-0-0"
+   },
+   {
+    "system": "Album des Pavillons 2023",
+    "value": "Pantone 186c, CMYK 10-100-74-2, RGB 210-16-52"
+   }
+  ]
+ },
  "fly": 3,
  "hoist": 2,
  "layers": [
@@ -36,17 +58,27 @@
   ],
   "laws": [
    {
-    "text": "Law 3/1993 Sb."
+    "sources": [
+     "https://www.psp.cz/docs/laws/1993/3.html",
+     "https://www.psp.cz/docs/laws/1993/3p.pdf",
+     "https://www.psp.cz/sqw/sbirka.sqw?cz=3&r=1993",
+     "https://www.zakonyprolidi.cz/cs/1998-154"
+    ],
+    "text": "Act No. 3/1993 Sb. on the state symbols of the Czech Republic, sections 3 and 4 and Annex 3"
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Czech Republic",
   "notes": [
-   "The law sets no exact shades, so these colors are conventional."
+   "From the law: the proportion, the two stripes and the blue wedge reaching half the length, and the names white, red and blue, in sections 3 and 4. Annex 3 is the official picture.",
+   "From elsewhere: the law sets no shades, and the Interior Ministry says this is deliberate. The red and blue hex values are sampled from Annex 3 in parliament's PDF, and aren't stated as numbers anywhere in the law.",
+   "The Interior Ministry's 2019 values and the Album's are kept as references. The Ministry calls its own non-binding and gives them for printing the arms, and its red is the pure screen primary. It names no shades for the flag itself.",
+   "Amendments: Act 154/1998 changed section 7 and Annex 6, on the anthem, and nothing else. Parliament's register lists no other amendment, and the Ministry cited only that one in 2019."
   ],
   "render-license": "CC0-1.0",
   "sources": [
-   "https://en.wikipedia.org/wiki/Flag_of_the_Czech_Republic"
+   "https://www.crwflags.com/fotw/flags/cz.html",
+   "https://archiv.mv.gov.cz/soubor/barevnost-statnich-symbolu-cr-informace-a-doporuceni.aspx"
   ]
  },
  "palette": {

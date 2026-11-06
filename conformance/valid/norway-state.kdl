@@ -6,11 +6,12 @@ meta {
   render-license "CC0-1.0"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Norway,_state.svg"
   note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "Colors match norway.kdl, which says where they come from."
 }
 palette {
-  red "#ba0c2f"
+  red "#e62d23"
   white "#ffffff"
-  blue "#00205b"
+  blue "#002569"
 }
 proportion hoist=16 fly=27
 outline tongued {

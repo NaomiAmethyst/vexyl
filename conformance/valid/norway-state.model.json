@@ -36,7 +36,8 @@
   "license": "CC-BY-SA-4.0",
   "name": "Norway (state and war flag)",
   "notes": [
-   "Sizes follow the drawing on Commons, not a checked construction sheet."
+   "Sizes follow the drawing on Commons, not a checked construction sheet.",
+   "Colors match norway.kdl, which says where they come from."
   ],
   "render-license": "CC0-1.0",
   "sources": [
@@ -49,8 +50,8 @@
   "tongue": 4
  },
  "palette": {
-  "blue": "#00205b",
-  "red": "#ba0c2f",
+  "blue": "#002569",
+  "red": "#e62d23",
   "white": "#ffffff"
  },
  "version": 1

@@ -1,24 +1,39 @@
-// Per the Flag Rules 1972: 10:6, with a disc of radius 1/5 of the length, centered
-// 9/20 along it. The rules specify Procion dyes, so these hex values are conversions
-// through Pantone 342 C and 485 C, made by Wikipedia's editors.
+// Length 10, width 6. Radius 1/5 of the length = 2. Center 9/20 of the length = 4.5
+// from the hoist, on the middle of the width = 3.
 vexyl 1
 meta {
   name "Bangladesh"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://en.wikipedia.org/wiki/Flag_of_Bangladesh"
-  note "The rules specify Procion dyes, so these hex values are conversions through Pantone, made by Wikipedia's editors."
-  law "Flag Rules 1972"
+  source "https://www.crwflags.com/fotw/flags/bd'.html"
+  note "From the law: the proportion, the disc's radius and place, bottle green and red, and the Procion dyes, in the Order's Second Schedule and rule 3 of the Flag Rules."
+  note "From elsewhere: the law gives dyes, not screen colors. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW, and the references are other reports on the same FOTW page."
+  note "Amendments: the Order was amended in 2010 (Articles 4A and 5), and SRO 38-Law/2021 replaced paragraph I of rule 4 of the Rules, on flying days. Neither touches the design."
+  law "Bangladesh National Anthem, Flag and Emblem Order, 1972 (P.O. No. 130 of 1972), Article 3 and Second Schedule" {
+    source "https://bdlaws.minlaw.gov.bd/act-details-418.html"
+    source "https://bdlaws.minlaw.gov.bd/upload/act/418___Schedule.pdf"
+  }
+  law "People's Republic of Bangladesh Flag Rules, 1972 (revised up to July 2005), rule 3" {
+    source "https://web.archive.org/web/20160303180402/http://lib.pmo.gov.bd/legalms/pdf/national-flag-rules.pdf"
+    source "https://www.dpp.gov.bd/upload_file/gazettes/39124_35463.pdf"
+  }
 }
 palette {
-  green "#006747" {
+  green "#006a52" {
     dye "Procion Brilliant Green H-2RS, 50 parts per 1000"
-    pantone "342 C"
+    pantone "3298 C"
+    cmyk 88 32 71 24
+    reference "Album des Pavillons 2000" "Pantone 342c, CMYK 100-0-69-43"
+    reference "Flags and Anthems Manual London 2012" "PMS 342"
   }
-  red "#da291c" {
+  red "#f4364c" {
     dye "Procion Brilliant Orange H-2RS, 60 parts per 1000"
-    pantone "485 C"
+    pantone "1787 C"
+    cmyk 0 88 59 0
+    reference "Album des Pavillons 2000" "Pantone 485c, CMYK 0-100-80-5"
+    reference "Flags and Anthems Manual London 2012" "PMS 485"
+    reference "An official model checked by Christopher Southworth, FOTW 2004" "PMS 032C"
   }
 }
 proportion hoist=6 fly=10

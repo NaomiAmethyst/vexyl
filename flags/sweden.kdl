@@ -1,25 +1,34 @@
-// The proportions are the 5:2:9 and 4:2:4 of Lag (1982:269). Regulation SFS 1983:826
-// defines the colors as NCS 4055-R95B and 0580-Y10R. The hex values are conversions
-// listed on Wikipedia, not values from the regulation.
+// Height 10, length 16. Field height 4, so an arm is 4/2 = 2, and 4 + 2 + 4 = 10. Inner
+// fields are 4 by 5, and outer fields 4 by 9, so 5 + 2 + 9 = 16.
 vexyl 1
 meta {
   name "Sweden"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://www.crwflags.com/fotw/flags/se_fact.html"
   source "https://en.wikipedia.org/wiki/Flag_of_Sweden"
-  note "The hex values are conversions listed on Wikipedia, not values from the regulation."
-  law "Lag (1982:269) om Sveriges flagga"
-  law "Förordning (1983:826)"
+  note "From the law: the proportions, in section 2 of the Act, and the colors, in the regulation, as NCS 4055-R95B and 0580-Y10R with the CIE values kept as references."
+  note "Derived: the hex values were converted for this file from the regulation's CIE values to sRGB, assuming D65, since the text read doesn't name the illuminant. The yellow is outside sRGB, so its red is clipped. The Pantone values aren't in the law, and are Wikipedia's."
+  note "The Act also fixes a triple-tailed flag, which this file doesn't draw."
+  note "Amendments: Parliament's text of the Act runs up to SFS 1994:697, and of the regulation up to SFS 2008:888, its latest reprint."
+  law "Lag (1982:269) om Sveriges flagga" {
+    source "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1982269-om-sveriges-flagga_sfs-1982-269/"
+  }
+  law "Förordning (1983:826) med riktlinjer för färgnyanserna i Sveriges flagga" {
+    source "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/forordning-1983826-med-riktlinjer-for_sfs-1983-826/"
+  }
 }
 palette {
-  blue "#005583" {
+  blue "#0c548e" {
     ncs "4055-R95B"
     pantone "301 C"
+    reference "CIE xyY" "0.189 0.192 8.3"
   }
-  yellow "#ffc200" {
+  yellow "#ffc800" {
     ncs "0580-Y10R"
     pantone "116 C"
+    reference "CIE xyY" "0.472 0.465 64.4"
   }
 }
 proportion hoist=10 fly=16

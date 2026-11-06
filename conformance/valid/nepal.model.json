@@ -4,6 +4,20 @@
   "width": 2.5823
  },
  "border-outside": true,
+ "color-refs": {
+  "blue": [
+   {
+    "system": "Flags and Anthems Manual London 2012, as reported by FOTW",
+    "value": "PMS 287"
+   }
+  ],
+  "crimson": [
+   {
+    "system": "Flags and Anthems Manual London 2012, as reported by FOTW",
+    "value": "PMS 186"
+   }
+  ]
+ },
  "fly": 60,
  "hoist": 80,
  "layers": [
@@ -137,19 +151,24 @@
   "laws": [
    {
     "sources": [
-     "https://crwflags.com/fotw/flags/np-law.html"
+     "https://web.archive.org/web/20221206114838/https://ag.gov.np/files/Constitution-of-Nepal_2072_Eng_www.moljpa.gov_.npDate-72_11_16.pdf",
+     "https://www.constituteproject.org/constitution/Nepal_2016"
     ],
-    "text": "Constitution of Nepal, Schedule 1"
+    "text": "Constitution of Nepal, 2015, Article 8 and Schedule-1"
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Nepal",
   "notes": [
-   "The constitution names crimson and deep blue. These values are the conventional ones."
+   "From the law: the whole shape, moon, sun and border, by the construction in Schedule-1, and the words crimson, deep blue and white in Article 8. The lengths are derived from that construction, and 1:1.219 is derived, not stated.",
+   "From elsewhere: the law gives no shades, and the only Pantone report found is London 2012's. The hex values are the Commons drawing's, which is the weakest source. They aren't legal.",
+   "Omitted: Schedule-1 lets the border on AC be extended for a pole. This file draws the plain border.",
+   "Amendments: the text read is the 2015 translation. The 2016 revision's translation has the same construction. The 2020 amendment was reported as changing Schedule-3, the coat of arms, but its text wasn't read."
   ],
   "render-license": "CC0-1.0",
   "sources": [
-   "https://crwflags.com/fotw/flags/np-law.html",
+   "https://www.crwflags.com/fotw/flags/np.html",
+   "https://www.crwflags.com/fotw/flags/np-law.html",
    "https://commons.wikimedia.org/wiki/File:Flag_of_Nepal.svg"
   ]
  },

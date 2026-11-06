@@ -1,4 +1,42 @@
 {
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "281 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "100 89 34 21"
+   },
+   {
+    "system": "Foreign Ministry, semi-official, as reported by FOTW",
+    "value": "printing PMS 281U, textiles PMS 2874"
+   },
+   {
+    "system": "De facto among flag makers, as reported by FOTW",
+    "value": "PMS 281"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "032 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 92 89 0"
+   },
+   {
+    "system": "Foreign Ministry, semi-official, as reported by FOTW",
+    "value": "printing PMS 032U, textiles PMS 186"
+   },
+   {
+    "system": "De facto among flag makers, as reported by FOTW",
+    "value": "PMS 200"
+   }
+  ]
+ },
  "fly": 22,
  "hoist": 16,
  "layers": [
@@ -35,22 +73,29 @@
   ],
   "laws": [
    {
-    "text": "Lov om Norges Flag, 1898"
+    "sources": [
+     "https://lovdata.no/dokument/NL/lov/1898-12-10-1"
+    ],
+    "text": "Lov om Norges Flag (flaggloven), LOV-1898-12-10-1, section 1"
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Norway",
   "notes": [
-   "The law names no color system. These are the de facto values, and sources conflict."
+   "From the law: every proportion, in section 1, and the colors in words, høirødt, mørkeblaat and white. The 1927 flag regulation repeats the same figures.",
+   "From elsewhere: the law names no color system. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW.",
+   "FOTW also reports semi-official Pantone matches from the Foreign Ministry and a de facto Pantone 200 among flag makers, kept as references. Sources conflict, and none of these is legal.",
+   "Amendments: Lovdata's current text shows no amending law, only a 2023 correction of the commencement date."
   ],
   "render-license": "CC0-1.0",
   "sources": [
-   "https://en.wikipedia.org/wiki/Flag_of_Norway"
+   "https://www.crwflags.com/fotw/flags/no_fact.html",
+   "https://web.archive.org/web/20240919145929/https://www.regjeringen.no/no/dep/ud/dep/forbindelser/norges-flagg-forskrift/id449230/"
   ]
  },
  "palette": {
-  "blue": "#00205b",
-  "red": "#ba0c2f",
+  "blue": "#002569",
+  "red": "#e62d23",
   "white": "#ffffff"
  },
  "version": 1

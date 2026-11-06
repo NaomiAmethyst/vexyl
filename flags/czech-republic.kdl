@@ -1,19 +1,33 @@
-// Law 3/1993 Sb.: 2:3, with the triangle reaching halfway along the flag. The law
-// sets no exact shades, so these colors are conventional.
+// Width 2, length 3. The wedge reaches half the length, so its depth is 3/2.
 vexyl 1
 meta {
   name "Czech Republic"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://en.wikipedia.org/wiki/Flag_of_the_Czech_Republic"
-  note "The law sets no exact shades, so these colors are conventional."
-  law "Law 3/1993 Sb."
+  source "https://www.crwflags.com/fotw/flags/cz.html"
+  source "https://archiv.mv.gov.cz/soubor/barevnost-statnich-symbolu-cr-informace-a-doporuceni.aspx"
+  note "From the law: the proportion, the two stripes and the blue wedge reaching half the length, and the names white, red and blue, in sections 3 and 4. Annex 3 is the official picture."
+  note "From elsewhere: the law sets no shades, and the Interior Ministry says this is deliberate. The red and blue hex values are sampled from Annex 3 in parliament's PDF, and aren't stated as numbers anywhere in the law."
+  note "The Interior Ministry's 2019 values and the Album's are kept as references. The Ministry calls its own non-binding and gives them for printing the arms, and its red is the pure screen primary. It names no shades for the flag itself."
+  note "Amendments: Act 154/1998 changed section 7 and Annex 6, on the anthem, and nothing else. Parliament's register lists no other amendment, and the Ministry cited only that one in 2019."
+  law "Act No. 3/1993 Sb. on the state symbols of the Czech Republic, sections 3 and 4 and Annex 3" {
+    source "https://www.psp.cz/docs/laws/1993/3.html"
+    source "https://www.psp.cz/docs/laws/1993/3p.pdf"
+    source "https://www.psp.cz/sqw/sbirka.sqw?cz=3&r=1993"
+    source "https://www.zakonyprolidi.cz/cs/1998-154"
+  }
 }
 palette {
   white "#ffffff"
-  red "#d7141a"
-  blue "#11457e"
+  red "#d7141a" {
+    reference "Interior Ministry 2019, non-binding" "CMYK 0-100-100-0, RGB 255-0-0"
+    reference "Album des Pavillons 2023" "Pantone 186c, CMYK 10-100-74-2, RGB 210-16-52"
+  }
+  blue "#11457e" {
+    reference "Interior Ministry 2019, non-binding" "CMYK 99-64-9-0, RGB 3-92-232"
+    reference "Album des Pavillons 2023" "Pantone 286c, CMYK 99-80-0-0, RGB 0-53-173"
+  }
 }
 proportion hoist=2 fly=3
 

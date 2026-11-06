@@ -1,26 +1,32 @@
-// Per Art. 6 of the National Flag Act's enforcement decree, as fractions of the
-// hoist H = 96: taegeuk diameter H/2, each trigram H/4 long and H/6 wide, set H/8
-// from the taegeuk with its center on a diagonal and its length across it. Bars are
-// H/24 wide, with gaps and breaks of H/48.
-//
-// The decree's color table is an annex that wasn't available to check. These values
-// are Wikipedia's conversions from the CIE specification.
+// Length to width 3:2, with the hoist H = 96: taegeuk diameter H/2, each trigram H/4
+// long and H/6 wide, set H/8 from the taegeuk with its center on a diagonal and its
+// length across it. Bars are H/24 wide, with gaps and breaks of H/48.
+//   Trigram center: 24 + 12 + 8 = 44. Bars at 38, 44 and 50, since 3 * 4 + 2 * 2 = 16.
 vexyl 1
 meta {
   name "South Korea"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
-  source "https://en.wikipedia.org/wiki/Flag_of_South_Korea"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Korea.svg"
-  note "The decree's color table is an annex that wasn't available to check. These values are Wikipedia's conversions from the CIE specification."
-  law "Enforcement decree of the National Flag Act, Art. 6" {
+  source "https://www.crwflags.com/fotw/flags/kr.html"
+  note "From the law: the proportion, in Article 7 of the Act, the construction, in Article 6 of the decree, and the CIE and Munsell values, in the decree's Annex 2."
+  note "Derived: the red and blue hex values were converted for this file from Annex 2's CIE values to sRGB, assuming D65, since the annex doesn't name an illuminant. Black and white are plain, and Annex 2 gives them only as Munsell values."
+  note "From elsewhere: the Pantone values aren't in the law. FOTW reports them from a 1997 ministry document and from the Album des Pavillons."
+  note "Article 5 of the decree lets the proportion differ at celebrations and along streets, with no figures, so this file has no variant for that."
+  note "Amendments: the national law center's current texts are the Act as of 28 January 2014 (No. 12342) and the decree as of 26 July 2017 (No. 28211). Wikisource's 2014 decree has the same Article 6."
+  law "National Flag Act (대한민국국기법), Article 7" {
+    source "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=150692"
+  }
+  law "Enforcement Decree of the National Flag Act (대한민국국기법 시행령), Articles 6 and 8 and Annex 2" {
+    source "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=195596"
+    source "https://www.law.go.kr/LSW/flDownload.do?flSeq=30715691"
     source "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
   }
 }
 palette {
-  white "#ffffff"
+  white "#ffffff" {
+    munsell "N 9.5"
+  }
   red "#cd2e3a" {
     munsell "6.0R 4.5/14"
     pantone "186 C"
@@ -31,7 +37,9 @@ palette {
     pantone "294 C"
     reference "CIE xyY" "0.1556 0.1354 6.5"
   }
-  black "#000000"
+  black "#000000" {
+    munsell "N 0.5"
+  }
 }
 proportion hoist=96 fly=144
 

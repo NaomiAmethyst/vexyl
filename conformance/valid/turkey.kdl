@@ -1,28 +1,36 @@
-// Ratios of the hoist, G = 240, per FOTW and Wikipedia's account of the construction
-// table under Law No. 2893: outer circle diameter 1/2 at 1/2 from the hoist, inner
-// circle diameter 2/5 offset 1/16, star circle diameter 1/4 with a gap of 1/3. The
-// law's own table hasn't been checked. The law gives no color; this one is
-// conventional, and other manuals use Pantone 186.
-//
-// Omitted: the white hem at the hoist, 1/30 of G. Positions are measured from the
-// hem's seam, and it's unconfirmed whether the 3:2 length includes it. Adding it
-// could move the charges 8 units toward the fly.
+// From the table annexed to Law 2893, with G = 240 and L = 3/2 G = 360:
+//   A 1/2 G outer center from the hem's inner edge, 120
+//   B 1/2 G outer diameter, radius 60
+//   C 0.0625 G between the circles' centers, 15
+//   D 0.4 G inner diameter, radius 48
+//   E 1/3 G from the inner circle's hoist-side crossing of the axis to the star's
+//     circle: 120 + 15 - 48 + 80 = 167
+//   F 1/4 G star circle diameter, radius 30, so its center is at 167 + 30 = 197
 vexyl 1
 meta {
   name "Turkey"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://cdn.fotw.info/flags/tr.html"
-  source "https://en.wikipedia.org/wiki/Flag_of_Turkey"
-  note "Positions are measured from a white hem at the hoist, 1/30 of the hoist wide, which this omits. It's unconfirmed whether the 3:2 length includes the hem, and adding it could move the charges 8 units toward the fly."
-  note "The ratios follow FOTW's and Wikipedia's accounts of the construction table, and the law's own table hasn't been checked. The law gives no color, so this one is conventional, and other manuals use Pantone 186."
-  law "Turkish Flag Law No. 2893" {
-    source "https://cdn.fotw.info/flags/tr_law.html"
+  source "https://www.crwflags.com/fotw/flags/tr.html"
+  note "From the law: every ratio on the grid, from the table annexed to Law 2893 and Article 4 of the regulation. The star's point toward the hoist is Article 4(G) and the annex's drawing."
+  note "Omitted: the white hem at the hoist, M, 1/30 of G. A is measured from the hem's inner edge, while the annex's drawing starts L at the hem's outer edge, which suggests that the 3:2 length includes the hem. Adding it could move the charges 8 units toward the fly."
+  note "Article 4(G) also puts the star's point on the line through the crescent's tips, but that line works out at 170.7, not the 167 that the table's E gives. This file follows the table."
+  note "From elsewhere: Article 3(B) of the regulation gives red as lightness 27.5, red-green 44.8, yellow-blue 15.6, within 3 NBS units, without naming the color space, so it's kept as a reference and not converted. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW. The law itself gives no shade."
+  note "Amendments: Law 2893's own list shows changes to Articles 2 to 4 and 6 to 9, and none to the annexed table. KHK 700 of 2018 renamed the regulation it calls for a yönetmelik. The 1985 Tüzük is still the one published. Its Article 3 was reworded in 1995, and its latest change, in 2012, touched Annex 4 only."
+  law "Turkish Flag Law No. 2893 of 22 September 1983, Article 2 and annexed table" {
+    source "https://www.mevzuat.gov.tr/MevzuatMetin/1.5.2893.pdf"
+  }
+  law "Türk Bayrağı Tüzüğü, Council of Ministers Decision 85/9034, Articles 3 and 4 and Annex 1" {
+    source "https://www.mevzuat.gov.tr/MevzuatMetin/2.5.859034.pdf"
   }
 }
 palette {
-  red "#e30a17"
+  red "#d21034" {
+    pantone "186 C"
+    cmyk 10 100 74 2
+    reference "Türk Bayrağı Tüzüğü, Article 3(B): lightness, red-green, yellow-blue" "27.5 44.8 15.6"
+  }
   white "#ffffff"
 }
 proportion hoist=240 fly=360

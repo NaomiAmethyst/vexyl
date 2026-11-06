@@ -1,7 +1,9 @@
-// The 1:1.9 flag, scaled so that each stripe is one grid unit. Canton 0.5385 by 0.76,
-// and star diameter 0.0616 of the hoist, as Wikipedia lists the specification under
-// Executive Order 10834. Government sources disagree on hex values; these are the
-// State Department ECA bureau's for Old Glory Red and Blue.
+// The table attached to Executive Order 10834, as parts of the hoist, scaled by 13 so
+// that each stripe, L = 1/13, is one grid unit:
+//   A 1, B 1.9 = 24.7. C 7/13 = 7, D 0.76 = 9.88. K 0.0616, so the star's radius is
+//   0.0308 * 13 = 0.4004.
+//   E and F 0.054, G and H 0.063, are the table's rounded spacings. The grid spreads the
+//   stars evenly instead, at C/10 = 0.0538 and D/12 = 0.0633, which is what they round.
 vexyl 1
 meta {
   name "United States"
@@ -11,21 +13,37 @@ meta {
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
-  source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
-  source "https://www.law.cornell.edu/uscode/text/4/7"
-  source "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
-  note "The hex values are the State Department ECA bureau's for Old Glory Red and Blue. Government sources disagree on them."
+  source "https://web.archive.org/web/20231226213113/https://eca.state.gov/files/bureau/eca_design_guide.pdf"
+  source "https://everyspec.com/FED_SPECS/F/download.php?spec=DDD-F-416F.049205.pdf"
+  source "https://www.crwflags.com/fotw/flags/us.html"
+  note "From the law: every proportion and the stars' positions, in the table and drawing attached to Executive Order 10834, and the red, white and blue in words, in 4 U.S.C. 1. The display rule is 4 U.S.C. 7(i). The order also authorizes other sizes for executive agencies, which aren't drawn here."
+  note "From elsewhere: no law gives a shade. The hex, Pantone and CMYK values are the State Department ECA bureau's 2017 design guide, a government page and not law. Federal Specification DDD-F-416F names the colors as Old Glory Red and Blue from the Standard Color Reference of America, 10th edition, for procurement. FOTW reports the same RGB from the Album des Pavillons 2023, with different Pantones."
+  note "Amendments: the National Archives' disposition table lists nothing that amends or revokes Executive Order 10834. 4 U.S.C. 1 and 2 stand as enacted in 1947. Section 7 was amended in 2007 and 2018, in its half-staff subsection only."
   law "Executive Order 10834" {
+    source "https://www.govinfo.gov/content/pkg/FR-1959-08-25/pdf/FR-1959-08-25.pdf"
     source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+    source "https://www.archives.gov/federal-register/executive-orders/1959.html"
   }
-  law "United States Flag Code" {
-    source "https://www.law.cornell.edu/uscode/text/4/chapter-1"
+  law "United States Flag Code, 4 U.S.C. 1, 2 and 7" {
+    source "https://www.law.cornell.edu/uscode/text/4/1"
+    source "https://www.law.cornell.edu/uscode/text/4/2"
+    source "https://www.law.cornell.edu/uscode/text/4/7"
   }
 }
 palette {
-  red "#b31942"
-  white "#ffffff"
-  blue "#0a3161"
+  red "#b31942" {
+    pantone "193 C"
+    cmyk 0 100 66 13
+    reference "Federal Specification DDD-F-416F" "Old Glory Red"
+  }
+  white "#ffffff" {
+    cmyk 0 0 0 0
+  }
+  blue "#0a3161" {
+    pantone "282 C"
+    cmyk 100 68 0 54
+    reference "Federal Specification DDD-F-416F" "Old Glory Blue"
+  }
 }
 proportion hoist=13 fly=24.7
 

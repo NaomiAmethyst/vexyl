@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10" width="1200" height="600">
   <title>Sweden</title>
-  <clipPath id="vx-51a22d35-09b4-flag1">
+  <clipPath id="vx-5aa8e880-09b4-flag1">
     <polygon points="0,0 20,0 20,10 0,10"/>
   </clipPath>
-  <g clip-path="url(#vx-51a22d35-09b4-flag1)">
-    <polygon points="0,0 20,0 20,10 0,10" fill="#005583"/>
-    <polygon points="5,0 7,0 7,10 5,10" fill="#ffc200"/>
-    <polygon points="0,4 20,4 20,6 0,6" fill="#ffc200"/>
+  <g clip-path="url(#vx-5aa8e880-09b4-flag1)">
+    <polygon points="0,0 20,0 20,10 0,10" fill="#0c548e"/>
+    <polygon points="5,0 7,0 7,10 5,10" fill="#ffc800"/>
+    <polygon points="0,4 20,4 20,6 0,6" fill="#ffc800"/>
   </g>
 </svg>
