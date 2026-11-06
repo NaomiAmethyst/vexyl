@@ -1,0 +1,38 @@
+// The proportions are the 5:2:9 and 4:2:4 of Lag (1982:269). Regulation SFS 1983:826
+// defines the colors as NCS 4055-R95B and 0580-Y10R. The hex values are conversions
+// listed on Wikipedia, not values from the regulation.
+vexyl 1
+meta {
+  name "Sweden"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://en.wikipedia.org/wiki/Flag_of_Sweden"
+  note "The hex values are conversions listed on Wikipedia, not values from the regulation."
+  law "Lag (1982:269) om Sveriges flagga"
+  law "Förordning (1983:826)"
+}
+palette {
+  blue "#005583" {
+    ncs "4055-R95B"
+    pantone "301 C"
+  }
+  yellow "#ffc200" {
+    ncs "0580-Y10R"
+    pantone "116 C"
+  }
+}
+proportion hoist=10 fly=16
+
+field blue
+cross yellow {
+  fly 5 2 9
+  hoist 4 2 4
+}
+
+// A reasonable rule rather than the law's: the cross keeps its place from the hoist.
+adapt {
+  range 1.2 2.4
+  wider extend
+  narrower cut
+}

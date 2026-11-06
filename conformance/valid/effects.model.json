@@ -1,0 +1,214 @@
+{
+ "fly": 30,
+ "hoist": 20,
+ "layers": [
+  {
+   "along": "hoist",
+   "blend": "normal",
+   "colors": [
+    "night",
+    "violet",
+    "night",
+    "violet",
+    "night",
+    "violet"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "rotate": 10
+  },
+  {
+   "blend": "normal",
+   "colors": [
+    "pink"
+   ],
+   "depth": 4,
+   "from": "fly",
+   "layer": "chevrons",
+   "opacity": 0.5,
+   "ratio": [
+    1
+   ]
+  },
+  {
+   "angle": 60,
+   "blend": "normal",
+   "colors": [
+    "gold",
+    "violet"
+   ],
+   "depth": 3,
+   "from": "top",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    2,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "fimbriate": {
+    "color": "night",
+    "width": 0.25
+   },
+   "layer": "saltire",
+   "opacity": 0.6,
+   "width": 1
+  },
+  {
+   "blend": "screen",
+   "cuts": [
+    {
+     "kind": "disc",
+     "radius": 1.5
+    }
+   ],
+   "layer": "group",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "gold",
+     "layer": "charge",
+     "opacity": 1,
+     "shape": {
+      "inner": 5,
+      "kind": "ring",
+      "radius": 6
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "white",
+     "fimbriate": {
+      "color": "night",
+      "width": 0.2
+     },
+     "layer": "charge",
+     "opacity": 1,
+     "shape": {
+      "kind": "plus",
+      "radius": 4,
+      "rotate": 45,
+      "width": 2
+     }
+    }
+   ],
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "repeat": {
+    "count": 6,
+    "kind": "ring",
+    "radius": 2,
+    "turn": true
+   },
+   "shape": {
+    "at": {
+     "fly": 15,
+     "hoist": 3
+    },
+    "ats": [
+     {
+      "fly": 15,
+      "hoist": 3
+     }
+    ],
+    "kind": "triangle",
+    "radius": 1
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "pink",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 5,
+     "hoist": 14
+    },
+    "ats": [
+     {
+      "fly": 5,
+      "hoist": 14
+     }
+    ],
+    "kind": "cardioid",
+    "radius": 3,
+    "rotate": 180
+   }
+  },
+  {
+   "blend": "normal",
+   "clip": {
+    "at": {
+     "fly": 25,
+     "hoist": 13
+    },
+    "ats": [
+     {
+      "fly": 25,
+      "hoist": 13
+     }
+    ],
+    "fly": 6,
+    "hoist": 3,
+    "kind": "rect"
+   },
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 25,
+     "hoist": 14
+    },
+    "ats": [
+     {
+      "fly": 25,
+      "hoist": 14
+     }
+    ],
+    "inner": 1,
+    "kind": "star",
+    "points": 8,
+    "radius": 3
+   }
+  },
+  {
+   "along": "bend",
+   "blend": "multiply",
+   "color": "gold",
+   "layer": "band",
+   "offset": 3,
+   "opacity": 1,
+   "width": 0.5
+  }
+ ],
+ "meta": {
+  "description": "Invented <test> flag & nothing more",
+  "name": "Effects Test"
+ },
+ "palette": {
+  "gold": "#f2c14e",
+  "night": "#1b1035",
+  "pink": "#f0a0c8",
+  "violet": "#7b4fd6",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

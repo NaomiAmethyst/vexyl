@@ -1,0 +1,130 @@
+// An invented flag exercising shapes and divisions that the real flags don't all reach.
+vexyl 1
+meta {
+  name "Vocabulary Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+  pink "#f0a0c8"
+}
+proportion hoist=20 fly=30
+
+define motif {
+  polygon {
+    point fly=0 hoist=0
+    point fly=1 hoist=0
+    point fly=0 hoist=1
+  }
+}
+
+define stripes {
+  bars night violet
+}
+
+bars night violet gold {
+  edge wavy depth=1 period=10
+}
+quarters none pink none none {
+  split fly=20 hoist=6
+}
+panel {
+  corner lower-fly
+  fly 8
+  hoist 6
+  use stripes
+}
+panel {
+  side bottom
+  width 2
+  edge zigzag depth=1 count=12
+  field white
+}
+rays gold none {
+  count 8
+  from fly=8 hoist=6
+  opacity 0.4
+}
+chevrons none gold {
+  from top
+  depth 6
+  ratio 4 1
+}
+pile white {
+  from fly
+  depth 4
+  base 12 18
+  flat 1
+  fimbriate night 0.2
+}
+pall pink {
+  from bottom
+  width 1
+  junction 6
+  opacity 0.5
+}
+charge lozenge gold {
+  fly 3
+  hoist 5
+  at fly=3 hoist=4
+  hollow 0.3
+}
+charge ellipse gold {
+  fly 3
+  hoist 1
+  at fly=8 hoist=4
+  rotate 30
+}
+charge ellipse white {
+  fly 2
+  hoist 3
+  at fly=3 hoist=14
+  hollow 0.2
+}
+charge lozenge white {
+  at fly=8 hoist=14
+  fly 2
+  hoist 2
+  fimbriate night 0.2
+}
+charge sun gold {
+  radius 2
+  disc 1
+  gap 0.2
+  points 10
+  spread 0.6
+  at fly=26 hoist=3
+}
+charge crescent white {
+  radius 1.5
+  inner 1.2
+  offset 0.6
+  rotate 90
+  at fly=22 hoist=3
+}
+charge ring white {
+  radius 2
+  inner 1.5
+  from 45
+  to 315
+  at fly=14 hoist=3
+}
+charge star night {
+  radius 1
+  at fly=3 hoist=10
+  repeat arc count=3 radius=2 from=-40 to=40 turn=#true
+}
+charge motif pink
+checks white night {
+  rows 2
+  columns 2
+  clip {
+    rect {
+      fly 2
+      hoist 2
+      at fly=12 hoist=10
+    }
+  }
+}

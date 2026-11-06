@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -20,7 +21,8 @@ import (
 
 const usage = `usage:
   vexyl render [options] FILE   render a flag to SVG
-  vexyl check FILE...           validate flags
+  vexyl check [-json] FILE...   validate flags, with -json listing one file's problems
+  vexyl model FILE              print a flag's parsed model as JSON
   vexyl info FILE               list a flag's details, colors, variants and folds
 
 render options:
@@ -53,9 +55,14 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 	case "render":
 		return render(args[1:], stdin, stdout)
 	case "check":
+		if len(args) > 1 && args[1] == "-json" {
+			return checkJSON(args[2:], stdin, stdout)
+		}
 		return check(args[1:], stdin)
 	case "info":
 		return info(args[1:], stdin, stdout)
+	case "model":
+		return model(args[1:], stdin, stdout)
 	case "help", "-h", "--help":
 		_, err := io.WriteString(stdout, usage)
 		return err
@@ -166,6 +173,52 @@ func info(paths []string, stdin io.Reader, stdout io.Writer) error {
 	}
 	if len(doc.Folds) > 0 {
 		fmt.Fprintf(stdout, "folds: %s\n", strings.Join(slices.Sorted(maps.Keys(doc.Folds)), ", "))
+	}
+	return nil
+}
+
+// model prints a flag's canonical model, which the conformance suite compares.
+func model(paths []string, stdin io.Reader, stdout io.Writer) error {
+	if len(paths) != 1 {
+		return fmt.Errorf("model needs one file\n%s", usage)
+	}
+	doc, err := load(paths[0], stdin)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(stdout)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", " ")
+	return enc.Encode(doc.Model())
+}
+
+// checkJSON lists one file's problems for tools, and fails if it has any.
+func checkJSON(paths []string, stdin io.Reader, stdout io.Writer) error {
+	if len(paths) != 1 {
+		return fmt.Errorf("check -json needs one file\n%s", usage)
+	}
+	var in io.Reader = stdin
+	if paths[0] != "-" {
+		f, err := os.Open(paths[0])
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		in = f
+	}
+	problems := vexyl.Validate(in, paths[0])
+	list := make([]map[string]any, len(problems))
+	for i, p := range problems {
+		list[i] = map[string]any{"line": p.Line, "column": p.Column, "node": p.Node, "message": p.Message}
+	}
+	enc := json.NewEncoder(stdout)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", " ")
+	if err := enc.Encode(list); err != nil {
+		return err
+	}
+	if len(problems) > 0 {
+		return fmt.Errorf("%d problems", len(problems))
 	}
 	return nil
 }

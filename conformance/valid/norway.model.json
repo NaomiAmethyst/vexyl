@@ -1,0 +1,57 @@
+{
+ "fly": 22,
+ "hoist": 16,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "red",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "blue",
+   "fimbriate": {
+    "color": "white",
+    "width": 1
+   },
+   "fly-parts": [
+    7,
+    2,
+    13
+   ],
+   "hoist-part": [
+    7,
+    2,
+    7
+   ],
+   "layer": "cross",
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "text": "Lov om Norges Flag, 1898"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Norway",
+  "notes": [
+   "The law names no color system. These are the de facto values, and sources conflict."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Flag_of_Norway"
+  ]
+ },
+ "palette": {
+  "blue": "#00205b",
+  "red": "#ba0c2f",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

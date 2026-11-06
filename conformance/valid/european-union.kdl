@@ -1,0 +1,31 @@
+// The ring's radius is a third of the hoist, and each star's is an eighteenth, per the
+// EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16.
+// Colors are the Pantone Reflex Blue and Yellow conversions.
+vexyl 1
+meta {
+  name "European Union"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://cdn.fotw.info/flags/eu'eun.html"
+  source "https://en.wikipedia.org/wiki/Flag_of_Europe"
+  note "The star radius of 1/18 of the hoist comes from the EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16."
+}
+palette {
+  blue "#003399" {
+    pantone "Reflex Blue"
+    cmyk 100 80 0 0
+  }
+  gold "#ffcc00" {
+    pantone "Yellow"
+    cmyk 0 21 100 0
+  }
+}
+proportion hoist=18 fly=27
+
+field blue
+charge star gold {
+  radius 1
+  at center
+  repeat ring count=12 radius=6
+}

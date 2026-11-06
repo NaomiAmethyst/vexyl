@@ -1,0 +1,75 @@
+// The 1:1.9 flag, scaled so that each stripe is one grid unit. Canton 0.5385 by 0.76,
+// and star diameter 0.0616 of the hoist, as Wikipedia lists the specification under
+// Executive Order 10834. Government sources disagree on hex values; these are the
+// State Department ECA bureau's for Old Glory Red and Blue.
+vexyl 1
+meta {
+  name "United States"
+  series "united-states"
+  version "50-star"
+  date "1960-07-04"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+  source "https://www.law.cornell.edu/uscode/text/4/7"
+  source "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
+  note "The hex values are the State Department ECA bureau's for Old Glory Red and Blue. Government sources disagree on them."
+  law "Executive Order 10834" {
+    source "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+  }
+  law "United States Flag Code" {
+    source "https://www.law.cornell.edu/uscode/text/4/chapter-1"
+  }
+}
+palette {
+  red "#b31942"
+  white "#ffffff"
+  blue "#0a3161"
+}
+proportion hoist=13 fly=24.7
+
+bars red white {
+  count 13
+}
+canton {
+  fly 9.88
+  hoist 7
+  field blue
+  charge star white {
+    radius 0.4004
+    repeat grid rows=9 columns=11 stagger=#true
+  }
+}
+
+// 4 U.S.C. section 7(i): against a wall, the union is uppermost and at the observer's
+// left, horizontally or vertically. Stars stay upright, since they would otherwise
+// point sideways.
+variant vertical {
+  from transpose
+  upright
+}
+
+// Custom rather than the Flag Code: two folds lengthwise with the blue outside, then
+// triangles from the striped end, with what's left at the hoist tucked in.
+fold triangle {
+  description "The customary triangular fold"
+  source "https://www.va.gov/opa/publications/celebrate/flagfold.pdf"
+  source "https://www.legion.org/advocacy/flag-advocacy/flag-folding-procedures"
+  over along=fly at=6.5 move=bottom
+  over along=fly at=3.25 move=bottom
+  over through="24.7 0 21.45 3.25" move="24.7 3.25"
+  over along=hoist at=21.45 move=fly
+  over through="21.45 3.25 18.2 0" move="21.45 0"
+  over along=hoist at=18.2 move=fly
+  over through="18.2 0 14.95 3.25" move="18.2 3.25"
+  over along=hoist at=14.95 move=fly
+  over through="14.95 3.25 11.7 0" move="14.95 0"
+  over along=hoist at=11.7 move=fly
+  over through="11.7 0 8.45 3.25" move="11.7 3.25"
+  over along=hoist at=8.45 move=fly
+  over through="8.45 3.25 5.2 0" move="8.45 0"
+  over along=hoist at=5.2 move=fly
+  over through="5.2 0 1.95 3.25" move="5.2 3.25"
+  tuck along=hoist at=1.95 move=hoist
+}

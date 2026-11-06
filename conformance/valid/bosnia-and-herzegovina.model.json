@@ -1,0 +1,119 @@
+{
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "Dark Blue C"
+   },
+   {
+    "system": "cmyk",
+    "value": "100 87 11 1"
+   },
+   {
+    "system": "Annex sheet, as reported by FOTW",
+    "value": "PMS Reflex Blue"
+   }
+  ],
+  "yellow": [
+   {
+    "system": "pantone",
+    "value": "116 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 21 93 0"
+   }
+  ]
+ },
+ "fly": 2000,
+ "hoist": 1000,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "yellow",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "base": [
+     530,
+     1530
+    ],
+    "edge": "top",
+    "kind": "pile",
+    "tip": [
+     1530,
+     1000
+    ]
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "repeat": {
+    "count": 9,
+    "fly": 125,
+    "hoist": 125,
+    "kind": "line"
+   },
+   "shape": {
+    "at": {
+     "fly": 350,
+     "hoist": -11.25
+    },
+    "ats": [
+     {
+      "fly": 350,
+      "hoist": -11.25
+     }
+    ],
+    "inner": 36.28677106876,
+    "kind": "star",
+    "points": 5,
+    "radius": 95
+   }
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://www.crwflags.com/fotw/flags/ba-law.html",
+     "https://web.archive.org/web/2024/https://www.ohr.int/decision-imposing-the-law-on-the-flag-of-bih-4/"
+    ],
+    "text": "Law on the Flag of Bosnia and Herzegovina, imposed by the High Representative's decision of 4 February 1998"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Bosnia and Herzegovina",
+  "notes": [
+   "The law's text and annex were read only as FOTW reproduces them. FOTW says its sheet fills in blanks in the official one, and that the official one doesn't place the stars against the triangle.",
+   "FOTW reports changes to the flag law adopted in 2004, and a later text is cited elsewhere as Official Gazette 19/01. Neither was read, so this design rests on the 1998 text.",
+   "The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW, and aren't legal. The annex sheet gives PMS Reflex Blue and 116. The Album itself wasn't read."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://www.crwflags.com/fotw/flags/ba-law.html",
+   "https://www.crwflags.com/fotw/flags/ba.html",
+   "https://www.crwflags.com/fotw/images/b/ba'.gif",
+   "https://web.archive.org/web/2024/https://www.ohr.int/decision-imposing-the-law-on-the-flag-of-bih-4/",
+   "https://commons.wikimedia.org/wiki/File:Flag_of_Bosnia_and_Herzegovina.svg"
+  ]
+ },
+ "palette": {
+  "blue": "#00249c",
+  "white": "#ffffff",
+  "yellow": "#ffcc00"
+ },
+ "version": 1
+}

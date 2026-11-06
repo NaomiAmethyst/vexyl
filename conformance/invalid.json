@@ -1,0 +1,474 @@
+[
+ {
+  "name": "no version",
+  "file": "invalid/no-version.kdl"
+ },
+ {
+  "name": "wrong version",
+  "file": "invalid/wrong-version.kdl",
+  "line": 1
+ },
+ {
+  "name": "missing meta name",
+  "file": "invalid/missing-meta-name.kdl",
+  "line": 2
+ },
+ {
+  "name": "incomplete",
+  "file": "invalid/incomplete.kdl"
+ },
+ {
+  "name": "out of order",
+  "file": "invalid/out-of-order.kdl",
+  "line": 3
+ },
+ {
+  "name": "unknown layer",
+  "file": "invalid/unknown-layer.kdl",
+  "line": 5
+ },
+ {
+  "name": "unknown child",
+  "file": "invalid/unknown-child.kdl",
+  "line": 5
+ },
+ {
+  "name": "unknown color",
+  "file": "invalid/unknown-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "bad palette value",
+  "file": "invalid/bad-palette-value.kdl",
+  "line": 3
+ },
+ {
+  "name": "ratio mismatch",
+  "file": "invalid/ratio-mismatch.kdl",
+  "line": 5
+ },
+ {
+  "name": "count mismatch",
+  "file": "invalid/count-mismatch.kdl",
+  "line": 5
+ },
+ {
+  "name": "no depth",
+  "file": "invalid/no-depth.kdl",
+  "line": 5
+ },
+ {
+  "name": "bad angle",
+  "file": "invalid/bad-angle.kdl",
+  "line": 5
+ },
+ {
+  "name": "bad along",
+  "file": "invalid/bad-along.kdl",
+  "line": 5
+ },
+ {
+  "name": "cross pair",
+  "file": "invalid/cross-pair.kdl",
+  "line": 5
+ },
+ {
+  "name": "cross missing",
+  "file": "invalid/cross-missing.kdl",
+  "line": 5
+ },
+ {
+  "name": "unknown shape",
+  "file": "invalid/unknown-shape.kdl",
+  "line": 5
+ },
+ {
+  "name": "radius missing",
+  "file": "invalid/radius-missing.kdl",
+  "line": 5
+ },
+ {
+  "name": "ellipse without a size",
+  "file": "invalid/ellipse-without-a-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "ring inner",
+  "file": "invalid/ring-inner.kdl",
+  "line": 5
+ },
+ {
+  "name": "star inner",
+  "file": "invalid/star-inner.kdl",
+  "line": 5
+ },
+ {
+  "name": "grid at",
+  "file": "invalid/grid-at.kdl",
+  "line": 5
+ },
+ {
+  "name": "grid at point",
+  "file": "invalid/grid-at-point.kdl",
+  "line": 5
+ },
+ {
+  "name": "too many copies",
+  "file": "invalid/too-many-copies.kdl",
+  "line": 5
+ },
+ {
+  "name": "polygon at",
+  "file": "invalid/polygon-at.kdl",
+  "line": 5
+ },
+ {
+  "name": "polygon size",
+  "file": "invalid/polygon-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "svg unknown color",
+  "file": "invalid/svg-unknown-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "svg currentColor without color",
+  "file": "invalid/svg-currentcolor-without-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "gradient unknown color",
+  "file": "invalid/gradient-unknown-color.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient of one",
+  "file": "invalid/gradient-of-one.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient of gradients",
+  "file": "invalid/gradient-of-gradients.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient bad axis",
+  "file": "invalid/gradient-bad-axis.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient bad property",
+  "file": "invalid/gradient-bad-property.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient stop count",
+  "file": "invalid/gradient-stop-count.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient stop range",
+  "file": "invalid/gradient-stop-range.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient stop order",
+  "file": "invalid/gradient-stop-order.kdl",
+  "line": 3
+ },
+ {
+  "name": "gradient on svg",
+  "file": "invalid/gradient-on-svg.kdl",
+  "line": 5
+ },
+ {
+  "name": "none in the palette",
+  "file": "invalid/none-in-the-palette.kdl",
+  "line": 3
+ },
+ {
+  "name": "crescent circles apart",
+  "file": "invalid/crescent-circles-apart.kdl",
+  "line": 5
+ },
+ {
+  "name": "sun disc too big",
+  "file": "invalid/sun-disc-too-big.kdl",
+  "line": 5
+ },
+ {
+  "name": "path not path data",
+  "file": "invalid/path-not-path-data.kdl",
+  "line": 5
+ },
+ {
+  "name": "path no box",
+  "file": "invalid/path-no-box.kdl",
+  "line": 5
+ },
+ {
+  "name": "pile without reach",
+  "file": "invalid/pile-without-reach.kdl",
+  "line": 5
+ },
+ {
+  "name": "pall without width",
+  "file": "invalid/pall-without-width.kdl",
+  "line": 5
+ },
+ {
+  "name": "quarters count",
+  "file": "invalid/quarters-count.kdl",
+  "line": 5
+ },
+ {
+  "name": "checks size",
+  "file": "invalid/checks-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "panel both",
+  "file": "invalid/panel-both.kdl",
+  "line": 5
+ },
+ {
+  "name": "panel size",
+  "file": "invalid/panel-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "panel edge",
+  "file": "invalid/panel-edge.kdl",
+  "line": 5
+ },
+ {
+  "name": "edge kind",
+  "file": "invalid/edge-kind.kdl",
+  "line": 5
+ },
+ {
+  "name": "edge size",
+  "file": "invalid/edge-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "repeat with ats",
+  "file": "invalid/repeat-with-ats.kdl",
+  "line": 5
+ },
+ {
+  "name": "arc of one",
+  "file": "invalid/arc-of-one.kdl",
+  "line": 5
+ },
+ {
+  "name": "lines and hollow",
+  "file": "invalid/lines-and-hollow.kdl",
+  "line": 5
+ },
+ {
+  "name": "grow length",
+  "file": "invalid/grow-length.kdl",
+  "line": 5
+ },
+ {
+  "name": "use unknown",
+  "file": "invalid/use-unknown.kdl",
+  "line": 5
+ },
+ {
+  "name": "define taken",
+  "file": "invalid/define-taken.kdl",
+  "line": 5
+ },
+ {
+  "name": "counterchange fimbriated",
+  "file": "invalid/counterchange-fimbriated.kdl",
+  "line": 5
+ },
+ {
+  "name": "adapt empty",
+  "file": "invalid/adapt-empty.kdl",
+  "line": 5
+ },
+ {
+  "name": "adapt bad rule",
+  "file": "invalid/adapt-bad-rule.kdl",
+  "line": 5
+ },
+ {
+  "name": "adapt bad range",
+  "file": "invalid/adapt-bad-range.kdl",
+  "line": 5
+ },
+ {
+  "name": "variant unknown turn",
+  "file": "invalid/variant-unknown-turn.kdl",
+  "line": 5
+ },
+ {
+  "name": "outline unknown",
+  "file": "invalid/outline-unknown.kdl",
+  "line": 5
+ },
+ {
+  "name": "layers after adapt",
+  "file": "invalid/layers-after-adapt.kdl",
+  "line": 6
+ },
+ {
+  "name": "bad until",
+  "file": "invalid/bad-until.kdl",
+  "line": 2
+ },
+ {
+  "name": "until first",
+  "file": "invalid/until-first.kdl",
+  "line": 2
+ },
+ {
+  "name": "bad series",
+  "file": "invalid/bad-series.kdl",
+  "line": 2
+ },
+ {
+  "name": "unsourced restriction",
+  "file": "invalid/unsourced-restriction.kdl",
+  "line": 2
+ },
+ {
+  "name": "law with no name",
+  "file": "invalid/law-with-no-name.kdl",
+  "line": 2
+ },
+ {
+  "name": "bad date",
+  "file": "invalid/bad-date.kdl",
+  "line": 2
+ },
+ {
+  "name": "impossible date",
+  "file": "invalid/impossible-date.kdl",
+  "line": 2
+ },
+ {
+  "name": "cmyk count",
+  "file": "invalid/cmyk-count.kdl",
+  "line": 3
+ },
+ {
+  "name": "cmyk range",
+  "file": "invalid/cmyk-range.kdl",
+  "line": 3
+ },
+ {
+  "name": "unknown color system",
+  "file": "invalid/unknown-color-system.kdl",
+  "line": 3
+ },
+ {
+  "name": "apex without angle",
+  "file": "invalid/apex-without-angle.kdl",
+  "line": 5
+ },
+ {
+  "name": "negative apex",
+  "file": "invalid/negative-apex.kdl",
+  "line": 5
+ },
+ {
+  "name": "heart radius",
+  "file": "invalid/heart-radius.kdl",
+  "line": 5
+ },
+ {
+  "name": "heart spread",
+  "file": "invalid/heart-spread.kdl",
+  "line": 5
+ },
+ {
+  "name": "svg cut",
+  "file": "invalid/svg-cut.kdl",
+  "line": 5
+ },
+ {
+  "name": "svg repeat",
+  "file": "invalid/svg-repeat.kdl",
+  "line": 5
+ },
+ {
+  "name": "infinite",
+  "file": "invalid/infinite.kdl",
+  "line": 5
+ },
+ {
+  "name": "opacity range",
+  "file": "invalid/opacity-range.kdl",
+  "line": 5
+ },
+ {
+  "name": "duplicate child",
+  "file": "invalid/duplicate-child.kdl",
+  "line": 5
+ },
+ {
+  "name": "annotation",
+  "file": "invalid/annotation.kdl",
+  "line": 5
+ },
+ {
+  "name": "duplicate property",
+  "file": "invalid/duplicate-property.kdl"
+ },
+ {
+  "name": "no canton size",
+  "file": "invalid/no-canton-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "empty group",
+  "file": "invalid/empty-group.kdl",
+  "line": 5
+ },
+ {
+  "name": "empty emblem",
+  "file": "invalid/empty-emblem.kdl",
+  "line": 5
+ },
+ {
+  "name": "emblem with a field",
+  "file": "invalid/emblem-with-a-field.kdl",
+  "line": 5
+ },
+ {
+  "name": "nested emblem",
+  "file": "invalid/nested-emblem.kdl",
+  "line": 5
+ },
+ {
+  "name": "emblem grid",
+  "file": "invalid/emblem-grid.kdl",
+  "line": 5
+ },
+ {
+  "name": "emblem bad axis",
+  "file": "invalid/emblem-bad-axis.kdl",
+  "line": 5
+ },
+ {
+  "name": "emblem arguments",
+  "file": "invalid/emblem-arguments.kdl",
+  "line": 5
+ },
+ {
+  "name": "line without step",
+  "file": "invalid/line-without-step.kdl",
+  "line": 5
+ },
+ {
+  "name": "line unknown property",
+  "file": "invalid/line-unknown-property.kdl",
+  "line": 5
+ }
+]

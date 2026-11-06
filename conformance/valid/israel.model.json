@@ -1,0 +1,101 @@
+{
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "2728 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "94 73 0 0"
+   },
+   {
+    "system": "dye",
+    "value": "Indanthren Calidon (GCDN), a 1948 sub-committee's choice, never gazetted"
+   }
+  ]
+ },
+ "fly": 220,
+ "hoist": 160,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "white",
+    "blue",
+    "white",
+    "blue",
+    "white"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    15,
+    25,
+    80,
+    25,
+    15
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "inner": 15.877132402714711,
+    "kind": "star",
+    "lines": 5.5,
+    "points": 6,
+    "radius": 27.5
+   }
+  }
+ ],
+ "meta": {
+  "date": "1948-10-28",
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://web.archive.org/web/20031002100810/http://www.israel-mfa.gov.il/mfa/go.asp?MFAH0cph0"
+    ],
+    "text": "Proclamation of the Flag of the State of Israel, Provisional Council of State, 28 October 1948"
+   },
+   {
+    "sources": [
+     "https://he.wikisource.org/wiki/%D7%97%D7%95%D7%A7_%D7%94%D7%93%D7%92%D7%9C_%D7%95%D7%94%D7%A1%D7%9E%D7%9C"
+    ],
+    "text": "Flag, Emblem and National Anthem Law, 5709-1949"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Israel",
+  "notes": [
+   "The proclamation was read as the Foreign Ministry's site reproduced it. It says 'as illustrated', and the illustration wasn't seen, so the star's overall size of 66 cm is from a FOTW contributor's sheet, not the text.",
+   "The proclamation says only dark sky-blue. FOTW reports a 1948 sub-committee's choice of the dye Indanthren Calidon, never gazetted. The hex is the Album des Pavillons 2023 as FOTW reports it, which lists a darker Pantone 280 C and this lighter one. Taking the lighter for the national flag is an inference from FOTW's report that naval and police flags use a darker shade."
+  ],
+  "render-license": "CC0-1.0",
+  "restrictions": [
+   {
+    "sources": [
+     "https://he.wikisource.org/wiki/%D7%97%D7%95%D7%A7_%D7%94%D7%93%D7%92%D7%9C_%D7%95%D7%94%D7%A1%D7%9E%D7%9C"
+    ],
+    "text": "Section 2: the State flag may not be used for commerce, business or a profession without a licence from the Minister of the Interior, though flying, making and selling flags is excepted."
+   }
+  ],
+  "sources": [
+   "https://web.archive.org/web/20031002100810/http://www.israel-mfa.gov.il/mfa/go.asp?MFAH0cph0",
+   "https://he.wikisource.org/wiki/%D7%97%D7%95%D7%A7_%D7%94%D7%93%D7%92%D7%9C_%D7%95%D7%94%D7%A1%D7%9E%D7%9C",
+   "https://www.crwflags.com/fotw/flags/il'.html",
+   "https://www.crwflags.com/fotw/flags/il_color.html"
+  ]
+ },
+ "palette": {
+  "blue": "#0047b6",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

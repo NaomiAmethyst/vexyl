@@ -1,0 +1,37 @@
+{
+ "fly": 4,
+ "hoist": 4,
+ "layers": [
+  {
+   "blend": "normal",
+   "colors": [
+    "blue",
+    "white"
+   ],
+   "columns": 4,
+   "flow": "bend-sinister",
+   "layer": "checks",
+   "opacity": 1,
+   "rows": 4
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "International code signal flag N",
+  "notes": [
+   "Sizes follow the drawing on Commons, not a checked construction sheet."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://commons.wikimedia.org/wiki/File:ICS_November.svg"
+  ]
+ },
+ "palette": {
+  "blue": "#0000ff",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

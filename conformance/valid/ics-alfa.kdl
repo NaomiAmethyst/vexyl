@@ -1,0 +1,22 @@
+vexyl 1
+meta {
+  name "International code signal flag A"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:ICS_Alfa.svg"
+  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+}
+palette {
+  white "#ffffff"
+  blue "#0000ff"
+  black "#000000"
+}
+proportion hoist=600 fly=600
+outline swallowtail {
+  depth 150
+}
+border black 2.5
+bars white blue {
+  along hoist
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3" width="1000" height="600">
+  <title>Bisexual Pride Flag</title>
+  <clipPath id="vx-f613a6f3-flag1">
+    <polygon points="0,0 5,0 5,3 0,3"/>
+  </clipPath>
+  <g clip-path="url(#vx-f613a6f3-flag1)">
+    <polygon points="0,0 5,0 5,3 0,3" fill="#d60270"/>
+    <polygon points="0,1.2 5,1.2 5,3 0,3" fill="#9b4f96"/>
+    <polygon points="0,1.8 5,1.8 5,3 0,3" fill="#0038a8"/>
+  </g>
+</svg>

@@ -1,0 +1,78 @@
+{
+ "color-refs": {
+  "green": [
+   {
+    "system": "dye",
+    "value": "Procion Brilliant Green H-2RS, 50 parts per 1000"
+   },
+   {
+    "system": "pantone",
+    "value": "342 C"
+   }
+  ],
+  "red": [
+   {
+    "system": "dye",
+    "value": "Procion Brilliant Orange H-2RS, 60 parts per 1000"
+   },
+   {
+    "system": "pantone",
+    "value": "485 C"
+   }
+  ]
+ },
+ "fly": 10,
+ "hoist": 6,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "green",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 4.5,
+     "hoist": 3
+    },
+    "ats": [
+     {
+      "fly": 4.5,
+      "hoist": 3
+     }
+    ],
+    "kind": "disc",
+    "radius": 2
+   }
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "text": "Flag Rules 1972"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Bangladesh",
+  "notes": [
+   "The rules specify Procion dyes, so these hex values are conversions through Pantone, made by Wikipedia's editors."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Flag_of_Bangladesh"
+  ]
+ },
+ "palette": {
+  "green": "#006747",
+  "red": "#da291c"
+ },
+ "version": 1
+}

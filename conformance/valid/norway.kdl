@@ -1,0 +1,26 @@
+// The 6:1:2:1:12 and 6:1:2:1:6 of the 1898 flag law, with the white as fimbriation.
+// The law names no color system. These are the de facto Pantone 200 and 281 values,
+// and sources conflict.
+vexyl 1
+meta {
+  name "Norway"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://en.wikipedia.org/wiki/Flag_of_Norway"
+  note "The law names no color system. These are the de facto values, and sources conflict."
+  law "Lov om Norges Flag, 1898"
+}
+palette {
+  red "#ba0c2f"
+  white "#ffffff"
+  blue "#00205b"
+}
+proportion hoist=16 fly=22
+
+field red
+cross blue {
+  fly 7 2 13
+  hoist 7 2 7
+  fimbriate white 1
+}

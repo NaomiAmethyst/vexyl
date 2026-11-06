@@ -1,0 +1,23 @@
+// Law 3/1993 Sb.: 2:3, with the triangle reaching halfway along the flag. The law
+// sets no exact shades, so these colors are conventional.
+vexyl 1
+meta {
+  name "Czech Republic"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://en.wikipedia.org/wiki/Flag_of_the_Czech_Republic"
+  note "The law sets no exact shades, so these colors are conventional."
+  law "Law 3/1993 Sb."
+}
+palette {
+  white "#ffffff"
+  red "#d7141a"
+  blue "#11457e"
+}
+proportion hoist=2 fly=3
+
+bars white red
+chevrons blue {
+  depth 1.5
+}

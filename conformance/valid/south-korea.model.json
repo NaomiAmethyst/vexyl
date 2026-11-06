@@ -1,0 +1,327 @@
+{
+ "color-refs": {
+  "blue": [
+   {
+    "system": "munsell",
+    "value": "5.0PB 3.0/12"
+   },
+   {
+    "system": "pantone",
+    "value": "294 C"
+   },
+   {
+    "system": "CIE xyY",
+    "value": "0.1556 0.1354 6.5"
+   }
+  ],
+  "red": [
+   {
+    "system": "munsell",
+    "value": "6.0R 4.5/14"
+   },
+   {
+    "system": "pantone",
+    "value": "186 C"
+   },
+   {
+    "system": "CIE xyY",
+    "value": "0.5640 0.3194 15.3"
+   }
+  ]
+ },
+ "fly": 144,
+ "hoist": 96,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "along": "bend",
+   "blend": "normal",
+   "charges": [
+    {
+     "blend": "normal",
+     "color": "blue",
+     "opacity": 1,
+     "shape": {
+      "kind": "disc",
+      "radius": 24
+     }
+    },
+    {
+     "blend": "normal",
+     "clip": {
+      "at": {
+       "hoist": -12
+      },
+      "ats": [
+       {
+        "hoist": -12
+       }
+      ],
+      "fly": 48,
+      "hoist": 24,
+      "kind": "rect"
+     },
+     "color": "red",
+     "opacity": 1,
+     "shape": {
+      "kind": "disc",
+      "radius": 24
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "red",
+     "opacity": 1,
+     "shape": {
+      "at": {
+       "fly": -12
+      },
+      "ats": [
+       {
+        "fly": -12
+       }
+      ],
+      "kind": "disc",
+      "radius": 12
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "blue",
+     "opacity": 1,
+     "shape": {
+      "at": {
+       "fly": 12
+      },
+      "ats": [
+       {
+        "fly": 12
+       }
+      ],
+      "kind": "disc",
+      "radius": 12
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "black",
+     "opacity": 1,
+     "repeat": {
+      "count": 3,
+      "fly": 6,
+      "kind": "line"
+     },
+     "shape": {
+      "at": {
+       "fly": -50
+      },
+      "ats": [
+       {
+        "fly": -50
+       }
+      ],
+      "fly": 4,
+      "hoist": 24,
+      "kind": "rect"
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "black",
+     "cuts": [
+      {
+       "at": {
+        "fly": 44
+       },
+       "ats": [
+        {
+         "fly": 44
+        }
+       ],
+       "fly": 20,
+       "hoist": 2,
+       "kind": "rect"
+      }
+     ],
+     "opacity": 1,
+     "repeat": {
+      "count": 3,
+      "fly": 6,
+      "kind": "line"
+     },
+     "shape": {
+      "at": {
+       "fly": 38
+      },
+      "ats": [
+       {
+        "fly": 38
+       }
+      ],
+      "fly": 4,
+      "hoist": 24,
+      "kind": "rect"
+     }
+    }
+   ],
+   "layer": "emblem",
+   "opacity": 1
+  },
+  {
+   "along": "bend-sinister",
+   "blend": "normal",
+   "charges": [
+    {
+     "blend": "normal",
+     "color": "black",
+     "opacity": 1,
+     "repeat": {
+      "count": 2,
+      "fly": 12,
+      "kind": "line"
+     },
+     "shape": {
+      "at": {
+       "fly": -50
+      },
+      "ats": [
+       {
+        "fly": -50
+       }
+      ],
+      "fly": 4,
+      "hoist": 24,
+      "kind": "rect"
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "black",
+     "cuts": [
+      {
+       "at": {
+        "fly": -44
+       },
+       "ats": [
+        {
+         "fly": -44
+        }
+       ],
+       "fly": 8,
+       "hoist": 2,
+       "kind": "rect"
+      }
+     ],
+     "opacity": 1,
+     "shape": {
+      "at": {
+       "fly": -44
+      },
+      "ats": [
+       {
+        "fly": -44
+       }
+      ],
+      "fly": 4,
+      "hoist": 24,
+      "kind": "rect"
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "black",
+     "opacity": 1,
+     "shape": {
+      "at": {
+       "fly": 44
+      },
+      "ats": [
+       {
+        "fly": 44
+       }
+      ],
+      "fly": 4,
+      "hoist": 24,
+      "kind": "rect"
+     }
+    },
+    {
+     "blend": "normal",
+     "color": "black",
+     "cuts": [
+      {
+       "at": {
+        "fly": 44
+       },
+       "ats": [
+        {
+         "fly": 44
+        }
+       ],
+       "fly": 20,
+       "hoist": 2,
+       "kind": "rect"
+      }
+     ],
+     "opacity": 1,
+     "repeat": {
+      "count": 2,
+      "fly": 12,
+      "kind": "line"
+     },
+     "shape": {
+      "at": {
+       "fly": 38
+      },
+      "ats": [
+       {
+        "fly": 38
+       }
+      ],
+      "fly": 4,
+      "hoist": 24,
+      "kind": "rect"
+     }
+    }
+   ],
+   "layer": "emblem",
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
+    ],
+    "text": "Enforcement decree of the National Flag Act, Art. 6"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "South Korea",
+  "notes": [
+   "The decree's color table is an annex that wasn't available to check. These values are Wikipedia's conversions from the CIE specification."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9",
+   "https://en.wikipedia.org/wiki/Flag_of_South_Korea",
+   "https://commons.wikimedia.org/wiki/File:Flag_of_South_Korea.svg"
+  ]
+ },
+ "palette": {
+  "black": "#000000",
+  "blue": "#0047a0",
+  "red": "#cd2e3a",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

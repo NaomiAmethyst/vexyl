@@ -55,7 +55,16 @@ func Parse(r io.Reader, name string) (*Flag, error) {
 	flag := p.document(doc)
 	flag.idPrefix = p.idPrefix
 	if len(p.errs) > 0 {
-		return nil, errors.Join(p.errs...)
+		problems := make(Problems, len(p.errs))
+		for i, err := range p.errs {
+			var one Problem
+			if errors.As(err, &one) {
+				problems[i] = one
+			} else {
+				problems[i] = Problem{Message: err.Error()}
+			}
+		}
+		return nil, problems
 	}
 	return flag, nil
 }
@@ -73,7 +82,8 @@ type parser struct {
 }
 
 func (p *parser) errf(n *kdl.Node, format string, args ...any) {
-	p.errs = append(p.errs, fmt.Errorf("%s: %s: %s", n.Location(), n.Name(), fmt.Sprintf(format, args...)))
+	at := n.Location()
+	p.errs = append(p.errs, Problem{at.Filename, at.Line, at.Column, n.Name(), fmt.Sprintf(format, args...)})
 }
 
 // document walks the top level, whose nodes have a fixed order.
@@ -110,7 +120,8 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 			continue
 		}
 		if s > stageVersion && stage < stageVersion {
-			p.errs = append(p.errs, fmt.Errorf("%s: document must start with `vexyl %d`", n.Location(), FormatVersion))
+			at := n.Location()
+			p.errs = append(p.errs, Problem{at.Filename, at.Line, at.Column, "", fmt.Sprintf("document must start with `vexyl %d`", FormatVersion)})
 			return flag
 		}
 		stage = s

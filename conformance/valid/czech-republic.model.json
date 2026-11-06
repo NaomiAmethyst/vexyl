@@ -1,0 +1,58 @@
+{
+ "fly": 3,
+ "hoist": 2,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "white",
+    "red"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "colors": [
+    "blue"
+   ],
+   "depth": 1.5,
+   "from": "hoist",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    1
+   ]
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "text": "Law 3/1993 Sb."
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Czech Republic",
+  "notes": [
+   "The law sets no exact shades, so these colors are conventional."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Flag_of_the_Czech_Republic"
+  ]
+ },
+ "palette": {
+  "blue": "#11457e",
+  "red": "#d7141a",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

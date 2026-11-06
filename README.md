@@ -72,6 +72,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
 
 - [`SPEC.md`](SPEC.md) is the language-neutral format specification, with its
   algorithms in pseudocode.
+- [`SDK.md`](SDK.md) says what every library offers, and
+  [`conformance/`](conformance/README.md) is the suite that they have to pass.
 - [`go/`](go) is the Go reference implementation, with the `vexyl` command in
   [`go/cmd/vexyl`](go/cmd/vexyl).
 - [`flags/`](flags) holds flags written by hand and checked against official
@@ -85,7 +87,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: 1200})
 - [`tools/`](tools) holds the importer. `svg2vexyl.py` converts one SVG file, and
   `fetch_flags.py` and `import_flags.py` gather a corpus and check each result with resvg.
 
-Run the tests with `make check`, and the fuzzers with `make fuzz`. Golden output
+Run the tests with `make check`, the conformance suite with `make conformance`, and the
+fuzzers with `make fuzz`. Golden output
 lives in `go/testdata/golden`; after an intended change, rewrite it by running
 `go test . -update` in `go/`.
 
@@ -93,7 +96,7 @@ lives in `go/testdata/golden`; after an intended change, rewrite it by running
 
 Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>.
 
-- The specification, `SPEC.md`, is licensed under
+- The specifications, `SPEC.md` and `SDK.md`, are licensed under
   [CC BY-SA 4.0](LICENSE-SPEC).
 - The code is licensed under the [Apache License 2.0](LICENSE).
 - Hand-written flag files say what they're licensed under in their `license` field, mostly

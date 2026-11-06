@@ -1,0 +1,183 @@
+{
+ "border": {
+  "color": "blue",
+  "width": 2.5823
+ },
+ "border-outside": true,
+ "fly": 60,
+ "hoist": 80,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "crimson",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "cuts": [
+    {
+     "at": {
+      "fly": 15,
+      "hoist": 18.7868
+     },
+     "ats": [
+      {
+       "fly": 15,
+       "hoist": 18.7868
+      }
+     ],
+     "kind": "disc",
+     "radius": 12.8401
+    }
+   ],
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 15,
+     "hoist": 23.4835
+    },
+    "ats": [
+     {
+      "fly": 15,
+      "hoist": 23.4835
+     }
+    ],
+    "kind": "disc",
+    "radius": 11.9503
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 15,
+     "hoist": 29.0446
+    },
+    "ats": [
+     {
+      "fly": 15,
+      "hoist": 29.0446
+     }
+    ],
+    "kind": "disc",
+    "radius": 5.5611
+   }
+  },
+  {
+   "blend": "normal",
+   "clip": {
+    "at": {
+     "fly": 15,
+     "hoist": 25.183
+    },
+    "ats": [
+     {
+      "fly": 15,
+      "hoist": 25.183
+     }
+    ],
+    "fly": 15.4462,
+    "hoist": 7.7231,
+    "kind": "rect"
+   },
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 15,
+     "hoist": 29.0446
+    },
+    "ats": [
+     {
+      "fly": 15,
+      "hoist": 29.0446
+     }
+    ],
+    "inner": 5.5611,
+    "kind": "star",
+    "points": 16,
+    "radius": 7.7231,
+    "rotate": 11.25
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 15,
+     "hoist": 58.7868
+    },
+    "ats": [
+     {
+      "fly": 15,
+      "hoist": 58.7868
+     }
+    ],
+    "inner": 8.1434,
+    "kind": "star",
+    "points": 12,
+    "radius": 12.8401
+   }
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://crwflags.com/fotw/flags/np-law.html"
+    ],
+    "text": "Constitution of Nepal, Schedule 1"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Nepal",
+  "notes": [
+   "The constitution names crimson and deep blue. These values are the conventional ones."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://crwflags.com/fotw/flags/np-law.html",
+   "https://commons.wikimedia.org/wiki/File:Flag_of_Nepal.svg"
+  ]
+ },
+ "outline": {
+  "kind": "polygon",
+  "vertices": [
+   {},
+   {
+    "fly": 60,
+    "hoist": 37.5736
+   },
+   {
+    "fly": 17.5736,
+    "hoist": 37.5736
+   },
+   {
+    "fly": 60,
+    "hoist": 80
+   },
+   {
+    "hoist": 80
+   }
+  ]
+ },
+ "palette": {
+  "blue": "#003893",
+  "crimson": "#dc143c",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -2 12 12" width="600" height="600">
+  <title>Panama</title>
+  <clipPath id="vx-bf3b3c79-b554-flag1">
+    <polygon points="0,0 12,0 12,8 0,8"/>
+  </clipPath>
+  <g clip-path="url(#vx-bf3b3c79-b554-flag1)">
+    <polygon points="0,0 12,0 12,8 0,8" fill="#ffffff"/>
+    <polygon points="6,0 12,0 12,8 6,8" fill="#da121a"/>
+    <polygon points="0,4 12,4 12,8 0,8" fill="#072357"/>
+    <polygon points="6,4 12,4 12,8 6,8" fill="#ffffff"/>
+    <polygon points="3,0.89443 3.248216,1.65836 4.05146,1.65836 3.401622,2.130495 3.649838,2.894425 3,2.42229 2.350162,2.894425 2.598378,2.130495 1.94854,1.65836 2.751784,1.65836" fill="#072357"/>
+    <polygon points="9,4.89443 9.248216,5.65836 10.05146,5.65836 9.401622,6.130495 9.649838,6.894425 9,6.42229 8.350162,6.894425 8.598378,6.130495 7.94854,5.65836 8.751784,5.65836" fill="#da121a"/>
+  </g>
+</svg>

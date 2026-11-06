@@ -1,0 +1,5 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; g gradient a a; }
+proportion hoist=1 fly=1
+charge svg g { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>"; }

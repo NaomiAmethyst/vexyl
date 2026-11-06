@@ -1,0 +1,177 @@
+{
+ "color-refs": {
+  "black": [
+   {
+    "system": "CKS",
+    "value": "401 C, blue black"
+   }
+  ],
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "Reflex Blue C"
+   },
+   {
+    "system": "cmyk",
+    "value": "100 91 24 7"
+   },
+   {
+    "system": "CKS",
+    "value": "762 C, national flag blue"
+   }
+  ],
+  "gold": [
+   {
+    "system": "pantone",
+    "value": "1235 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 32 89 0"
+   },
+   {
+    "system": "CKS",
+    "value": "724 C, gold yellow"
+   }
+  ],
+  "green": [
+   {
+    "system": "pantone",
+    "value": "3415 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "88 27 83 15"
+   },
+   {
+    "system": "CKS",
+    "value": "42 C, spectrum green"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "179 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "5 87 82 0"
+   },
+   {
+    "system": "CKS",
+    "value": "750 C, chilli red"
+   }
+  ],
+  "white": [
+   {
+    "system": "CKS",
+    "value": "701 C, national flag white"
+   }
+  ]
+ },
+ "fly": 90,
+ "hoist": 60,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "red",
+    "blue"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "edge": "hoist",
+    "junction": 45,
+    "kind": "pall",
+    "width": 20
+   }
+  },
+  {
+   "blend": "normal",
+   "colors": [
+    "gold"
+   ],
+   "depth": 45,
+   "from": "hoist",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    1
+   ]
+  },
+  {
+   "angle": 33.6901,
+   "blend": "normal",
+   "colors": [
+    "black"
+   ],
+   "depth": 26.9722,
+   "from": "hoist",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "green",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "edge": "hoist",
+    "junction": 45,
+    "kind": "pall",
+    "width": 12
+   }
+  }
+ ],
+ "meta": {
+  "date": "1994-04-27",
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://www.justice.gov.za/constitution/SAConstitution-web-eng.pdf"
+    ],
+    "text": "Constitution of the Republic of South Africa, 1996, section 5 and Schedule 1"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "South Africa",
+  "notes": [
+   "The geometry and color names are from Schedule 1 of the Constitution. The date is when the government's page says the flag was first used.",
+   "The Pantone values are the approximate equivalents on the government's page, and the CKS textile colors are from the same page. Neither is in the Constitution.",
+   "The hex and CMYK values are the Album des Pavillons 2023's, as reported by FOTW, except that FOTW's Album RGB for blue, 0-20-187, looks like a typo: the others match Pantone's own values, so blue uses 0-20-137, which FOTW also reports from Flag Color Codes. Black and white are plain."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://www.justice.gov.za/constitution/SAConstitution-web-eng.pdf",
+   "https://www.gov.za/about-sa/national-flag-0",
+   "https://www.crwflags.com/fotw/flags/za.html"
+  ]
+ },
+ "palette": {
+  "black": "#000000",
+  "blue": "#001489",
+  "gold": "#ffb81c",
+  "green": "#007749",
+  "red": "#e03c31",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

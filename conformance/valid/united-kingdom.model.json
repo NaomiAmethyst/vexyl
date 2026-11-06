@@ -1,0 +1,103 @@
+{
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "280 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "100 89 27 8"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "186 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "10 100 74 2"
+   }
+  ]
+ },
+ "fly": 60,
+ "hoist": 30,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "saltire",
+   "opacity": 1,
+   "width": 6
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "counterchange": true,
+   "layer": "saltire",
+   "opacity": 1,
+   "width": 2
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 2
+   },
+   "fly-parts": [
+    27,
+    6,
+    27
+   ],
+   "hoist-part": [
+    12,
+    6,
+    12
+   ],
+   "layer": "cross",
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://archive.org/stream/cihm_20863/cihm_20863_djvu.txt"
+    ],
+    "text": "Proclamation of 1 January 1801 declaring His Majesty's pleasure concerning the royal stile and titles, and the ensigns, armorial flags and banners"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "United Kingdom",
+  "notes": [
+   "The Proclamation gives the design in heraldic words only: no measurements, proportion or shades. The Flag Institute calls this the only national flag with no basis in law, and the Admiralty's reply quoted by FOTW said there is no statutory authority beyond custom for its proportions.",
+   "The widths are the Flag Institute's specification, a recommendation. It matches FOTW's account of the official 1/30 units.",
+   "1:2 is custom, not law. FOTW's contributor Graham Bartram says government uses 1:2, with 1:2 and 3:5 both in the government's flag book BR20, which wasn't read. The Flag Institute calls 3:5 normal on land and 1:2 customary at sea. 3:5 isn't included because no law fixes it.",
+   "Hex, Pantone and CMYK are the Album des Pavillons 2023, as reported by FOTW. The Pantones match the Flag Institute's recommended 280 C and 186 C."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://archive.org/stream/cihm_20863/cihm_20863_djvu.txt",
+   "https://www.flaginstitute.org/wp/uk-flags/union-flag-specification/",
+   "https://www.crwflags.com/fotw/flags/gb_var.html",
+   "https://www.crwflags.com/fotw/flags/gb_col.html"
+  ]
+ },
+ "palette": {
+  "blue": "#00267f",
+  "red": "#d21034",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

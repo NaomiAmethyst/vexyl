@@ -1,0 +1,83 @@
+{
+ "fly": 6000,
+ "hoist": 3810,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "indigo",
+    "violet"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "angle": 45,
+   "blend": "normal",
+   "colors": [
+    "white",
+    "pink",
+    "sky",
+    "brown",
+    "black"
+   ],
+   "depth": 2864,
+   "from": "hoist",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    951,
+    469,
+    492,
+    472,
+    480
+   ]
+  }
+ ],
+ "meta": {
+  "design-rights": "Creative Commons license excluding commercial use; check the designer's terms",
+  "designers": [
+   "Daniel Quasar"
+  ],
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Progress Pride Flag",
+  "notes": [
+   "No official construction sheet was found, so the proportion and chevron sizes follow the Commons drawing, and its nearly 45-degree arms are treated as exactly 45.",
+   "This file's license covers the encoding, not the design. Check the designer's current terms before using the flag."
+  ],
+  "sources": [
+   "https://en.wikipedia.org/wiki/Progress_flag",
+   "https://commons.wikimedia.org/wiki/File:LGBTQ%2B_rainbow_flag_Quasar_%22Progress%22_variant.svg"
+  ]
+ },
+ "palette": {
+  "black": "#000000",
+  "brown": "#613915",
+  "green": "#008026",
+  "indigo": "#004dff",
+  "orange": "#ff8c00",
+  "pink": "#ffafc8",
+  "red": "#e40303",
+  "sky": "#74d7ee",
+  "violet": "#750787",
+  "white": "#ffffff",
+  "yellow": "#ffed00"
+ },
+ "version": 1
+}

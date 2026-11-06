@@ -1,0 +1,83 @@
+{
+ "adapt": {
+  "max": 2.4,
+  "min": 1.2,
+  "narrower": "extend",
+  "wider": "extend"
+ },
+ "color-refs": {
+  "blue": [
+   {
+    "system": "ncs",
+    "value": "4055-R95B"
+   },
+   {
+    "system": "pantone",
+    "value": "301 C"
+   }
+  ],
+  "yellow": [
+   {
+    "system": "ncs",
+    "value": "0580-Y10R"
+   },
+   {
+    "system": "pantone",
+    "value": "116 C"
+   }
+  ]
+ },
+ "fly": 16,
+ "hoist": 10,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "yellow",
+   "fly-parts": [
+    5,
+    2,
+    9
+   ],
+   "hoist-part": [
+    4,
+    2,
+    4
+   ],
+   "layer": "cross",
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "text": "Lag (1982:269) om Sveriges flagga"
+   },
+   {
+    "text": "Förordning (1983:826)"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Sweden",
+  "notes": [
+   "The hex values are conversions listed on Wikipedia, not values from the regulation."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Flag_of_Sweden"
+  ]
+ },
+ "palette": {
+  "blue": "#005583",
+  "yellow": "#ffc200"
+ },
+ "version": 1
+}

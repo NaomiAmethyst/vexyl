@@ -1,0 +1,104 @@
+{
+ "color-refs": {
+  "green": [
+   {
+    "system": "pantone",
+    "value": "348 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "87 22 96 7"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "185 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 100 81 0"
+   }
+  ],
+  "yellow": [
+   {
+    "system": "pantone",
+    "value": "116 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 21 93 0"
+   }
+  ]
+ },
+ "fly": 15,
+ "hoist": 10,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "yellow",
+    "red"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "green",
+     "layer": "field",
+     "opacity": 1
+    }
+   ],
+   "opacity": 1,
+   "side": "hoist",
+   "width": 6
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://sgg.gouv.bj/doc/loi-90-020/download"
+    ],
+    "text": "Law No. 90-020 of 27 July 1990 defining the flag of the Republic of Benin"
+   },
+   {
+    "sources": [
+     "https://www.constituteproject.org/constitution/Benin_1990"
+    ],
+    "text": "Constitution of 11 December 1990, Article 1"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Benin",
+  "notes": [
+   "The law fixes the bands but no overall proportion. The 2:3 is the Album des Pavillons 2000, as reported by FOTW, and isn't legal.",
+   "The law names colors only. The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW. The Album itself wasn't read."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://sgg.gouv.bj/doc/loi-90-020/download",
+   "https://www.constituteproject.org/constitution/Benin_1990",
+   "https://www.crwflags.com/fotw/flags/bj.html"
+  ]
+ },
+ "palette": {
+  "green": "#00843d",
+  "red": "#e4002b",
+  "yellow": "#ffcc00"
+ },
+ "version": 1
+}

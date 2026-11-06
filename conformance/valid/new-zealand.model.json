@@ -1,0 +1,251 @@
+{
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "280 C"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "186 C"
+   }
+  ]
+ },
+ "defines": {
+  "union": {
+   "fly": 60,
+   "hoist": 30,
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "blue",
+     "layer": "field",
+     "opacity": 1
+    },
+    {
+     "blend": "normal",
+     "color": "white",
+     "layer": "saltire",
+     "opacity": 1,
+     "width": 6
+    },
+    {
+     "blend": "normal",
+     "color": "red",
+     "counterchange": true,
+     "layer": "saltire",
+     "opacity": 1,
+     "width": 2
+    },
+    {
+     "blend": "normal",
+     "color": "red",
+     "fimbriate": {
+      "color": "white",
+      "width": 2
+     },
+     "fly-parts": [
+      27,
+      6,
+      27
+     ],
+     "hoist-part": [
+      12,
+      6,
+      12
+     ],
+     "layer": "cross",
+     "opacity": 1
+    }
+   ]
+  }
+ },
+ "fly": 120,
+ "hoist": 60,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "corner": "upper-hoist",
+   "fly": 60,
+   "hoist": 30,
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "define": {
+      "fly": 60,
+      "hoist": 30,
+      "layers": [
+       {
+        "blend": "normal",
+        "color": "blue",
+        "layer": "field",
+        "opacity": 1
+       },
+       {
+        "blend": "normal",
+        "color": "white",
+        "layer": "saltire",
+        "opacity": 1,
+        "width": 6
+       },
+       {
+        "blend": "normal",
+        "color": "red",
+        "counterchange": true,
+        "layer": "saltire",
+        "opacity": 1,
+        "width": 2
+       },
+       {
+        "blend": "normal",
+        "color": "red",
+        "fimbriate": {
+         "color": "white",
+         "width": 2
+        },
+        "fly-parts": [
+         27,
+         6,
+         27
+        ],
+        "hoist-part": [
+         12,
+         6,
+         12
+        ],
+        "layer": "cross",
+        "opacity": 1
+       }
+      ]
+     },
+     "layer": "use",
+     "name": "union",
+     "opacity": 1
+    }
+   ],
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.5
+   },
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 90,
+     "hoist": 12
+    },
+    "ats": [
+     {
+      "fly": 90,
+      "hoist": 12
+     },
+     {
+      "fly": 76.1362,
+      "hoist": 25.9484
+     }
+    ],
+    "inner": 1.2048735858873318,
+    "kind": "star",
+    "points": 5,
+    "radius": 3.1544
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.5
+   },
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 101.8832,
+     "hoist": 22.3299
+    },
+    "ats": [
+     {
+      "fly": 101.8832,
+      "hoist": 22.3299
+     }
+    ],
+    "inner": 1.0040740537731516,
+    "kind": "star",
+    "points": 5,
+    "radius": 2.6287
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.5
+   },
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 90,
+     "hoist": 48
+    },
+    "ats": [
+     {
+      "fly": 90,
+      "hoist": 48
+     }
+    ],
+    "inner": 1.4057495112037623,
+    "kind": "star",
+    "points": 5,
+    "radius": 3.6803
+   }
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://www.wipo.int/wipolex/en/text/497108"
+    ],
+    "text": "Flags, Emblems, and Names Protection Act 1981, section 5 and Schedule 1"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "New Zealand",
+  "notes": [
+   "The Act declares the flag depicted in its Schedule 1, and its section 10 lets standard dimensions be set under it. The measurements here are from the government's flag specification as quoted by FOTW. That page blocked access, so it wasn't read directly.",
+   "Schedule 1's picture wasn't seen, because the copy read is text only. Section 5 was read in the 2014 reprint at WIPO; later versions were blocked.",
+   "Pantone 186 C and 280 C are the government page's, as FOTW reports them. The hex values are those Flag Color Codes gives for these Pantones, as reported by FOTW. The Album des Pavillons's blue is a different Pantone, 287 C, set aside because the government page names 280 C."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://www.wipo.int/wipolex/en/text/497108",
+   "https://www.crwflags.com/fotw/flags/nz.html"
+  ]
+ },
+ "palette": {
+  "blue": "#012169",
+  "red": "#c8102e",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

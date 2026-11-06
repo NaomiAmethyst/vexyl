@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1.25 0.75" width="1000" height="600">
+  <title>Germany</title>
+  <defs>
+    <g id="vx-eb2db645-1b4b-front1">
+      <clipPath id="vx-eb2db645-1b4b-flag2">
+        <polygon points="0,0 5,0 5,3 0,3"/>
+      </clipPath>
+      <g clip-path="url(#vx-eb2db645-1b4b-flag2)">
+        <polygon points="0,0 5,0 5,3 0,3" fill="#000000"/>
+        <polygon points="0,1 5,1 5,3 0,3" fill="#dd0000"/>
+        <polygon points="0,2 5,2 5,3 0,3" fill="#ffcc00"/>
+      </g>
+    </g>
+  </defs>
+  <clipPath id="vx-eb2db645-1b4b-facet3">
+    <polygon points="1.25,0 0,0 0,0.75 1.25,0.75"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet3)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 -1 0 1.5)"/></g>
+  <polygon points="1.25,0 0,0 0,0.75 1.25,0.75" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet4">
+    <polygon points="1.25,0.75 0,0.75 0,0 1.25,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet4)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 1 0 -1.5)"/></g>
+  <polygon points="1.25,0.75 0,0.75 0,0 1.25,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet5">
+    <polygon points="0,0.75 1.25,0.75 1.25,0 0,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet5)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 -1 0 3)"/></g>
+  <polygon points="0,0.75 1.25,0.75 1.25,0 0,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet6">
+    <polygon points="1.25,0.75 0,0.75 0,0 1.25,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet6)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 1 0 0)"/></g>
+  <polygon points="1.25,0.75 0,0.75 0,0 1.25,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet7">
+    <polygon points="1.25,0.75 1.25,0 0,0 0,0.75"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet7)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 1 5 0)"/></g>
+  <polygon points="1.25,0.75 1.25,0 0,0 0,0.75" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet8">
+    <polygon points="1.25,0.75 0,0.75 0,0 1.25,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet8)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 -1 5 3)"/></g>
+  <polygon points="1.25,0.75 0,0.75 0,0 1.25,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet9">
+    <polygon points="1.25,0.75 1.25,0 0,0 0,0.75"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet9)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 1 5 -1.5)"/></g>
+  <polygon points="1.25,0.75 1.25,0 0,0 0,0.75" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet10">
+    <polygon points="1.25,0 1.25,0.75 0,0.75 0,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet10)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 -1 5 1.5)"/></g>
+  <polygon points="1.25,0 1.25,0.75 0,0.75 0,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet11">
+    <polygon points="1.25,0 0,0 0,0.75 1.25,0.75"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet11)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 -1 -2.5 1.5)"/></g>
+  <polygon points="1.25,0 0,0 0,0.75 1.25,0.75" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet12">
+    <polygon points="1.25,0.75 0,0.75 0,0 1.25,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet12)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 1 -2.5 -1.5)"/></g>
+  <polygon points="1.25,0.75 0,0.75 0,0 1.25,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet13">
+    <polygon points="0,0.75 1.25,0.75 1.25,0 0,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet13)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 -1 -2.5 3)"/></g>
+  <polygon points="0,0.75 1.25,0.75 1.25,0 0,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet14">
+    <polygon points="1.25,0.75 0,0.75 0,0 1.25,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet14)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(1 0 0 1 -2.5 0)"/></g>
+  <polygon points="1.25,0.75 0,0.75 0,0 1.25,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet15">
+    <polygon points="0,0.75 1.25,0.75 1.25,0 0,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet15)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 1 2.5 0)"/></g>
+  <polygon points="0,0.75 1.25,0.75 1.25,0 0,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet16">
+    <polygon points="1.25,0.75 0,0.75 0,0 1.25,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet16)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 -1 2.5 3)"/></g>
+  <polygon points="1.25,0.75 0,0.75 0,0 1.25,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet17">
+    <polygon points="0,0.75 1.25,0.75 1.25,0 0,0"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet17)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 1 2.5 -1.5)"/></g>
+  <polygon points="0,0.75 1.25,0.75 1.25,0 0,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+  <clipPath id="vx-eb2db645-1b4b-facet18">
+    <polygon points="0,0 1.25,0 1.25,0.75 0,0.75"/>
+  </clipPath>
+  <g clip-path="url(#vx-eb2db645-1b4b-facet18)"><use href="#vx-eb2db645-1b4b-front1" transform="matrix(-1 0 0 -1 2.5 1.5)"/></g>
+  <polygon points="0,0 1.25,0 1.25,0.75 0,0.75" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.005"/>
+</svg>

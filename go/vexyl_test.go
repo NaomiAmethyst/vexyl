@@ -5,6 +5,7 @@ package vexyl
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"flag"
@@ -569,6 +570,13 @@ func TestRejected(t *testing.T) {
 		{"line without step", header + `charge disc a { radius 1; repeat line count=2; }`, "needs a step"},
 		{"line unknown property", header + `charge disc a { radius 1; repeat line count=2 fly=1 radius=2; }`, "unknown property"},
 	}
+	if *update {
+		var cases []invalidCase
+		for _, tt := range tests {
+			cases = append(cases, invalidCase{tt.name, tt.src})
+		}
+		writeInvalidFixtures(t, cases)
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := Parse(strings.NewReader(tt.src), "test")
@@ -579,6 +587,44 @@ func TestRejected(t *testing.T) {
 				t.Errorf("error %q doesn't contain %q", err, tt.want)
 			}
 		})
+	}
+}
+
+type invalidCase struct{ name, src string }
+
+// writeInvalidFixtures saves documents that must be refused, for the conformance suite.
+// It records the line of the first problem, except for syntax errors, whose place depends
+// on the KDL parser.
+func writeInvalidFixtures(t *testing.T, cases []invalidCase) {
+	t.Helper()
+	dir := filepath.Join("..", "conformance", "invalid")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	type entry struct {
+		Name string `json:"name"`
+		File string `json:"file"`
+		Line int    `json:"line,omitempty"`
+	}
+	slug := regexp.MustCompile(`[^a-z0-9]+`)
+	var list []entry
+	for _, c := range cases {
+		name := strings.Trim(slug.ReplaceAllString(strings.ToLower(c.name), "-"), "-")
+		if err := os.WriteFile(filepath.Join(dir, name+".kdl"), []byte(c.src), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		e := entry{Name: c.name, File: "invalid/" + name + ".kdl"}
+		if ps := Validate(strings.NewReader(c.src), name); len(ps) > 0 && ps[0].Node != "" {
+			e.Line = ps[0].Line
+		}
+		list = append(list, e)
+	}
+	out, err := json.MarshalIndent(list, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join("..", "conformance", "invalid.json"), append(out, '\n'), 0o644); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -1188,6 +1234,46 @@ field a
 	}
 	parse(t, src(`render-license "CC-BY-SA-4.0"
   adapted-from "https://example.org/a" { license "CC-BY-SA-4.0"; }`))
+}
+
+func TestValidateReportsWhere(t *testing.T) {
+	ps := Validate(strings.NewReader(header+"sparkle a\n"), "f")
+	if len(ps) != 1 || ps[0].Line != 5 || ps[0].Column != 1 || ps[0].Node != "sparkle" {
+		t.Errorf("problems: %+v", ps)
+	}
+	if ps := Validate(strings.NewReader(header+"field a\n"), "f"); ps != nil {
+		t.Errorf("valid flag has problems: %+v", ps)
+	}
+	if ps := Validate(strings.NewReader("vexyl 1\nmeta {\n"), "f"); len(ps) != 1 || ps[0].Line != 2 {
+		t.Errorf("syntax error: %+v", ps)
+	}
+}
+
+func TestSVGTree(t *testing.T) {
+	f := parse(t, header+`field a`)
+	root, err := f.SVGTree(Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if root.Name != "svg" || len(root.Children) == 0 {
+		t.Fatalf("root: %+v", root)
+	}
+	text, err := f.SVG(Options{})
+	if err != nil || !strings.HasPrefix(text, "<svg") {
+		t.Errorf("SVG: %v %q", err, text)
+	}
+}
+
+func TestModel(t *testing.T) {
+	m := parse(t, header+`bars a b { along hoist; }`).Model().(map[string]any)
+	layers := m["layers"].([]any)
+	bar := layers[0].(map[string]any)
+	if bar["layer"] != "bars" || bar["along"] != "hoist" || m["fly"] != 20.0 {
+		t.Errorf("model: %+v", m)
+	}
+	if _, present := m["outline"]; present {
+		t.Errorf("empty fields should be left out: %+v", m)
+	}
 }
 
 func TestMetaRecords(t *testing.T) {

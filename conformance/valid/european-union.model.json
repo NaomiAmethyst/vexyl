@@ -1,0 +1,74 @@
+{
+ "color-refs": {
+  "blue": [
+   {
+    "system": "pantone",
+    "value": "Reflex Blue"
+   },
+   {
+    "system": "cmyk",
+    "value": "100 80 0 0"
+   }
+  ],
+  "gold": [
+   {
+    "system": "pantone",
+    "value": "Yellow"
+   },
+   {
+    "system": "cmyk",
+    "value": "0 21 100 0"
+   }
+  ]
+ },
+ "fly": 27,
+ "hoist": 18,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "repeat": {
+    "count": 12,
+    "kind": "ring",
+    "radius": 6
+   },
+   "shape": {
+    "ats": [
+     null
+    ],
+    "inner": 0.3819660112501052,
+    "kind": "star",
+    "points": 5,
+    "radius": 1
+   }
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "European Union",
+  "notes": [
+   "The star radius of 1/18 of the hoist comes from the EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://cdn.fotw.info/flags/eu'eun.html",
+   "https://en.wikipedia.org/wiki/Flag_of_Europe"
+  ]
+ },
+ "palette": {
+  "blue": "#003399",
+  "gold": "#ffcc00"
+ },
+ "version": 1
+}

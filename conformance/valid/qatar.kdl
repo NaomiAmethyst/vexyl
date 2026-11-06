@@ -1,0 +1,78 @@
+// From the law, Law 14 of 2012, Annex 1, Figure 1, with L = 2100:
+//   H = 11/28 L = 825; triangle length TL = 12% of 2/3 L = 168; nine triangles, base H/9
+//   white W = L/3 - TL/2, so the line's middle is at L/3 = 700
+// The Annex's other sizes have their own figures: TL is 15% of 2/3 L at 1:2 (Figure 6), 16% at
+// 3:5 (Figure 7), and 18% at 2:3 by Figure 8's table.
+vexyl 1
+meta {
+  name "Qatar"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://web.archive.org/web/20230203134009/https://www.almeezan.qa/ClarificationsNoteDetails.aspx?id=8750&language=ar"
+  source "https://web.archive.org/web/20230203134009im_/https://www.almeezan.qa/Img/00003410.gif"
+  source "https://web.archive.org/web/20220817071605/https://www.customs.gov.qa/English/Legislations/Documents/Executive%20Resolutions/Prevent%20clearance%20of%20goods%20contrary%20to%20the%20provisions%20of%20the%20law%20No.%20%284%29%20of%202012%20about%20Qatari%20flag.pdf"
+  source "https://www.crwflags.com/fotw/flags/qa.html"
+  note "The law gives Pantone 1955 C and white. The hex and CMYK values are Wikipedia's for that Pantone, as FOTW reports them. The Album des Pavillons 2023 gives a different color, Pantone 222 C, so it isn't used here."
+  note "Annex 1 says 11:28 is for use inside Qatar, and that abroad a flag follows the host country's proportions by Figures 5 to 8. Those are the variants here."
+  note "Figure 8 labels its triangle length 16% of 2/3 L, but its whole table works out to 18%, and the variant follows the table."
+  law "Law No. 14 of 2012 concerning the Qatari flag, Annex 1" {
+    source "https://web.archive.org/web/20230203134009/https://www.almeezan.qa/ClarificationsNoteDetails.aspx?id=8750&language=ar"
+    source "https://web.archive.org/web/20220817071605/https://www.customs.gov.qa/English/Legislations/Documents/Executive%20Resolutions/Prevent%20clearance%20of%20goods%20contrary%20to%20the%20provisions%20of%20the%20law%20No.%20%284%29%20of%202012%20about%20Qatari%20flag.pdf"
+  }
+  restriction "Article 5: the flag may not be used for purposes contrary to its original purpose, have words, pictures or designs added, or be used commercially, as a brand or part of one, or for advertising." {
+    source "https://web.archive.org/web/20220817071605/https://www.customs.gov.qa/English/Legislations/Documents/Executive%20Resolutions/Prevent%20clearance%20of%20goods%20contrary%20to%20the%20provisions%20of%20the%20law%20No.%20%284%29%20of%202012%20about%20Qatari%20flag.pdf"
+  }
+}
+palette {
+  maroon "#8a1538" {
+    pantone "1955 C"
+    cmyk 0 85 59 46
+  }
+  white "#ffffff"
+}
+proportion hoist=825 fly=2100
+
+field maroon
+panel {
+  side hoist
+  width 700
+  edge zigzag depth=168 count=9
+  field white
+}
+
+// Annex 1, Figure 6.
+variant international-1-2 {
+  proportion hoist=15 fly=30
+  field maroon
+  panel {
+    side hoist
+    width 10
+    edge zigzag depth=3 count=9
+    field white
+  }
+}
+
+// Annex 1, Figure 7.
+variant international-3-5 {
+  proportion hoist=45 fly=75
+  field maroon
+  panel {
+    side hoist
+    width 25
+    edge zigzag depth=8 count=9
+    field white
+  }
+}
+
+// Annex 1, Figure 8, by its table.
+variant international-2-3 {
+  proportion hoist=50 fly=75
+  field maroon
+  panel {
+    side hoist
+    width 25
+    edge zigzag depth=9 count=9
+    field white
+  }
+}

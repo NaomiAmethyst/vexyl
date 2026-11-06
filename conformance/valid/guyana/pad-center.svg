@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -10 50 50" width="600" height="600">
+  <title>Guyana</title>
+  <clipPath id="vx-d3fb3c83-b554-flag1">
+    <polygon points="0,0 50,0 50,30 0,30"/>
+  </clipPath>
+  <g clip-path="url(#vx-d3fb3c83-b554-flag1)">
+    <polygon points="0,0 50,0 50,30 0,30" fill="#009530"/>
+    <polygon points="-58.309519,-16.448893 46.5199,15 46.5199,15 -58.309519,46.448893" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <polygon points="-58.309519,-16.448893 46.5199,15 46.5199,15 -58.309519,46.448893" fill="#ffcc00"/>
+    <polygon points="-58.309519,-33.819562 23.0563,15 23.0563,15 -58.309519,63.819562" fill="#000000" stroke="#000000" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <polygon points="-58.309519,-33.819562 23.0563,15 23.0563,15 -58.309519,63.819562" fill="#c8102e"/>
+  </g>
+</svg>

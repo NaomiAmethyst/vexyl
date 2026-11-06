@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -140 280 280" width="600" height="600">
+  <title>North Macedonia</title>
+  <clipPath id="vx-99b76c2d-4908-flag1">
+    <polygon points="0,0 280,0 280,140 0,140"/>
+  </clipPath>
+  <g clip-path="url(#vx-99b76c2d-4908-flag1)">
+    <polygon points="0,0 280,0 280,140 0,140" fill="#d82126"/>
+    <polygon points="0,56 0,84 140,70" fill="#f8e92e"/>
+    <polygon points="280,56 280,84 140,70" fill="#f8e92e"/>
+    <polygon points="126,0 154,0 140,60" fill="#f8e92e"/>
+    <polygon points="126,140 154,140 140,80" fill="#f8e92e"/>
+    <polygon points="0,0 42,0 142.5,70 140,70" fill="#f8e92e"/>
+    <polygon points="280,0 238,0 137.5,70 140,70" fill="#f8e92e"/>
+    <polygon points="0,140 42,140 142.5,70 140,70" fill="#f8e92e"/>
+    <polygon points="280,140 238,140 137.5,70 140,70" fill="#f8e92e"/>
+    <circle cx="140" cy="70" r="20" fill="#d82126" stroke="#d82126" stroke-width="10" stroke-linejoin="miter" stroke-miterlimit="10"/>
+    <circle cx="140" cy="70" r="20" fill="#f8e92e"/>
+  </g>
+</svg>

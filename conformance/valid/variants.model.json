@@ -1,0 +1,144 @@
+{
+ "adapt": {
+  "max": 3,
+  "min": 1,
+  "narrower": "extend",
+  "wider": "extend"
+ },
+ "defines": {
+  "mark": {
+   "shape": {
+    "box": [
+     0,
+     0,
+     10,
+     10
+    ],
+    "d": "M0 0H10V10H0Z",
+    "kind": "path"
+   }
+  }
+ },
+ "fly": 30,
+ "hoist": 20,
+ "layers": [
+  {
+   "along": "hoist",
+   "blend": "normal",
+   "colors": [
+    "night",
+    "violet"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "gold",
+     "layer": "field",
+     "opacity": 1
+    }
+   ],
+   "opacity": 1,
+   "side": "hoist",
+   "width": 4
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "ats": [
+     null
+    ],
+    "inner": 3,
+    "kind": "crescent",
+    "offset": 1.5,
+    "radius": 4
+   }
+  },
+  {
+   "anchor": "start",
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 2,
+     "hoist": 2
+    },
+    "ats": [
+     {
+      "fly": 2,
+      "hoist": 2
+     }
+    ],
+    "box": [
+     0,
+     0,
+     10,
+     10
+    ],
+    "d": "M0 0H10V10H0Z",
+    "fly": 2,
+    "hoist": 2,
+    "kind": "path"
+   }
+  }
+ ],
+ "meta": {
+  "name": "Variants Test"
+ },
+ "palette": {
+  "gold": "#f2c14e",
+  "night": "#1b1035",
+  "violet": "#7b4fd6",
+  "white": "#ffffff"
+ },
+ "reverse": {
+  "layers": [
+   {
+    "blend": "normal",
+    "color": "night",
+    "layer": "field",
+    "opacity": 1
+   }
+  ]
+ },
+ "variants": {
+  "banner": {
+   "from": "rotate",
+   "outline": {
+    "depth": 6,
+    "kind": "swallowtail"
+   }
+  },
+  "plain": {
+   "from": "none",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "violet",
+     "layer": "field",
+     "opacity": 1
+    }
+   ]
+  },
+  "vertical": {
+   "from": "transpose",
+   "ratio": 2,
+   "upright": true
+  }
+ },
+ "version": 1
+}

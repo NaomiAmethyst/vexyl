@@ -1,0 +1,53 @@
+{
+ "adapt": {
+  "narrower": "scale",
+  "wider": "scale"
+ },
+ "fly": 5,
+ "hoist": 3,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "blue",
+    "pink",
+    "white",
+    "pink",
+    "blue"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1,
+    1,
+    1
+   ]
+  }
+ ],
+ "meta": {
+  "designers": [
+   "Monica Helms"
+  ],
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Transgender Pride Flag",
+  "notes": [
+   "No primary construction sheet was found. The equal stripes and colors follow the Commons drawing."
+  ],
+  "sources": [
+   "https://en.wikipedia.org/wiki/Transgender_flag",
+   "https://commons.wikimedia.org/wiki/File:Transgender_Pride_flag.svg"
+  ]
+ },
+ "palette": {
+  "blue": "#5bcefa",
+  "pink": "#f5a9b8",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

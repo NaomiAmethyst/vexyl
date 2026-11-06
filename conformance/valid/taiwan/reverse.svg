@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="900" height="600">
+  <title>Taiwan</title>
+  <g transform="matrix(-1 0 0 1 120 0)">
+    <clipPath id="vx-574fa392-b34d-flag1">
+      <polygon points="0,0 120,0 120,80 0,80"/>
+    </clipPath>
+    <g clip-path="url(#vx-574fa392-b34d-flag1)">
+      <polygon points="0,0 120,0 120,80 0,80" fill="#d21034"/>
+      <clipPath id="vx-574fa392-b34d-panel2">
+        <polygon points="0,0 60,0 60,40 0,40"/>
+      </clipPath>
+      <g transform="translate(0 0)" clip-path="url(#vx-574fa392-b34d-panel2)" style="isolation:isolate">
+        <polygon points="0,0 60,0 60,40 0,40" fill="#00529b"/>
+        <polygon points="30,5 32.009626,12.499972 37.5,7.009619 35.490401,14.509599 42.990381,12.5 37.500028,17.990374 45,20 37.500028,22.009626 42.990381,27.5 35.490401,25.490401 37.5,32.990381 32.009626,27.500028 30,35 27.990374,27.500028 22.5,32.990381 24.509599,25.490401 17.009619,27.5 22.499972,22.009626 15,20 22.499972,17.990374 17.009619,12.5 24.509599,14.509599 22.5,7.009619 27.990374,12.499972" fill="#ffffff"/>
+        <circle cx="30" cy="20" r="8.5" fill="#00529b"/>
+        <circle cx="30" cy="20" r="7.5" fill="#ffffff"/>
+      </g>
+    </g>
+  </g>
+</svg>

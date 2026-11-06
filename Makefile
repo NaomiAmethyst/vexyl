@@ -9,7 +9,7 @@ GO      ?= go
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check fuzz install uninstall clean
+.PHONY: all test check conformance conformance-fixtures fuzz install uninstall clean
 
 all: vexyl
 
@@ -23,6 +23,14 @@ check: test
 	cd go && $(GO) vet ./...
 	python3 -m unittest discover -s tools
 	@test -z "$$(gofmt -l go)" || { gofmt -l go; exit 1; }
+
+conformance: vexyl
+	python3 conformance/run.py ./vexyl
+
+# Changes what every implementation must do, so review the diff.
+conformance-fixtures: vexyl
+	cd go && $(GO) test . -update
+	python3 tools/build_conformance.py ./vexyl resvg
 
 fuzz:
 	cd go && $(GO) test -run '^$$' -fuzz '^FuzzSanitize$$' -fuzztime 60s .

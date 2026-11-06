@@ -1,0 +1,2177 @@
+{
+ "resvg": "0.49.0",
+ "tolerance": {
+  "heights": [
+   16,
+   32,
+   128,
+   512
+  ],
+  "threshold": 48,
+  "solid_percent": 0.05,
+  "mean_channel": 0.25,
+  "worst_tile": 16,
+  "worst_tile_height": 512
+ },
+ "cases": [
+  {
+   "name": "bahrain",
+   "file": "valid/bahrain.kdl",
+   "model": "valid/bahrain.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/bahrain/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/bahrain/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/bahrain/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/bahrain/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/bahrain/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "bangladesh",
+   "file": "valid/bangladesh.kdl",
+   "model": "valid/bangladesh.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/bangladesh/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/bangladesh/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/bangladesh/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "benin",
+   "file": "valid/benin.kdl",
+   "model": "valid/benin.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/benin/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/benin/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/benin/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "bisexual",
+   "file": "valid/bisexual.kdl",
+   "model": "valid/bisexual.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/bisexual/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/bisexual/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/bisexual/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "bosnia-and-herzegovina",
+   "file": "valid/bosnia-and-herzegovina.kdl",
+   "model": "valid/bosnia-and-herzegovina.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/bosnia-and-herzegovina/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/bosnia-and-herzegovina/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/bosnia-and-herzegovina/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/bosnia-and-herzegovina/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "canada",
+   "file": "valid/canada.kdl",
+   "model": "valid/canada.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/canada/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/canada/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/canada/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/canada/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/canada/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/canada/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "colorado",
+   "file": "valid/colorado.kdl",
+   "model": "valid/colorado.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/colorado/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/colorado/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/colorado/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "czech-republic",
+   "file": "valid/czech-republic.kdl",
+   "model": "valid/czech-republic.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/czech-republic/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/czech-republic/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/czech-republic/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "east-timor",
+   "file": "valid/east-timor.kdl",
+   "model": "valid/east-timor.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/east-timor/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/east-timor/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/east-timor/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/east-timor/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "european-union",
+   "file": "valid/european-union.kdl",
+   "model": "valid/european-union.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/european-union/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/european-union/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/european-union/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "germany",
+   "file": "valid/germany.kdl",
+   "model": "valid/germany.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/germany/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/germany/reverse.svg"
+    },
+    {
+     "name": "variant-hanging",
+     "options": {
+      "variant": "hanging"
+     },
+     "svg": "valid/germany/variant-hanging.svg"
+    },
+    {
+     "name": "fold-storage",
+     "options": {
+      "fold": "storage"
+     },
+     "svg": "valid/germany/fold-storage.svg"
+    },
+    {
+     "name": "fold-storage-step-1",
+     "options": {
+      "fold": "storage",
+      "fold_step": 1
+     },
+     "svg": "valid/germany/fold-storage-step-1.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/germany/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/germany/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/germany/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "guyana",
+   "file": "valid/guyana.kdl",
+   "model": "valid/guyana.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/guyana/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/guyana/reverse.svg"
+    },
+    {
+     "name": "variant-sea",
+     "options": {
+      "variant": "sea"
+     },
+     "svg": "valid/guyana/variant-sea.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/guyana/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "ics-alfa",
+   "file": "valid/ics-alfa.kdl",
+   "model": "valid/ics-alfa.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/ics-alfa/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/ics-alfa/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/ics-alfa/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/ics-alfa/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "ics-november",
+   "file": "valid/ics-november.kdl",
+   "model": "valid/ics-november.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/ics-november/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/ics-november/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/ics-november/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/ics-november/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "ics-zulu",
+   "file": "valid/ics-zulu.kdl",
+   "model": "valid/ics-zulu.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/ics-zulu/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/ics-zulu/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/ics-zulu/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/ics-zulu/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "israel",
+   "file": "valid/israel.kdl",
+   "model": "valid/israel.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/israel/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/israel/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/israel/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/israel/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/israel/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "kuwait",
+   "file": "valid/kuwait.kdl",
+   "model": "valid/kuwait.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/kuwait/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/kuwait/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/kuwait/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/kuwait/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "morocco",
+   "file": "valid/morocco.kdl",
+   "model": "valid/morocco.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/morocco/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/morocco/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/morocco/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "nepal",
+   "file": "valid/nepal.kdl",
+   "model": "valid/nepal.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/nepal/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/nepal/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/nepal/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "new-zealand",
+   "file": "valid/new-zealand.kdl",
+   "model": "valid/new-zealand.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/new-zealand/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/new-zealand/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/new-zealand/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/new-zealand/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "north-macedonia",
+   "file": "valid/north-macedonia.kdl",
+   "model": "valid/north-macedonia.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/north-macedonia/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/north-macedonia/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/north-macedonia/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/north-macedonia/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/north-macedonia/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/north-macedonia/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "norway-state",
+   "file": "valid/norway-state.kdl",
+   "model": "valid/norway-state.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/norway-state/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/norway-state/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/norway-state/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "norway",
+   "file": "valid/norway.kdl",
+   "model": "valid/norway.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/norway/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/norway/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/norway/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "panama",
+   "file": "valid/panama.kdl",
+   "model": "valid/panama.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/panama/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/panama/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/panama/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "progress-pride",
+   "file": "valid/progress-pride.kdl",
+   "model": "valid/progress-pride.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/progress-pride/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/progress-pride/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/progress-pride/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "qatar",
+   "file": "valid/qatar.kdl",
+   "model": "valid/qatar.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/qatar/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/qatar/reverse.svg"
+    },
+    {
+     "name": "variant-international-1-2",
+     "options": {
+      "variant": "international-1-2"
+     },
+     "svg": "valid/qatar/variant-international-1-2.svg"
+    },
+    {
+     "name": "variant-international-2-3",
+     "options": {
+      "variant": "international-2-3"
+     },
+     "svg": "valid/qatar/variant-international-2-3.svg"
+    },
+    {
+     "name": "variant-international-3-5",
+     "options": {
+      "variant": "international-3-5"
+     },
+     "svg": "valid/qatar/variant-international-3-5.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/qatar/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/qatar/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/qatar/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "saint-vincent-and-the-grenadines",
+   "file": "valid/saint-vincent-and-the-grenadines.kdl",
+   "model": "valid/saint-vincent-and-the-grenadines.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/saint-vincent-and-the-grenadines/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/saint-vincent-and-the-grenadines/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/saint-vincent-and-the-grenadines/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "seychelles",
+   "file": "valid/seychelles.kdl",
+   "model": "valid/seychelles.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/seychelles/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/seychelles/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/seychelles/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/seychelles/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "solomon-islands",
+   "file": "valid/solomon-islands.kdl",
+   "model": "valid/solomon-islands.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/solomon-islands/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/solomon-islands/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/solomon-islands/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/solomon-islands/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "south-africa",
+   "file": "valid/south-africa.kdl",
+   "model": "valid/south-africa.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/south-africa/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/south-africa/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/south-africa/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "south-korea",
+   "file": "valid/south-korea.kdl",
+   "model": "valid/south-korea.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/south-korea/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/south-korea/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/south-korea/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/south-korea/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/south-korea/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "sweden",
+   "file": "valid/sweden.kdl",
+   "model": "valid/sweden.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/sweden/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/sweden/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/sweden/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/sweden/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "taiwan",
+   "file": "valid/taiwan.kdl",
+   "model": "valid/taiwan.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/taiwan/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/taiwan/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/taiwan/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "tanzania",
+   "file": "valid/tanzania.kdl",
+   "model": "valid/tanzania.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/tanzania/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/tanzania/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/tanzania/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "transgender",
+   "file": "valid/transgender.kdl",
+   "model": "valid/transgender.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/transgender/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/transgender/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/transgender/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/transgender/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/transgender/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "turkey",
+   "file": "valid/turkey.kdl",
+   "model": "valid/turkey.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/turkey/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/turkey/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/turkey/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/turkey/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/turkey/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "united-kingdom",
+   "file": "valid/united-kingdom.kdl",
+   "model": "valid/united-kingdom.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/united-kingdom/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/united-kingdom/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/united-kingdom/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/united-kingdom/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "united-states",
+   "file": "valid/united-states.kdl",
+   "model": "valid/united-states.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/united-states/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/united-states/reverse.svg"
+    },
+    {
+     "name": "variant-vertical",
+     "options": {
+      "variant": "vertical"
+     },
+     "svg": "valid/united-states/variant-vertical.svg"
+    },
+    {
+     "name": "fold-triangle",
+     "options": {
+      "fold": "triangle"
+     },
+     "svg": "valid/united-states/fold-triangle.svg"
+    },
+    {
+     "name": "fold-triangle-step-1",
+     "options": {
+      "fold": "triangle",
+      "fold_step": 1
+     },
+     "svg": "valid/united-states/fold-triangle-step-1.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/united-states/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "venezuela",
+   "file": "valid/venezuela.kdl",
+   "model": "valid/venezuela.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/venezuela/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/venezuela/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/venezuela/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "wiphala",
+   "file": "valid/wiphala.kdl",
+   "model": "valid/wiphala.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/wiphala/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/wiphala/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/wiphala/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/wiphala/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "effects",
+   "file": "valid/effects.kdl",
+   "model": "valid/effects.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/effects/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/effects/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/effects/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/effects/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/effects/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "gradients",
+   "file": "valid/gradients.kdl",
+   "model": "valid/gradients.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/gradients/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/gradients/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/gradients/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "heart-chevron",
+   "file": "valid/heart-chevron.kdl",
+   "model": "valid/heart-chevron.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/heart-chevron/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/heart-chevron/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/heart-chevron/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "inline-svg",
+   "file": "valid/inline-svg.kdl",
+   "model": "valid/inline-svg.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/inline-svg/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/inline-svg/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/inline-svg/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "variants",
+   "file": "valid/variants.kdl",
+   "model": "valid/variants.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/variants/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/variants/reverse.svg"
+    },
+    {
+     "name": "variant-banner",
+     "options": {
+      "variant": "banner"
+     },
+     "svg": "valid/variants/variant-banner.svg"
+    },
+    {
+     "name": "variant-plain",
+     "options": {
+      "variant": "plain"
+     },
+     "svg": "valid/variants/variant-plain.svg"
+    },
+    {
+     "name": "variant-vertical",
+     "options": {
+      "variant": "vertical"
+     },
+     "svg": "valid/variants/variant-vertical.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/variants/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/variants/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/variants/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "vocabulary",
+   "file": "valid/vocabulary.kdl",
+   "model": "valid/vocabulary.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/vocabulary/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/vocabulary/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/vocabulary/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/vocabulary/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/vocabulary/pad-end.svg"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,97 @@
+{
+ "color-refs": {
+  "green": [
+   {
+    "system": "pantone",
+    "value": "340 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "83 15 76 2"
+   }
+  ],
+  "red": [
+   {
+    "system": "pantone",
+    "value": "186 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "10 100 74 2"
+   }
+  ]
+ },
+ "fly": 12,
+ "hoist": 6,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "green",
+    "white",
+    "red"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "black",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "depth": 3,
+    "edge": "hoist",
+    "flat": 2,
+    "kind": "pile"
+   }
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://www.crwflags.com/fotw/flags/kw_laws.html"
+    ],
+    "text": "Law No. 26 of 1961 on the national flag of the State of Kuwait, 7 September 1961"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Kuwait",
+  "notes": [
+   "The law was read only in the translation on FOTW, not in the Arabic gazette text. The Kuwaiti embassy in Japan's summary agrees on the 2:1 rectangle, the three equal stripes and the trapezoid at the hoist.",
+   "Law No. 31 of 1961 and Decree-Law No. 73 of 2025 amend the law's use and penalty articles, as FOTW and the Arab Times report them. Neither report mentions any change to Article 1. Neither amending text was read.",
+   "Green, red and their Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW. Black and white are plain. Kuwait's Visual Identity of November 2024, a government document, has green Pantone 347 C, RGB 0-154-68, and red Pantone 186 C, RGB 200-16-46, as FOTW reports them for the emblem. It's set aside because it wasn't read and FOTW gives these for the emblem, not the flag."
+  ],
+  "render-license": "CC0-1.0",
+  "restrictions": [
+   {
+    "sources": [
+     "https://www.arabtimesonline.com/news/raise-a-flag-face-a-fine-kuwaits-new-law-explained"
+    ],
+    "text": "Decree-Law No. 73 of 2025, as the Arab Times reports it: using the flag for commercial branding or advertising, displaying it continuously on private buildings, or raising a damaged one is punishable by up to a year in prison or a fine."
+   }
+  ],
+  "sources": [
+   "https://www.crwflags.com/fotw/flags/kw_laws.html",
+   "https://www.crwflags.com/fotw/flags/kw.html",
+   "https://www.arabtimesonline.com/news/raise-a-flag-face-a-fine-kuwaits-new-law-explained"
+  ]
+ },
+ "palette": {
+  "black": "#000000",
+  "green": "#009460",
+  "red": "#d21034",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

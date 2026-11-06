@@ -1,0 +1,455 @@
+{
+ "defines": {
+  "motif": {
+   "shape": {
+    "kind": "polygon",
+    "vertices": [
+     {},
+     {
+      "fly": 1
+     },
+     {
+      "hoist": 1
+     }
+    ]
+   }
+  },
+  "stripes": {
+   "layers": [
+    {
+     "along": "fly",
+     "blend": "normal",
+     "colors": [
+      "night",
+      "violet"
+     ],
+     "layer": "bars",
+     "opacity": 1,
+     "ratio": [
+      1,
+      1
+     ]
+    }
+   ]
+  }
+ },
+ "fly": 30,
+ "hoist": 20,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "night",
+    "violet",
+    "gold"
+   ],
+   "layer": "bars",
+   "line": {
+    "depth": 1,
+    "kind": "wavy",
+    "period": 10
+   },
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "colors": [
+    "none",
+    "pink",
+    "none",
+    "none"
+   ],
+   "layer": "quarters",
+   "opacity": 1,
+   "split": {
+    "fly": 20,
+    "hoist": 6
+   }
+  },
+  {
+   "blend": "normal",
+   "corner": "lower-fly",
+   "fly": 8,
+   "hoist": 6,
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "define": {
+      "layers": [
+       {
+        "along": "fly",
+        "blend": "normal",
+        "colors": [
+         "night",
+         "violet"
+        ],
+        "layer": "bars",
+        "opacity": 1,
+        "ratio": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     "layer": "use",
+     "name": "stripes",
+     "opacity": 1
+    }
+   ],
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "white",
+     "layer": "field",
+     "opacity": 1
+    }
+   ],
+   "line": {
+    "count": 12,
+    "depth": 1,
+    "kind": "zigzag"
+   },
+   "opacity": 1,
+   "side": "bottom",
+   "width": 2
+  },
+  {
+   "at": {
+    "fly": 8,
+    "hoist": 6
+   },
+   "blend": "normal",
+   "colors": [
+    "gold",
+    "none",
+    "gold",
+    "none",
+    "gold",
+    "none",
+    "gold",
+    "none"
+   ],
+   "from": "center",
+   "layer": "rays",
+   "opacity": 0.4,
+   "ratio": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "colors": [
+    "none",
+    "gold"
+   ],
+   "depth": 6,
+   "from": "top",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    4,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "fimbriate": {
+    "color": "night",
+    "width": 0.2
+   },
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "base": [
+     12,
+     18
+    ],
+    "depth": 4,
+    "edge": "fly",
+    "flat": 1,
+    "kind": "pile"
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "pink",
+   "layer": "charge",
+   "opacity": 0.5,
+   "shape": {
+    "edge": "bottom",
+    "junction": 6,
+    "kind": "pall",
+    "width": 1
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 3,
+     "hoist": 4
+    },
+    "ats": [
+     {
+      "fly": 3,
+      "hoist": 4
+     }
+    ],
+    "fly": 3,
+    "hoist": 5,
+    "hollow": 0.3,
+    "kind": "lozenge"
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 8,
+     "hoist": 4
+    },
+    "ats": [
+     {
+      "fly": 8,
+      "hoist": 4
+     }
+    ],
+    "fly": 3,
+    "hoist": 1,
+    "kind": "ellipse",
+    "rotate": 30
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 3,
+     "hoist": 14
+    },
+    "ats": [
+     {
+      "fly": 3,
+      "hoist": 14
+     }
+    ],
+    "fly": 2,
+    "hoist": 3,
+    "hollow": 0.2,
+    "kind": "ellipse"
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "fimbriate": {
+    "color": "night",
+    "width": 0.2
+   },
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 8,
+     "hoist": 14
+    },
+    "ats": [
+     {
+      "fly": 8,
+      "hoist": 14
+     }
+    ],
+    "fly": 2,
+    "hoist": 2,
+    "kind": "lozenge"
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "gold",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 26,
+     "hoist": 3
+    },
+    "ats": [
+     {
+      "fly": 26,
+      "hoist": 3
+     }
+    ],
+    "disc": 1,
+    "gap": 0.2,
+    "kind": "sun",
+    "points": 10,
+    "radius": 2,
+    "spread": 0.6
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 22,
+     "hoist": 3
+    },
+    "ats": [
+     {
+      "fly": 22,
+      "hoist": 3
+     }
+    ],
+    "inner": 1.2,
+    "kind": "crescent",
+    "offset": 0.6,
+    "radius": 1.5,
+    "rotate": 90
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "white",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 14,
+     "hoist": 3
+    },
+    "ats": [
+     {
+      "fly": 14,
+      "hoist": 3
+     }
+    ],
+    "from": 45,
+    "has-arc": true,
+    "inner": 1.5,
+    "kind": "ring",
+    "radius": 2,
+    "to": 315
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "night",
+   "layer": "charge",
+   "opacity": 1,
+   "repeat": {
+    "count": 3,
+    "from": -40,
+    "kind": "arc",
+    "radius": 2,
+    "to": 40,
+    "turn": true
+   },
+   "shape": {
+    "at": {
+     "fly": 3,
+     "hoist": 10
+    },
+    "ats": [
+     {
+      "fly": 3,
+      "hoist": 10
+     }
+    ],
+    "inner": 0.3819660112501052,
+    "kind": "star",
+    "points": 5,
+    "radius": 1
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "pink",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "kind": "polygon",
+    "vertices": [
+     {},
+     {
+      "fly": 1
+     },
+     {
+      "hoist": 1
+     }
+    ]
+   }
+  },
+  {
+   "blend": "normal",
+   "clip": {
+    "at": {
+     "fly": 12,
+     "hoist": 10
+    },
+    "ats": [
+     {
+      "fly": 12,
+      "hoist": 10
+     }
+    ],
+    "fly": 2,
+    "hoist": 2,
+    "kind": "rect"
+   },
+   "colors": [
+    "white",
+    "night"
+   ],
+   "columns": 2,
+   "flow": "bend-sinister",
+   "layer": "checks",
+   "opacity": 1,
+   "rows": 2
+  }
+ ],
+ "meta": {
+  "name": "Vocabulary Test"
+ },
+ "palette": {
+  "gold": "#f2c14e",
+  "night": "#1b1035",
+  "pink": "#f0a0c8",
+  "violet": "#7b4fd6",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

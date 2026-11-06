@@ -1,0 +1,344 @@
+{
+ "fly": 24.7,
+ "folds": {
+  "triangle": {
+   "description": "The customary triangular fold",
+   "sources": [
+    "https://www.va.gov/opa/publications/celebrate/flagfold.pdf",
+    "https://www.legion.org/advocacy/flag-advocacy/flag-folding-procedures"
+   ],
+   "steps": [
+    {
+     "a": {
+      "hoist": 6.5
+     },
+     "b": {
+      "fly": 1,
+      "hoist": 6.5
+     },
+     "kind": "over",
+     "moving": {
+      "hoist": 7.5
+     }
+    },
+    {
+     "a": {
+      "hoist": 3.25
+     },
+     "b": {
+      "fly": 1,
+      "hoist": 3.25
+     },
+     "kind": "over",
+     "moving": {
+      "hoist": 4.25
+     }
+    },
+    {
+     "a": {
+      "fly": 24.7
+     },
+     "b": {
+      "fly": 21.45,
+      "hoist": 3.25
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 24.7,
+      "hoist": 3.25
+     }
+    },
+    {
+     "a": {
+      "fly": 21.45
+     },
+     "b": {
+      "fly": 21.45,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 22.45
+     }
+    },
+    {
+     "a": {
+      "fly": 21.45,
+      "hoist": 3.25
+     },
+     "b": {
+      "fly": 18.2
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 21.45
+     }
+    },
+    {
+     "a": {
+      "fly": 18.2
+     },
+     "b": {
+      "fly": 18.2,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 19.2
+     }
+    },
+    {
+     "a": {
+      "fly": 18.2
+     },
+     "b": {
+      "fly": 14.95,
+      "hoist": 3.25
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 18.2,
+      "hoist": 3.25
+     }
+    },
+    {
+     "a": {
+      "fly": 14.95
+     },
+     "b": {
+      "fly": 14.95,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 15.95
+     }
+    },
+    {
+     "a": {
+      "fly": 14.95,
+      "hoist": 3.25
+     },
+     "b": {
+      "fly": 11.7
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 14.95
+     }
+    },
+    {
+     "a": {
+      "fly": 11.7
+     },
+     "b": {
+      "fly": 11.7,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 12.7
+     }
+    },
+    {
+     "a": {
+      "fly": 11.7
+     },
+     "b": {
+      "fly": 8.45,
+      "hoist": 3.25
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 11.7,
+      "hoist": 3.25
+     }
+    },
+    {
+     "a": {
+      "fly": 8.45
+     },
+     "b": {
+      "fly": 8.45,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 9.45
+     }
+    },
+    {
+     "a": {
+      "fly": 8.45,
+      "hoist": 3.25
+     },
+     "b": {
+      "fly": 5.2
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 8.45
+     }
+    },
+    {
+     "a": {
+      "fly": 5.2
+     },
+     "b": {
+      "fly": 5.2,
+      "hoist": 1
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 6.2
+     }
+    },
+    {
+     "a": {
+      "fly": 5.2
+     },
+     "b": {
+      "fly": 1.95,
+      "hoist": 3.25
+     },
+     "kind": "over",
+     "moving": {
+      "fly": 5.2,
+      "hoist": 3.25
+     }
+    },
+    {
+     "a": {
+      "fly": 1.95
+     },
+     "b": {
+      "fly": 1.95,
+      "hoist": 1
+     },
+     "kind": "tuck",
+     "moving": {
+      "fly": 0.95
+     }
+    }
+   ]
+  }
+ },
+ "hoist": 13,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "red",
+    "white",
+    "red",
+    "white",
+    "red",
+    "white",
+    "red",
+    "white",
+    "red",
+    "white",
+    "red",
+    "white",
+    "red"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "corner": "upper-hoist",
+   "fly": 9.88,
+   "hoist": 7,
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "blue",
+     "layer": "field",
+     "opacity": 1
+    },
+    {
+     "blend": "normal",
+     "color": "white",
+     "layer": "charge",
+     "opacity": 1,
+     "repeat": {
+      "columns": 11,
+      "kind": "grid",
+      "rows": 9,
+      "stagger": true
+     },
+     "shape": {
+      "inner": 0.1529391909045421,
+      "kind": "star",
+      "points": 5,
+      "radius": 0.4004
+     }
+    }
+   ],
+   "opacity": 1
+  }
+ ],
+ "meta": {
+  "date": "1960-07-04",
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://www.archives.gov/federal-register/codification/executive-order/10834.html"
+    ],
+    "text": "Executive Order 10834"
+   },
+   {
+    "sources": [
+     "https://www.law.cornell.edu/uscode/text/4/chapter-1"
+    ],
+    "text": "United States Flag Code"
+   }
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "United States",
+  "notes": [
+   "The hex values are the State Department ECA bureau's for Old Glory Red and Blue. Government sources disagree on them."
+  ],
+  "render-license": "CC0-1.0",
+  "series": "united-states",
+  "sources": [
+   "https://www.archives.gov/federal-register/codification/executive-order/10834.html",
+   "https://www.law.cornell.edu/uscode/text/4/7",
+   "https://en.wikipedia.org/wiki/Flag_of_the_United_States"
+  ],
+  "version": "50-star"
+ },
+ "palette": {
+  "blue": "#0a3161",
+  "red": "#b31942",
+  "white": "#ffffff"
+ },
+ "variants": {
+  "vertical": {
+   "from": "transpose",
+   "upright": true
+  }
+ },
+ "version": 1
+}

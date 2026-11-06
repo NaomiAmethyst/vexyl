@@ -1,0 +1,183 @@
+{
+ "fly": 35,
+ "gradients": {
+  "corner": {
+   "along": "bend",
+   "colors": [
+    "sky",
+    "pink"
+   ],
+   "stops": [
+    null,
+    1
+   ]
+  },
+  "dusk": {
+   "along": "hoist",
+   "colors": [
+    "pink",
+    "charcoal"
+   ],
+   "stops": [
+    0.25,
+    1
+   ]
+  },
+  "pastel": {
+   "along": "fly",
+   "colors": [
+    "pink",
+    "butter",
+    "sky"
+   ],
+   "stops": [
+    null,
+    0.5,
+    1
+   ]
+  },
+  "rising": {
+   "along": "bend-sinister",
+   "colors": [
+    "charcoal",
+    "butter"
+   ],
+   "stops": [
+    null,
+    1
+   ]
+  }
+ },
+ "hoist": 21,
+ "layers": [
+  {
+   "along": "fly",
+   "blend": "normal",
+   "colors": [
+    "charcoal",
+    "pastel",
+    "white",
+    "dusk",
+    "white",
+    "pastel",
+    "charcoal"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "colors": [
+    "rising",
+    "corner"
+   ],
+   "depth": 10,
+   "from": "hoist",
+   "layer": "chevrons",
+   "opacity": 1,
+   "ratio": [
+    2,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "dusk",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.25
+   },
+   "layer": "saltire",
+   "opacity": 1,
+   "width": 1
+  },
+  {
+   "blend": "normal",
+   "corner": "upper-hoist",
+   "fly": 6,
+   "hoist": 6,
+   "layer": "panel",
+   "layers": [
+    {
+     "blend": "normal",
+     "color": "corner",
+     "layer": "field",
+     "opacity": 1
+    }
+   ],
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "color": "pastel",
+   "fimbriate": {
+    "color": "dusk",
+    "width": 0.2
+   },
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 28,
+     "hoist": 4
+    },
+    "ats": [
+     {
+      "fly": 28,
+      "hoist": 4
+     }
+    ],
+    "inner": 0.7639320225002104,
+    "kind": "star",
+    "points": 5,
+    "radius": 2
+   }
+  },
+  {
+   "blend": "normal",
+   "color": "rising",
+   "layer": "charge",
+   "opacity": 1,
+   "repeat": {
+    "count": 2,
+    "fly": -6,
+    "kind": "line"
+   },
+   "shape": {
+    "at": {
+     "fly": 28,
+     "hoist": 16
+    },
+    "ats": [
+     {
+      "fly": 28,
+      "hoist": 16
+     }
+    ],
+    "kind": "heart",
+    "radius": 2,
+    "spread": 2.8284271247461903
+   }
+  }
+ ],
+ "meta": {
+  "name": "Gradient Test"
+ },
+ "palette": {
+  "butter": "#f6f1ad",
+  "charcoal": "#7f7f7f",
+  "pink": "#ffb0ca",
+  "sky": "#9bdaec",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

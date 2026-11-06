@@ -1,0 +1,129 @@
+{
+ "color-refs": {
+  "red": [
+   {
+    "system": "pantone",
+    "value": "485 C"
+   },
+   {
+    "system": "cmyk",
+    "value": "6 94 96 0"
+   },
+   {
+    "system": "Flags and Anthems Manual, London 2012, as reported by FOTW",
+    "value": "PMS 032"
+   }
+  ]
+ },
+ "defines": {
+  "leaf": {
+   "shape": {
+    "box": [
+     0,
+     0,
+     9600,
+     4800
+    ],
+    "d": "M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z",
+    "kind": "path"
+   }
+  }
+ },
+ "fly": 64,
+ "hoist": 32,
+ "layers": [
+  {
+   "along": "hoist",
+   "blend": "normal",
+   "colors": [
+    "red",
+    "white",
+    "red"
+   ],
+   "layer": "bars",
+   "opacity": 1,
+   "ratio": [
+    1,
+    2,
+    1
+   ]
+  },
+  {
+   "blend": "normal",
+   "color": "red",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "box": [
+     0,
+     0,
+     9600,
+     4800
+    ],
+    "d": "M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z",
+    "fly": 64,
+    "hoist": 32,
+    "kind": "path"
+   }
+  }
+ ],
+ "meta": {
+  "adapted-from": [
+   {
+    "authors": [
+     "MapGrid",
+     "Illegitimate Barrister"
+    ],
+    "license": "LicenseRef-Public-Domain",
+    "part": "the maple leaf's outline",
+    "u-r-l": "https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg"
+   }
+  ],
+  "date": "1965-02-15",
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "laws": [
+   {
+    "sources": [
+     "https://people.stfx.ca/lstanley/stanley/flagbook/AppendixA.htm"
+    ],
+    "text": "Royal Proclamation of the National Flag of Canada, 28 January 1965"
+   },
+   {
+    "sources": [
+     "https://laws-lois.justice.gc.ca/eng/acts/N-9/page-1.html"
+    ],
+    "text": "National Flag of Canada Manufacturing Standards Act, R.S.C. 1985, c. N-9"
+   }
+  ],
+  "license": "LicenseRef-Public-Domain",
+  "name": "Canada",
+  "notes": [
+   "The proclamation was read as George Stanley's book reprints it. It says only that the leaf is a single red maple leaf. Canadian Heritage calls it the stylized 11-point leaf and gives the 32 x 64 grid, which isn't law.",
+   "The leaf's outline is the path of the Commons file named above, copied without change, and isn't from the law. Canadian Heritage's own leaf files weren't reachable to compare.",
+   "The Manufacturing Standards Act leaves manufacture to the CGSB standards CAN/CGSB-98.1, .2 and .3, which weren't read. They'd be the place to look for an official red.",
+   "The hex, Pantone and CMYK values are the Album des Pavillons 2023, as reported by FOTW. The Album itself wasn't read. FOTW's other sources give PMS 032 for the flag, and PMS 485 for screens."
+  ],
+  "restrictions": [
+   {
+    "sources": [
+     "https://web.archive.org/web/2025/https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html"
+    ],
+    "text": "Canadian Heritage says the flag and its maple leaf are protected symbols under the Trademarks Act."
+   }
+  ],
+  "sources": [
+   "https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg",
+   "https://people.stfx.ca/lstanley/stanley/flagbook/AppendixA.htm",
+   "https://web.archive.org/web/2025/https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html",
+   "https://laws-lois.justice.gc.ca/eng/acts/N-9/page-1.html",
+   "https://crwflags.com/fotw/flags/ca_fact.html"
+  ]
+ },
+ "palette": {
+  "red": "#da291c",
+  "white": "#ffffff"
+ },
+ "version": 1
+}

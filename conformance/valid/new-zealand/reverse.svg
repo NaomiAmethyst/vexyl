@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="1200" height="600">
+  <title>New Zealand</title>
+  <g transform="matrix(-1 0 0 1 120 0)">
+    <clipPath id="vx-faebe5f3-b34d-flag1">
+      <polygon points="0,0 120,0 120,60 0,60"/>
+    </clipPath>
+    <g clip-path="url(#vx-faebe5f3-b34d-flag1)">
+      <polygon points="0,0 120,0 120,60 0,60" fill="#012169"/>
+      <clipPath id="vx-faebe5f3-b34d-panel2">
+        <polygon points="0,0 60,0 60,30 0,30"/>
+      </clipPath>
+      <g transform="translate(0 0)" clip-path="url(#vx-faebe5f3-b34d-panel2)" style="isolation:isolate">
+        <g transform="scale(1 1)">
+          <polygon points="0,0 60,0 60,30 0,30" fill="#012169"/>
+          <polygon points="0,0 0,3.354102 53.291796,30 60,30 60,26.645898 6.708204,0" fill="#ffffff"/>
+          <polygon points="0,30 0,26.645898 53.291796,0 60,0 60,3.354102 6.708204,30" fill="#ffffff"/>
+          <clipPath id="vx-faebe5f3-b34d-clip3">
+            <polygon points="30,15 60,15 60,30 30,15 30,30 0,30 30,15 0,15 0,0 30,15 30,0 60,0"/>
+          </clipPath>
+          <g clip-path="url(#vx-faebe5f3-b34d-clip3)">
+            <polygon points="0,0 0,2.236068 55.527864,30 60,30 60,27.763932 4.472136,0" fill="#c8102e"/>
+            <polygon points="0,30 0,27.763932 55.527864,0 60,0 60,2.236068 4.472136,30" fill="#c8102e"/>
+          </g>
+          <polygon points="27,-4 33,-4 33,34 27,34" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="miter" stroke-miterlimit="10"/>
+          <polygon points="-4,12 64,12 64,18 -4,18" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="miter" stroke-miterlimit="10"/>
+          <polygon points="27,0 33,0 33,30 27,30" fill="#c8102e"/>
+          <polygon points="0,12 60,12 60,18 0,18" fill="#c8102e"/>
+        </g>
+      </g>
+      <polygon points="90,8.8456 90.708207,11.025237 93.000013,11.025237 91.145903,12.372326 91.85411,14.551963 90,13.204874 88.14589,14.551963 88.854097,12.372326 86.999987,11.025237 89.291793,11.025237" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      <polygon points="76.1362,22.794 76.844407,24.973637 79.136213,24.973637 77.282103,26.320726 77.99031,28.500363 76.1362,27.153274 74.28209,28.500363 74.990297,26.320726 73.136187,24.973637 75.427993,24.973637" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      <polygon points="90,8.8456 90.708207,11.025237 93.000013,11.025237 91.145903,12.372326 91.85411,14.551963 90,13.204874 88.14589,14.551963 88.854097,12.372326 86.999987,11.025237 89.291793,11.025237" fill="#c8102e"/>
+      <polygon points="76.1362,22.794 76.844407,24.973637 79.136213,24.973637 77.282103,26.320726 77.99031,28.500363 76.1362,27.153274 74.28209,28.500363 74.990297,26.320726 73.136187,24.973637 75.427993,24.973637" fill="#c8102e"/>
+      <polygon points="101.8832,19.7012 102.47338,21.517587 104.383242,21.517587 102.838131,22.640176 103.428311,24.456563 101.8832,23.333974 100.338089,24.456563 100.928269,22.640176 99.383158,21.517587 101.29302,21.517587" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      <polygon points="101.8832,19.7012 102.47338,21.517587 104.383242,21.517587 102.838131,22.640176 103.428311,24.456563 101.8832,23.333974 100.338089,24.456563 100.928269,22.640176 99.383158,21.517587 101.29302,21.517587" fill="#c8102e"/>
+      <polygon points="90,44.3197 90.826279,46.862725 93.500173,46.862725 91.336947,48.4344 92.163226,50.977425 90,49.40575 87.836774,50.977425 88.663053,48.4344 86.499827,46.862725 89.173721,46.862725" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      <polygon points="90,44.3197 90.826279,46.862725 93.500173,46.862725 91.336947,48.4344 92.163226,50.977425 90,49.40575 87.836774,50.977425 88.663053,48.4344 86.499827,46.862725 89.173721,46.862725" fill="#c8102e"/>
+    </g>
+  </g>
+</svg>

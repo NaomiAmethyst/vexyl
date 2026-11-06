@@ -1,0 +1,47 @@
+{
+ "fly": 7,
+ "hoist": 7,
+ "layers": [
+  {
+   "blend": "normal",
+   "colors": [
+    "white",
+    "yellow",
+    "orange",
+    "red",
+    "purple",
+    "blue",
+    "green"
+   ],
+   "columns": 7,
+   "flow": "bend",
+   "layer": "checks",
+   "opacity": 1,
+   "rows": 7
+  }
+ ],
+ "meta": {
+  "encoders": [
+   "Naomi Persephone Amethyst"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "name": "Wiphala of the Qulla Suyu",
+  "notes": [
+   "Sizes follow the drawing on Commons, not a checked construction sheet."
+  ],
+  "render-license": "CC0-1.0",
+  "sources": [
+   "https://commons.wikimedia.org/wiki/File:Banner_of_the_Qulla_Suyu.svg"
+  ]
+ },
+ "palette": {
+  "blue": "#0f47af",
+  "green": "#078930",
+  "orange": "#eb7711",
+  "purple": "#742c64",
+  "red": "#da121a",
+  "white": "#ffffff",
+  "yellow": "#fcdd09"
+ },
+ "version": 1
+}

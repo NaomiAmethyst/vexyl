@@ -1,0 +1,41 @@
+// Ratios of the hoist, G = 240, per FOTW and Wikipedia's account of the construction
+// table under Law No. 2893: outer circle diameter 1/2 at 1/2 from the hoist, inner
+// circle diameter 2/5 offset 1/16, star circle diameter 1/4 with a gap of 1/3. The
+// law's own table hasn't been checked. The law gives no color; this one is
+// conventional, and other manuals use Pantone 186.
+//
+// Omitted: the white hem at the hoist, 1/30 of G. Positions are measured from the
+// hem's seam, and it's unconfirmed whether the 3:2 length includes it. Adding it
+// could move the charges 8 units toward the fly.
+vexyl 1
+meta {
+  name "Turkey"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://cdn.fotw.info/flags/tr.html"
+  source "https://en.wikipedia.org/wiki/Flag_of_Turkey"
+  note "Positions are measured from a white hem at the hoist, 1/30 of the hoist wide, which this omits. It's unconfirmed whether the 3:2 length includes the hem, and adding it could move the charges 8 units toward the fly."
+  note "The ratios follow FOTW's and Wikipedia's accounts of the construction table, and the law's own table hasn't been checked. The law gives no color, so this one is conventional, and other manuals use Pantone 186."
+  law "Turkish Flag Law No. 2893" {
+    source "https://cdn.fotw.info/flags/tr_law.html"
+  }
+}
+palette {
+  red "#e30a17"
+  white "#ffffff"
+}
+proportion hoist=240 fly=360
+
+field red
+charge crescent white {
+  radius 60
+  inner 48
+  offset 15
+  at fly=120 hoist=120
+}
+charge star white {
+  radius 30
+  at fly=197 hoist=120
+  rotate -90
+}

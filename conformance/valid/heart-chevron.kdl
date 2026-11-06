@@ -1,0 +1,42 @@
+// An invented flag exercising the heart shape, an off-center chevron, and inline SVG
+// taking its color from the palette.
+vexyl 1
+meta {
+  name "Heart and Apex Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  pink "#f0a0c8"
+  white "#ffffff"
+  gold "#f2c14e"
+}
+proportion hoist=6 fly=10
+
+bars night violet pink
+chevrons white {
+  depth 4
+  angle 45
+  apex 2
+}
+charge heart gold {
+  radius 0.6
+  at fly=1.4 hoist=2
+  rotate -90
+}
+charge heart white {
+  radius 0.5
+  spread 0.75
+  at fly=7.5 hoist=3
+  fimbriate night 0.05
+}
+charge svg gold {
+  at fly=8.5 hoist=1
+  fly 1
+  hoist 1
+  markup #"""
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+      <circle cx="5" cy="5" r="5" fill="currentColor"/>
+    </svg>
+    """#
+}

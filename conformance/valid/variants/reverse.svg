@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="900" height="600">
+  <title>Variants Test</title>
+  <clipPath id="vx-34704182-b34d-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-34704182-b34d-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#1b1035"/>
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+vexyl 1
+meta {
+  name "Colorado"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://commons.wikimedia.org/wiki/File:Flag_of_Colorado.svg"
+  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+}
+palette {
+  blue "#00205b"
+  white "#ffffff"
+  red "#bf0a30"
+  gold "#ffd700"
+}
+proportion hoist=1200 fly=1800
+
+bars blue white blue
+charge ring red {
+  radius 400
+  inner 150
+  from 112
+  to 68
+  at fly=760 hoist=600
+}
+charge disc gold {
+  radius 200
+  at fly=760 hoist=600
+}
