@@ -2,8 +2,7 @@ vexyl 1
 meta {
   name "Vexyl logo"
   encoder "Naomi Persephone Amethyst"
-  license "CC-BY-SA-4.0"
-  render-license "CC0-1.0"
+  license "Apache-2.0"
 }
 palette {
   deep "#4a2fb8"
