@@ -68,6 +68,40 @@ class Models(unittest.TestCase):
         self.assertFalse(run.numbers_close(True, 1))
 
 
+class OutputChecks(unittest.TestCase):
+    OPEN = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><title>T</title>'
+
+    def problems(self, body):
+        return run.output_problems(self.OPEN + body + "</svg>")
+
+    def test_clean_output_passes(self):
+        self.assertEqual(self.problems(
+            '<clipPath id="a"><rect width="1" height="1"/></clipPath><g clip-path="url(#a)" style="isolation:isolate">'
+            '<svg viewBox="0 0 1 1" x="0" y="0" width="1" height="1" preserveAspectRatio="xMidYMid meet" fill="rgb(1,2,3)"><rect id="b"/></svg></g>'), [])
+
+    def test_each_banned_thing_is_seen(self):
+        for body in ['<script/>', '<image href="x.png"/>', '<rect onclick="x"/>', '<rect class="a"/>', '<a/>', '<style/>',
+                     '<text>x</text>', '<foreignObject/>', '<rect fill="url(https://example.test/)"/>',
+                     '<rect fill="expression(x)"/>', '<rect style="fill:url(x)"/>', '<rect style="background:red"/>',
+                     '<rect style="fill:\\75rl(x)"/>', '<linearGradient href="https://example.test/"/>', '<g>text</g>',
+                     '<rect/>text', '<rect id="a"/><rect id="a"/>', '<rect id="a b"/>',
+                     '<rect xmlns:x="urn:x" x:y="1"/>', '<x xmlns="urn:x"/>', '<svg viewBox="0 0 1 1"><use href="#a"/></svg>',
+                     '<svg viewBox="0 0 1 1"><svg viewBox="0 0 1 1"/></svg>', '<g><title>x</title></g>']:
+            self.assertTrue(self.problems(body), body)
+        self.assertTrue(run.output_problems("<svg"))
+
+    def test_artwork_has_to_match_but_for_prefixes(self):
+        want = run.ET.fromstring('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect id="r" fill="url(#g)"/></svg>')
+        def got(body, attrs=""):
+            return run.ET.fromstring(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" x="1" y="1" width="1" height="1"{attrs}>{body}</svg>')
+        self.assertIsNone(run.artwork_differs(want, got('<rect id="p-r" fill="url(#p-g)"/>')))
+        self.assertTrue(run.artwork_differs(want, got('<rect id="r" fill="url(#p-g)"/>')))
+        self.assertTrue(run.artwork_differs(want, got('<rect id="p-r" fill="url(#g)"/>')))
+        self.assertTrue(run.artwork_differs(want, got('<rect id="p-r" fill="url(#p-g)" stroke="red"/>')))
+        self.assertTrue(run.artwork_differs(want, got('<rect id="p-r" fill="url(#p-g)"/><rect/>')))
+        self.assertTrue(run.artwork_differs(want, got('<rect id="p-r" fill="url(#p-g)"/>', ' onload="x"')))
+
+
 class Flags(unittest.TestCase):
     def test_options_become_flags(self):
         self.assertEqual(run.flags_for({"ratio": "1:2", "fit": "pad", "fold_step": 1}),

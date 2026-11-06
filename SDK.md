@@ -26,7 +26,7 @@ Names follow each language's conventions: `svgTree`, `SVGTree`, `svg_tree`.
 | `svgTree` | A flag and options | The same document as a tree of elements, or an error |
 
 A library MUST NOT read the network or the filesystem to do any of these, because a document
-is self-contained. It MAY offer conveniences that read files, separately.
+is self-contained. It MUST enforce the limits in section 15 of the format when reading a document. It MAY offer conveniences that read files, separately.
 
 A flag is a native structure: a library SHOULD use its language's own types. It MUST NOT change
 when rendered, so one flag can render with many options.
@@ -75,7 +75,11 @@ language, so the suite can compare what a library understood, apart from how it 
 - Anything empty, zero or false is left out.
 - Defaults have been applied, as they are for drawing: a star's `inner` has been worked out, and
   `count` has expanded a bar's colors.
-- Inline SVG is as it is after being sanitized.
+- Inline SVG is as it is after being sanitized, and the source's other content isn't kept anywhere.
+  It's written as `<svg xmlns="..." viewBox="X Y W H" ...>`, then its elements with nothing between
+  them and never self-closed, with attributes in source order, IDs and references as written, and
+  `& < > " ' tab LF CR` in values as `&amp; &lt; &gt; &#34; &#39; &#x9; &#xA; &#xD;`.
+- A `use` gives the name of what it uses, and that's found under the flag's definitions.
 
 The suite's `.model.json` files show every field. They compare with numbers allowed to differ by
 one part in a million.
@@ -107,5 +111,10 @@ at the suite's version for the format's version. It has three parts:
 | Renders | Each flag, in each form, compared with the expected SVG as pixels |
 | Models | Each flag's model, compared with the expected JSON |
 | Invalid documents | Each is refused, with a problem on the expected line |
+| Accepted documents | Each is valid, including those exactly at a limit |
+| Sanitizer output | Each piece of artwork comes out as expected, in the model and in a render |
+
+Every render is also checked for what mustn't be in it, such as an element or attribute off the
+allowlist or a reference leaving the document, since pixels can't show those.
 
 Each library offers a small command for the suite to run, as the `vexyl` command does.

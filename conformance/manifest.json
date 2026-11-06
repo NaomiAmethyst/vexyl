@@ -2053,6 +2053,47 @@
    ]
   },
   {
+   "name": "line-endings",
+   "file": "valid/line-endings.kdl",
+   "model": "valid/line-endings.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/line-endings/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/line-endings/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/line-endings/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/line-endings/pad-center.svg"
+    }
+   ]
+  },
+  {
    "name": "variants",
    "file": "valid/variants.kdl",
    "model": "valid/variants.model.json",
@@ -2111,6 +2152,24 @@
       "fit": "pad"
      },
      "svg": "valid/variants/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/variants/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/variants/pad-end.svg"
     }
    ]
   },
@@ -2152,24 +2211,6 @@
       "fit": "pad"
      },
      "svg": "valid/vocabulary/pad-center.svg"
-    },
-    {
-     "name": "pad-start",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
-     },
-     "svg": "valid/vocabulary/pad-start.svg"
-    },
-    {
-     "name": "pad-end",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
-     },
-     "svg": "valid/vocabulary/pad-end.svg"
     }
    ]
   }

@@ -4,6 +4,7 @@
 package vexyl
 
 import (
+	"errors"
 	"regexp"
 	"slices"
 	"strconv"
@@ -16,6 +17,9 @@ import (
 var (
 	seriesValue  = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	pathValue    = regexp.MustCompile(`^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\-\s]+$`)
+	decimalWhole = regexp.MustCompile(`^` + decimalForm + `$`)
+	numberList   = regexp.MustCompile(`^\s*` + decimalForm + `(?:[\s,]+` + decimalForm + `)*\s*$`)
+	numberSplit  = regexp.MustCompile(`[\s,]+`)
 	cornerValues = []string{"upper-hoist", "upper-fly", "lower-hoist", "lower-fly"}
 	rayFromNames = append([]string{"center", "hoist", "fly", "top", "bottom"}, cornerValues...)
 	shapeKinds   = []string{"disc", "ring", "rect", "plus", "triangle", "star", "heart", "cardioid",
@@ -48,21 +52,52 @@ func (p *parser) pathData(n *kdl.Node) string {
 	return d
 }
 
+// decimalForm is the one way to write a number inside a string.
+const decimalForm = `[-+]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][-+]?[0-9]+)?`
+
+// asciiSpace is what counts as whitespace inside strings and inline SVG.
+const asciiSpace = " \t\n\f\r"
+
+// decimalValue reads one number written in decimalForm, within the format's limits.
+func decimalValue(text string) (float64, bool) {
+	if !decimalWhole.MatchString(text) {
+		return 0, false
+	}
+	v, err := strconv.ParseFloat(text, 64)
+	if err != nil && !errors.Is(err, strconv.ErrRange) {
+		return 0, false
+	}
+	if !inLimits(v) {
+		return 0, false
+	}
+	return v, true
+}
+
+// numbersIn reads a string holding numbers, separated by whitespace, commas or both.
+func numbersIn(text string) ([]float64, bool) {
+	if !numberList.MatchString(text) {
+		return nil, false
+	}
+	parts := numberSplit.Split(strings.Trim(text, asciiSpace), -1)
+	out := make([]float64, len(parts))
+	for i, part := range parts {
+		v, ok := decimalValue(part)
+		if !ok {
+			return nil, false
+		}
+		out[i] = v
+	}
+	return out, true
+}
+
 func (p *parser) boxValue(n *kdl.Node, text string) [4]float64 {
 	var box [4]float64
-	fields := strings.FieldsFunc(text, func(r rune) bool { return r == ' ' || r == ',' })
-	if len(fields) != 4 {
-		p.errf(n, `box must be "x y width height"`)
+	values, ok := numbersIn(text)
+	if !ok || len(values) != 4 {
+		p.errf(n, `box must be "x y width height", with each a finite decimal number of a reasonable size`)
 		return box
 	}
-	for i, field := range fields {
-		v, err := strconv.ParseFloat(field, 64)
-		if err != nil {
-			p.errf(n, `box must be "x y width height"`)
-			return box
-		}
-		box[i] = v
-	}
+	copy(box[:], values)
 	return box
 }
 
@@ -189,6 +224,7 @@ func (p *parser) panel(n *kdl.Node, depth int) Layer {
 		"hoist":  func(c *kdl.Node) { l.Hoist = p.positive(c, p.number(c)) },
 		"edge":   func(c *kdl.Node) { l.Line = p.line(c) },
 	})
+	p.checkWaves(n, l.Line)
 	switch {
 	case l.Side != "" && l.Corner != "":
 		p.errf(n, "needs either `side` or `corner`, not both")
@@ -216,7 +252,7 @@ func (p *parser) panel(n *kdl.Node, depth int) Layer {
 	return l
 }
 
-func (p *parser) use(n *kdl.Node) Layer {
+func (p *parser) use(n *kdl.Node, depth int) Layer {
 	l := &Use{Effects: newEffects()}
 	args := n.Arguments()
 	p.noProps(n)
@@ -230,7 +266,10 @@ func (p *parser) use(n *kdl.Node) Layer {
 		p.errf(n, "%q isn't a defined design", l.Name)
 		return nil
 	}
-	l.Define = d
+	if depth+d.height > maxDepth {
+		p.errf(n, "%q nests more than %d levels deep where it's used", l.Name, maxDepth)
+	}
+	l.design = d
 	p.children(n, []string{"cut"}, p.withEffects(&l.Effects, nil))
 	return l
 }
@@ -291,6 +330,8 @@ func (p *parser) define(n *kdl.Node) {
 			d.Layers = append(d.Layers, l)
 		}
 	}
+	d.size = layersSize(d.Layers, p.longer)
+	d.height = layersHeight(d.Layers)
 	p.defines[name] = d
 }
 
@@ -376,6 +417,7 @@ func (p *parser) reverse(n *kdl.Node, flag *Flag) {
 	if len(r.Layers) == 0 {
 		p.errf(n, "needs layers, or `mirror`")
 	}
+	p.count(n, r.Layers)
 	flag.Reverse = r
 }
 
@@ -461,6 +503,7 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 			p.errf(n, "with a `proportion` needs its own layers")
 		}
 	}
+	p.count(n, v.Layers)
 	flag.Variants[name] = v
 }
 
@@ -637,19 +680,10 @@ func (p *parser) pointList(n *kdl.Node, v kdl.Value, count int) []float64 {
 		p.errf(n, "needs %d numbers in a string", count)
 		return nil
 	}
-	fields := strings.Fields(v.String())
-	if len(fields) != count {
-		p.errf(n, "needs %d numbers in a string", count)
+	values, ok := numbersIn(v.String())
+	if !ok || len(values) != count {
+		p.errf(n, "needs %d finite decimal numbers of a reasonable size in a string", count)
 		return nil
 	}
-	out := make([]float64, count)
-	for i, field := range fields {
-		x, err := strconv.ParseFloat(field, 64)
-		if err != nil {
-			p.errf(n, "needs %d numbers in a string", count)
-			return nil
-		}
-		out[i] = x
-	}
-	return out
+	return values
 }

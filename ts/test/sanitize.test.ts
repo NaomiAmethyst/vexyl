@@ -1,19 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-// Inline SVG is a security boundary. These tests hold the reference's, then go further, because a
-// tokenizer written for this library has to be right about everything an XML parser can be fooled by.
+// Inline SVG is a security boundary. The suite's tables are checked here as well as by the suite,
+// and these go further, because a tokenizer written for this library has to be right about
+// everything an XML parser can be fooled by.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
-import { parse, svg, svgTree, treeToSvg, validate } from "../src/index.js";
-import { maxSvgDepth, SanitizeError, sanitizeSvg, usesCurrentColor } from "../src/sanitize.js";
+import { parse, svg, svgTree, treeToSvg, validate, type ChargeLayer, type SvgShape } from "../src/index.js";
+import { idMark, maxSvgDepth, SanitizeError, sanitizeSvg, usesCurrentColor } from "../src/sanitize.js";
 import { XmlDecoder, XmlError } from "../src/xml.js";
-import { header, readRepo } from "./helpers.js";
+import { header, readRepo, root } from "./helpers.js";
 
 const ns = "http://www.w3.org/2000/svg";
 const svgOpen = `<svg xmlns="${ns}" viewBox="0 0 10 10">`;
-const accepted = (markup: string) => sanitizeSvg(markup, "p-");
+const accepted = (markup: string) => {
+	const e = sanitizeSvg(markup);
+	return { ...e, attrs: e.attrs.replaceAll(idMark, "p-"), body: e.body.replaceAll(idMark, "p-") };
+};
 const refused = (markup: string): void => {
 	assert.throws(() => accepted(markup), SanitizeError, `accepted: ${markup}`);
 };
@@ -89,7 +95,7 @@ test("sanitizer keeps artwork and prefixes IDs", () => {
 	assert.equal(out.attrs, ` fill="#123456"`);
 	for (const want of [
 		`id="p-g"`, `href="#p-h"`, `id="p-r"`, `fill="url(#p-g)"`,
-		`style="opacity:0.5;stroke:url(#p-g)"`, `clip-path="url(#p-c)"`,
+		`style="stroke:url(#p-g);opacity:0.5"`, `clip-path="url(#p-c)"`,
 		`fill="rgb(1, 2, 3)"`, `transform="translate(1 2) rotate(3)"`,
 	]) {
 		assert.ok(out.body.includes(want), `${out.body} lacks ${want}`);
@@ -101,9 +107,7 @@ test("an embedded file can't refer to the renderer's IDs or another embed's", ()
 	const out = svg(parse(readRepo("go/testdata/inline-svg.kdl")));
 	const ids = [...out.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]!);
 	assert.equal(new Set(ids).size, ids.length);
-	for (const want of ["svg1-shade", "svg2-shade"]) {
-		assert.ok(ids.some((id) => id.endsWith(want)), `no ${want} in ${ids}`);
-	}
+	assert.equal(ids.filter((id) => id.endsWith("-shade")).length, 2, `${ids}`);
 });
 
 test("several flags in one page don't share definitions", () => {
@@ -305,23 +309,23 @@ test("an attribute in another namespace goes, and a prefixed allowed one doesn't
 });
 
 test("output is written afresh, so nothing comes through unescaped", () => {
-	const out = accepted(`${svgOpen}<rect class="&quot; onclick=&quot;alert(1)&quot;" fill="red&gt;&lt;script&gt;"/></svg>`);
+	const out = accepted(`${svgOpen}<rect transform="&quot; onclick=&quot;alert(1)&quot;" fill="red&gt;&lt;script&gt;"/></svg>`);
 	assert.ok(!out.body.includes(`" onclick`), out.body);
 	assert.ok(!out.body.includes("<script"), out.body);
-	assert.equal(out.body, `<rect class="&#34; onclick=&#34;alert(1)&#34;" fill="red&gt;&lt;script&gt;"></rect>`);
+	assert.equal(out.body, `<rect transform="&#34; onclick=&#34;alert(1)&#34;" fill="red&gt;&lt;script&gt;"></rect>`);
 	const lines = accepted(`${svgOpen}<rect d="a&#10;b&#13;c&#9;d"/></svg>`);
 	assert.equal(lines.body, `<rect d="a&#xA;b&#xD;c&#x9;d"></rect>`);
 });
 
 test("line endings in attributes are normalized as XML says", () => {
-	assert.equal(accepted(`${svgOpen}<rect d="a\r\nb\rc"/></svg>`).body, `<rect d="a&#xA;b&#xA;c"></rect>`);
+	assert.equal(accepted(`${svgOpen}<rect d="a\r\nb\rc\td"/></svg>`).body, `<rect d="a b c d"></rect>`);
 });
 
 test("only the five named entities exist", () => {
-	assert.equal(accepted(`${svgOpen}<rect class="&lt;&gt;&amp;&apos;&quot;"/></svg>`).body, `<rect class="&lt;&gt;&amp;&#39;&#34;"></rect>`);
-	assert.equal(accepted(`${svgOpen}<rect class="&#65;&#x41;&#x0041;&#000065;"/></svg>`).body, `<rect class="AAAA"></rect>`);
-	// A surrogate by number reads as a replacement character, as the reference does.
-	assert.equal(accepted(`${svgOpen}<rect class="&#xD800;"/></svg>`).body, `<rect class="�"></rect>`);
+	assert.equal(accepted(`${svgOpen}<rect d="&lt;&gt;&amp;&apos;&quot;"/></svg>`).body, `<rect d="&lt;&gt;&amp;&#39;&#34;"></rect>`);
+	assert.equal(accepted(`${svgOpen}<rect d="&#65;&#x41;&#x0041;&#000065;"/></svg>`).body, `<rect d="AAAA"></rect>`);
+	// A surrogate isn't a character, however it's written.
+	refused(`${svgOpen}<rect d="&#xD800;"/></svg>`);
 });
 
 test("depth counts the root, up to the limit", () => {
@@ -364,27 +368,24 @@ test("a size with no viewBox has to be a plain number", () => {
 	assert.equal(accepted(`<svg xmlns="${ns}" width="2px" height=" 3 "/>`).viewBox, "0 0 2 3");
 });
 
-test("whitespace is what the reference says it is", () => {
-	// Text of only Unicode spaces passes, as it does for the reference, since it isn't kept.
-	assert.equal(accepted(`${svgOpen}  　</svg>`).body, "");
-	// A byte order mark isn't one of them, even though JavaScript's trim would say so.
-	refused(`${svgOpen}﻿</svg>`);
-	// In a viewBox, only XML's whitespace separates.
-	refused(`<svg xmlns="${ns}" viewBox="0 0 1 1"/>`);
-	refused(`<svg xmlns="${ns}" viewBox=" 0 0 1 1"/>`);
-	// In a url(), too.
-	refused(`${svgOpen}<rect fill="url( #a)"/></svg>`);
+test("whitespace is ASCII's, everywhere", () => {
+	for (const space of ["\u00a0", "\u3000", "\u0085", "\u2028", "\ufeff"]) {
+		refused(`${svgOpen}${space}</svg>`);
+		refused(`<svg xmlns="${ns}" viewBox="0${space}0 1 1"/>`);
+		refused(`<svg xmlns="${ns}" viewBox="${space}0 0 1 1"/>`);
+		refused(`${svgOpen}<rect fill="url(${space}#a)"/></svg>`);
+		refused(`${svgOpen}<rect style="${space}fill:red"/></svg>`);
+	}
 });
 
-test("attributes are copied even when the XML repeats one, as the reference does", () => {
-	// The reference writes both, which makes the output ill-formed. See the report on this port.
-	const out = accepted(`<svg xmlns="${ns}" xmlns:x="http://www.w3.org/1999/xlink" viewBox="0 0 1 1"><linearGradient href="#a" x:href="#a"/></svg>`);
-	assert.equal(out.body, `<linearGradient href="#p-a" href="#p-a"></linearGradient>`);
+test("a repeated attribute is refused, however it's spelled", () => {
 	refused(`${svgOpen}<rect fill="red" fill="url(https://example.test/)"/></svg>`);
+	refused(`<svg xmlns="${ns}" xmlns:x="http://www.w3.org/1999/xlink" viewBox="0 0 1 1"><linearGradient href="#a" x:href="#a"/></svg>`);
+	refused(`<svg xmlns="${ns}" xmlns:a="urn:a" xmlns:b="urn:a" viewBox="0 0 1 1"><rect a:x="1" b:x="2"/></svg>`);
 });
 
 test("style is rewritten in a fixed form", () => {
-	assert.equal(accepted(`${svgOpen}<rect style=" STROKE : red ; ; fill:blue; "/></svg>`).body, `<rect style="fill:blue;stroke:red"></rect>`);
+	assert.equal(accepted(`${svgOpen}<rect style=" STROKE : red ; ; fill:blue; "/></svg>`).body, `<rect style="stroke:red;fill:blue"></rect>`);
 });
 
 test("references are prefixed everywhere they can be", () => {
@@ -393,9 +394,6 @@ test("references are prefixed everywhere they can be", () => {
 		assert.ok(out.body.includes(`url(#p-${id})`), out.body);
 	}
 	assert.ok(out.body.includes(`href="#p-f"`), out.body);
-	// The prefix can't be affected by what's in the id.
-	const dollars = sanitizeSvg(`${svgOpen}<rect fill="url(#a)"/></svg>`, "$1$`-");
-	assert.ok(dollars.body.includes("url(#$1$`-a)"), dollars.body);
 });
 
 test("the tokenizer rejects what's after the root's close, whether or not it's a tag", () => {
@@ -421,6 +419,32 @@ test("what a page gets has passed the sanitizer, and the tree matches", () => {
 	assert.ok(!out.includes("urn:i"));
 	const tree = svgTree(flag);
 	const again = treeToSvg(tree);
-	assert.ok(again.includes(`fill="url(#${flag.idPrefix}svg1-g)"`), again);
+	assert.match(again, new RegExp(`fill="url\\(#${flag.idPrefix}svg\\d+-g\\)"`));
 	assert.ok(!again.includes("urn:i"));
+});
+
+test("the suite's documents, without needing its rasterizer", () => {
+	const invalid = JSON.parse(readRepo("conformance/invalid.json")) as { name: string; file: string; line?: number }[];
+	for (const c of invalid) {
+		const bytes = readFileSync(join(root, "conformance", c.file));
+		let text: string;
+		try {
+			text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
+		} catch {
+			continue;
+		}
+		const problems = validate(text);
+		assert.ok(problems.length > 0, `accepted: ${c.name}`);
+		if (c.line !== undefined) {
+			assert.ok(problems.some((p) => p.line === c.line), `${c.name}: lines ${problems.map((p) => p.line).join()}`);
+		}
+	}
+	for (const c of JSON.parse(readRepo("conformance/accepted.json")) as { name: string; file: string }[]) {
+		assert.deepEqual(validate(readRepo(`conformance/${c.file}`)), [], c.name);
+	}
+	for (const c of JSON.parse(readRepo("conformance/sanitize.json")) as { name: string; file: string; markup: string }[]) {
+		const flag = parse(readRepo(`conformance/${c.file}`));
+		const charge = flag.layers[0] as ChargeLayer;
+		assert.equal((charge.shape as SvgShape).markup, c.markup, c.name);
+	}
 });

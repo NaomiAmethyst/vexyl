@@ -1,0 +1,9 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+charge svg a {
+  markup "<?xml version='1.0' encoding='utf-8' standalone = \"no\" ?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"></svg>"
+  fly 1
+  hoist 1
+}

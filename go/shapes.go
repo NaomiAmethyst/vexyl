@@ -249,6 +249,9 @@ func linePoints(l *Line, span float64) (along, offset []float64) {
 	if l.Count > 0 {
 		period = span / float64(l.Count)
 	}
+	if span/period > maxCopies {
+		panic(renderRefusal(fmt.Sprintf("a shaped edge can't have more than %d waves", maxCopies)))
+	}
 	half := l.Depth / 2
 	if l.Kind == "zigzag" {
 		sign := -1.0

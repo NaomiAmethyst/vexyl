@@ -3,7 +3,7 @@
 Every Vexyl library has to pass this. [SDK.md](../SDK.md) says what the suite checks, and why.
 
 ```
-python3 conformance/run.py [--only render,model,invalid] [--filter TEXT] COMMAND...
+python3 conformance/run.py [--only render,model,invalid,accepted,sanitize] [--filter TEXT] [--resvg PATH] COMMAND...
 ```
 
 It needs Python with numpy and Pillow, and resvg at the version in `manifest.json`, since
@@ -28,6 +28,8 @@ A render that's refused exits nonzero.
 | `valid/NAME/*.svg` | Its expected renders |
 | `invalid.json` | Each document that must be refused, and the line of its first problem if it has one |
 | `invalid/NAME.kdl` | Those documents |
+| `accepted.json`, `accepted/NAME.kdl` | Documents that must be valid, many exactly at a limit |
+| `sanitize.json`, `sanitize/NAME.kdl` | Documents with inline SVG, and the canonical markup each must come to |
 
 The flags here are copies of those in `flags/` and `go/testdata/`, with the terms in their own
 `license` fields. Files in `invalid/` and everything else here are under this project's Apache
@@ -48,6 +50,18 @@ These limits come from disturbing the fixtures. Every flag still passes with its
 to 4 decimals. A color 2 off, a charge moved by 0.5% of the hoist and a star 3% too large fail,
 with few exceptions, such as a star too small for the change to register. Very small errors can
 still pass, like a radius 1% off on a small charge, so passing isn't proof of exactness.
+
+## How the sanitizer is checked
+
+Pixels can't show that a sanitizer works, because most of what it removes draws nothing. So
+passing also takes all of these:
+
+- Every document under `invalid/` whose name starts `sanitizer-` is refused. They come from the
+  tables in `go/conformance_test.go`.
+- Every render of every flag has nothing in it off the allowlist: no other element or attribute,
+  no reference leaving the document, no function in a paint, no stray text and no repeated `id`.
+- Each document in `sanitize.json` gives exactly its canonical markup in the model, and draws that
+  same artwork, with each ID and reference having gained a prefix.
 
 ## Changing the fixtures
 

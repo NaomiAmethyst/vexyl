@@ -1,0 +1,6 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+charge star a { radius 1; points 10000; repeat grid rows=5 columns=4; }
+field a

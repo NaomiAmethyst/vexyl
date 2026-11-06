@@ -1,0 +1,34 @@
+[
+ {
+  "name": "paints exactly the limit",
+  "file": "accepted/paints-exactly-the-limit.kdl"
+ },
+ {
+  "name": "paints exactly the limit with star points",
+  "file": "accepted/paints-exactly-the-limit-with-star-points.kdl"
+ },
+ {
+  "name": "paints exactly the limit with path data",
+  "file": "accepted/paints-exactly-the-limit-with-path-data.kdl"
+ },
+ {
+  "name": "inline svg counted by its bytes",
+  "file": "accepted/inline-svg-counted-by-its-bytes.kdl"
+ },
+ {
+  "name": "nests exactly the limit through uses",
+  "file": "accepted/nests-exactly-the-limit-through-uses.kdl"
+ },
+ {
+  "name": "a box with every separator",
+  "file": "accepted/a-box-with-every-separator.kdl"
+ },
+ {
+  "name": "a box with every way to write a number",
+  "file": "accepted/a-box-with-every-way-to-write-a-number.kdl"
+ },
+ {
+  "name": "a number at each end of what's allowed",
+  "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
+ }
+]

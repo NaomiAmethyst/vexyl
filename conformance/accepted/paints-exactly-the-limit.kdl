@@ -1,0 +1,24 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }
+checks a b { rows 100; columns 100; }

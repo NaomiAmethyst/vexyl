@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10" width="1200" height="600">
+  <title>Line endings</title>
+  <desc>A file saved on another system.&#xA;Its multi-line strings read the same.</desc>
+  <g transform="matrix(-1 0 0 1 20 0)">
+    <clipPath id="vx-66eb16b9-b34d-flag1">
+      <polygon points="0,0 20,0 20,10 0,10"/>
+    </clipPath>
+    <g clip-path="url(#vx-66eb16b9-b34d-flag1)">
+      <polygon points="0,0 20,0 20,10 0,10" fill="#0044aa"/>
+      <svg x="6" y="1" width="8" height="8" viewBox="0 0 10 10" preserveAspectRatio="xMidYMid meet"><path fill="#ffcc00" d="M1 1     H9 V9     H1 Z"></path></svg>
+    </g>
+  </g>
+</svg>

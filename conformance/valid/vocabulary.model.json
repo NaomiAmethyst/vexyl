@@ -81,24 +81,6 @@
    "layers": [
     {
      "blend": "normal",
-     "define": {
-      "layers": [
-       {
-        "along": "fly",
-        "blend": "normal",
-        "colors": [
-         "night",
-         "violet"
-        ],
-        "layer": "bars",
-        "opacity": 1,
-        "ratio": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
      "layer": "use",
      "name": "stripes",
      "opacity": 1

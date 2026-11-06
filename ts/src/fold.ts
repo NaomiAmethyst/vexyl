@@ -2,6 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { add, boundary, dot, mul, offsetPolygon, rectPoly, sub, type Vec } from "./geometry.js";
+import { maxFacets } from "./limits.js";
 import type { Flag, Fold } from "./types.js";
 
 /** Maps (x, y) to (a*x + c*y + e, b*x + d*y + f), as SVG writes it. */
@@ -114,6 +115,9 @@ export function foldFacets(shape: Vec[], fold: Fold, steps: number): Facet[] {
 		}
 		if (kept.length === 0) {
 			throw new Error(`fold step ${i + 1}: nothing is left on the other side of its crease`);
+		}
+		if (kept.length + moved.length > maxFacets) {
+			throw new Error(`fold step ${i + 1}: makes more than ${maxFacets} pieces`);
 		}
 		// Whichever way it goes, the moving stack lands in reverse order.
 		moved.reverse();

@@ -658,7 +658,7 @@ test("refusing a fold", () => {
 		["fold f { over along=hoist at=30 move=hoist; }", "nothing is left"],
 		[`fold f { over through="0 0 1 1" move="5 5"; }`, "on its crease"],
 		["fold f { over along=hoist at=5 move=top; }", "moves hoist or fly"],
-		[`fold f { over through="1 2" move="3 4"; }`, "4 numbers"],
+		[`fold f { over through="1 2" move="3 4"; }`, "4 finite"],
 		["fold f { over move=top; }", "needs along"],
 		[`fold f { description "x"; }`, "at least one step"],
 		["fold f", "at least one step"],

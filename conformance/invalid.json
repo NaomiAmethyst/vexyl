@@ -470,5 +470,1203 @@
   "name": "line unknown property",
   "file": "invalid/line-unknown-property.kdl",
   "line": 5
+ },
+ {
+  "name": "exponential use",
+  "file": "invalid/exponential-use.kdl",
+  "line": 31
+ },
+ {
+  "name": "just past the limit",
+  "file": "invalid/just-past-the-limit.kdl",
+  "line": 25
+ },
+ {
+  "name": "star points past the limit",
+  "file": "invalid/star-points-past-the-limit.kdl",
+  "line": 6
+ },
+ {
+  "name": "path data past the limit",
+  "file": "invalid/path-data-past-the-limit.kdl",
+  "line": 11
+ },
+ {
+  "name": "inline svg past the limit by its bytes",
+  "file": "invalid/inline-svg-past-the-limit-by-its-bytes.kdl",
+  "line": 25
+ },
+ {
+  "name": "reverse past the limit",
+  "file": "invalid/reverse-past-the-limit.kdl",
+  "line": 15
+ },
+ {
+  "name": "variants past the limit",
+  "file": "invalid/variants-past-the-limit.kdl",
+  "line": 15
+ },
+ {
+  "name": "uses nest too deep",
+  "file": "invalid/uses-nest-too-deep.kdl",
+  "line": 36
+ },
+ {
+  "name": "group around a use too deep",
+  "file": "invalid/group-around-a-use-too-deep.kdl",
+  "line": 37
+ },
+ {
+  "name": "edge with too many waves",
+  "file": "invalid/edge-with-too-many-waves.kdl",
+  "line": 5
+ },
+ {
+  "name": "panel edge with too many waves",
+  "file": "invalid/panel-edge-with-too-many-waves.kdl",
+  "line": 5
+ },
+ {
+  "name": "fold with too many pieces",
+  "file": "invalid/fold-with-too-many-pieces.kdl"
+ },
+ {
+  "name": "box hex",
+  "file": "invalid/box-hex.kdl",
+  "line": 5
+ },
+ {
+  "name": "box underscore",
+  "file": "invalid/box-underscore.kdl",
+  "line": 5
+ },
+ {
+  "name": "box inf",
+  "file": "invalid/box-inf.kdl",
+  "line": 5
+ },
+ {
+  "name": "box nan",
+  "file": "invalid/box-nan.kdl",
+  "line": 5
+ },
+ {
+  "name": "box beyond the limit",
+  "file": "invalid/box-beyond-the-limit.kdl",
+  "line": 5
+ },
+ {
+  "name": "box too small",
+  "file": "invalid/box-too-small.kdl",
+  "line": 5
+ },
+ {
+  "name": "box past what a number can hold",
+  "file": "invalid/box-past-what-a-number-can-hold.kdl",
+  "line": 5
+ },
+ {
+  "name": "box with a no-break space",
+  "file": "invalid/box-with-a-no-break-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "box with a leading comma",
+  "file": "invalid/box-with-a-leading-comma.kdl",
+  "line": 5
+ },
+ {
+  "name": "define box inf",
+  "file": "invalid/define-box-inf.kdl",
+  "line": 5
+ },
+ {
+  "name": "outline box nan",
+  "file": "invalid/outline-box-nan.kdl",
+  "line": 5
+ },
+ {
+  "name": "through hex",
+  "file": "invalid/through-hex.kdl",
+  "line": 6
+ },
+ {
+  "name": "through underscore",
+  "file": "invalid/through-underscore.kdl",
+  "line": 6
+ },
+ {
+  "name": "through inf",
+  "file": "invalid/through-inf.kdl",
+  "line": 6
+ },
+ {
+  "name": "through nan",
+  "file": "invalid/through-nan.kdl",
+  "line": 6
+ },
+ {
+  "name": "through beyond the limit",
+  "file": "invalid/through-beyond-the-limit.kdl",
+  "line": 6
+ },
+ {
+  "name": "through move nan",
+  "file": "invalid/through-move-nan.kdl",
+  "line": 6
+ },
+ {
+  "name": "through with a no-break space",
+  "file": "invalid/through-with-a-no-break-space.kdl",
+  "line": 6
+ },
+ {
+  "name": "number too small",
+  "file": "invalid/number-too-small.kdl",
+  "line": 5
+ },
+ {
+  "name": "number beyond the limit",
+  "file": "invalid/number-beyond-the-limit.kdl",
+  "line": 5
+ },
+ {
+  "name": "not utf-8",
+  "file": "invalid/not-utf-8.kdl"
+ },
+ {
+  "name": "problem after crlf",
+  "file": "invalid/problem-after-crlf.kdl",
+  "line": 5
+ },
+ {
+  "name": "problem after cr",
+  "file": "invalid/problem-after-cr.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: script",
+  "file": "invalid/sanitizer-script.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: foreignObject",
+  "file": "invalid/sanitizer-foreignobject.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: image",
+  "file": "invalid/sanitizer-image.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: anchor",
+  "file": "invalid/sanitizer-anchor.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style element",
+  "file": "invalid/sanitizer-style-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: animate",
+  "file": "invalid/sanitizer-animate.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: set",
+  "file": "invalid/sanitizer-set.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: use",
+  "file": "invalid/sanitizer-use.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: pattern",
+  "file": "invalid/sanitizer-pattern.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: filter",
+  "file": "invalid/sanitizer-filter.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text",
+  "file": "invalid/sanitizer-text.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: bare text",
+  "file": "invalid/sanitizer-bare-text.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: nested svg",
+  "file": "invalid/sanitizer-nested-svg.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: uppercase script",
+  "file": "invalid/sanitizer-uppercase-script.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: event handler",
+  "file": "invalid/sanitizer-event-handler.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: external href",
+  "file": "invalid/sanitizer-external-href.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: xlink external",
+  "file": "invalid/sanitizer-xlink-external.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: javascript href",
+  "file": "invalid/sanitizer-javascript-href.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: external fill",
+  "file": "invalid/sanitizer-external-fill.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: uppercase url",
+  "file": "invalid/sanitizer-uppercase-url.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: data url",
+  "file": "invalid/sanitizer-data-url.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: mixed urls",
+  "file": "invalid/sanitizer-mixed-urls.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: external style",
+  "file": "invalid/sanitizer-external-style.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style escape",
+  "file": "invalid/sanitizer-style-escape.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style import",
+  "file": "invalid/sanitizer-style-import.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style behavior",
+  "file": "invalid/sanitizer-style-behavior.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style comment",
+  "file": "invalid/sanitizer-style-comment.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: bad id",
+  "file": "invalid/sanitizer-bad-id.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: css src function",
+  "file": "invalid/sanitizer-css-src-function.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: css image function",
+  "file": "invalid/sanitizer-css-image-function.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: class",
+  "file": "invalid/sanitizer-class.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: element with no namespace",
+  "file": "invalid/sanitizer-element-with-no-namespace.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: repeated attribute",
+  "file": "invalid/sanitizer-repeated-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: repeated attribute by its expanded name",
+  "file": "invalid/sanitizer-repeated-attribute-by-its-expanded-name.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href and xlink href",
+  "file": "invalid/sanitizer-href-and-xlink-href.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: undeclared element prefix",
+  "file": "invalid/sanitizer-undeclared-element-prefix.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: undeclared attribute prefix",
+  "file": "invalid/sanitizer-undeclared-attribute-prefix.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: undeclared prefix in a dropped element",
+  "file": "invalid/sanitizer-undeclared-prefix-in-a-dropped-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: surrogate reference",
+  "file": "invalid/sanitizer-surrogate-reference.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: surrogate reference in decimal",
+  "file": "invalid/sanitizer-surrogate-reference-in-decimal.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: null reference",
+  "file": "invalid/sanitizer-null-reference.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: reference to FFFF",
+  "file": "invalid/sanitizer-reference-to-ffff.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text of a no-break space",
+  "file": "invalid/sanitizer-text-of-a-no-break-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text of an ideographic space",
+  "file": "invalid/sanitizer-text-of-an-ideographic-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text of a next line",
+  "file": "invalid/sanitizer-text-of-a-next-line.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text of a byte order mark",
+  "file": "invalid/sanitizer-text-of-a-byte-order-mark.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with a no-break space before a property",
+  "file": "invalid/sanitizer-style-with-a-no-break-space-before-a-property.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url with a no-break space",
+  "file": "invalid/sanitizer-url-with-a-no-break-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url with a long s",
+  "file": "invalid/sanitizer-url-with-a-long-s.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: color with a long s",
+  "file": "invalid/sanitizer-color-with-a-long-s.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style property with a dotted capital",
+  "file": "invalid/sanitizer-style-property-with-a-dotted-capital.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style property with a kelvin sign",
+  "file": "invalid/sanitizer-style-property-with-a-kelvin-sign.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: no space between attributes",
+  "file": "invalid/sanitizer-no-space-between-attributes.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: xml prefix bound elsewhere",
+  "file": "invalid/sanitizer-xml-prefix-bound-elsewhere.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: another prefix bound to the xml namespace",
+  "file": "invalid/sanitizer-another-prefix-bound-to-the-xml-namespace.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: xmlns prefix declared",
+  "file": "invalid/sanitizer-xmlns-prefix-declared.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: xmlns namespace bound",
+  "file": "invalid/sanitizer-xmlns-namespace-bound.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: prefix undeclared",
+  "file": "invalid/sanitizer-prefix-undeclared.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: xml declaration inside",
+  "file": "invalid/sanitizer-xml-declaration-inside.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: instruction named xml in capitals",
+  "file": "invalid/sanitizer-instruction-named-xml-in-capitals.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: instruction with a colon",
+  "file": "invalid/sanitizer-instruction-with-a-colon.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: instruction with no space after its target",
+  "file": "invalid/sanitizer-instruction-with-no-space-after-its-target.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: comment with a control character",
+  "file": "invalid/sanitizer-comment-with-a-control-character.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: instruction with a noncharacter",
+  "file": "invalid/sanitizer-instruction-with-a-noncharacter.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: cdata with a control character",
+  "file": "invalid/sanitizer-cdata-with-a-control-character.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: script by entity-free prefix",
+  "file": "invalid/sanitizer-script-by-entity-free-prefix.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: script in a nested default namespace",
+  "file": "invalid/sanitizer-script-in-a-nested-default-namespace.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: event handler in any case",
+  "file": "invalid/sanitizer-event-handler-in-any-case.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: event handler with no namespace via an empty prefix",
+  "file": "invalid/sanitizer-event-handler-with-no-namespace-via-an-empty-prefix.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: handler spelled with an entity",
+  "file": "invalid/sanitizer-handler-spelled-with-an-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href with an entity for the scheme",
+  "file": "invalid/sanitizer-href-with-an-entity-for-the-scheme.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href with a leading space",
+  "file": "invalid/sanitizer-href-with-a-leading-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href with a tab inside the scheme",
+  "file": "invalid/sanitizer-href-with-a-tab-inside-the-scheme.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href with a fragment after a hash",
+  "file": "invalid/sanitizer-href-with-a-fragment-after-a-hash.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href that's only a hash",
+  "file": "invalid/sanitizer-href-that-s-only-a-hash.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href with a path after the hash",
+  "file": "invalid/sanitizer-href-with-a-path-after-the-hash.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: href with spaces",
+  "file": "invalid/sanitizer-href-with-spaces.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: xlink href to another file",
+  "file": "invalid/sanitizer-xlink-href-to-another-file.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url by entity",
+  "file": "invalid/sanitizer-url-by-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url with an escaped paren",
+  "file": "invalid/sanitizer-url-with-an-escaped-paren.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url in mixed case",
+  "file": "invalid/sanitizer-url-in-mixed-case.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url with a fragment and a host",
+  "file": "invalid/sanitizer-url-with-a-fragment-and-a-host.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url to a protocol-relative place",
+  "file": "invalid/sanitizer-url-to-a-protocol-relative-place.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url with a space in its id",
+  "file": "invalid/sanitizer-url-with-a-space-in-its-id.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: url with an unmatched quote and a load",
+  "file": "invalid/sanitizer-url-with-an-unmatched-quote-and-a-load.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a color function hiding a url",
+  "file": "invalid/sanitizer-a-color-function-hiding-a-url.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a load after a color",
+  "file": "invalid/sanitizer-a-load-after-a-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a function name a color only starts",
+  "file": "invalid/sanitizer-a-function-name-a-color-only-starts.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a function a color only ends",
+  "file": "invalid/sanitizer-a-function-a-color-only-ends.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: expression",
+  "file": "invalid/sanitizer-expression.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: var",
+  "file": "invalid/sanitizer-var.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: calc",
+  "file": "invalid/sanitizer-calc.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: attr",
+  "file": "invalid/sanitizer-attr.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: paint with a load in a stroke",
+  "file": "invalid/sanitizer-paint-with-a-load-in-a-stroke.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: paint with a load in a mask",
+  "file": "invalid/sanitizer-paint-with-a-load-in-a-mask.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: paint with a load in a clip-path",
+  "file": "invalid/sanitizer-paint-with-a-load-in-a-clip-path.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: filter attribute",
+  "file": "invalid/sanitizer-filter-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: marker attribute",
+  "file": "invalid/sanitizer-marker-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: cursor attribute",
+  "file": "invalid/sanitizer-cursor-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: font attribute",
+  "file": "invalid/sanitizer-font-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with an unlisted property",
+  "file": "invalid/sanitizer-style-with-an-unlisted-property.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with an unlisted property after a good one",
+  "file": "invalid/sanitizer-style-with-an-unlisted-property-after-a-good-one.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with no colon",
+  "file": "invalid/sanitizer-style-with-no-colon.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with a property in an escape",
+  "file": "invalid/sanitizer-style-with-a-property-in-an-escape.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style hiding a load in a url in a good property",
+  "file": "invalid/sanitizer-style-hiding-a-load-in-a-url-in-a-good-property.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with a load after a semicolon inside a url",
+  "file": "invalid/sanitizer-style-with-a-load-after-a-semicolon-inside-a-url.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with a load after a good url",
+  "file": "invalid/sanitizer-style-with-a-load-after-a-good-url.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with a comment",
+  "file": "invalid/sanitizer-style-with-a-comment.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with an at-rule",
+  "file": "invalid/sanitizer-style-with-an-at-rule.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with an entity for a backslash",
+  "file": "invalid/sanitizer-style-with-an-entity-for-a-backslash.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with an entity for an at",
+  "file": "invalid/sanitizer-style-with-an-entity-for-an-at.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: style with an entity for a comment",
+  "file": "invalid/sanitizer-style-with-an-entity-for-a-comment.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: id with a space",
+  "file": "invalid/sanitizer-id-with-a-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: id starting with a digit",
+  "file": "invalid/sanitizer-id-starting-with-a-digit.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: id with a quote",
+  "file": "invalid/sanitizer-id-with-a-quote.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: id with an angle bracket",
+  "file": "invalid/sanitizer-id-with-an-angle-bracket.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: empty id",
+  "file": "invalid/sanitizer-empty-id.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: uppercase element that isn't allowed",
+  "file": "invalid/sanitizer-uppercase-element-that-isn-t-allowed.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: element differing only in case",
+  "file": "invalid/sanitizer-element-differing-only-in-case.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: animate in a prefix",
+  "file": "invalid/sanitizer-animate-in-a-prefix.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: unknown element in the namespace, nested in an allowed one",
+  "file": "invalid/sanitizer-unknown-element-in-the-namespace-nested-in-an-allowed-one.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: symbol",
+  "file": "invalid/sanitizer-symbol.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: marker",
+  "file": "invalid/sanitizer-marker.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: view",
+  "file": "invalid/sanitizer-view.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: switch",
+  "file": "invalid/sanitizer-switch.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: tspan",
+  "file": "invalid/sanitizer-tspan.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: textPath",
+  "file": "invalid/sanitizer-textpath.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: feImage",
+  "file": "invalid/sanitizer-feimage.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: iframe",
+  "file": "invalid/sanitizer-iframe.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: cdata text",
+  "file": "invalid/sanitizer-cdata-text.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text after an element",
+  "file": "invalid/sanitizer-text-after-an-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text inside an allowed element",
+  "file": "invalid/sanitizer-text-inside-an-allowed-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a character reference as text",
+  "file": "invalid/sanitizer-a-character-reference-as-text.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a nested doctype",
+  "file": "invalid/sanitizer-a-nested-doctype.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an entity declaration",
+  "file": "invalid/sanitizer-an-entity-declaration.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a directive inside a dropped element",
+  "file": "invalid/sanitizer-a-directive-inside-a-dropped-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a directive inside a foreign element",
+  "file": "invalid/sanitizer-a-directive-inside-a-foreign-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: empty",
+  "file": "invalid/sanitizer-empty.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: not svg",
+  "file": "invalid/sanitizer-not-svg.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: no namespace",
+  "file": "invalid/sanitizer-no-namespace.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: no size",
+  "file": "invalid/sanitizer-no-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: percent size",
+  "file": "invalid/sanitizer-percent-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: empty viewBox",
+  "file": "invalid/sanitizer-empty-viewbox.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: handler on root",
+  "file": "invalid/sanitizer-handler-on-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: two roots",
+  "file": "invalid/sanitizer-two-roots.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: doctype",
+  "file": "invalid/sanitizer-doctype.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: malformed",
+  "file": "invalid/sanitizer-malformed.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: too deep",
+  "file": "invalid/sanitizer-too-deep.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text before the root",
+  "file": "invalid/sanitizer-text-before-the-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a reference before the root",
+  "file": "invalid/sanitizer-a-reference-before-the-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a reference after the root",
+  "file": "invalid/sanitizer-a-reference-after-the-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: cdata after the root",
+  "file": "invalid/sanitizer-cdata-after-the-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: space before the declaration",
+  "file": "invalid/sanitizer-space-before-the-declaration.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration with no version",
+  "file": "invalid/sanitizer-a-declaration-with-no-version.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration out of order",
+  "file": "invalid/sanitizer-a-declaration-out-of-order.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration with something else",
+  "file": "invalid/sanitizer-a-declaration-with-something-else.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration with no spaces",
+  "file": "invalid/sanitizer-a-declaration-with-no-spaces.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a viewBox with a no-break space",
+  "file": "invalid/sanitizer-a-viewbox-with-a-no-break-space.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a viewBox beyond the limit",
+  "file": "invalid/sanitizer-a-viewbox-beyond-the-limit.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a viewBox too small",
+  "file": "invalid/sanitizer-a-viewbox-too-small.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a viewBox past what a number can hold",
+  "file": "invalid/sanitizer-a-viewbox-past-what-a-number-can-hold.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a size beyond the limit",
+  "file": "invalid/sanitizer-a-size-beyond-the-limit.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: no closing tag",
+  "file": "invalid/sanitizer-no-closing-tag.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: unclosed child",
+  "file": "invalid/sanitizer-unclosed-child.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: mismatched close",
+  "file": "invalid/sanitizer-mismatched-close.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: stray close",
+  "file": "invalid/sanitizer-stray-close.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: close after the root",
+  "file": "invalid/sanitizer-close-after-the-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: text after the root",
+  "file": "invalid/sanitizer-text-after-the-root.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: two roots of different kinds",
+  "file": "invalid/sanitizer-two-roots-of-different-kinds.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: unterminated tag",
+  "file": "invalid/sanitizer-unterminated-tag.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: unterminated attribute",
+  "file": "invalid/sanitizer-unterminated-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: attribute with no value",
+  "file": "invalid/sanitizer-attribute-with-no-value.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: attribute with an unquoted value",
+  "file": "invalid/sanitizer-attribute-with-an-unquoted-value.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: angle bracket in an attribute",
+  "file": "invalid/sanitizer-angle-bracket-in-an-attribute.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an attribute with two prefixes",
+  "file": "invalid/sanitizer-an-attribute-with-two-prefixes.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an element with two prefixes",
+  "file": "invalid/sanitizer-an-element-with-two-prefixes.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a close with two prefixes",
+  "file": "invalid/sanitizer-a-close-with-two-prefixes.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a close with another prefix",
+  "file": "invalid/sanitizer-a-close-with-another-prefix.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a name starting with a digit",
+  "file": "invalid/sanitizer-a-name-starting-with-a-digit.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a name starting with a hyphen",
+  "file": "invalid/sanitizer-a-name-starting-with-a-hyphen.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a space before a name",
+  "file": "invalid/sanitizer-a-space-before-a-name.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a slash in a tag",
+  "file": "invalid/sanitizer-a-slash-in-a-tag.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an unknown entity",
+  "file": "invalid/sanitizer-an-unknown-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an entity with no semicolon",
+  "file": "invalid/sanitizer-an-entity-with-no-semicolon.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a bare ampersand",
+  "file": "invalid/sanitizer-a-bare-ampersand.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an entity out of range",
+  "file": "invalid/sanitizer-an-entity-out-of-range.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a huge entity",
+  "file": "invalid/sanitizer-a-huge-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a null by entity",
+  "file": "invalid/sanitizer-a-null-by-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a control character by entity",
+  "file": "invalid/sanitizer-a-control-character-by-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a noncharacter by entity",
+  "file": "invalid/sanitizer-a-noncharacter-by-entity.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an uppercase X in a reference",
+  "file": "invalid/sanitizer-an-uppercase-x-in-a-reference.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an empty reference",
+  "file": "invalid/sanitizer-an-empty-reference.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a raw control character",
+  "file": "invalid/sanitizer-a-raw-control-character.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a null in text",
+  "file": "invalid/sanitizer-a-null-in-text.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: ]]\u003e in text",
+  "file": "invalid/sanitizer-in-text.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an unterminated comment",
+  "file": "invalid/sanitizer-an-unterminated-comment.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a double hyphen in a comment",
+  "file": "invalid/sanitizer-a-double-hyphen-in-a-comment.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a comment ending in three hyphens",
+  "file": "invalid/sanitizer-a-comment-ending-in-three-hyphens.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a broken comment open",
+  "file": "invalid/sanitizer-a-broken-comment-open.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an unterminated CDATA",
+  "file": "invalid/sanitizer-an-unterminated-cdata.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a lowercase CDATA",
+  "file": "invalid/sanitizer-a-lowercase-cdata.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an unterminated instruction",
+  "file": "invalid/sanitizer-an-unterminated-instruction.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: an instruction with no target",
+  "file": "invalid/sanitizer-an-instruction-with-no-target.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: another XML version",
+  "file": "invalid/sanitizer-another-xml-version.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: another encoding",
+  "file": "invalid/sanitizer-another-encoding.kdl",
+  "line": 5
  }
 ]

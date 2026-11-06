@@ -1,0 +1,43 @@
+{
+ "fly": 20,
+ "hoist": 10,
+ "layers": [
+  {
+   "blend": "normal",
+   "color": "blue",
+   "layer": "field",
+   "opacity": 1
+  },
+  {
+   "blend": "normal",
+   "layer": "charge",
+   "opacity": 1,
+   "shape": {
+    "at": {
+     "fly": 10,
+     "hoist": 5
+    },
+    "ats": [
+     {
+      "fly": 10,
+      "hoist": 5
+     }
+    ],
+    "fly": 8,
+    "hoist": 8,
+    "kind": "svg",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"><path fill=\"#ffcc00\" d=\"M1 1     H9 V9     H1 Z\"></path></svg>"
+   }
+  }
+ ],
+ "meta": {
+  "description": "A file saved on another system.\nIts multi-line strings read the same.",
+  "license": "CC0-1.0",
+  "name": "Line endings"
+ },
+ "palette": {
+  "blue": "#0044aa",
+  "gold": "#ffcc00"
+ },
+ "version": 1
+}

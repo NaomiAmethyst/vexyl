@@ -2,7 +2,9 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { add, clipConvex, mul, regionCenter, regionCorners, regionReach, rotate, sub, sum, type Geom, type Region, type Vec } from "./geometry.js";
+import { maxCopies } from "./limits.js";
 import { num } from "./text.js";
+import { RenderError } from "./types.js";
 import type { Axis, Outline, PallShape, PanelLayer, PathShape, PileShape, Point, PolygonShape, RaysLayer, RingShape, Shape, ShapedEdge, SunShape } from "./types.js";
 
 /** A full circle as a path, which can then have a hole or rays in the same outline. */
@@ -298,6 +300,9 @@ export function linePoints(l: ShapedEdge, span: number): { along: number[]; offs
 	let period = l.period ?? 0;
 	if (l.count !== undefined && l.count > 0) {
 		period = span / l.count;
+	}
+	if (span / period > maxCopies) {
+		throw new RenderError(`a shaped edge can't have more than ${maxCopies} waves`);
 	}
 	const half = l.depth / 2;
 	const along: number[] = [];

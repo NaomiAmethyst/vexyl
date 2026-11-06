@@ -132,6 +132,9 @@ type Define struct {
 	Layers []Layer
 	// Fly and Hoist give a design its own grid, scaled to fill where it's used.
 	Fly, Hoist float64
+
+	// size and height are worked out when it's read, as SPEC section 15 counts them.
+	size, height int
 }
 
 // Reverse is a flag's other side, as seen from that side.
@@ -351,8 +354,9 @@ type Panel struct {
 // Use paints a design from a Define in the current region.
 type Use struct {
 	Effects
-	Name   string
-	Define *Define
+	Name string
+	// design is the definition it names, which isn't part of the use itself.
+	design *Define
 }
 
 // Shape is a shape used by a charge, clip or cut.
@@ -406,7 +410,7 @@ type Shape struct {
 	Fly, Hoist float64
 	// Vertices are a polygon's points.
 	Vertices []Point
-	// Markup is the source of an inline SVG.
+	// Markup is an inline SVG after being sanitized, with its IDs as they were written.
 	Markup string
 
 	// placed records an explicit `at`, even `at center`.

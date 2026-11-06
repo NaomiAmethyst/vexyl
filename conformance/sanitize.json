@@ -1,0 +1,57 @@
+[
+ {
+  "name": "artwork with its descriptions and foreign content removed",
+  "file": "sanitize/artwork-with-its-descriptions-and-foreign-content-removed.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 10\" fill=\"#123456\"\u003e\u003cdefs\u003e\u003clinearGradient id=\"g\" href=\"#h\"\u003e\u003c/linearGradient\u003e\u003c/defs\u003e\u003ccircle fill=\"rgb(1, 2, 3)\" stroke=\"hsla(1, 2%, 3%, 0.5)\" transform=\"translate(1 2) rotate(3)\"\u003e\u003c/circle\u003e\u003crect id=\"r\" fill=\"url(#g)\" style=\"stroke:url(#g);opacity:0.5\" clip-path=\"url(#c)\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "a style's order, which decides what wins",
+  "file": "sanitize/a-style-s-order-which-decides-what-wins.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003crect style=\"fill:red;fill:blue\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "a prefixed root and elements",
+  "file": "sanitize/a-prefixed-root-and-elements.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\"\u003e\u003crect\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "what's dropped needn't pass",
+  "file": "sanitize/what-s-dropped-needn-t-pass.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003crect\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "attributes in another namespace",
+  "file": "sanitize/attributes-in-another-namespace.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003crect\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "entities and references, written afresh",
+  "file": "sanitize/entities-and-references-written-afresh.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003crect fill=\"\u0026lt;AA\u0026amp;\u0026#39;\u0026#34;\u0026gt;\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "literal whitespace in an attribute becomes spaces, and references stay",
+  "file": "sanitize/literal-whitespace-in-an-attribute-becomes-spaces-and-references-stay.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003cpath d=\"M0 0  L1 1\u0026#xA;Z\"\u003e\u003c/path\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "whitespace between elements, in text and cdata",
+  "file": "sanitize/whitespace-between-elements-in-text-and-cdata.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003cg\u003e\u003c/g\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "every way to write a url",
+  "file": "sanitize/every-way-to-write-a-url.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003crect fill=\"url(#a)\" stroke=\"url(#b)\" mask=\"url(#c)\" clip-path=\"url(#d)\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "nesting up to the limit",
+  "file": "sanitize/nesting-up-to-the-limit.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003cg\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "a declaration with everything",
+  "file": "sanitize/a-declaration-with-everything.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003c/svg\u003e"
+ }
+]

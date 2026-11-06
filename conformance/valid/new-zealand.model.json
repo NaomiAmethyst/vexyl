@@ -80,53 +80,6 @@
    "layers": [
     {
      "blend": "normal",
-     "define": {
-      "fly": 60,
-      "hoist": 30,
-      "layers": [
-       {
-        "blend": "normal",
-        "color": "blue",
-        "layer": "field",
-        "opacity": 1
-       },
-       {
-        "blend": "normal",
-        "color": "white",
-        "layer": "saltire",
-        "opacity": 1,
-        "width": 6
-       },
-       {
-        "blend": "normal",
-        "color": "red",
-        "counterchange": true,
-        "layer": "saltire",
-        "opacity": 1,
-        "width": 2
-       },
-       {
-        "blend": "normal",
-        "color": "red",
-        "fimbriate": {
-         "color": "white",
-         "width": 2
-        },
-        "fly-parts": [
-         27,
-         6,
-         27
-        ],
-        "hoist-part": [
-         12,
-         6,
-         12
-        ],
-        "layer": "cross",
-        "opacity": 1
-       }
-      ]
-     },
      "layer": "use",
      "name": "union",
      "opacity": 1

@@ -4,8 +4,9 @@
 import { getLocation, InvalidKdlError, parse as parseKdl, type Document, type Node } from "@bgotink/kdl";
 import { foldFacets, foldShape } from "./fold.js";
 import { boundary, offsetPolygon, type Vec } from "./geometry.js";
-import { sanitizeSvg, usesCurrentColor } from "./sanitize.js";
-import { dict, fields, formatNumber, hash, parseNumber } from "./text.js";
+import { addSize, inLimits, layersHeight, layersSize, maxCopies, maxSize, waves } from "./limits.js";
+import { canonical, sanitizeSvg, usesCurrentColor } from "./sanitize.js";
+import { dict, formatNumber, hash, numbersIn } from "./text.js";
 import type {
 	Adapt, AdaptRule, Adaptation, Anchor, Axis, BandLayer, BarsLayer, BlendMode, Border, Box, ChargeLayer, ChecksLayer, ChevronsLayer,
 	ColorRef, CornerName, CrossLayer, Define, EdgeName, Effects, EmblemLayer, EmbeddedSvg, FieldLayer, Fimbriation, Flag, Fold, FoldStep,
@@ -17,13 +18,12 @@ import type {
 export const formatVersion = 1;
 
 const maxDepth = 32;
-const maxCopies = 10000;
 /** In a color list this leaves a gap, and it can't be a palette name. */
 const noColor = "none";
 
 const colorValue = /^#[0-9a-fA-F]{6}$/;
 const seriesValue = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-// \s is spelled out, because JavaScript's also matches Unicode spaces and the reference's doesn't.
+// \s is spelled out, because JavaScript's also matches Unicode spaces and the format's doesn't.
 const pathValue = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\-\t\n\f\r ]+$/;
 
 const alongValues = ["fly", "hoist", "bend", "bend-sinister"];
@@ -111,7 +111,9 @@ function validDate(text: string): boolean {
 }
 
 /** Reads a Vexyl document, giving every problem found in it, or its flag. */
-export function read(source: string, name?: string): { flag?: Flag; problems: Problem[] } {
+export function read(text: string, name?: string): { flag?: Flag; problems: Problem[] } {
+	// A document means the same however its lines end.
+	const source = text.replace(/\r\n?/g, "\n");
 	let doc: Document;
 	try {
 		doc = parseKdl(source, { storeLocations: true });
@@ -200,7 +202,10 @@ class Parser {
 	private gradients: Record<string, Gradient> = dict();
 	/** Lets a gradient's colors recognize other gradients, since they're defined one at a time. */
 	private gradientNames: string[] = [];
-	private embeds = 0;
+	/** What the flag has painted so far, as section 15 of the format counts it. */
+	private size = 0;
+	/** The longer side of the flag's own grid, for counting shaped edges. */
+	private longer = 0;
 
 	constructor(idPrefix: string, name?: string) {
 		this.idPrefix = idPrefix;
@@ -310,6 +315,7 @@ class Parser {
 					const layer = this.layer(n, 1);
 					if (layer !== null) {
 						flag.layers.push(layer);
+						this.count(n, [layer]);
 					}
 				}
 			}
@@ -332,6 +338,18 @@ class Parser {
 			}
 		}
 		return flag;
+	}
+
+	/**
+	 * Adds what a top-level node paints to the flag's size, and refuses the node that takes it past
+	 * the limit, so that a document can't demand unbounded work.
+	 */
+	private count(n: Node, layers: Layer[]): void {
+		const was = this.size;
+		this.size = addSize(this.size, layersSize(layers, this.longer));
+		if (was <= maxSize && this.size > maxSize) {
+			this.errf(n, `paints too much: a flag can only come to ${maxSize} parts`);
+		}
 	}
 
 	private meta(n: Node, m: Meta): void {
@@ -517,6 +535,7 @@ class Parser {
 		this.only(n, 0, ["hoist", "fly"]);
 		flag.hoist = this.positive(n, this.prop(n, "hoist"));
 		flag.fly = this.positive(n, this.prop(n, "fly"));
+		this.longer = Math.max(flag.hoist, flag.fly);
 		this.noChildren(n);
 	}
 
@@ -557,7 +576,7 @@ class Parser {
 			case "panel":
 				return this.panel(n, depth);
 			case "use":
-				return this.use(n);
+				return this.use(n, depth);
 			case "emblem":
 				return this.emblem(n);
 			case "group": {
@@ -691,6 +710,7 @@ class Parser {
 			const cycle = l.colors;
 			l.colors = Array.from({ length: count }, (_, i) => cycle[i % cycle.length]!);
 		}
+		this.checkWaves(n, l.edge);
 		l.ratio = this.ratio(n, ratio, l.colors.length);
 		if (l.grow !== undefined && l.grow.length !== l.colors.length) {
 			this.errf(n, `has ${l.colors.length} colors but ${l.grow.length} \`grow\` values`);
@@ -743,6 +763,12 @@ class Parser {
 			l.fimbriate = edge;
 		} else {
 			delete l.fimbriate;
+		}
+	}
+
+	private checkWaves(n: Node, l: ShapedEdge | undefined): void {
+		if (l !== undefined && waves(l, this.longer) > maxCopies) {
+			this.errf(n, `a shaped edge can't have more than ${maxCopies} waves`);
 		}
 	}
 
@@ -1230,9 +1256,10 @@ class Parser {
 					this.errf(n, "needs `markup`");
 					return;
 				}
-				this.embeds++;
 				try {
-					s.embedded = sanitizeSvg(s.markup, `${this.idPrefix}svg${this.embeds}-`);
+					s.embedded = sanitizeSvg(s.markup);
+					// Only what passed is kept, so that nothing can read what the sanitizer removed.
+					s.markup = canonical(s.embedded);
 				} catch (e) {
 					this.errf(n, (e as Error).message);
 				}
@@ -1426,7 +1453,7 @@ class Parser {
 			this.errf(n, "needs a number");
 			return 0;
 		}
-		if (!Number.isFinite(v) || Math.abs(v) > 1e12) {
+		if (!inLimits(v)) {
 			this.errf(n, "needs a finite number of a reasonable size");
 			return 0;
 		}
@@ -1523,21 +1550,12 @@ class Parser {
 	}
 
 	private boxValue(n: Node, text: string): Box {
-		const box: Box = [0, 0, 0, 0];
-		const parts = text.split(/[ ,]/).filter((part) => part !== "");
-		if (parts.length !== 4) {
-			this.errf(n, 'box must be "x y width height"');
-			return box;
+		const values = numbersIn(text);
+		if (values === undefined || values.length !== 4) {
+			this.errf(n, 'box must be "x y width height", with each a finite decimal number of a reasonable size');
+			return [0, 0, 0, 0];
 		}
-		for (let i = 0; i < 4; i++) {
-			const v = parseNumber(parts[i]!);
-			if (v === undefined) {
-				this.errf(n, 'box must be "x y width height"');
-				return box;
-			}
-			box[i] = v;
-		}
-		return box;
+		return values as Box;
 	}
 
 	/** Reads `edge wavy depth=N period=N` or `edge zigzag depth=N count=N`. */
@@ -1685,6 +1703,7 @@ class Parser {
 				}
 			},
 		});
+		this.checkWaves(n, l.edge);
 		if (l.side && l.corner) {
 			this.errf(n, "needs either `side` or `corner`, not both");
 		} else if (l.side) {
@@ -1711,7 +1730,7 @@ class Parser {
 		return l;
 	}
 
-	private use(n: Node): Layer | null {
+	private use(n: Node, depth: number): Layer | null {
 		const a0 = args(n);
 		this.noProps(n);
 		const name = a0[0];
@@ -1723,6 +1742,9 @@ class Parser {
 		if (d === undefined || d.shape !== undefined) {
 			this.errf(n, `"${name}" isn't a defined design`);
 			return null;
+		}
+		if (depth + (d.height ?? 0) > maxDepth) {
+			this.errf(n, `"${name}" nests more than ${maxDepth} levels deep where it's used`);
 		}
 		const l: UseLayer = { layer: "use", ...newEffects(), name, define: d };
 		this.children(n, ["cut"], this.withEffects(l, {}));
@@ -1790,6 +1812,8 @@ class Parser {
 				d.layers.push(l);
 			}
 		}
+		d.size = layersSize(d.layers, this.longer);
+		d.height = layersHeight(d.layers);
 		this.defines[name] = d;
 	}
 
@@ -1876,6 +1900,7 @@ class Parser {
 		if (r.layers.length === 0) {
 			this.errf(n, "needs layers, or `mirror`");
 		}
+		this.count(n, r.layers);
 		flag.reverse = r;
 	}
 
@@ -1969,6 +1994,7 @@ class Parser {
 				this.errf(n, "with a `proportion` needs its own layers");
 			}
 		}
+		this.count(n, v.layers);
 		flag.variants[name] = v;
 	}
 
@@ -2118,26 +2144,12 @@ class Parser {
 	}
 
 	private pointList(n: Node, v: KdlValue, count: number): number[] | null {
-		const message = `needs ${count} numbers in a string`;
-		if (typeof v !== "string") {
-			this.errf(n, message);
+		const values = typeof v === "string" ? numbersIn(v) : undefined;
+		if (values === undefined || values.length !== count) {
+			this.errf(n, `needs ${count} finite decimal numbers of a reasonable size in a string`);
 			return null;
 		}
-		const parts = fields(v);
-		if (parts.length !== count) {
-			this.errf(n, message);
-			return null;
-		}
-		const out: number[] = [];
-		for (const part of parts) {
-			const x = parseNumber(part);
-			if (x === undefined) {
-				this.errf(n, message);
-				return null;
-			}
-			out.push(x);
-		}
-		return out;
+		return values;
 	}
 }
 

@@ -1,0 +1,25 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+define d0 {
+  charge svg { fly 1; hoist 1; markup "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\"/>"; }
+}
+define d1 { use d0; use d0; }
+define d2 { use d1; use d1; }
+define d3 { use d2; use d2; }
+define d4 { use d3; use d3; }
+define d5 { use d4; use d4; }
+define d6 { use d5; use d5; }
+define d7 { use d6; use d6; }
+define d8 { use d7; use d7; }
+define d9 { use d8; use d8; }
+define d10 { use d9; use d9; }
+define d11 { use d10; use d10; }
+define d12 { use d11; use d11; }
+define d13 { use d12; use d12; }
+define d14 { use d13; use d13; }
+define d15 { use d14; use d14; }
+define d16 { use d15; use d15; }
+define d17 { use d16; use d16; }
+use d17

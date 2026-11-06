@@ -5,12 +5,11 @@ package vexyl
 
 import (
 	"bytes"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"flag"
+	"fmt"
 	"io"
-	"maps"
 	"math"
 	"os"
 	"path/filepath"
@@ -569,13 +568,48 @@ func TestRejected(t *testing.T) {
 		{"emblem arguments", header + `emblem 1 { charge disc a { radius 1; }; }`, "takes no arguments"},
 		{"line without step", header + `charge disc a { radius 1; repeat line count=2; }`, "needs a step"},
 		{"line unknown property", header + `charge disc a { radius 1; repeat line count=2 fly=1 radius=2; }`, "unknown property"},
+		{"exponential use", header + exponentialDocument(25), "paints too much"},
+		{"just past the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 20) + "field a\n", "paints too much"},
+		{"star points past the limit", header + "charge star a { radius 1; points 10000; repeat grid rows=5 columns=4; }\nfield a\n", "paints too much"},
+		{"path data past the limit", header + strings.Repeat(pathCopies(128), 7), "paints too much"},
+		{"inline svg past the limit by its bytes", header + svgChain(17), "paints too much"},
+		{"reverse past the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "reverse {\n" + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "field a\n}\n", "paints too much"},
+		{"variants past the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "variant v {\n" + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "field a\n}\n", "paints too much"},
+		{"uses nest too deep", header + nestedUses(33), "levels deep"},
+		{"group around a use too deep", header + "define d1 { field a; }\ndefine d2 { use d1; }\n" + strings.Repeat("group {\n", 30) + "use d2\n" + strings.Repeat("}\n", 30), "levels deep"},
+		{"edge with too many waves", header + `bars a b { edge wavy depth=1 period=0.0001; }`, "waves"},
+		{"panel edge with too many waves", header + `panel { side top; width 1; edge wavy depth=1 period=0.0001; field a; }`, "waves"},
+		{"fold with too many pieces", header + "field a\nfold f {\n" + manyCreases(14) + "}\n", "pieces"},
+		{"box hex", header + `charge path a { d "M0 0Z"; box "0x1p1 0 1 1"; fly 1; }`, "box must be"},
+		{"box underscore", header + `charge path a { d "M0 0Z"; box "1_0 0 1 1"; fly 1; }`, "box must be"},
+		{"box inf", header + `charge path a { d "M0 0Z"; box "0 0 inf 1"; fly 1; }`, "box must be"},
+		{"box nan", header + `charge path a { d "M0 0Z"; box "nan nan 1 1"; fly 2; }`, "box must be"},
+		{"box beyond the limit", header + `charge path a { d "M0 0Z"; box "0 0 1e13 1"; fly 1; }`, "box must be"},
+		{"box too small", header + `charge path a { d "M0 0Z"; box "0 0 1e-13 1"; fly 1; }`, "box must be"},
+		{"box past what a number can hold", header + `charge path a { d "M0 0Z"; box "0 0 1e999 1"; fly 1; }`, "box must be"},
+		{"box with a no-break space", header + "charge path a { d \"M0 0Z\"; box \"0\\u{a0}0 1 1\"; fly 1; }", "box must be"},
+		{"box with a leading comma", header + `charge path a { d "M0 0Z"; box ",0 0 1 1"; fly 1; }`, "box must be"},
+		{"define box inf", header + `define d { path "M0 0Z" box="0 0 inf 1"; }`, "box must be"},
+		{"outline box nan", header + `outline { path "M0 0Z" box="nan 0 1 1"; }`, "box must be"},
+		{"through hex", header + "field a\nfold f { over through=\"0x1 0 1 1\" move=\"0 1\"; }\n", "decimal numbers"},
+		{"through underscore", header + "field a\nfold f { over through=\"1_0 0 1 1\" move=\"0 1\"; }\n", "decimal numbers"},
+		{"through inf", header + "field a\nfold f { over through=\"0 0 inf 1\" move=\"0 1\"; }\n", "decimal numbers"},
+		{"through nan", header + "field a\nfold f { over through=\"nan 0 1 1\" move=\"0 1\"; }\n", "decimal numbers"},
+		{"through beyond the limit", header + "field a\nfold f { over through=\"0 0 1e13 1\" move=\"0 1\"; }\n", "decimal numbers"},
+		{"through move nan", header + "field a\nfold f { over through=\"0 0 1 1\" move=\"nan 1\"; }\n", "decimal numbers"},
+		{"through with a no-break space", header + "field a\nfold f { over through=\"0\\u{a0}0 1 1\" move=\"0 1\"; }\n", "decimal numbers"},
+		{"number too small", header + `charge disc a { radius 1e-13; }`, "finite"},
+		{"number beyond the limit", header + `charge disc a { radius 1e13; }`, "finite"},
+		{"not utf-8", header + "field \"\xff\"\n", "UTF-8"},
+		{"problem after crlf", "vexyl 1\r\nmeta { name \"T\"; }\r\npalette { a \"#112233\"; }\r\nproportion hoist=10 fly=20\r\nfield nope\r\n", "isn't in the palette"},
+		{"problem after cr", "vexyl 1\rmeta { name \"T\"; }\rpalette { a \"#112233\"; }\rproportion hoist=10 fly=20\rfield nope\r", "isn't in the palette"},
 	}
 	if *update {
 		var cases []invalidCase
 		for _, tt := range tests {
 			cases = append(cases, invalidCase{tt.name, tt.src})
 		}
-		writeInvalidFixtures(t, cases)
+		writeInvalidFixtures(t, append(cases, sanitizerCases()...))
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -587,44 +621,6 @@ func TestRejected(t *testing.T) {
 				t.Errorf("error %q doesn't contain %q", err, tt.want)
 			}
 		})
-	}
-}
-
-type invalidCase struct{ name, src string }
-
-// writeInvalidFixtures saves documents that must be refused, for the conformance suite.
-// It records the line of the first problem, except for syntax errors, whose place depends
-// on the KDL parser.
-func writeInvalidFixtures(t *testing.T, cases []invalidCase) {
-	t.Helper()
-	dir := filepath.Join("..", "conformance", "invalid")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	type entry struct {
-		Name string `json:"name"`
-		File string `json:"file"`
-		Line int    `json:"line,omitempty"`
-	}
-	slug := regexp.MustCompile(`[^a-z0-9]+`)
-	var list []entry
-	for _, c := range cases {
-		name := strings.Trim(slug.ReplaceAllString(strings.ToLower(c.name), "-"), "-")
-		if err := os.WriteFile(filepath.Join(dir, name+".kdl"), []byte(c.src), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		e := entry{Name: c.name, File: "invalid/" + name + ".kdl"}
-		if ps := Validate(strings.NewReader(c.src), name); len(ps) > 0 && ps[0].Node != "" {
-			e.Line = ps[0].Line
-		}
-		list = append(list, e)
-	}
-	out, err := json.MarshalIndent(list, "", " ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join("..", "conformance", "invalid.json"), append(out, '\n'), 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
 
@@ -1236,6 +1232,22 @@ field a
   adapted-from "https://example.org/a" { license "CC-BY-SA-4.0"; }`))
 }
 
+// manyCreases folds a flag in half again and again, along alternate sides.
+func manyCreases(n int) string {
+	var b strings.Builder
+	w, h := 20.0, 10.0
+	for i := range n {
+		if i%2 == 0 {
+			w /= 2
+			fmt.Fprintf(&b, "over along=hoist at=%v move=fly\n", w)
+		} else {
+			h /= 2
+			fmt.Fprintf(&b, "over along=fly at=%v move=bottom\n", h)
+		}
+	}
+	return b.String()
+}
+
 func TestValidateReportsWhere(t *testing.T) {
 	ps := Validate(strings.NewReader(header+"sparkle a\n"), "f")
 	if len(ps) != 1 || ps[0].Line != 5 || ps[0].Column != 1 || ps[0].Node != "sparkle" {
@@ -1452,7 +1464,7 @@ func TestFoldRefusals(t *testing.T) {
 		{"everything moves", `fold f { over along=hoist at=30 move=hoist; }`, "nothing is left"},
 		{"point on the crease", `fold f { over through="0 0 1 1" move="5 5"; }`, "on its crease"},
 		{"wrong side name", `fold f { over along=hoist at=5 move=top; }`, "moves hoist or fly"},
-		{"bad numbers", `fold f { over through="1 2" move="3 4"; }`, "4 numbers"},
+		{"bad numbers", `fold f { over through="1 2" move="3 4"; }`, "4 finite"},
 		{"no crease", `fold f { over move=top; }`, "needs along"},
 		{"no steps", `fold f { description "x"; }`, "at least one step"},
 	}
@@ -1527,108 +1539,6 @@ func TestErrorsReportLocationsAndAllProblems(t *testing.T) {
 	}
 }
 
-const svgOpen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">`
-
-func TestSanitizeRejects(t *testing.T) {
-	tests := []struct{ name, body string }{
-		{"script", `<script>alert(1)</script>`},
-		{"foreignObject", `<foreignObject><div/></foreignObject>`},
-		{"image", `<image href="https://example.test/x.png"/>`},
-		{"anchor", `<a href="javascript:alert(1)"><rect/></a>`},
-		{"style element", `<style>@import "https://example.test/x.css";</style>`},
-		{"animate", `<animate attributeName="fill"/>`},
-		{"set", `<set attributeName="onmouseover" to="alert(1)"/>`},
-		{"use", `<use href="#x"/>`},
-		{"pattern", `<pattern id="p"/>`},
-		{"filter", `<filter id="f"/>`},
-		{"text", `<text>hello</text>`},
-		{"bare text", `hello`},
-		{"nested svg", `<svg/>`},
-		{"uppercase script", `<SCRIPT/>`},
-		{"event handler", `<rect onclick="alert(1)"/>`},
-		{"external href", `<linearGradient href="https://example.test/g.svg#a"/>`},
-		{"xlink external", `<linearGradient xmlns:x="http://www.w3.org/1999/xlink" x:href="https://example.test/g.svg#a"/>`},
-		{"javascript href", `<linearGradient href="javascript:alert(1)"/>`},
-		{"external fill", `<rect fill="url(https://example.test/x.svg#a)"/>`},
-		{"uppercase url", `<rect fill="URL(https://example.test/x.svg#a)"/>`},
-		{"data url", `<rect fill="url(data:image/svg+xml,x)"/>`},
-		{"mixed urls", `<rect fill="url(#ok) url(https://example.test/a)"/>`},
-		{"external style", `<rect style="fill:url(https://example.test/x)"/>`},
-		{"style escape", `<rect style="fill:\75rl(https://example.test/x)"/>`},
-		{"style import", `<rect style="@import 'https://example.test/x'"/>`},
-		{"style behavior", `<rect style="behavior:url(x.htc)"/>`},
-		{"style comment", `<rect style="fill:u/**/rl(https://example.test/x)"/>`},
-		{"bad id", `<rect id="a b"/>`},
-		{"css src function", `<rect fill="src('https://example.test/x')"/>`},
-		{"css image function", `<rect style="fill:image('https://example.test/x')"/>`},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if out, err := sanitizeSVG(svgOpen+tt.body+`</svg>`, "p-"); err == nil {
-				t.Errorf("accepted, producing %q", out.body)
-			}
-		})
-	}
-}
-
-func TestSanitizeRejectsBadRoots(t *testing.T) {
-	tests := []struct{ name, markup string }{
-		{"empty", ``},
-		{"not svg", `<html xmlns="http://www.w3.org/1999/xhtml"/>`},
-		{"no namespace", `<svg viewBox="0 0 1 1"/>`},
-		{"no size", `<svg xmlns="http://www.w3.org/2000/svg"/>`},
-		{"percent size", `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"/>`},
-		{"empty viewBox", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0"/>`},
-		{"handler on root", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" onload="alert(1)"/>`},
-		{"two roots", svgOpen + `</svg>` + svgOpen + `</svg>`},
-		{"doctype", `<!DOCTYPE svg [<!ENTITY x "y">]>` + svgOpen + `</svg>`},
-		{"malformed", svgOpen + `<rect>`},
-		{"too deep", svgOpen + strings.Repeat("<g>", maxSVGDepth+1) + strings.Repeat("</g>", maxSVGDepth+1) + `</svg>`},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if _, err := sanitizeSVG(tt.markup, "p-"); err == nil {
-				t.Error("accepted")
-			}
-		})
-	}
-}
-
-func TestSanitizeKeepsArtworkAndPrefixesIDs(t *testing.T) {
-	out, err := sanitizeSVG(`<?xml version="1.0"?>
-<!-- a comment -->
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     xmlns:i="http://example.test/editor" width="20px" height="10" fill="#123456" i:zoom="2">
-  <title>gone</title>
-  <metadata><i:thing>gone</i:thing></metadata>
-  <i:panel><script>gone</script></i:panel>
-  <defs><linearGradient id="g" xlink:href="#h"/></defs>
-  <circle fill="rgb(1, 2, 3)" stroke="hsla(1, 2%, 3%, 0.5)" transform="translate(1 2) rotate(3)"/>
-  <rect id="r" fill="url(#g)" style="stroke: url('#g'); opacity: 0.5" clip-path="url(#c)" i:label="gone"/>
-</svg>`, "p-")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if out.viewBox != "0 0 20 10" {
-		t.Errorf("viewBox = %q", out.viewBox)
-	}
-	if out.attrs != ` fill="#123456"` {
-		t.Errorf("root attrs = %q", out.attrs)
-	}
-	for _, want := range []string{
-		`id="p-g"`, `href="#p-h"`, `id="p-r"`, `fill="url(#p-g)"`,
-		`style="opacity:0.5;stroke:url(#p-g)"`, `clip-path="url(#p-c)"`,
-		`fill="rgb(1, 2, 3)"`, `transform="translate(1 2) rotate(3)"`,
-	} {
-		if !strings.Contains(out.body, want) {
-			t.Errorf("%q lacks %q", out.body, want)
-		}
-	}
-	if strings.Contains(out.body, "gone") {
-		t.Errorf("dropped content survived: %q", out.body)
-	}
-}
-
 // An embedded file must not be able to refer to the renderer's own IDs, or
 // another embed's.
 func TestEmbedsAreIsolated(t *testing.T) {
@@ -1645,10 +1555,14 @@ func TestEmbedsAreIsolated(t *testing.T) {
 		}
 		seen[m[1]] = true
 	}
-	for _, want := range []string{"svg1-shade", "svg2-shade"} {
-		if !slices.ContainsFunc(slices.Collect(maps.Keys(seen)), func(id string) bool { return strings.HasSuffix(id, want) }) {
-			t.Errorf("missing id ending %q; have %v", want, seen)
+	shades := 0
+	for id := range seen {
+		if strings.HasSuffix(id, "-shade") {
+			shades++
 		}
+	}
+	if shades != 2 {
+		t.Errorf("wanted two artworks' IDs for the same name; have %v", seen)
 	}
 }
 
@@ -1673,10 +1587,12 @@ func FuzzSanitize(f *testing.F) {
 	f.Add(svgOpen + `<script>x</script></svg>`)
 	banned := regexp.MustCompile(`(?i)<\s*(script|foreignObject|image|style|a|use|set|animate)\b|\son\w+=`)
 	f.Fuzz(func(t *testing.T, markup string) {
-		out, err := sanitizeSVG(markup, "p-")
+		out, err := sanitizeSVG(markup)
 		if err != nil {
 			return
 		}
+		out.body = strings.ReplaceAll(out.body, idMark, "p-")
+		out.attrs = strings.ReplaceAll(out.attrs, idMark, "p-")
 		if loc := banned.FindString(out.body + out.attrs); loc != "" {
 			t.Errorf("banned %q survived in %q", loc, out.body)
 		}

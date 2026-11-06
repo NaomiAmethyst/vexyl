@@ -7,6 +7,7 @@ import {
 	add, axis, bandPoly, barPolys, boundary, chevronPolys, crossPolys, mul, offsetPolygon, position, rawChevrons, rectPoly,
 	regionBounds, regionCenter, regionCorners, rotate, shapeGeom, type Geom, type Region, type Vec,
 } from "./geometry.js";
+import { idMark } from "./sanitize.js";
 import { circlePath, forRegion, outlineGeom, panelEdge, panelRect, rayPolys } from "./shapes.js";
 import { esc, hash, num } from "./text.js";
 import { RenderError } from "./types.js";
@@ -118,12 +119,11 @@ export function svgTree(flag: Flag, opts: Options = {}): SvgElement {
 	const dec = new XmlDecoder(svg(flag, opts));
 	let root: SvgElement | undefined;
 	const open: SvgElement[] = [];
-	const rawName = (n: { space: string; local: string }): string => (n.space !== "" ? `${n.space}:${n.local}` : n.local);
-	for (let t = dec.rawToken(); t !== null; t = dec.rawToken()) {
+	for (let t = dec.token(); t !== null; t = dec.token()) {
 		if (t.type === "start") {
 			const e: SvgElement = {
-				name: rawName(t.name),
-				attrs: t.attrs.map((a) => ({ name: rawName(a.name), value: a.value })),
+				name: t.raw,
+				attrs: t.given.map((a) => ({ name: a.name, value: a.value })),
 				children: [],
 			};
 			const parent = open.at(-1);
@@ -660,8 +660,10 @@ class Renderer {
 			this.line(`<g ${attrs.join(" ")}>`);
 			this.depth++;
 		}
+		// Each time it's drawn gets its own prefix, since a definition can draw it many times.
+		const prefix = this.id("svg") + "-";
 		this.line(
-			`<svg x="${num(at.x - s.fly / 2)}" y="${num(at.y - s.hoist / 2)}" width="${num(s.fly)}" height="${num(s.hoist)}" viewBox="${s.embedded.viewBox}" preserveAspectRatio="xMidYMid meet"${s.embedded.attrs}>${s.embedded.body}</svg>`,
+			`<svg x="${num(at.x - s.fly / 2)}" y="${num(at.y - s.hoist / 2)}" width="${num(s.fly)}" height="${num(s.hoist)}" viewBox="${esc(s.embedded.viewBox)}" preserveAspectRatio="xMidYMid meet"${s.embedded.attrs.replaceAll(idMark, prefix)}>${s.embedded.body.replaceAll(idMark, prefix)}</svg>`,
 		);
 		if (attrs.length > 0) {
 			this.depth--;

@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-// A strict XML tokenizer with no DOM, so that it behaves the same in Node and in browsers. The
-// sanitizer's security rests on this reading markup exactly one way: anything it can't read for
-// certain is an error. It accepts the same documents as the reference's XML decoder.
-
-import { inCharacterRange } from "./text.js";
+// Reads well-formed XML 1.0 with namespaces, as section 8.3 of the format defines it, with no DOM,
+// so that it behaves the same in Node and in browsers. The sanitizer's security rests on this
+// reading markup exactly one way, so nothing here is lenient.
 
 export const svgNamespace = "http://www.w3.org/2000/svg";
 export const xlinkNamespace = "http://www.w3.org/1999/xlink";
 const xmlNamespace = "http://www.w3.org/XML/1998/namespace";
+const xmlnsNamespace = "http://www.w3.org/2000/xmlns/";
 
 export class XmlError extends Error {
 	constructor(message: string) {
@@ -19,7 +18,7 @@ export class XmlError extends Error {
 }
 
 export interface XmlName {
-	/** The namespace once translated, or the prefix when read raw or when it's undeclared. */
+	/** The namespace it's in, or empty if it's in none. */
 	space: string;
 	local: string;
 }
@@ -30,80 +29,30 @@ export interface XmlAttr {
 }
 
 export type XmlToken =
-	| { type: "start"; name: XmlName; attrs: XmlAttr[] }
+	| { type: "start"; name: XmlName; attrs: XmlAttr[]; raw: string; given: { name: string; value: string }[] }
 	| { type: "end"; name: XmlName }
 	| { type: "text"; data: string }
-	| { type: "comment" }
-	| { type: "instruction"; target: string }
+	| { type: "other" }
 	| { type: "directive" };
 
-// XML 1.0's Letter, '_' and ':', and its other NameChars, by code point.
-const firstRanges = "3a,41-5a,5f,61-7a,c0-d6,d8-f6,f8-131,134-13e,141-148,14a-17e,180-1c3,1cd-1f0,1f4-1f5,1fa-217,250-2a8,2bb-2c1,386,388-38a,38c,38e-3a1,3a3-3ce,3d0-3d6,3da,3dc,3de,3e0,3e2-3f3,401-40c,40e-44f,451-45c,45e-481,490-4c4,4c7-4c8,4cb-4cc,4d0-4eb,4ee-4f5,4f8-4f9,531-556,559,561-586,5d0-5ea,5f0-5f2,621-63a,641-64a,671-6b7,6ba-6be,6c0-6ce,6d0-6d3,6d5,6e5-6e6,905-939,93d,958-961,985-98c,98f-990,993-9a8,9aa-9b0,9b2,9b6-9b9,9dc-9dd,9df-9e1,9f0-9f1,a05-a0a,a0f-a10,a13-a28,a2a-a30,a32-a33,a35-a36,a38-a39,a59-a5c,a5e,a72-a74,a85-a8b,a8d,a8f-a91,a93-aa8,aaa-ab0,ab2-ab3,ab5-ab9,b05-b0c,b0f-b10,b13-b28,b2a-b30,b32-b33,b36-b39,b3d,b5c-b5d,b5f-b61,b85-b8a,b8e-b90,b92-b95,b99-b9a,b9c,b9e-b9f,ba3-ba4,ba8-baa,bae-bb5,bb7-bb9,c05-c0c,c0e-c10,c12-c28,c2a-c33,c35-c39,c60-c61,c85-c8c,c8e-c90,c92-ca8,caa-cb3,cb5-cb9,cde,ce0-ce1,d05-d0c,d0e-d10,d12-d28,d2a-d39,d60-d61,e01-e2e,e30,e32-e33,e40-e45,e81-e82,e84,e87-e88,e8a,e8d,e94-e97,e99-e9f,ea1-ea3,ea5,ea7,eaa-eab,ead-eae,eb0,eb2-eb3,ebd,ec0-ec4,f40-f47,f49-f69,10a0-10c5,10d0-10f6,1100,1102-1103,1105-1107,1109,110b-110c,110e-1112,113c,113e,1140,114c,114e,1150,1154-1155,1159,115f-1161,1163,1165,1167,1169,116d-116e,1172-1173,11ae-11af,11b7-11b8,11ba,11bc-11c2,11f9,1e00-1e9b,1ea0-1ef9,1f00-1f15,1f18-1f1d,1f20-1f45,1f48-1f4d,1f50-1f57,1f5d,1f5f-1f7d,1f80-1fb4,1fb6-1fbc,1fbe,1fc2-1fc4,1fc6-1fcc,1fd0-1fd3,1fd6-1fdb,1fe0-1fec,1ff2-1ff4,1ff6-1ffc,2126,212a-212b,212e,2180-2182,3007,3021-3029,3041-3094,30a1-30fa,3105-312c,4e00-9fa5,ac00-d7a3";
-const secondRanges = "2d-2e,30-39,b7,2d0-2d1,300-345,360-361,387,483-486,591-5a1,5a3-5b9,5bb-5bd,5bf,5c1-5c2,64b-652,660-669,670,6d6-6e4,6e7-6e8,6ea-6ed,6f0-6f9,901-903,93c,93e-94d,951-954,962-963,966-96f,981-983,9bc,9be-9c4,9c7-9c8,9cb-9cd,9d7,9e2-9e3,9e6-9ef,a3e-a42,a47-a48,a4b-a4d,a66-a71,a81-a83,abc,abe-ac5,ac7-ac9,acb-acd,ae6-aef,b01-b03,b3c,b3e-b43,b47-b48,b4b-b4d,b56-b57,b66-b6f,b82-b83,bbe-bc2,bc6-bc8,bca-bcd,bd7,be7-bef,c01-c03,c3e-c44,c46-c48,c4a-c4d,c55-c56,c66-c6f,c82-c83,cbe-cc4,cc6-cc8,cca-ccd,cd5-cd6,ce6-cef,d02-d03,d3e-d43,d46-d48,d4a-d4d,d57,d66-d6f,e31,e34-e3a,e46-e4e,e50-e59,eb1,eb4-eb9,ebb-ebc,ec6,ec8-ecd,ed0-ed9,f18-f19,f20-f29,f35,f37,f39,f3e-f3f,f71-f84,f86-f8b,f90-f95,f97,f99-fad,fb1-fb7,fb9,20d0-20dc,302a-302f,3031-3035,3099-309a,309d-309e,30fc-30fe";
-
-function decodeRanges(text: string): number[] {
-	const out: number[] = [];
-	for (const part of text.split(",")) {
-		const [a, b] = part.split("-");
-		out.push(parseInt(a!, 16), parseInt(b ?? a!, 16));
-	}
-	return out;
+export function isXmlChar(c: number): boolean {
+	return c === 0x09 || c === 0x0a || c === 0x0d || (c >= 0x20 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xfffd) || (c >= 0x10000 && c <= 0x10ffff);
 }
 
-let firstTable: number[] | undefined;
-let secondTable: number[] | undefined;
+const isSpaceCode = (c: number): boolean => c === 0x20 || c === 0x09 || c === 0x0a || c === 0x0d;
 
-function inRanges(table: number[], code: number): boolean {
-	let lo = 0;
-	let hi = table.length / 2 - 1;
-	while (lo <= hi) {
-		const mid = (lo + hi) >>> 1;
-		if (code < table[mid * 2]!) {
-			hi = mid - 1;
-		} else if (code > table[mid * 2 + 1]!) {
-			lo = mid + 1;
-		} else {
-			return true;
-		}
-	}
-	return false;
-}
-
-function isFirst(code: number): boolean {
-	firstTable ??= decodeRanges(firstRanges);
-	return inRanges(firstTable, code);
-}
-
-function isSecond(code: number): boolean {
-	secondTable ??= decodeRanges(secondRanges);
-	return inRanges(secondTable, code);
-}
-
-function isName(s: string): boolean {
-	if (s.length === 0) {
-		return false;
-	}
-	let start = true;
-	for (const ch of s) {
-		const code = ch.codePointAt(0)!;
-		if (start ? !isFirst(code) : !isFirst(code) && !isSecond(code)) {
-			return false;
-		}
-		start = false;
-	}
-	return true;
-}
-
-function isNameCode(c: number): boolean {
+function isNameStart(c: number): boolean {
 	return (
-		(c >= 0x41 && c <= 0x5a) ||
-		(c >= 0x61 && c <= 0x7a) ||
-		(c >= 0x30 && c <= 0x39) ||
-		c === 0x5f ||
-		c === 0x3a ||
-		c === 0x2e ||
-		c === 0x2d
+		c === 0x3a || c === 0x5f || (c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a) ||
+		(c >= 0xc0 && c <= 0xd6) || (c >= 0xd8 && c <= 0xf6) || (c >= 0xf8 && c <= 0x2ff) ||
+		(c >= 0x370 && c <= 0x37d) || (c >= 0x37f && c <= 0x1fff) || (c >= 0x200c && c <= 0x200d) ||
+		(c >= 0x2070 && c <= 0x218f) || (c >= 0x2c00 && c <= 0x2fef) || (c >= 0x3001 && c <= 0xd7ff) ||
+		(c >= 0xf900 && c <= 0xfdcf) || (c >= 0xfdf0 && c <= 0xfffd) || (c >= 0x10000 && c <= 0xeffff)
 	);
+}
+
+function isNameChar(c: number): boolean {
+	return isNameStart(c) || c === 0x2d || c === 0x2e || (c >= 0x30 && c <= 0x39) || c === 0xb7 || (c >= 0x300 && c <= 0x36f) || (c >= 0x203f && c <= 0x2040);
 }
 
 const entities: ReadonlyMap<string, string> = new Map([
@@ -114,386 +63,449 @@ const entities: ReadonlyMap<string, string> = new Map([
 	["quot", '"'],
 ]);
 
-/** Finds `param="value"` in the XML declaration, as loosely as the reference does. */
-function declared(param: string, s: string): string {
-	const key = param + "=";
-	let i = 0;
-	let sep = "";
-	while (i < s.length) {
-		const sub = s.slice(i);
-		const k = sub.indexOf(key);
-		if (k < 0 || key.length + k >= sub.length) {
-			return "";
-		}
-		i += key.length + k + 1;
-		const c = sub[key.length + k]!;
-		if (c === "'" || c === '"') {
-			sep = c;
-			break;
-		}
+const endOfMarkup = "unexpected end of the markup";
+
+/** Divides a name at its colon, of which it can have one, between two parts. */
+function splitQName(raw: string): [string, string] {
+	const colon = raw.indexOf(":");
+	if (colon < 0) {
+		return ["", raw];
 	}
-	if (sep === "") {
-		return "";
+	const after = raw.slice(colon + 1);
+	if (colon === 0 || after === "" || after.includes(":") || !isNameStart(after.codePointAt(0)!)) {
+		throw new XmlError(`"${raw}" isn't a valid qualified name`);
 	}
-	const j = s.indexOf(sep, i);
-	return j < 0 ? "" : s.slice(i, j);
+	return [raw.slice(0, colon), after];
 }
 
-type StackEntry = { kind: "start"; name: XmlName } | { kind: "ns"; local: string; url: string | undefined };
+/** Reads ` version="1.0" encoding="UTF-8" standalone="yes"`, of which only the version is required. */
+function checkDeclaration(data: string): void {
+	const bad = new XmlError("malformed XML declaration");
+	let pos = 0;
+	const field = (key: string): string | undefined => {
+		let i = pos;
+		while (i < data.length && isSpaceCode(data.charCodeAt(i))) {
+			i++;
+		}
+		if (i === pos || !data.startsWith(key, i)) {
+			return undefined;
+		}
+		i += key.length;
+		while (i < data.length && isSpaceCode(data.charCodeAt(i))) {
+			i++;
+		}
+		if (data[i] !== "=") {
+			throw bad;
+		}
+		i++;
+		while (i < data.length && isSpaceCode(data.charCodeAt(i))) {
+			i++;
+		}
+		const quote = data[i];
+		if (quote !== '"' && quote !== "'") {
+			throw bad;
+		}
+		const end = data.indexOf(quote, i + 1);
+		if (end < 0) {
+			throw bad;
+		}
+		pos = end + 1;
+		return data.slice(i + 1, end);
+	};
+	const version = field("version");
+	if (version === undefined) {
+		throw bad;
+	}
+	if (version !== "1.0") {
+		throw new XmlError(`unsupported XML version "${version}"; only 1.0 is`);
+	}
+	const encoding = field("encoding");
+	if (encoding !== undefined && !/^utf-8$/i.test(encoding)) {
+		throw new XmlError(`unsupported encoding "${encoding}"; only UTF-8 is`);
+	}
+	const standalone = field("standalone");
+	if (standalone !== undefined && standalone !== "yes" && standalone !== "no") {
+		throw bad;
+	}
+	for (; pos < data.length; pos++) {
+		if (!isSpaceCode(data.charCodeAt(pos))) {
+			throw bad;
+		}
+	}
+}
+
+interface Frame {
+	raw: string;
+	name: XmlName;
+	undo: { prefix: string; uri: string | undefined }[];
+}
 
 /** Reads tokens one at a time. Elements come back matched and nested, or it throws. */
 export class XmlDecoder {
 	private readonly src: string;
 	private pos = 0;
-	private toClose: XmlName | undefined;
-	private readonly ns = new Map<string, string>();
-	private readonly stack: StackEntry[] = [];
+	private readonly stack: Frame[] = [];
+	private readonly ns = new Map<string, string>([["xml", xmlNamespace]]);
+	private pending: XmlToken | undefined;
+	private doneRoot = false;
 
-	constructor(src: string) {
-		this.src = src;
+	constructor(markup: string) {
+		for (const ch of markup) {
+			const code = ch.codePointAt(0)!;
+			if (!isXmlChar(code)) {
+				throw new XmlError(`U+${code.toString(16).toUpperCase().padStart(4, "0")} isn't an XML character`);
+			}
+		}
+		this.src = markup.replace(/\r\n?/g, "\n");
 	}
 
-	/** The next token with its namespaces worked out, or null at the end of the document. */
+	/** The next token, or null once the document has ended properly. */
 	token(): XmlToken | null {
-		const t = this.rawToken();
-		if (t === null) {
-			if (this.stack.length > 0) {
-				throw new XmlError("unexpected end of the document");
-			}
-			return null;
-		}
-		if (t.type === "start") {
-			for (const a of t.attrs) {
-				if (a.name.space === "xmlns") {
-					this.stack.push({ kind: "ns", local: a.name.local, url: this.ns.get(a.name.local) });
-					this.ns.set(a.name.local, a.value);
-				}
-				if (a.name.space === "" && a.name.local === "xmlns") {
-					this.stack.push({ kind: "ns", local: "", url: this.ns.get("") });
-					this.ns.set("", a.value);
-				}
-			}
-			this.stack.push({ kind: "start", name: { ...t.name } });
-			this.translate(t.name, true);
-			for (const a of t.attrs) {
-				this.translate(a.name, false);
-			}
-		} else if (t.type === "end") {
-			this.popElement(t.name);
-		}
-		return t;
-	}
-
-	private translate(n: XmlName, isElement: boolean): void {
-		if (n.space === "xmlns" || (n.space === "" && !isElement)) {
-			return;
-		}
-		if (n.space === "xml") {
-			n.space = xmlNamespace;
-		} else if (n.space === "" && n.local === "xmlns") {
-			return;
-		}
-		const url = this.ns.get(n.space);
-		if (url !== undefined) {
-			n.space = url;
-		}
-	}
-
-	private popElement(name: XmlName): void {
-		const s = this.stack.pop();
-		if (s === undefined || s.kind !== "start") {
-			throw new XmlError(`unexpected end element </${name.local}>`);
-		}
-		if (s.name.local !== name.local) {
-			throw new XmlError(`element <${s.name.local}> closed by </${name.local}>`);
-		}
-		if (s.name.space !== name.space) {
-			throw new XmlError(`element <${s.name.local}> in space ${s.name.space} closed by </${name.local}> in space ${name.space}`);
-		}
-		this.translate(name, true);
-		for (let top = this.stack.at(-1); top !== undefined && top.kind === "ns"; top = this.stack.at(-1)) {
-			this.stack.pop();
-			if (top.url !== undefined) {
-				this.ns.set(top.local, top.url);
-			} else {
-				this.ns.delete(top.local);
-			}
-		}
-	}
-
-	/** The next token as written, with no checks on nesting and no namespaces worked out. */
-	rawToken(): XmlToken | null {
-		if (this.toClose !== undefined) {
-			const name = this.toClose;
-			this.toClose = undefined;
-			return { type: "end", name };
+		if (this.pending !== undefined) {
+			const t = this.pending;
+			this.pending = undefined;
+			return t;
 		}
 		const src = this.src;
 		if (this.pos >= src.length) {
+			if (this.stack.length > 0) {
+				throw new XmlError(endOfMarkup);
+			}
 			return null;
 		}
 		if (src[this.pos] !== "<") {
-			return { type: "text", data: this.text("", false) };
+			return this.text();
 		}
-		this.pos++;
-		const b = this.next();
-		if (b === "/") {
-			const name = this.nsname("expected element name after </");
-			this.space();
-			if (this.next() !== ">") {
-				throw new XmlError(`invalid characters between </${name.local} and >`);
-			}
-			return { type: "end", name };
+		if (src.startsWith("</", this.pos)) {
+			return this.endTag();
 		}
-		if (b === "?") {
+		if (src.startsWith("<?", this.pos)) {
 			return this.instruction();
 		}
-		if (b === "!") {
-			return this.bang();
+		if (src.startsWith("<!--", this.pos)) {
+			return this.comment();
 		}
-		this.pos--;
-		return this.startElement();
+		if (src.startsWith("<![CDATA[", this.pos)) {
+			return this.cdata();
+		}
+		if (src.startsWith("<!", this.pos)) {
+			// A directive is always refused, so there's no need to find where it ends.
+			this.pos = src.length;
+			return { type: "directive" };
+		}
+		return this.startTag();
+	}
+
+	/** Reads character data, which outside the root can only be whitespace. */
+	private text(): XmlToken {
+		const src = this.src;
+		let out = "";
+		while (this.pos < src.length && src[this.pos] !== "<") {
+			const c = src[this.pos]!;
+			if (c === "&") {
+				if (this.stack.length === 0) {
+					throw new XmlError("a character reference can't appear outside the root");
+				}
+				out += this.reference();
+			} else if (c === "]" && src.startsWith("]]>", this.pos)) {
+				throw new XmlError("]]> can't appear in text");
+			} else {
+				out += c;
+				this.pos++;
+			}
+		}
+		return { type: "text", data: out };
+	}
+
+	private cdata(): XmlToken {
+		if (this.stack.length === 0) {
+			throw new XmlError("a CDATA section can't appear outside the root");
+		}
+		const start = this.pos + "<![CDATA[".length;
+		const end = this.src.indexOf("]]>", start);
+		if (end < 0) {
+			throw new XmlError(endOfMarkup);
+		}
+		this.pos = end + "]]>".length;
+		return { type: "text", data: this.src.slice(start, end) };
+	}
+
+	private comment(): XmlToken {
+		const start = this.pos + "<!--".length;
+		const end = this.src.indexOf("--", start);
+		if (end < 0) {
+			throw new XmlError(endOfMarkup);
+		}
+		if (!this.src.startsWith("-->", end)) {
+			throw new XmlError('"--" can\'t appear in a comment');
+		}
+		this.pos = end + "-->".length;
+		return { type: "other" };
 	}
 
 	private instruction(): XmlToken {
-		const target = this.readName();
-		if (target === null || !isName(target)) {
-			throw new XmlError("expected target name after <?");
+		const begin = this.pos;
+		this.pos += "<?".length;
+		let target: string;
+		try {
+			target = this.name();
+		} catch {
+			throw new XmlError("expected a target after <?");
 		}
-		this.space();
 		const end = this.src.indexOf("?>", this.pos);
 		if (end < 0) {
-			throw new XmlError("unexpected end of the document");
+			throw new XmlError(endOfMarkup);
 		}
 		const data = this.src.slice(this.pos, end);
-		this.pos = end + 2;
-		if (target === "xml") {
-			const version = declared("version", data);
-			if (version !== "" && version !== "1.0") {
-				throw new XmlError(`unsupported version "${version}"; only version 1.0 is supported`);
-			}
-			const encoding = declared("encoding", data);
-			if (encoding !== "" && encoding.toLowerCase() !== "utf-8") {
-				throw new XmlError(`unsupported encoding "${encoding}"`);
-			}
+		if (data !== "" && !isSpaceCode(data.charCodeAt(0))) {
+			throw new XmlError("a processing instruction's target needs a space after it");
 		}
-		return { type: "instruction", target };
+		this.pos = end + "?>".length;
+		if (/^xml$/i.test(target)) {
+			if (begin !== 0 || target !== "xml") {
+				throw new XmlError("an XML declaration can only come first");
+			}
+			checkDeclaration(data);
+		} else if (target.includes(":")) {
+			throw new XmlError("a processing instruction's target can't have a colon");
+		}
+		return { type: "other" };
 	}
 
-	private bang(): XmlToken {
-		const b = this.next();
-		if (b === "-") {
-			if (this.next() !== "-") {
-				throw new XmlError("invalid sequence <!- not part of <!--");
-			}
-			let b0 = "";
-			let b1 = "";
-			for (;;) {
-				const c = this.next();
-				if (b0 === "-" && b1 === "-") {
-					if (c !== ">") {
-						throw new XmlError('invalid sequence "--" not allowed in comments');
-					}
-					return { type: "comment" };
-				}
-				b0 = b1;
-				b1 = c;
-			}
-		}
-		if (b === "[") {
-			for (const expected of "CDATA[") {
-				if (this.next() !== expected) {
-					throw new XmlError("invalid <![ sequence");
-				}
-			}
-			return { type: "text", data: this.text("", true) };
-		}
-		// A directive is always refused, so there's no need to find where it ends.
-		return { type: "directive" };
-	}
-
-	private startElement(): XmlToken {
-		const name = this.nsname("expected element name after <");
-		const attrs: XmlAttr[] = [];
-		for (;;) {
-			this.space();
-			const b = this.next();
-			if (b === "/") {
-				if (this.next() !== ">") {
-					throw new XmlError("expected /> in element");
-				}
-				this.toClose = { ...name };
-				break;
-			}
-			if (b === ">") {
-				break;
-			}
-			this.pos--;
-			const attr = this.nsname("expected attribute name in element");
-			this.space();
-			if (this.next() !== "=") {
-				throw new XmlError("attribute name without = in element");
-			}
-			this.space();
-			const quote = this.next();
-			if (quote !== '"' && quote !== "'") {
-				throw new XmlError("unquoted or missing attribute value in element");
-			}
-			attrs.push({ name: attr, value: this.text(quote, false) });
-		}
-		return { type: "start", name, attrs };
-	}
-
-	private next(): string {
-		if (this.pos >= this.src.length) {
-			throw new XmlError("unexpected end of the document");
-		}
-		return this.src[this.pos++]!;
-	}
-
-	private space(): void {
-		while (this.pos < this.src.length) {
-			const c = this.src.charCodeAt(this.pos);
-			if (c !== 0x20 && c !== 0x0d && c !== 0x0a && c !== 0x09) {
-				return;
-			}
-			this.pos++;
-		}
-	}
-
-	/** Reads up to the first ASCII character not valid in a name, or null if there's no name. */
-	private readName(): string | null {
+	/** Reads an XML 1.0 Name. */
+	private name(): string {
+		const src = this.src;
 		const start = this.pos;
-		while (this.pos < this.src.length) {
-			const c = this.src.charCodeAt(this.pos);
-			if (c < 0x80 && !isNameCode(c)) {
+		while (this.pos < src.length) {
+			const c = src.codePointAt(this.pos)!;
+			if (this.pos === start ? !isNameStart(c) : !isNameChar(c)) {
 				break;
 			}
-			this.pos++;
+			this.pos += c > 0xffff ? 2 : 1;
 		}
 		if (this.pos === start) {
-			if (this.pos >= this.src.length) {
-				throw new XmlError("unexpected end of the document");
+			throw new XmlError("expected a name");
+		}
+		return src.slice(start, this.pos);
+	}
+
+	private space(): boolean {
+		const start = this.pos;
+		while (this.pos < this.src.length && isSpaceCode(this.src.charCodeAt(this.pos))) {
+			this.pos++;
+		}
+		return this.pos > start;
+	}
+
+	private endTag(): XmlToken {
+		this.pos += "</".length;
+		let raw: string;
+		try {
+			raw = this.name();
+		} catch {
+			throw new XmlError("expected a name after </");
+		}
+		this.space();
+		if (this.pos >= this.src.length) {
+			throw new XmlError(endOfMarkup);
+		}
+		if (this.src[this.pos] !== ">") {
+			throw new XmlError(`unexpected characters in </${raw}>`);
+		}
+		this.pos++;
+		const top = this.stack.at(-1);
+		if (top === undefined) {
+			throw new XmlError(`</${raw}> closes nothing`);
+		}
+		if (top.raw !== raw) {
+			throw new XmlError(`<${top.raw}> is closed by </${raw}>`);
+		}
+		return this.closeElement();
+	}
+
+	private closeElement(): XmlToken {
+		const top = this.stack.pop()!;
+		for (let i = top.undo.length - 1; i >= 0; i--) {
+			const u = top.undo[i]!;
+			if (u.uri !== undefined) {
+				this.ns.set(u.prefix, u.uri);
+			} else {
+				this.ns.delete(u.prefix);
 			}
-			return null;
 		}
-		return this.src.slice(start, this.pos);
+		if (this.stack.length === 0) {
+			this.doneRoot = true;
+		}
+		return { type: "end", name: top.name };
 	}
 
-	private nsname(missing: string): XmlName {
-		const s = this.readName();
-		if (s === null) {
-			throw new XmlError(missing);
+	private startTag(): XmlToken {
+		this.pos++;
+		let raw: string;
+		try {
+			raw = this.name();
+		} catch {
+			throw new XmlError("expected a name after <");
 		}
-		if (!isName(s)) {
-			throw new XmlError(`invalid XML name: ${s}`);
+		if (this.doneRoot) {
+			throw new XmlError("markup can only have one root element");
 		}
-		const colon = s.indexOf(":");
-		if (colon < 0) {
-			return { space: "", local: s };
-		}
-		if (s.indexOf(":", colon + 1) >= 0) {
-			throw new XmlError(missing);
-		}
-		if (colon === 0 || colon === s.length - 1) {
-			return { space: "", local: s };
-		}
-		return { space: s.slice(0, colon), local: s.slice(colon + 1) };
-	}
-
-	/** Reads text, up to a quote if one is given, or to `]]>` in a CDATA section. */
-	private text(quote: string, cdata: boolean): string {
-		const src = this.src;
-		let out = "";
-		let b0 = "";
-		let b1 = "";
+		const given: { name: string; value: string }[] = [];
+		const seen = new Set<string>();
+		let selfClosing = false;
 		for (;;) {
-			if (this.pos >= src.length) {
-				if (cdata) {
-					throw new XmlError("unexpected end of the document in a CDATA section");
-				}
-				if (quote !== "") {
-					throw new XmlError("unexpected end of the document");
-				}
+			const spaced = this.space();
+			if (this.pos >= this.src.length) {
+				throw new XmlError(endOfMarkup);
+			}
+			const c = this.src[this.pos];
+			if (c === ">") {
+				this.pos++;
 				break;
 			}
-			const b = src[this.pos++]!;
-			if (quote === "" && b0 === "]" && b1 === "]" && b === ">") {
-				if (cdata) {
-					out = out.slice(0, -2);
-					break;
+			if (c === "/") {
+				if (!this.src.startsWith("/>", this.pos)) {
+					throw new XmlError("expected /> in an element");
 				}
-				throw new XmlError("unescaped ]]> not in a CDATA section");
-			}
-			if (b === "<" && !cdata) {
-				if (quote !== "") {
-					throw new XmlError("unescaped < inside a quoted string");
-				}
-				this.pos--;
+				this.pos += "/>".length;
+				selfClosing = true;
 				break;
 			}
-			if (quote !== "" && b === quote) {
-				break;
+			if (!spaced) {
+				throw new XmlError(`<${raw}> needs a space before each attribute`);
 			}
-			if (b === "&" && !cdata) {
-				out += this.entity();
-				b0 = "";
-				b1 = "";
+			let name: string;
+			try {
+				name = this.name();
+			} catch {
+				throw new XmlError(`expected an attribute name in <${raw}>`);
+			}
+			if (seen.has(name)) {
+				throw new XmlError(`attribute "${name}" is repeated`);
+			}
+			seen.add(name);
+			this.space();
+			if (this.src[this.pos] !== "=") {
+				throw new XmlError(`attribute "${name}" has no value`);
+			}
+			this.pos++;
+			this.space();
+			given.push({ name, value: this.attrValue() });
+		}
+		const frame: Frame = { raw, name: { space: "", local: "" }, undo: [] };
+		// Declarations apply to the element they're on, so they're read first.
+		for (const a of given) {
+			this.declare(a.name, a.value, frame);
+		}
+		const [prefix, local] = splitQName(raw);
+		if (prefix === "xmlns") {
+			throw new XmlError("an element can't use the xmlns prefix");
+		}
+		const space = this.ns.get(prefix) ?? "";
+		if (prefix !== "" && space === "") {
+			throw new XmlError(`prefix "${prefix}" isn't declared`);
+		}
+		frame.name = { space, local };
+		const attrs: XmlAttr[] = [];
+		const expanded = new Set<string>();
+		for (const a of given) {
+			if (a.name === "xmlns" || a.name.startsWith("xmlns:")) {
 				continue;
 			}
-			if (b === "\r") {
-				out += "\n";
-			} else if (!(b1 === "\r" && b === "\n")) {
-				out += b;
+			const [aPrefix, aLocal] = splitQName(a.name);
+			let aSpace = "";
+			if (aPrefix !== "") {
+				aSpace = this.ns.get(aPrefix) ?? "";
+				if (aSpace === "") {
+					throw new XmlError(`prefix "${aPrefix}" isn't declared`);
+				}
 			}
-			b0 = b1;
-			b1 = b;
-		}
-		for (const ch of out) {
-			if (!inCharacterRange(ch.codePointAt(0)!)) {
-				throw new XmlError(`illegal character code U+${ch.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`);
+			const key = `${aSpace} ${aLocal}`;
+			if (expanded.has(key)) {
+				throw new XmlError(`attribute "${a.name}" is repeated`);
 			}
+			expanded.add(key);
+			attrs.push({ name: { space: aSpace, local: aLocal }, value: a.value });
 		}
-		return out;
+		this.stack.push(frame);
+		if (selfClosing) {
+			this.pending = this.closeElement();
+		}
+		return { type: "start", name: frame.name, attrs, raw, given };
 	}
 
-	private entity(): string {
-		const start = this.pos - 1;
-		const invalid = (): XmlError => new XmlError(`invalid character entity ${this.src.slice(start, Math.min(this.pos, start + 32))}`);
-		let b = this.next();
-		if (b === "#") {
-			b = this.next();
-			let base = 10;
-			if (b === "x") {
-				base = 16;
-				b = this.next();
+	/** Applies a namespace declaration, if an attribute is one. */
+	private declare(name: string, value: string, frame: Frame): void {
+		let prefix = "";
+		if (name.startsWith("xmlns:")) {
+			splitQName(name);
+			prefix = name.slice("xmlns:".length);
+			if (prefix === "xmlns") {
+				throw new XmlError("the xmlns prefix can't be declared");
 			}
-			let digits = "";
-			while ((b >= "0" && b <= "9") || (base === 16 && ((b >= "a" && b <= "f") || (b >= "A" && b <= "F")))) {
-				digits += b;
-				b = this.next();
+			if (value === "") {
+				throw new XmlError(`prefix "${prefix}" can't be undeclared`);
 			}
-			if (b !== ";" || digits === "") {
-				throw invalid();
-			}
-			const value = digits.replace(/^0+(?=.)/, "");
-			// A long run of digits is out of range, and big enough to lose precision.
-			const code = value.length > 8 ? Infinity : parseInt(value, base);
-			if (code > 0x10ffff) {
-				throw invalid();
-			}
-			// A surrogate isn't a character, and the reference reads it as a replacement.
-			return code >= 0xd800 && code <= 0xdfff ? "�" : String.fromCodePoint(code);
+		} else if (name !== "xmlns") {
+			return;
 		}
-		this.pos--;
-		const name = this.readName();
-		if (this.next() !== ";" || name === null) {
-			throw invalid();
+		if ((prefix === "xml") !== (value === xmlNamespace) || value === xmlnsNamespace) {
+			throw new XmlError(`namespace "${value}" can't be bound to that prefix`);
 		}
-		const text = entities.get(name);
-		if (text === undefined) {
-			throw invalid();
+		frame.undo.push({ prefix, uri: this.ns.get(prefix) });
+		this.ns.set(prefix, value);
+	}
+
+	/** Reads a quoted value, turning literal whitespace into spaces as XML says. */
+	private attrValue(): string {
+		const src = this.src;
+		const quote = src[this.pos];
+		if (quote !== '"' && quote !== "'") {
+			throw new XmlError("an attribute's value needs quotes");
 		}
-		return text;
+		this.pos++;
+		let out = "";
+		for (;;) {
+			if (this.pos >= src.length) {
+				throw new XmlError(endOfMarkup);
+			}
+			const c = src[this.pos]!;
+			if (c === quote) {
+				this.pos++;
+				return out;
+			}
+			if (c === "<") {
+				throw new XmlError("< can't appear in an attribute's value");
+			}
+			if (c === "&") {
+				out += this.reference();
+			} else {
+				out += c === "\t" || c === "\n" || c === "\r" ? " " : c;
+				this.pos++;
+			}
+		}
+	}
+
+	/** Reads one of XML's five named entities, or a reference to a character. */
+	private reference(): string {
+		const end = this.src.indexOf(";", this.pos);
+		if (end < 0) {
+			throw new XmlError("& needs to begin a reference ending in ;");
+		}
+		const body = this.src.slice(this.pos + 1, end);
+		this.pos = end + 1;
+		const named = entities.get(body);
+		if (named !== undefined) {
+			return named;
+		}
+		const m = /^#(?:x([0-9a-fA-F]+)|([0-9]+))$/.exec(body);
+		if (m === null) {
+			throw new XmlError(body.startsWith("#") ? `invalid reference &${body};` : `unknown entity &${body};`);
+		}
+		const code = m[1] !== undefined ? parseInt(m[1], 16) : parseInt(m[2]!, 10);
+		if (!isXmlChar(code)) {
+			throw new XmlError(`invalid reference &${body};`);
+		}
+		return String.fromCodePoint(code);
 	}
 }

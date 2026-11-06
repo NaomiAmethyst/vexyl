@@ -1,1 +1,3 @@
 go/testdata/golden/** linguist-generated=true
+go/testdata/line-endings.kdl -text
+conformance/valid/line-endings.kdl -text

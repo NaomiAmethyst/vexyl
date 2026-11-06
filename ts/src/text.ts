@@ -2,140 +2,65 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 // Text and number handling whose exact behavior the format's checks depend on. JavaScript's
-// own `trim`, `\s`, `parseFloat` and `Math.round` each differ from the reference at the edges,
-// and accepting a different set of documents would be a conformance bug.
+// own `trim`, `\s`, `parseFloat` and `Math.round` each differ from the format's rules at the
+// edges, and accepting a different set of documents would be a conformance bug.
+
+import { inLimits } from "./limits.js";
+import { isXmlChar } from "./xml.js";
 
 /** A map whose keys can be anything in a document, including `__proto__` and `constructor`. */
 export function dict<T>(): Record<string, T> {
 	return Object.create(null) as Record<string, T>;
 }
 
-/** The reference's definition of whitespace, which is Unicode's White_Space. */
-export function isSpace(code: number): boolean {
-	return (
-		(code >= 0x09 && code <= 0x0d) ||
-		code === 0x20 ||
-		code === 0x85 ||
-		code === 0xa0 ||
-		code === 0x1680 ||
-		(code >= 0x2000 && code <= 0x200a) ||
-		code === 0x2028 ||
-		code === 0x2029 ||
-		code === 0x202f ||
-		code === 0x205f ||
-		code === 0x3000
-	);
-}
+/** What counts as whitespace inside strings and inline SVG. */
+const isAsciiSpace = (code: number): boolean => code === 0x20 || code === 0x09 || code === 0x0a || code === 0x0c || code === 0x0d;
 
 export function trimSpace(s: string): string {
 	let start = 0;
 	let end = s.length;
-	while (start < end && isSpace(s.charCodeAt(start))) {
+	while (start < end && isAsciiSpace(s.charCodeAt(start))) {
 		start++;
 	}
-	while (end > start && isSpace(s.charCodeAt(end - 1))) {
+	while (end > start && isAsciiSpace(s.charCodeAt(end - 1))) {
 		end--;
 	}
 	return s.slice(start, end);
 }
 
-/** Splits around runs of whitespace, leaving out empty fields. */
-export function fields(s: string): string[] {
-	const out: string[] = [];
-	let start = -1;
-	for (let i = 0; i < s.length; i++) {
-		if (isSpace(s.charCodeAt(i))) {
-			if (start >= 0) {
-				out.push(s.slice(start, i));
-				start = -1;
-			}
-		} else if (start < 0) {
-			start = i;
-		}
+/** Lowers only ASCII letters, since others like U+212A can lower into them. */
+export function asciiLower(s: string): string {
+	return s.replace(/[A-Z]+/g, (m) => m.toLowerCase());
+}
+
+/** The one way to write a number inside a string. */
+export const decimalForm = "[-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?";
+const decimalWhole = new RegExp(`^${decimalForm}$`);
+const numberList = new RegExp(`^[\\t\\n\\f\\r ]*${decimalForm}(?:[\\t\\n\\f\\r ,]+${decimalForm})*[\\t\\n\\f\\r ]*$`);
+
+/** Reads one number written that way, or gives undefined if it isn't one or is beyond the limits. */
+export function decimalValue(text: string): number | undefined {
+	if (!decimalWhole.test(text)) {
+		return undefined;
 	}
-	if (start >= 0) {
-		out.push(s.slice(start));
+	const v = Number(text);
+	return inLimits(v) ? v : undefined;
+}
+
+/** Reads a string holding numbers, separated by whitespace, commas or both. */
+export function numbersIn(text: string): number[] | undefined {
+	if (!numberList.test(text)) {
+		return undefined;
+	}
+	const out: number[] = [];
+	for (const part of trimSpace(text).split(/[\t\n\f\r ,]+/)) {
+		const v = decimalValue(part);
+		if (v === undefined) {
+			return undefined;
+		}
+		out.push(v);
 	}
 	return out;
-}
-
-function underscoresOK(text: string): boolean {
-	let s = text;
-	if (s[0] === "-" || s[0] === "+") {
-		s = s.slice(1);
-	}
-	let saw = "^";
-	let i = 0;
-	let hex = false;
-	if (s.length >= 2 && s[0] === "0" && /[boxBOX]/.test(s[1]!)) {
-		i = 2;
-		saw = "0";
-		hex = /[xX]/.test(s[1]!);
-	}
-	for (; i < s.length; i++) {
-		const c = s[i]!;
-		if ((c >= "0" && c <= "9") || (hex && /[a-fA-F]/.test(c))) {
-			saw = "0";
-		} else if (c === "_") {
-			if (saw !== "0") {
-				return false;
-			}
-			saw = "_";
-		} else {
-			if (saw === "_") {
-				return false;
-			}
-			saw = "!";
-		}
-	}
-	return saw !== "_";
-}
-
-function hexFloat(digits: string, exponent: number): number {
-	let value = 0;
-	let scale = exponent;
-	let dot = false;
-	for (const c of digits) {
-		if (c === ".") {
-			dot = true;
-		} else {
-			value = value * 16 + parseInt(c, 16);
-			if (dot) {
-				scale -= 4;
-			}
-		}
-	}
-	return value === 0 ? 0 : value * 2 ** scale;
-}
-
-/** Reads a number as the reference does, or gives undefined if it isn't one or is out of range. */
-export function parseNumber(s: string): number | undefined {
-	const special = /^([+-]?)(inf|infinity)$/i.exec(s);
-	if (special) {
-		return special[1] === "-" ? -Infinity : Infinity;
-	}
-	if (/^nan$/i.test(s)) {
-		return NaN;
-	}
-	const hex = /^[+-]?0[xX]([0-9a-fA-F_.]*)[pP]([+-]?[0-9][0-9_]*)$/.exec(s);
-	const form = hex ?? /^[+-]?([0-9_.]*)(?:[eE]([+-]?[0-9][0-9_]*))?$/.exec(s);
-	if (!form) {
-		return undefined;
-	}
-	const mantissa = form[1]!;
-	if ((mantissa.match(/\./g) ?? []).length > 1 || !/[0-9a-fA-F]/.test(mantissa)) {
-		return undefined;
-	}
-	if (s.includes("_") && !underscoresOK(s)) {
-		return undefined;
-	}
-	const clean = mantissa.replaceAll("_", "");
-	const exponent = form[2]?.replaceAll("_", "");
-	const value = hex ? hexFloat(clean, Number(exponent)) : Number(clean + (exponent === undefined ? "" : "e" + exponent));
-	if (!Number.isFinite(value)) {
-		return undefined;
-	}
-	return s[0] === "-" ? -value : value;
 }
 
 /** Writes a number in full, with as few digits as read back the same and never an exponent. */
@@ -177,17 +102,6 @@ export function num(v: number): string {
 	return rounded === 0 ? "0" : formatNumber(rounded);
 }
 
-export function inCharacterRange(code: number): boolean {
-	return (
-		code === 0x09 ||
-		code === 0x0a ||
-		code === 0x0d ||
-		(code >= 0x20 && code <= 0xd7ff) ||
-		(code >= 0xe000 && code <= 0xfffd) ||
-		(code >= 0x10000 && code <= 0x10ffff)
-	);
-}
-
 /** Escapes text for XML, whether in an attribute or not. */
 export function esc(s: string): string {
 	if (!/[^\x20\x21\x23-\x25\x28-\x3b\x3d\x3f-\x7e]/.test(s)) {
@@ -221,7 +135,7 @@ export function esc(s: string): string {
 				out += "&#xD;";
 				break;
 			default:
-				out += inCharacterRange(ch.codePointAt(0)!) ? ch : "�";
+				out += isXmlChar(ch.codePointAt(0)!) ? ch : "�";
 		}
 	}
 	return out;

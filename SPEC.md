@@ -69,7 +69,10 @@ rotate(v, a) = (v.x * cos(a) - v.y * sin(a),
 
 ## 4. Documents
 
-A document is KDL v2. Its top-level nodes MUST appear in this order:
+A document is KDL v2, in UTF-8. Before parsing, each CRLF and lone CR is normalized to LF, so that
+a document means the same however its lines end, including inside multi-line strings and inline SVG.
+
+Its top-level nodes MUST appear in this order:
 
 ```
 vexyl 1              required; the format version
@@ -89,6 +92,18 @@ fold ...             optional and repeatable, §13
 A renderer MUST reject an unknown format version, unknown nodes and unknown
 properties. Flags are exact constructions, so a silently ignored instruction
 would produce a wrong flag.
+
+A few values are numbers written inside a string, such as a `box` or a fold's `through`. Those
+have one grammar, and there's no hexadecimal, underscore, `inf` or `nan`:
+
+```
+number    = sign? (digits "."? digits? | "." digits) (("e" | "E") sign? digits)?
+sign      = "+" | "-"
+digits    = one or more of 0-9
+```
+
+They're separated by ASCII whitespace (space, tab, LF, FF or CR), commas or both, with any ASCII
+whitespace around the whole. Each is subject to the limits in §15.
 
 ### 4.1 meta
 
@@ -691,22 +706,40 @@ wherever the artwork allows. A document whose artwork uses `currentColor` MUST g
 a palette color, so that it can't pick up a color from wherever it's displayed.
 Using it for lettering or seals doesn't make them part of the format.
 
+Markup MUST be a well-formed XML 1.0 document (fifth edition) that's also namespace-well-formed
+under Namespaces in XML 1.0, and every library MUST read it that way, whatever its XML parser
+allows. In particular:
+
+- Its encoding is UTF-8. An XML declaration is optional, MUST come first if it's there, and can
+  only say version `1.0` and encoding UTF-8.
+- An attribute MUST NOT be repeated, by its written name or by its namespace and local name.
+  `href` and `xlink:href` on one element count as a repeat, because they mean the same.
+- Every prefix MUST be declared, and `xml` and `xmlns` keep their reserved meanings.
+- Only the five predefined entities exist. A character reference MUST refer to an XML character,
+  so `&#xD800;` and `&#0;` are errors, as is any such character written literally, even in a
+  comment or inside something that would be removed.
+- Line endings are normalized as XML says, and literal tabs and newlines in an attribute's value
+  become spaces.
+
+Whitespace anywhere in inline SVG means ASCII whitespace, and any other kind of space is text like
+any other. Style properties and CSS function names are matched ignoring ASCII case only.
+
 The root MUST be an `svg` element in the SVG namespace, with a `viewBox` or with
 numeric `width` and `height` (optionally in `px`). Those give it a viewBox of
-`0 0 width height`.
+`0 0 width height`. All of those numbers use the grammar in §4, within the limits in §15.
 
 Because documents are untrusted, inline SVG is checked against an allowlist:
 
 | Content | Allowed |
 |---|---|
 | Elements | `defs`, `g`, `path`, `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, `linearGradient`, `radialGradient`, `stop`, `clipPath`, `mask` |
-| Geometry attributes | `id`, `class`, `transform`, `d`, `x`, `y`, `width`, `height`, `cx`, `cy`, `r`, `rx`, `ry`, `x1`, `y1`, `x2`, `y2`, `points`, `offset`, `fx`, `fy`, `fr`, `gradientUnits`, `gradientTransform`, `spreadMethod`, `clipPathUnits`, `maskUnits`, `maskContentUnits`, `href` |
+| Geometry attributes | `id`, `transform`, `d`, `x`, `y`, `width`, `height`, `cx`, `cy`, `r`, `rx`, `ry`, `x1`, `y1`, `x2`, `y2`, `points`, `offset`, `fx`, `fy`, `fr`, `gradientUnits`, `gradientTransform`, `spreadMethod`, `clipPathUnits`, `maskUnits`, `maskContentUnits`, `href` |
 | Presentation attributes, also usable as `style` properties | `fill`, `fill-opacity`, `fill-rule`, `stroke`, `stroke-width`, `stroke-opacity`, `stroke-linecap`, `stroke-linejoin`, `stroke-miterlimit`, `stroke-dasharray`, `stroke-dashoffset`, `opacity`, `clip-path`, `clip-rule`, `mask`, `stop-color`, `stop-opacity`, `color`, `display`, `visibility`, `paint-order`, `vector-effect`, `shape-rendering`, `mix-blend-mode`, `isolation` |
 
 A renderer MUST reject a document whose inline SVG contains:
 
 - any other element or attribute in the SVG namespace, or with no namespace
-- non-whitespace text outside elements, or a DOCTYPE or other directive
+- text other than whitespace, or a DOCTYPE or other directive
 - an `href` (or `xlink:href`) that isn't `#id`
 - a presentation value using any function other than `url(#id)`, `rgb()`,
   `rgba()`, `hsl()` or `hsla()`
@@ -727,9 +760,10 @@ attributes in other namespaces, other than `xlink:href`, along with comments and
 processing instructions. Editors commonly add these, and they don't affect how
 the artwork draws.
 
-A renderer MUST rewrite every `id` and reference with a prefix unique to the
-charge, or otherwise isolate the artwork, so that one piece of artwork can't refer
-to the flag's own definitions or another's.
+A renderer MUST rewrite every `id` and reference with a prefix unique to each time the artwork is
+drawn, or otherwise isolate it, so that one piece of artwork can't refer to the flag's own
+definitions or another's. A `style` keeps its declarations in their order, because a later one
+can override an earlier one.
 
 A charge can also repeat `at`, placing a copy at each position, as a constellation does.
 That can't be combined with `repeat`.
@@ -1059,13 +1093,56 @@ make one flag use another's clip paths.
 
 ## 15. Limits
 
-So that a small document can't demand unbounded work, a renderer MUST accept and
-MAY reject beyond these limits:
+So that a small document can't demand unbounded work, a renderer MUST enforce these, and reject a
+document when it's parsed, so that validating it says so too:
 
-- layers nested up to 32 levels deep
+- Layers nest up to 32 levels deep. That counts through `use`: a `use` is one level, and what it
+  names is nested within it.
+- A flag paints up to 200000 parts, as counted below.
+
+A renderer MUST also accept and MAY reject beyond these:
+
 - up to 10000 bars, star points, or copies from a single `repeat`
+- up to 10000 waves in a shaped edge, and up to 10000 pieces from a fold
 
-Numbers MUST be finite, and renderers MAY reject magnitudes above 1e12.
+A number MUST be finite, with a magnitude that's zero or from 1e-12 to 1e12, so that nothing worked
+out from it can overflow. A renderer MUST reject any other.
+
+The size of a flag is the total over its layers, the layers of its `reverse` and the layers of each
+`variant`. It's worked out without expanding anything, since each definition's size can be worked
+out once, when it's read:
+
+```
+function size(layer):
+    n = sum of parts(s) for s in the layer's clip and cuts
+    case layer:
+        bars:               n + colors * (1 + waves(edge)), or n + colors with no edge
+        chevrons, rays:     n + colors
+        quarters:           n + 4
+        checks:             n + rows * columns
+        charge, pile, pall: n + copies * parts(shape)
+        emblem, group:      n + sum of size(child)
+        panel, canton:      n + sum of size(child) + waves(edge)
+        use:                n + sum of size(child) for each layer of the design it names
+        anything else:      n + 1
+
+function parts(shape):
+    case shape:
+        star, sun:      points
+        polygon:        its points
+        path:           1 + floor(bytes of d / 64)
+        svg:            1 + floor(bytes of the sanitized markup / 64)
+        anything else:  1
+
+copies = the repeat's count, or rows * columns for a grid, or the number of `at`s, or 1
+waves(edge) = 0 with no edge, or its count, or ceil(the longer side of the flag's proportion / period)
+```
+
+`colors` is after any `count`. The sanitized markup is written as the SDK's model gives it.
+
+The largest flag in the collection this was measured on, of 2,281, comes to 36,434 parts, 99% of
+them are under 14,000, and half are under 70, so the limit leaves room for more than five times the
+largest. The deepest nests 3 levels.
 
 ## 16. Open questions
 

@@ -13,6 +13,7 @@ import (
 	"math"
 	"regexp"
 	"slices"
+	"unicode/utf8"
 
 	kdl "github.com/calico32/kdl-go"
 )
@@ -39,10 +40,16 @@ var (
 // Parse reads a Vexyl document. The name is used in error messages. Every
 // problem found is reported, joined into the returned error.
 func Parse(r io.Reader, name string) (*Flag, error) {
-	src, err := io.ReadAll(r)
+	raw, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
+	if !utf8.Valid(raw) {
+		return nil, Problems{{Source: name, Message: "a document has to be UTF-8"}}
+	}
+	// kdl-go mishandles CRLF in multi-line strings, and a document means the same
+	// however its lines end.
+	src := []byte(normalizeNewlines(string(raw)))
 	doc, err := kdl.Parse(bytes.NewReader(src),
 		kdl.WithVersion(kdl.Version2),
 		kdl.WithSourceName(name),
@@ -51,9 +58,9 @@ func Parse(r io.Reader, name string) (*Flag, error) {
 		return nil, err
 	}
 	sum := sha256.Sum256(src)
-	p := &parser{idPrefix: "vx-" + hex.EncodeToString(sum[:4]) + "-"}
+	p := &parser{}
 	flag := p.document(doc)
-	flag.idPrefix = p.idPrefix
+	flag.idPrefix = "vx-" + hex.EncodeToString(sum[:4]) + "-"
 	if len(p.errs) > 0 {
 		problems := make(Problems, len(p.errs))
 		for i, err := range p.errs {
@@ -77,8 +84,10 @@ type parser struct {
 	// gradientNames lets a gradient's stops recognize other gradients, since
 	// they're defined one at a time.
 	gradientNames []string
-	embeds        int
-	idPrefix      string
+	// size is what the flag has painted so far, as SPEC section 15 counts it.
+	size int
+	// longer is the longer side of the flag's own grid, for counting shaped edges.
+	longer float64
 }
 
 func (p *parser) errf(n *kdl.Node, format string, args ...any) {
@@ -160,6 +169,7 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 			}
 			if l := p.layer(n, 1); l != nil {
 				flag.Layers = append(flag.Layers, l)
+				p.count(n, []Layer{l})
 			}
 		}
 	}
@@ -183,6 +193,16 @@ func (p *parser) document(doc *kdl.Document) *Flag {
 		}
 	}
 	return flag
+}
+
+// count adds what a top-level node paints to the flag's size, and refuses the node that
+// takes it past the limit, so that a document can't demand unbounded work.
+func (p *parser) count(n *kdl.Node, layers []Layer) {
+	was := p.size
+	p.size = addSize(p.size, layersSize(layers, p.longer))
+	if was <= maxSize && p.size > maxSize {
+		p.errf(n, "paints too much: a flag can only come to %d parts", maxSize)
+	}
 }
 
 func (p *parser) meta(n *kdl.Node, m *Meta) {
@@ -376,6 +396,7 @@ func (p *parser) proportion(n *kdl.Node, flag *Flag) {
 	p.only(n, 0, "hoist", "fly")
 	flag.Hoist = p.positive(n, p.prop(n, "hoist"))
 	flag.Fly = p.positive(n, p.prop(n, "fly"))
+	p.longer = max(flag.Hoist, flag.Fly)
 	p.noChildren(n)
 }
 
@@ -415,7 +436,7 @@ func (p *parser) layer(n *kdl.Node, depth int) Layer {
 	case "panel":
 		return p.panel(n, depth)
 	case "use":
-		return p.use(n)
+		return p.use(n, depth)
 	case "emblem":
 		return p.emblem(n)
 	case "group":
@@ -547,6 +568,7 @@ func (p *parser) bars(n *kdl.Node) Layer {
 			l.Colors[i] = cycle[i%len(cycle)]
 		}
 	}
+	p.checkWaves(n, l.Line)
 	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
 	if l.Grow != nil && len(l.Grow) != len(l.Colors) {
 		p.errf(n, "has %d colors but %d `grow` values", len(l.Colors), len(l.Grow))
@@ -591,6 +613,12 @@ func (p *parser) chevrons(n *kdl.Node) Layer {
 	}
 	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
 	return l
+}
+
+func (p *parser) checkWaves(n *kdl.Node, l *Line) {
+	if l != nil && l.waves(p.longer) > maxCopies {
+		p.errf(n, "a shaped edge can't have more than %d waves", maxCopies)
+	}
 }
 
 func (p *parser) ratio(n *kdl.Node, ratio []float64, count int) []float64 {
@@ -1015,13 +1043,14 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 			p.errf(n, "needs `markup`")
 			return
 		}
-		p.embeds++
-		embedded, err := sanitizeSVG(s.Markup, fmt.Sprintf("%ssvg%d-", p.idPrefix, p.embeds))
+		embedded, err := sanitizeSVG(s.Markup)
 		if err != nil {
 			p.errf(n, "%v", err)
 			return
 		}
 		s.embedded = embedded
+		// Only what passed is kept, so that nothing can read what the sanitizer removed.
+		s.Markup = embedded.canonical()
 	}
 }
 
@@ -1239,7 +1268,7 @@ func (p *parser) numberValue(n *kdl.Node, v kdl.Value) float64 {
 		p.errf(n, "needs a number")
 		return 0
 	}
-	if math.IsNaN(f) || math.IsInf(f, 0) || math.Abs(f) > 1e12 {
+	if !inLimits(f) {
 		p.errf(n, "needs a finite number of a reasonable size")
 		return 0
 	}

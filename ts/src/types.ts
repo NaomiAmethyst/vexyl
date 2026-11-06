@@ -168,6 +168,9 @@ export interface Define {
 	/** A design's own grid, scaled to fill where it's used. */
 	fly?: number;
 	hoist?: number;
+	/** What a design paints and how deep it nests, as section 15 of the format counts them. */
+	size?: number;
+	height?: number;
 }
 
 export interface Reverse {
@@ -471,9 +474,9 @@ export interface SvgShape extends ShapeCommon {
 	kind: "svg";
 	fly: number;
 	hoist: number;
-	/** The source of the inline SVG, as written. */
+	/** The inline SVG after being sanitized, with its IDs as they were written. */
 	markup: string;
-	/** The inline SVG after being sanitized, which is the only form ever drawn. */
+	/** The same, in the pieces that drawing it needs. */
 	embedded: EmbeddedSvg;
 }
 
@@ -499,8 +502,9 @@ export type Shape =
 /** Inline SVG that has passed the sanitizer. */
 export interface EmbeddedSvg {
 	viewBox: string;
-	/** The root element's attributes, each with a leading space. */
+	/** The root element's attributes, each with a leading space, marked where IDs get their prefixes. */
 	attrs: string;
+	/** Its contents, marked the same way. */
 	body: string;
 }
 

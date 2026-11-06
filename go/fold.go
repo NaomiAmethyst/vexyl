@@ -129,6 +129,9 @@ func foldFacets(shape []vec, fold *Fold, steps int) ([]facet, error) {
 		if len(kept) == 0 {
 			return nil, fmt.Errorf("fold step %d: nothing is left on the other side of its crease", i+1)
 		}
+		if len(kept)+len(moved) > maxFacets {
+			return nil, fmt.Errorf("fold step %d: makes more than %d pieces", i+1, maxFacets)
+		}
 		// Whichever way it goes, the moving stack lands in reverse order.
 		slices.Reverse(moved)
 		switch step.Kind {

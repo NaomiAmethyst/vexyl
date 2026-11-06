@@ -1,0 +1,36 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+define d1 { field a; }
+define d2 { use d1; }
+define d3 { use d2; }
+define d4 { use d3; }
+define d5 { use d4; }
+define d6 { use d5; }
+define d7 { use d6; }
+define d8 { use d7; }
+define d9 { use d8; }
+define d10 { use d9; }
+define d11 { use d10; }
+define d12 { use d11; }
+define d13 { use d12; }
+define d14 { use d13; }
+define d15 { use d14; }
+define d16 { use d15; }
+define d17 { use d16; }
+define d18 { use d17; }
+define d19 { use d18; }
+define d20 { use d19; }
+define d21 { use d20; }
+define d22 { use d21; }
+define d23 { use d22; }
+define d24 { use d23; }
+define d25 { use d24; }
+define d26 { use d25; }
+define d27 { use d26; }
+define d28 { use d27; }
+define d29 { use d28; }
+define d30 { use d29; }
+define d31 { use d30; }
+use d31

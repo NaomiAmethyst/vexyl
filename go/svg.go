@@ -42,8 +42,21 @@ type Options struct {
 	FoldStep int
 }
 
+// renderRefusal stops a render that turns out to be too much, deep inside geometry that
+// otherwise can't fail.
+type renderRefusal string
+
 // WriteSVG renders the flag as a standalone SVG document.
-func (f *Flag) WriteSVG(w io.Writer, opts Options) error {
+func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			refusal, ok := r.(renderRefusal)
+			if !ok {
+				panic(r)
+			}
+			err = errors.New(string(refusal))
+		}
+	}()
 	height := opts.Height
 	if height == 0 {
 		height = DefaultHeight
@@ -394,14 +407,14 @@ func (r *renderer) content(l Layer, reg region) {
 	case *Panel:
 		r.panel(l, reg)
 	case *Use:
-		if l.Define.Fly == 0 {
-			r.layers(l.Define.Layers, reg)
+		if l.design.Fly == 0 {
+			r.layers(l.design.Layers, reg)
 			return
 		}
 		// A design with its own grid is scaled to fill the region it's used in.
-		r.line(`<g transform="scale(%s %s)">`, num(reg.w/l.Define.Fly), num(reg.h/l.Define.Hoist))
+		r.line(`<g transform="scale(%s %s)">`, num(reg.w/l.design.Fly), num(reg.h/l.design.Hoist))
 		r.depth++
-		r.layers(l.Define.Layers, region{w: l.Define.Fly, h: l.Define.Hoist})
+		r.layers(l.design.Layers, region{w: l.design.Fly, h: l.design.Hoist})
 		r.depth--
 		r.line(`</g>`)
 	}
@@ -654,9 +667,11 @@ func (r *renderer) embedded(c *Charge, at vec) {
 			r.line(`</g>`)
 		}()
 	}
+	// Each time it's drawn gets its own prefix, since a definition can draw it many times.
+	prefix := r.id("svg") + "-"
 	r.line(`<svg x="%s" y="%s" width="%s" height="%s" viewBox="%s" preserveAspectRatio="xMidYMid meet"%s>%s</svg>`,
-		num(at.x-s.Fly/2), num(at.y-s.Hoist/2), num(s.Fly), num(s.Hoist),
-		s.embedded.viewBox, s.embedded.attrs, s.embedded.body)
+		num(at.x-s.Fly/2), num(at.y-s.Hoist/2), num(s.Fly), num(s.Hoist), esc(s.embedded.viewBox),
+		strings.ReplaceAll(s.embedded.attrs, idMark, prefix), strings.ReplaceAll(s.embedded.body, idMark, prefix))
 }
 
 // paint fills shapes, after painting any fimbriation beneath all of them. Each

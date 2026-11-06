@@ -224,7 +224,7 @@ function layerFields(l: Layer): Record<string, Plain | undefined> {
 		case "panel":
 			return { ...e, side: l.side, width: l.width, corner: l.corner, at: point(l.at), fly: l.fly, hoist: l.hoist, line: line(l.edge), layers: list(l.layers, layer) };
 		case "use":
-			return { ...e, name: l.name, define: define(l.define) };
+			return { ...e, name: l.name };
 	}
 }
 

@@ -1,0 +1,21 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+field a
+fold f {
+over along=hoist at=10 move=fly
+over along=fly at=5 move=bottom
+over along=hoist at=5 move=fly
+over along=fly at=2.5 move=bottom
+over along=hoist at=2.5 move=fly
+over along=fly at=1.25 move=bottom
+over along=hoist at=1.25 move=fly
+over along=fly at=0.625 move=bottom
+over along=hoist at=0.625 move=fly
+over along=fly at=0.3125 move=bottom
+over along=hoist at=0.3125 move=fly
+over along=fly at=0.15625 move=bottom
+over along=hoist at=0.15625 move=fly
+over along=fly at=0.078125 move=bottom
+}

@@ -341,10 +341,10 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 	case *Use:
 		c := *t
 		c.Effects, _ = a.effects(t.Effects, old, new)
-		if t.Define.Fly == 0 {
-			d := *t.Define
-			d.Layers = a.layers(t.Define.Layers, old, new)
-			c.Define = &d
+		if t.design.Fly == 0 {
+			d := *t.design
+			d.Layers = a.layers(t.design.Layers, old, new)
+			c.design = &d
 		}
 		return &c
 	}
