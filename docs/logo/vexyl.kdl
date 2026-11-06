@@ -1,0 +1,22 @@
+vexyl 1
+meta {
+  name "Vexyl logo"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+}
+palette {
+  deep "#4a2fb8"
+  violet "#7a5cf0"
+  light "#b69cff"
+  pale "#efeaff"
+}
+proportion hoist=10 fly=14
+outline pennant
+
+border deep 0.32
+
+rays pale violet deep light {
+  from hoist
+  count 4
+}

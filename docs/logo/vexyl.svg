@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10" width="840" height="600">
+  <title>Vexyl logo</title>
+  <clipPath id="vx-95f1ee081c9b1a9e-flag1">
+    <polygon points="0,0 14,5 0,10"/>
+  </clipPath>
+  <g clip-path="url(#vx-95f1ee081c9b1a9e-flag1)">
+    <polygon points="0,0 14,0 14,10 0,10" fill="#efeaff"/>
+    <polygon points="5,0 0,5 0,0" fill="#efeaff"/>
+    <polygon points="14,0 14,5 0,5 5,0" fill="#7a5cf0"/>
+    <polygon points="14,10 5,10 0,5 14,5" fill="#4a2fb8"/>
+    <polygon points="0,10 0,5 5,10" fill="#b69cff"/>
+    <polygon points="0,0 14,5 0,10" fill="none" stroke="#4a2fb8" stroke-width="0.64" stroke-linejoin="miter" stroke-miterlimit="10"/>
+  </g>
+</svg>
