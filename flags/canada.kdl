@@ -4,8 +4,13 @@ vexyl 1
 meta {
   name "Canada"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
-  source "https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg"
+  license "LicenseRef-Public-Domain"
+  adapted-from "https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg" {
+    author "MapGrid"
+    author "Illegitimate Barrister"
+    license "LicenseRef-Public-Domain"
+    part "the maple leaf"
+  }
   note "Sizes follow the drawing on Commons, not a checked construction sheet."
 }
 palette {

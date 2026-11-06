@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 18" width="2500" height="600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2100 825" width="1527.272727" height="600">
   <title>Qatar</title>
-  <clipPath id="vx-fef35d16-flag1">
-    <polygon points="0,0 75,0 75,18 0,18"/>
+  <clipPath id="vx-eba192e3-flag1">
+    <polygon points="0,0 2100,0 2100,825 0,825"/>
   </clipPath>
-  <g clip-path="url(#vx-fef35d16-flag1)">
-    <polygon points="0,0 75,0 75,18 0,18" fill="#8a1538"/>
-    <clipPath id="vx-fef35d16-panel2">
-      <polygon points="0,0 22,0 28,1 22,2 28,3 22,4 28,5 22,6 28,7 22,8 28,9 22,10 28,11 22,12 28,13 22,14 28,15 22,16 28,17 22,18 0,18"/>
+  <g clip-path="url(#vx-eba192e3-flag1)">
+    <polygon points="0,0 2100,0 2100,825 0,825" fill="#8a1538"/>
+    <clipPath id="vx-eba192e3-panel2">
+      <polygon points="0,0 616,0 784,45.833333 616,91.666667 784,137.5 616,183.333333 784,229.166667 616,275 784,320.833333 616,366.666667 784,412.5 616,458.333333 784,504.166667 616,550 784,595.833333 616,641.666667 784,687.5 616,733.333333 784,779.166667 616,825 0,825"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-fef35d16-panel2)" style="isolation:isolate">
-      <polygon points="0,0 28,0 28,18 0,18" fill="#ffffff"/>
+    <g transform="translate(0 0)" clip-path="url(#vx-eba192e3-panel2)" style="isolation:isolate">
+      <polygon points="0,0 784,0 784,825 0,825" fill="#ffffff"/>
     </g>
   </g>
 </svg>

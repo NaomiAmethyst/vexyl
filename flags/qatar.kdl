@@ -5,18 +5,18 @@ meta {
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Qatar.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "Sizes follow the drawing on Commons, whose 11:28 is also Annex 1 of Qatar's law, not a checked construction sheet."
 }
 palette {
   maroon "#8a1538"
   white "#ffffff"
 }
-proportion hoist=18 fly=75
+proportion hoist=825 fly=2100
 
 field maroon
 panel {
   side hoist
-  width 25
-  edge zigzag depth=6 count=9
+  width 700
+  edge zigzag depth=168 count=9
   field white
 }
