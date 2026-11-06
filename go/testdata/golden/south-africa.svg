@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="900" height="600">
   <title>South Africa</title>
-  <clipPath id="vx-2a55f99c-flag1">
+  <clipPath id="vx-a7070219-flag1">
     <polygon points="0,0 90,0 90,60 0,60"/>
   </clipPath>
-  <g clip-path="url(#vx-2a55f99c-flag1)">
+  <g clip-path="url(#vx-a7070219-flag1)">
     <polygon points="0,0 90,0 90,60 0,60" fill="#e03c31"/>
     <polygon points="0,30 90,30 90,60 0,60" fill="#001489"/>
     <polygon points="-101.094004,-79.414507 48.027756,20 218.166538,20 218.166538,40 48.027756,40 -101.094004,139.414507 -112.188008,122.773501 26.972244,30 -112.188008,-62.773501" fill="#ffffff"/>

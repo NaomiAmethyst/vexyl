@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18" width="1200" height="600">
   <title>Timor-Leste</title>
-  <clipPath id="vx-6b8ca378-flag1">
+  <clipPath id="vx-2c4a9a77-flag1">
     <polygon points="0,0 36,0 36,18 0,18"/>
   </clipPath>
-  <g clip-path="url(#vx-6b8ca378-flag1)">
+  <g clip-path="url(#vx-2c4a9a77-flag1)">
     <polygon points="0,0 36,0 36,18 0,18" fill="#da291c"/>
     <polygon points="0,0 18,9 0,18" fill="#ffc72c"/>
     <polygon points="0,0 12,9 0,18" fill="#000000"/>

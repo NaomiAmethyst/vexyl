@@ -12,7 +12,7 @@ seals, go into inline SVG, which is a faithful copy rather than a description.
 This is a mechanical conversion. It says what a drawing looks like, not how the flag
 is officially constructed.
 
-    svg2vexyl.py [--name NAME] [--source URL] [--encoder TEXT] [--license SPDX] FILE
+    svg2vexyl.py [--name NAME] [--source URL] [--author TEXT] [--encoder TEXT] [--license SPDX] FILE
 """
 
 import argparse
@@ -2204,7 +2204,7 @@ def render_stop(e):
     return f"<stop{attr_text(attrs)}/>"
 
 
-def convert(source, name, url=None, encoder=None, license_id=None, note=None, series=None):
+def convert(source, name, url=None, encoder=None, license_id=None, note=None, series=None, author=None):
     root = ET.fromstring(source)
     if local(root.tag) != "svg":
         raise Unsupported("not svg")
@@ -2233,7 +2233,15 @@ def convert(source, name, url=None, encoder=None, license_id=None, note=None, se
         lines.append(f"  encoder {kdl_string(encoder)}")
     if license_id:
         lines.append(f"  license {kdl_string(license_id)}")
-    if url:
+    # The file is made from this drawing, so it credits it rather than citing it as evidence.
+    if url and (author or license_id):
+        lines.append(f"  adapted-from {kdl_string(url)} {{")
+        if author:
+            lines.append(f"    author {kdl_string(author)}")
+        if license_id:
+            lines.append(f"    license {kdl_string(license_id)}")
+        lines.append("  }")
+    elif url:
         lines.append(f"  source {kdl_string(url)}")
     lines.append("}")
     body = "\n\n".join(render_layers(writer.layers, reader.w, reader.h))
@@ -2650,13 +2658,14 @@ def main():
     ap.add_argument("file")
     ap.add_argument("--name", default="Imported Flag")
     ap.add_argument("--source")
-    ap.add_argument("--encoder")
+    ap.add_argument("--author", help="who made the original drawing")
+    ap.add_argument("--encoder", help="who's making this file")
     ap.add_argument("--license")
     args = ap.parse_args()
     with open(args.file, "rb") as f:
         source = f.read()
     try:
-        text, _ = convert(source, args.name, args.source, args.encoder, args.license)
+        text, _ = convert(source, args.name, args.source, args.encoder, args.license, author=args.author)
     except Unsupported as e:
         print(f"unsupported: {e}", file=sys.stderr)
         return 1

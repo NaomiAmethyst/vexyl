@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="1200" height="600">
   <title>Solomon Islands</title>
-  <clipPath id="vx-70110f3a-flag1">
+  <clipPath id="vx-a59d5392-flag1">
     <polygon points="0,0 200,0 200,100 0,100"/>
   </clipPath>
-  <g clip-path="url(#vx-70110f3a-flag1)">
+  <g clip-path="url(#vx-a59d5392-flag1)">
     <polygon points="0,100 0,0 0,0 200,0 200,100 200,100" fill="#0051ba"/>
     <polygon points="0,100 0,100 200,0 200,100 200,100" fill="#215b33"/>
     <polygon points="0,100 0,94.968847 189.937694,0 200,0 200,5.031153 10.062306,100" fill="#fcd116"/>

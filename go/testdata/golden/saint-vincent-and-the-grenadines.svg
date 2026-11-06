@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" width="900" height="600">
   <title>Saint Vincent and the Grenadines</title>
-  <clipPath id="vx-1048a2d4-flag1">
+  <clipPath id="vx-67c0e5ca-flag1">
     <polygon points="0,0 240,0 240,160 0,160"/>
   </clipPath>
-  <g clip-path="url(#vx-1048a2d4-flag1)">
+  <g clip-path="url(#vx-67c0e5ca-flag1)">
     <polygon points="0,0 0,160 240,160 240,0" fill="#002674"/>
     <polygon points="60,0 60,160 240,160 240,0" fill="#fcd022"/>
     <polygon points="180,0 180,160 240,160 240,0" fill="#007c2e"/>

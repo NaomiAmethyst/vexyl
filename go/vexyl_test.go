@@ -1146,6 +1146,50 @@ proportion hoist=1 fly=1`)
 	}
 }
 
+func TestMetaAdaptation(t *testing.T) {
+	src := func(meta string) string {
+		return `vexyl 1
+meta {
+  name "T"
+` + meta + `
+}
+palette { a "#112233"; }
+proportion hoist=10 fly=20
+field a
+`
+	}
+	f := parse(t, src(`license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  adapted-from "https://example.org/a" {
+    author "A"
+    author "B"
+    license "LicenseRef-Public-Domain"
+    part "the emblem"
+  }
+  adapted-from "https://example.org/b"  { license "CC0-1.0"; }`))
+	if f.Meta.RenderLicense != "CC0-1.0" || len(f.Meta.AdaptedFrom) != 2 {
+		t.Fatalf("meta: %+v", f.Meta)
+	}
+	a := f.Meta.AdaptedFrom[0]
+	if a.URL != "https://example.org/a" || len(a.Authors) != 2 || a.License != "LicenseRef-Public-Domain" || a.Part != "the emblem" {
+		t.Errorf("adaptation: %+v", a)
+	}
+	for _, c := range []struct{ name, meta, want string }{
+		{"render license can't cover a share-alike work", `render-license "CC0-1.0"
+  adapted-from "https://example.org/a" { license "CC-BY-SA-4.0"; }`, "can't cover"},
+		{"render license can't cover an unknown license", `render-license "CC0-1.0"
+  adapted-from "https://example.org/a"`, "can't cover"},
+		{"no URL", `adapted-from { license "CC0-1.0"; }`, "needs the URL"},
+		{"unknown child", `adapted-from "https://example.org/a" { nonsense "x"; }`, "nonsense"},
+	} {
+		if _, err := Parse(strings.NewReader(src(c.meta)), "test"); err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s: err = %v", c.name, err)
+		}
+	}
+	parse(t, src(`render-license "CC-BY-SA-4.0"
+  adapted-from "https://example.org/a" { license "CC-BY-SA-4.0"; }`))
+}
+
 func TestMetaRecords(t *testing.T) {
 	f := parse(t, `vexyl 1
 meta {

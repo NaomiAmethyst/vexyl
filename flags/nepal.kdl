@@ -10,7 +10,8 @@ vexyl 1
 meta {
   name "Nepal"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://crwflags.com/fotw/flags/np-law.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Nepal.svg"
   note "The constitution names crimson and deep blue. These values are the conventional ones."

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 48" width="900" height="600">
   <title>Tanzania</title>
-  <clipPath id="vx-923d9df6-flag1">
+  <clipPath id="vx-c7b6da40-flag1">
     <polygon points="0,0 72,0 72,48 0,48"/>
   </clipPath>
-  <g clip-path="url(#vx-923d9df6-flag1)">
+  <g clip-path="url(#vx-c7b6da40-flag1)">
     <polygon points="0,48 0,0 0,0 72,0 72,48 72,48" fill="#1eb53a"/>
     <polygon points="0,48 0,48 72,0 72,48 72,48" fill="#00a3dd"/>
     <polygon points="-39.605551,66.591673 104.394449,-29.408327 111.605551,-18.591673 -32.394449,77.408327" fill="#fcd116" stroke="#fcd116" stroke-width="6" stroke-linejoin="miter" stroke-miterlimit="10"/>

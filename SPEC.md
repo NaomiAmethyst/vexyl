@@ -107,9 +107,34 @@ would produce a wrong flag.
 | `design-rights` | no | Rights in the design, as free text or an SPDX ID |
 | `encoder` | no, repeatable | Who wrote this file |
 | `license` | no | License of this file, as an SPDX ID |
+| `render-license` | no | An added permission for images rendered from this file, as an SPDX ID |
+| `adapted-from` | no, repeatable | The URL of a work this file derives from |
 | `source` | no, repeatable | URL of the specification or reference used |
 
 A design and its encoding can have different owners, so they are separate.
+
+`license` covers the file. `render-license` is an additional permission from the file's
+rights holders for images rendered from it, so that a file can ask for credit while its
+renders ask for nothing. Without one, renders fall under `license`. It covers only what
+those holders can grant, and never a flag's design or rules about using it. Someone who
+edits a file and keeps the field extends the permission to their changes.
+
+`encoder` is who wrote this file, and `source` is evidence: a law or reference it relies on.
+`adapted-from` is different: it's a work that the file takes material from, such as the drawing
+of an emblem, with what its license needs:
+
+```
+adapted-from "https://commons.wikimedia.org/wiki/File:Example.svg" {
+  author "Who made it"
+  license "CC-BY-SA-4.0"
+  part "the coat of arms"
+}
+```
+
+`author` is repeatable. `part` says what was taken, and leaving it out means that the whole
+file derives from the work. A file with a `render-license` MUST NOT adapt a work unless that
+work's `license` is the same as the `render-license`, `CC0-1.0` or
+`LicenseRef-Public-Domain`, since a render can't grant more than its material allows.
 
 Each version of a flag gets its own file, because successive versions can differ
 completely, while a `variant` is a form of one design. `series` links them, since a name

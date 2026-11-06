@@ -181,7 +181,7 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 	list := func(dst *[]string) func(*kdl.Node) {
 		return func(c *kdl.Node) { *dst = append(*dst, p.str(c)) }
 	}
-	p.children(n, []string{"designer", "encoder", "source", "note", "law", "restriction"}, map[string]func(*kdl.Node){
+	p.children(n, []string{"designer", "encoder", "source", "note", "law", "restriction", "adapted-from"}, map[string]func(*kdl.Node){
 		"name":        str(&m.Name),
 		"description": str(&m.Description),
 		"version":     str(&m.Version),
@@ -217,18 +217,53 @@ func (p *parser) meta(n *kdl.Node, m *Meta) {
 				m.Restrictions = append(m.Restrictions, *r)
 			}
 		},
-		"designer":      list(&m.Designers),
-		"design-rights": str(&m.DesignRights),
-		"encoder":       list(&m.Encoders),
-		"license":       str(&m.License),
-		"source":        list(&m.Sources),
+		"designer":       list(&m.Designers),
+		"design-rights":  str(&m.DesignRights),
+		"encoder":        list(&m.Encoders),
+		"license":        str(&m.License),
+		"render-license": str(&m.RenderLicense),
+		"adapted-from": func(c *kdl.Node) {
+			if a := p.adaptation(c); a != nil {
+				m.AdaptedFrom = append(m.AdaptedFrom, *a)
+			}
+		},
+		"source": list(&m.Sources),
 	})
+	if m.RenderLicense != "" {
+		for _, a := range m.AdaptedFrom {
+			if a.License != m.RenderLicense && !freeLicenses[a.License] {
+				p.errf(n, "`render-license` %q can't cover work adapted from %s under %q", m.RenderLicense, a.URL, a.License)
+			}
+		}
+	}
 	if m.Name == "" {
 		p.errf(n, "needs a `name`")
 	}
 	if m.Date != "" && m.Until != "" && m.Until < m.Date {
 		p.errf(n, "`until` comes before `date`")
 	}
+}
+
+// freeLicenses put no conditions on a work, so a file that adapts one can license its
+// renders however it likes.
+var freeLicenses = map[string]bool{"CC0-1.0": true, "LicenseRef-Public-Domain": true}
+
+func (p *parser) adaptation(n *kdl.Node) *Adaptation {
+	p.noProps(n)
+	args := n.Arguments()
+	if len(args) != 1 || args[0].Kind() != kdl.String {
+		p.errf(n, "needs the URL of the original work")
+		return nil
+	}
+	a := &Adaptation{URL: args[0].String()}
+	if n.Children() != nil {
+		p.children(n, []string{"author"}, map[string]func(*kdl.Node){
+			"author":  func(c *kdl.Node) { a.Authors = append(a.Authors, p.str(c)) },
+			"license": func(c *kdl.Node) { a.License = p.str(c) },
+			"part":    func(c *kdl.Node) { a.Part = p.str(c) },
+		})
+	}
+	return a
 }
 
 func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {

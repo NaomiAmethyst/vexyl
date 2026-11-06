@@ -5,7 +5,8 @@ vexyl 1
 meta {
   name "European Union"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://cdn.fotw.info/flags/eu'eun.html"
   source "https://en.wikipedia.org/wiki/Flag_of_Europe"
   note "The star radius of 1/18 of the hoist comes from the EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16."

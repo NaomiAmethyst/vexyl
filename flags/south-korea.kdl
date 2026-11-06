@@ -9,7 +9,8 @@ vexyl 1
 meta {
   name "South Korea"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
   source "https://en.wikipedia.org/wiki/Flag_of_South_Korea"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_South_Korea.svg"

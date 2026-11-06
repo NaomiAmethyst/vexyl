@@ -64,6 +64,10 @@ def excluded(key):
     return True
 
 
+# Who runs the importer, and so makes the files. The drawings' authors are credited as such.
+ENCODER = "Naomi Persephone Amethyst"
+
+
 def license_id(short):
     text = (short or "").strip().lower()
     if text in LICENSES:
@@ -98,7 +102,7 @@ def one(job):
     result = dict(key=key, status=None, reason=None, native=0, inline=0, reasons=[], license=license_id(meta.get("LicenseShortName")))
     source = f"{svgs}/{key}.svg"
     try:
-        text, stats = S.convert(open(source, "rb").read(), title, entry.get("page"), credit(meta.get("Artist")), result["license"])
+        text, stats = S.convert(open(source, "rb").read(), title, entry.get("page"), ENCODER, result["license"], author=credit(meta.get("Artist")))
     except S.Unsupported as e:
         return dict(result, status="unsupported", reason=str(e))
     except ET.ParseError:

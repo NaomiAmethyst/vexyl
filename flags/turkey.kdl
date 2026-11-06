@@ -11,7 +11,8 @@ vexyl 1
 meta {
   name "Turkey"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://cdn.fotw.info/flags/tr.html"
   source "https://en.wikipedia.org/wiki/Flag_of_Turkey"
   note "Positions are measured from a white hem at the hoist, 1/30 of the hoist wide, which this omits. It's unconfirmed whether the 3:2 length includes the hem, and adding it could move the charges 8 units toward the fly."

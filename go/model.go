@@ -71,7 +71,20 @@ type Meta struct {
 	DesignRights string
 	Encoders     []string
 	License      string
-	Sources      []string
+	// RenderLicense is an added permission for images rendered from this file.
+	RenderLicense string
+	// AdaptedFrom lists the works this file derives from.
+	AdaptedFrom []Adaptation
+	Sources     []string
+}
+
+// Adaptation is a work that a file derives from, with what its license requires.
+type Adaptation struct {
+	URL     string
+	Authors []string
+	License string
+	// Part says what was taken, or is empty if the whole file derives from it.
+	Part string
 }
 
 // Reference is a named or described thing, with where it comes from.

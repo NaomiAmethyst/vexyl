@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90000 60000" width="900" height="600">
   <title>Morocco</title>
-  <clipPath id="vx-930502ce-flag1">
+  <clipPath id="vx-cffaa713-flag1">
     <polygon points="0,0 90000,0 90000,60000 0,60000"/>
   </clipPath>
-  <g clip-path="url(#vx-930502ce-flag1)">
+  <g clip-path="url(#vx-cffaa713-flag1)">
     <polygon points="0,0 90000,0 90000,60000 0,60000" fill="#c1272d"/>
     <path d="M45000 17308L52460.170422 40268.043693L32929.190695 26077.956307L57070.809305 26077.956307L37539.829578 40268.043693Z" fill="none" stroke="#006233" stroke-width="1426" stroke-linejoin="miter" stroke-miterlimit="10"/>
   </g>

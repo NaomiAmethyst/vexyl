@@ -4,7 +4,8 @@ vexyl 1
 meta {
   name "Czech Republic"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://en.wikipedia.org/wiki/Flag_of_the_Czech_Republic"
   note "The law sets no exact shades, so these colors are conventional."
   law "Law 3/1993 Sb."

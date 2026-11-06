@@ -5,7 +5,8 @@ vexyl 1
 meta {
   name "Sweden"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://en.wikipedia.org/wiki/Flag_of_Sweden"
   note "The hex values are conversions listed on Wikipedia, not values from the regulation."
   law "Lag (1982:269) om Sveriges flagga"

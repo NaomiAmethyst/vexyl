@@ -6,7 +6,8 @@ vexyl 1
 meta {
   name "Tanzania"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://www.fotw.info/flags/tz.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Tanzania.svg"
   note "Band widths follow FOTW citing Album des Pavillons rather than a government document. It doesn't say which way they're measured, so they're taken across the band, as the Commons drawing does."

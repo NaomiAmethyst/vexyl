@@ -5,7 +5,8 @@ vexyl 1
 meta {
   name "Norway"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://en.wikipedia.org/wiki/Flag_of_Norway"
   note "The law names no color system. These are the de facto values, and sources conflict."
   law "Lov om Norges Flag, 1898"

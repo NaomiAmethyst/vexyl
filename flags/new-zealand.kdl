@@ -2,7 +2,8 @@ vexyl 1
 meta {
   name "New Zealand"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_New_Zealand.svg"
   note "Sizes follow the drawing on Commons, not a checked construction sheet."
 }

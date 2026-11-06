@@ -30,6 +30,19 @@ class Stability(unittest.TestCase):
         self.assertEqual(len(outputs), 1)
 
 
+class Credit(unittest.TestCase):
+    def test_drawing_is_credited_as_the_work_adapted(self):
+        text, _ = S.convert((HEAD + '<rect width="30" height="20" fill="#f00"/></svg>').encode(), "T", "https://example.org/a", "Me", "CC-BY-SA-4.0", author="Them")
+        self.assertIn('encoder "Me"', text)
+        self.assertIn('adapted-from "https://example.org/a" {\n    author "Them"\n    license "CC-BY-SA-4.0"\n  }', text)
+        self.assertNotIn('  source "', text)
+
+    def test_url_with_nothing_to_credit_is_a_source(self):
+        text, _ = S.convert((HEAD + '<rect width="30" height="20" fill="#f00"/></svg>').encode(), "T", "https://example.org/a")
+        self.assertIn('source "https://example.org/a"', text)
+        self.assertNotIn("adapted-from", text)
+
+
 class Tidying(unittest.TestCase):
     def flag(self, body):
         return S.tidy('vexyl 1\nproportion hoist=600 fly=900\n\n' + body)

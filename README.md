@@ -93,8 +93,10 @@ Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>.
 
 - The specification, `SPEC.md`, is licensed under
   [CC BY-SA 4.0](LICENSE-SPEC).
-- The code and hand-written flag files are licensed under the
-  [Apache License 2.0](LICENSE).
+- The code is licensed under the [Apache License 2.0](LICENSE).
+- Hand-written flag files say what they're licensed under in their `license` field, mostly
+  [CC BY-SA 4.0](LICENSE-SPEC). Most also have a `render-license` of CC0 1.0, so that what
+  they render to can be used with no conditions.
 
 These licenses cover this project's work. They grant no rights in the flag designs
 themselves, which belong to their own designers and may have their own terms or

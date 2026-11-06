@@ -5,7 +5,8 @@ vexyl 1
 meta {
   name "Bangladesh"
   encoder "Naomi Persephone Amethyst"
-  license "Apache-2.0"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
   source "https://en.wikipedia.org/wiki/Flag_of_Bangladesh"
   note "The rules specify Procion dyes, so these hex values are conversions through Pantone, made by Wikipedia's editors."
   law "Flag Rules 1972"
