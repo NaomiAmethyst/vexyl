@@ -1,150 +1,100 @@
 {
- "defines": {
+ "define": {
   "hexagram": {
-   "shape": {
-    "inner": 2.3094010767585034,
-    "kind": "star",
-    "points": 6,
-    "radius": 4
-   }
+   "inner": 2.3094010767585034,
+   "points": 6,
+   "radius": 4,
+   "shape": "star"
   },
   "lobe": {
-   "shape": {
-    "kind": "heart",
-    "radius": 1,
-    "spread": 1.4142135623730951
-   }
+   "radius": 1,
+   "shape": "heart",
+   "spread": 1.4142135623730951
   },
   "rising": {
-   "shape": {
-    "disc": 2,
-    "gap": 0.5,
-    "kind": "sun",
-    "points": 8,
-    "radius": 4,
-    "spread": 0.5
-   }
+   "disc": 2,
+   "gap": 0.5,
+   "points": 8,
+   "radius": 4,
+   "shape": "sun",
+   "spread": 0.5
   }
  },
- "fly": 40,
- "hoist": 20,
  "layers": [
   {
-   "blend": "normal",
    "color": "blue",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
-   "color": "gold",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 8,
      "hoist": 10
-    },
-    "ats": [
-     {
-      "fly": 8,
-      "hoist": 10
-     }
-    ],
-    "inner": 2.3094010767585034,
-    "kind": "star",
-    "points": 6,
-    "radius": 4
-   }
+    }
+   ],
+   "color": "gold",
+   "inner": 2.3094010767585034,
+   "layer": "charge",
+   "points": 6,
+   "radius": 4,
+   "shape": "star"
   },
   {
-   "blend": "normal",
-   "color": "gold",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 20,
      "hoist": 10
-    },
-    "ats": [
-     {
-      "fly": 20,
-      "hoist": 10
-     }
-    ],
-    "inner": 1.1547005383792517,
-    "kind": "star",
-    "points": 6,
-    "radius": 2
-   }
+    }
+   ],
+   "color": "gold",
+   "inner": 1.1547005383792517,
+   "layer": "charge",
+   "points": 6,
+   "radius": 2,
+   "shape": "star"
   },
   {
-   "blend": "normal",
-   "color": "red",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 32,
      "hoist": 5
-    },
-    "ats": [
-     {
-      "fly": 32,
-      "hoist": 5
-     }
-    ],
-    "inner": 2.0760644148902876,
-    "kind": "star",
-    "points": 7,
-    "radius": 3
-   }
+    }
+   ],
+   "color": "red",
+   "inner": 2.0760644148902876,
+   "layer": "charge",
+   "points": 7,
+   "radius": 3,
+   "shape": "star"
   },
   {
-   "blend": "normal",
-   "color": "gold",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 32,
      "hoist": 15
-    },
-    "ats": [
-     {
-      "fly": 32,
-      "hoist": 15
-     }
-    ],
-    "disc": 2,
-    "gap": 0.5,
-    "kind": "sun",
-    "points": 8,
-    "radius": 4,
-    "spread": 0.5
-   }
+    }
+   ],
+   "color": "gold",
+   "disc": 2,
+   "gap": 0.5,
+   "layer": "charge",
+   "points": 8,
+   "radius": 4,
+   "shape": "sun",
+   "spread": 0.5
   },
   {
-   "blend": "normal",
-   "color": "red",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 8,
      "hoist": 16
-    },
-    "ats": [
-     {
-      "fly": 8,
-      "hoist": 16
-     }
-    ],
-    "kind": "heart",
-    "radius": 2,
-    "spread": 2.8284271247461903
-   }
+    }
+   ],
+   "color": "red",
+   "layer": "charge",
+   "radius": 2,
+   "shape": "heart",
+   "spread": 2.8284271247461903
   }
  ],
  "meta": {
@@ -152,9 +102,19 @@
   "name": "Defined shapes"
  },
  "palette": {
-  "blue": "#003399",
-  "gold": "#ffcc00",
-  "red": "#cc0000"
+  "blue": {
+   "color": "#003399"
+  },
+  "gold": {
+   "color": "#ffcc00"
+  },
+  "red": {
+   "color": "#cc0000"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 40,
+  "hoist": 20
+ },
+ "vexyl": 1
 }

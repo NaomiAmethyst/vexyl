@@ -1,82 +1,77 @@
 {
- "color-refs": {
-  "red": [
-   {
-    "system": "pantone",
-    "value": "485 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 95 100 0"
-   }
-  ]
- },
- "fly": 20,
- "hoist": 12,
  "layers": [
   {
-   "blend": "normal",
    "color": "red",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
+   "edge": {
+    "count": 5,
+    "depth": 3,
+    "form": "zigzag"
+   },
    "layer": "panel",
    "layers": [
     {
-     "blend": "normal",
      "color": "white",
-     "layer": "field",
-     "opacity": 1
+     "layer": "field"
     }
    ],
-   "line": {
-    "count": 5,
-    "depth": 3,
-    "kind": "zigzag"
-   },
-   "opacity": 1,
    "side": "hoist",
    "width": 6.5
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Decree-Law No. 4 of 2002 on the flag of the Kingdom of Bahrain",
+    "source": [
      "https://www.lloc.gov.bh/Legislation/HTM/L0402"
-    ],
-    "text": "Decree-Law No. 4 of 2002 on the flag of the Kingdom of Bahrain"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Bahrain",
-  "notes": [
+  "note": [
    "The proportion, division and triangles are Article 1 of the decree-law, which also refers to an attached model that wasn't in the text read.",
    "The law says only a deep red. The Pantone, CMYK and hex are the specification in the Arabic flag guide on the government's education portal, page 25, which isn't a law. Its RGB is misprinted as 21,0 4,1 28. The Album des Pavillons 2023, as reported by FOTW, agrees on the Pantone and RGB 218-41-28."
   ],
   "render-license": "CC0-1.0",
-  "restrictions": [
+  "restriction": [
    {
-    "sources": [
+    "restriction": "Article 8: the flag may not be used for commercial purposes, in particular in patents, trademarks or advertising. Article 9 sets the penalties.",
+    "source": [
      "https://www.lloc.gov.bh/Legislation/HTM/L0402"
-    ],
-    "text": "Article 8: the flag may not be used for commercial purposes, in particular in patents, trademarks or advertising. Article 9 sets the penalties."
+    ]
    }
   ],
-  "sources": [
+  "source": [
    "https://www.lloc.gov.bh/Legislation/HTM/L0402",
    "https://www.edunet.bh/e_content/level_1/stage_1/subject_ID_4/Part_3/e_books/Flag--guide---Arabic/Flag--guide---Arabic.pdf",
    "https://www.crwflags.com/fotw/flags/bh.html"
   ]
  },
  "palette": {
-  "red": "#da291c",
-  "white": "#ffffff"
+  "red": {
+   "cmyk": [
+    0,
+    95,
+    100,
+    0
+   ],
+   "color": "#da291c",
+   "pantone": "485 C"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 20,
+  "hoist": 12
+ },
+ "vexyl": 1
 }

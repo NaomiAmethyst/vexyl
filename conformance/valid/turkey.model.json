@@ -1,96 +1,59 @@
 {
- "color-refs": {
-  "red": [
-   {
-    "system": "pantone",
-    "value": "186 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "10 100 74 2"
-   },
-   {
-    "system": "Türk Bayrağı Tüzüğü, Article 3(B): lightness, red-green, yellow-blue",
-    "value": "27.5 44.8 15.6"
-   }
-  ]
- },
- "fly": 360,
- "hoist": 240,
  "layers": [
   {
-   "blend": "normal",
    "color": "red",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
-   "color": "white",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 120,
      "hoist": 120
-    },
-    "ats": [
-     {
-      "fly": 120,
-      "hoist": 120
-     }
-    ],
-    "inner": 48,
-    "kind": "crescent",
-    "offset": 15,
-    "radius": 60
-   }
+    }
+   ],
+   "color": "white",
+   "inner": 48,
+   "layer": "charge",
+   "offset": 15,
+   "radius": 60,
+   "shape": "crescent"
   },
   {
-   "blend": "normal",
-   "color": "white",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 197,
      "hoist": 120
-    },
-    "ats": [
-     {
-      "fly": 197,
-      "hoist": 120
-     }
-    ],
-    "inner": 11.458980337503156,
-    "kind": "star",
-    "points": 5,
-    "radius": 30,
-    "rotate": -90
-   }
+    }
+   ],
+   "color": "white",
+   "inner": 11.458980337503156,
+   "layer": "charge",
+   "radius": 30,
+   "rotate": -90,
+   "shape": "star"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Turkish Flag Law No. 2893 of 22 September 1983, Article 2 and annexed table",
+    "source": [
      "https://www.mevzuat.gov.tr/MevzuatMetin/1.5.2893.pdf"
-    ],
-    "text": "Turkish Flag Law No. 2893 of 22 September 1983, Article 2 and annexed table"
+    ]
    },
    {
-    "sources": [
+    "law": "Türk Bayrağı Tüzüğü, Council of Ministers Decision 85/9034, Articles 3 and 4 and Annex 1",
+    "source": [
      "https://www.mevzuat.gov.tr/MevzuatMetin/2.5.859034.pdf"
-    ],
-    "text": "Türk Bayrağı Tüzüğü, Council of Ministers Decision 85/9034, Articles 3 and 4 and Annex 1"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Turkey",
-  "notes": [
+  "note": [
    "From the law: every ratio on the grid, from the table annexed to Law 2893 and Article 4 of the regulation. The star's point toward the hoist is Article 4(G) and the annex's drawing.",
    "Omitted: the white hem at the hoist, M, 1/30 of G. A is measured from the hem's inner edge, while the annex's drawing starts L at the hem's outer edge, which suggests that the 3:2 length includes the hem. Adding it could move the charges 8 units toward the fly.",
    "Article 4(G) also puts the star's point on the line through the crescent's tips, but that line works out at 170.7, not the 167 that the table's E gives. This file follows the table.",
@@ -98,13 +61,34 @@
    "Amendments: Law 2893's own list shows changes to Articles 2 to 4 and 6 to 9, and none to the annexed table. KHK 700 of 2018 renamed the regulation it calls for a yönetmelik. The 1985 Tüzük is still the one published. Its Article 3 was reworded in 1995, and its latest change, in 2012, touched Annex 4 only."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.crwflags.com/fotw/flags/tr.html"
   ]
  },
  "palette": {
-  "red": "#d21034",
-  "white": "#ffffff"
+  "red": {
+   "cmyk": [
+    10,
+    100,
+    74,
+    2
+   ],
+   "color": "#d21034",
+   "pantone": "186 C",
+   "reference": [
+    {
+     "system": "Türk Bayrağı Tüzüğü, Article 3(B): lightness, red-green, yellow-blue",
+     "value": "27.5 44.8 15.6"
+    }
+   ]
+  },
+  "white": {
+   "color": "#ffffff"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 360,
+  "hoist": 240
+ },
+ "vexyl": 1
 }

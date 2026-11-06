@@ -1,66 +1,12 @@
 {
- "color-refs": {
-  "black": [
-   {
-    "system": "British Standard 2660",
-    "value": "9-103"
-   }
-  ],
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "299 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "75 20 0 0"
-   },
-   {
-    "system": "British Standard 2660",
-    "value": "0-012"
-   }
-  ],
-  "gold": [
-   {
-    "system": "pantone",
-    "value": "116 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 19 93 0"
-   },
-   {
-    "system": "British Standard 2660",
-    "value": "0-002"
-   }
-  ],
-  "green": [
-   {
-    "system": "pantone",
-    "value": "361 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "78 0 100 0"
-   },
-   {
-    "system": "British Standard 2660",
-    "value": "0-010"
-   }
-  ]
- },
- "fly": 72,
- "hoist": 48,
  "layers": [
   {
    "along": "bend-sinister",
-   "blend": "normal",
    "colors": [
     "green",
     "blue"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     1
@@ -68,58 +14,113 @@
   },
   {
    "along": "bend-sinister",
-   "blend": "normal",
    "color": "black",
    "fimbriate": {
     "color": "gold",
     "width": 3
    },
    "layer": "band",
-   "opacity": 1,
    "width": 13
   }
  ],
  "meta": {
   "date": "1964-04-26",
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "National Flag and Coat of Arms Act, No. 15 of 1971, now part of the National Emblems Act, Chapter 10",
+    "source": [
      "https://ictpolicyafrica.org/api/files/15651659425474op0jpjk2b3.pdf",
      "https://web.archive.org/web/20251207044628/https://tanzlii.org/en/akn/tz/act/1971/15/eng@2002-07-31"
-    ],
-    "text": "National Flag and Coat of Arms Act, No. 15 of 1971, now part of the National Emblems Act, Chapter 10"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Tanzania",
-  "notes": [
+  "note": [
    "The First Schedule gives the two equal diagonal portions, green over blue, and golden, black and golden bands with the golden ones smaller. Its drawing has no measurements, and the law gives no proportion or shades.",
    "2:3 and the band widths come from the undated pamphlet Tanzania National Symbols, from the Prime Minister's office, and Album des Pavillons 2000, both as reported by FOTW. Neither was read. The pamphlet says 13/48 and 1/16 of the fly but also 13 and 3 inches on a flag of 6 by 4 feet, which only works as a share of the hoist, as FOTW's contributor reads it.",
    "Hex, Pantone and CMYK are the Album des Pavillons 2023, as reported by FOTW. The pamphlet's British Standard codes are kept as references."
   ],
   "render-license": "CC0-1.0",
-  "restrictions": [
+  "restriction": [
    {
-    "sources": [
+    "restriction": "Section 6: the flag or its likeness may not be used as a trade mark, in advertising or on articles for sale, or on other articles except for a purpose the Minister approves, unless the Minister exempts it.",
+    "source": [
      "https://ictpolicyafrica.org/api/files/15651659425474op0jpjk2b3.pdf"
-    ],
-    "text": "Section 6: the flag or its likeness may not be used as a trade mark, in advertising or on articles for sale, or on other articles except for a purpose the Minister approves, unless the Minister exempts it."
+    ]
    }
   ],
-  "sources": [
+  "source": [
    "https://ictpolicyafrica.org/api/files/15651659425474op0jpjk2b3.pdf",
    "https://web.archive.org/web/20251207044628/https://tanzlii.org/en/akn/tz/act/1971/15/eng@2002-07-31",
    "https://www.crwflags.com/fotw/flags/tz.html"
   ]
  },
  "palette": {
-  "black": "#000000",
-  "blue": "#00a0e2",
-  "gold": "#ffce00",
-  "green": "#12ad2b"
+  "black": {
+   "color": "#000000",
+   "reference": [
+    {
+     "system": "British Standard 2660",
+     "value": "9-103"
+    }
+   ]
+  },
+  "blue": {
+   "cmyk": [
+    75,
+    20,
+    0,
+    0
+   ],
+   "color": "#00a0e2",
+   "pantone": "299 C",
+   "reference": [
+    {
+     "system": "British Standard 2660",
+     "value": "0-012"
+    }
+   ]
+  },
+  "gold": {
+   "cmyk": [
+    0,
+    19,
+    93,
+    0
+   ],
+   "color": "#ffce00",
+   "pantone": "116 C",
+   "reference": [
+    {
+     "system": "British Standard 2660",
+     "value": "0-002"
+    }
+   ]
+  },
+  "green": {
+   "cmyk": [
+    78,
+    0,
+    100,
+    0
+   ],
+   "color": "#12ad2b",
+   "pantone": "361 C",
+   "reference": [
+    {
+     "system": "British Standard 2660",
+     "value": "0-010"
+    }
+   ]
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 72,
+  "hoist": 48
+ },
+ "vexyl": 1
 }

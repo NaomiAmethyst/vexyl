@@ -364,7 +364,7 @@ func TestSanitizerKeeps(t *testing.T) {
 // The model and a render both come from what passed, and only a render has prefixes.
 func TestModelHoldsSanitizedMarkup(t *testing.T) {
 	f := parse(t, svgDocument(svgOpen+`<title>hidden</title><rect id="r" fill="url(#g)"/></svg>`))
-	markup := f.Model().(map[string]any)["layers"].([]any)[0].(map[string]any)["shape"].(map[string]any)["markup"]
+	markup := f.Model().(map[string]any)["layers"].([]any)[0].(map[string]any)["markup"]
 	want := `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect id="r" fill="url(#g)"></rect></svg>`
 	if markup != want {
 		t.Errorf("markup = %v", markup)
@@ -492,6 +492,113 @@ func TestWriteSuiteTables(t *testing.T) {
 		accepts = append(accepts, accepted{tt.name, filepath.ToSlash(file)})
 	}
 	writeJSON(t, filepath.Join(dir, "accepted.json"), accepts)
+	type distinct struct {
+		Name string `json:"name"`
+		A    string `json:"a"`
+		B    string `json:"b"`
+	}
+	var pairs []distinct
+	for _, tt := range distinctDocuments {
+		pairs = append(pairs, distinct{tt.name, tt.a, tt.b})
+	}
+	writeJSON(t, filepath.Join(dir, "distinct.json"), pairs)
+}
+
+// distinctDocuments differ in what they mean, so their models have to differ. Most are
+// pairs where a zero or a default could be mistaken for leaving something out.
+var distinctDocuments = []struct{ name, a, b string }{
+	{"a position at the origin, and none", `charge disc a { radius 1; at fly=0 hoist=0; }`, `charge disc a { radius 1; }`},
+	{"two positions, and only one", `charge disc a { radius 1; at center; at fly=0 hoist=0; }`, `charge disc a { radius 1; at fly=0 hoist=0; }`},
+	{"an apex at the start, and none", `chevrons a { depth 1; angle 45; apex 0; }`, `chevrons a { depth 1; angle 45; }`},
+	{"no opacity, and full", `field a { opacity 0; }`, `field a`},
+	{"a split at the origin, and none", `quarters a b a b { split fly=0 hoist=0; }`, `quarters a b a b`},
+	{"an emblem at the origin, and none", `emblem { at fly=0 hoist=0; charge disc a { radius 1; }; }`, `emblem { charge disc a { radius 1; }; }`},
+	{"a panel at the origin, and none", `panel { at fly=0 hoist=0; fly 1; hoist 1; field a; }`, `panel { fly 1; hoist 1; field a; }`},
+	{"rays from the origin, and the center", `rays a b { from fly=0 hoist=0; }`, `rays a b`},
+	{"a ring's arc from up, and no arc", `charge ring a { radius 2; inner 1; from 0; to 90; }`, `charge ring a { radius 2; inner 1; }`},
+	{"an arc ending at up, and at another place", `charge ring a { radius 2; inner 1; from 90; to 0; }`, `charge ring a { radius 2; inner 1; from 90; to 10; }`},
+	{"a bar that doesn't grow, and one that does", `bars a b { grow 0 1; }`, `bars a b { grow 1 1; }`},
+	{"a grow of evens, and none", `bars a b { grow 1 1; }`, `bars a b`},
+	{"a stop at the start, and elsewhere", "G 0 1", "G 0.5 1"},
+	{"a point at the origin, and elsewhere", `charge polygon a { point fly=0 hoist=0; point fly=1 hoist=0; point fly=1 hoist=1; }`, `charge polygon a { point fly=0 hoist=1; point fly=1 hoist=0; point fly=1 hoist=1; }`},
+	{"a line stepping only one way, and the other", `charge disc a { radius 1; repeat line count=2 fly=1; }`, `charge disc a { radius 1; repeat line count=2 hoist=1; }`},
+	{"an arc's start at up, and elsewhere", `charge disc a { radius 1; repeat arc count=2 radius=1 from=0 to=90; }`, `charge disc a { radius 1; repeat arc count=2 radius=1 from=1 to=90; }`},
+	{"a box at the origin, and elsewhere", `charge path a { d "M0 0Z"; box "0 0 1 1"; fly 1; }`, `charge path a { d "M0 0Z"; box "1 0 1 1"; fly 1; }`},
+	{"a box's fly, and hoist", `charge path a { d "M0 0Z"; box "0 0 1 1"; fly 1; }`, `charge path a { d "M0 0Z"; box "0 0 1 1"; hoist 1; }`},
+	{"a cross's fly, and hoist", `cross a { fly 0 1 1; hoist 1 1 0; }`, `cross a { fly 1 1 0; hoist 0 1 1; }`},
+	{"a pile's base at the start", `pile a { depth 1; base 0 1; }`, `pile a { depth 1; }`},
+	{"a pile's tip at the start", `pile a { tip 0 1; }`, `pile a { tip 1 1; }`},
+	{"a pile's edge", `pile a { depth 1; from top; }`, `pile a { depth 1; }`},
+	{"a pile's flat", `pile a { depth 1; flat 1; }`, `pile a { depth 1; }`},
+	{"a pall's junction", `pall a { width 1; junction 1; }`, `pall a { width 1; }`},
+	{"a pile, and a pall", `pile a { depth 1; }`, `pall a { width 1; }`},
+	{"a canton, and a panel in another corner", `canton { fly 1; hoist 1; field a; }`, `panel { corner upper-fly; fly 1; hoist 1; field a; }`},
+	{"edge and angle measures", `rays a b { measure edge; }`, `rays a b`},
+	{"evenodd", `charge path a { d "M0 0Z"; box "0 0 1 1"; fly 1; evenodd; }`, `charge path a { d "M0 0Z"; box "0 0 1 1"; fly 1; }`},
+	{"a hollow shape", `charge disc a { radius 1; hollow 0.5; }`, `charge disc a { radius 1; }`},
+	{"a star's lines", `charge star a { radius 1; lines 0.5; }`, `charge star a { radius 1; }`},
+	{"a star's points", `charge star a { radius 1; points 6; }`, `charge star a { radius 1; }`},
+	{"a star's inner", `charge star a { radius 1; inner 0.1; }`, `charge star a { radius 1; }`},
+	{"a sun's gap", `charge sun a { radius 2; disc 1; gap 0.1; }`, `charge sun a { radius 2; disc 1; }`},
+	{"a sun's spread", `charge sun a { radius 2; disc 1; spread 0.5; }`, `charge sun a { radius 2; disc 1; }`},
+	{"a turn", `charge disc a { radius 1; repeat ring count=2 radius=1 turn=#true; }`, `charge disc a { radius 1; repeat ring count=2 radius=1; }`},
+	{"a stagger", `charge disc a { radius 1; repeat grid rows=2 columns=2 stagger=#true; }`, `charge disc a { radius 1; repeat grid rows=2 columns=2; }`},
+	{"rotations", `band a { width 1; rotate 1; }`, `band a { width 1; }`},
+	{"offsets", `band a { width 1; offset 1; }`, `band a { width 1; }`},
+	{"axes", `band a { width 1; along hoist; }`, `band a { width 1; }`},
+	{"blends", `field a { blend multiply; }`, `field a`},
+	{"anchors", `charge disc a { radius 1; anchor end; }`, `charge disc a { radius 1; }`},
+	{"clips", `field a { clip { disc { radius 1; }; }; }`, `field a`},
+	{"a pile as a clip, and a pall", `field a { clip { pile { depth 1; }; }; }`, `field a { clip { pall { width 1; }; }; }`},
+	{"cuts", `field a { cut { disc { radius 1; }; }; }`, `field a`},
+	{"diagonal quarters", `quarters a b a b { diagonal; }`, `quarters a b a b`},
+	{"a counterchange", `saltire a { width 1; counterchange; }`, `saltire a { width 1; }`},
+	{"a check's flow", `checks a b { rows 2; columns 2; flow bend; }`, `checks a b { rows 2; columns 2; }`},
+	{"what a definition holds", "define d { field a; }\nuse d\n", "define d { field b; }\nuse d\n"},
+	{"a definition's grid", "define d hoist=1 fly=1 { field a; }\nuse d\n", "define d { field a; }\nuse d\n"},
+	{"a reverse", "field a\nreverse { field b; }\n", "field a\n"},
+	{"an outside border", "border a 1 outside\nfield a\n", "border a 1\nfield a\n"},
+	{"wider and narrower", "field a\nadapt { wider extend; }\n", "field a\nadapt { narrower extend; }\n"},
+	{"a range", "field a\nadapt { wider extend; range 1 2; }\n", "field a\nadapt { wider extend; }\n"},
+	{"a variant turning", "field a\nvariant v { from rotate; }\n", "field a\nvariant v { from transpose; }\n"},
+	{"a variant upright", "field a\nvariant v { from rotate; upright; }\n", "field a\nvariant v { from rotate; }\n"},
+	{"a variant's outside border", "field a\nvariant v { border a 1 outside; }\n", "field a\nvariant v { border a 1; }\n"},
+	{"a fold's crease", "field a\nfold f { over along=hoist at=5 move=fly; }\n", "field a\nfold f { over along=hoist at=5 move=hoist; }\n"},
+	{"a fold's direction", "field a\nfold f { over along=hoist at=5 move=fly; }\n", "field a\nfold f { under along=hoist at=5 move=fly; }\n"},
+	{"a fold through any line", `field a` + "\nfold f { over through=\"0 0 1 1\" move=\"0 1\"; }\n", `field a` + "\nfold f { over through=\"0 0 1 1\" move=\"1 0\"; }\n"},
+}
+
+func distinctDocument(body string) string {
+	if strings.HasPrefix(body, "G ") {
+		return "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; b \"#445566\"; g gradient a b { stops " + body[2:] + "; }; }\nproportion hoist=10 fly=20\nfield g\n"
+	}
+	return header + body + "\n"
+}
+
+func TestModelsOfDifferentFlagsDiffer(t *testing.T) {
+	for _, tt := range distinctDocuments {
+		t.Run(tt.name, func(t *testing.T) {
+			a, err := json.Marshal(parse(t, distinctDocument(tt.a)).Model())
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := json.Marshal(parse(t, distinctDocument(tt.b)).Model())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(a) == string(b) {
+				t.Errorf("both have the model %s", a)
+			}
+		})
+	}
+}
+
+func TestCMYKIsNumbers(t *testing.T) {
+	m := parse(t, "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\" { cmyk 100 0.0000001 0 40; }; }\nproportion hoist=1 fly=1\n").Model().(map[string]any)
+	cmyk := m["palette"].(map[string]any)["a"].(map[string]any)["cmyk"].([]any)
+	if len(cmyk) != 4 || cmyk[0] != 100.0 || cmyk[1] != 0.0000001 || cmyk[2] != 0.0 {
+		t.Errorf("cmyk: %v", cmyk)
+	}
 }
 
 // acceptedDocuments have to be valid, and are too big or too odd to be worth drawing. Many

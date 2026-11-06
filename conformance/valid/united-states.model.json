@@ -1,269 +1,162 @@
 {
- "color-refs": {
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "282 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "100 68 0 54"
-   },
-   {
-    "system": "Federal Specification DDD-F-416F",
-    "value": "Old Glory Blue"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "193 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 100 66 13"
-   },
-   {
-    "system": "Federal Specification DDD-F-416F",
-    "value": "Old Glory Red"
-   }
-  ],
-  "white": [
-   {
-    "system": "cmyk",
-    "value": "0 0 0 0"
-   }
-  ]
- },
- "fly": 24.7,
- "folds": {
+ "fold": {
   "triangle": {
    "description": "The customary triangular fold",
-   "sources": [
+   "source": [
     "https://www.va.gov/opa/publications/celebrate/flagfold.pdf",
     "https://www.legion.org/advocacy/flag-advocacy/flag-folding-procedures"
    ],
    "steps": [
     {
-     "a": {
-      "hoist": 6.5
-     },
-     "b": {
-      "fly": 1,
-      "hoist": 6.5
-     },
-     "kind": "over",
-     "moving": {
-      "hoist": 7.5
-     }
+     "along": "fly",
+     "at": 6.5,
+     "move": "bottom",
+     "step": "over"
     },
     {
-     "a": {
-      "hoist": 3.25
-     },
-     "b": {
-      "fly": 1,
-      "hoist": 3.25
-     },
-     "kind": "over",
-     "moving": {
-      "hoist": 4.25
-     }
+     "along": "fly",
+     "at": 3.25,
+     "move": "bottom",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 24.7
-     },
-     "b": {
-      "fly": 21.45,
-      "hoist": 3.25
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 24.7,
-      "hoist": 3.25
-     }
+     "move": [
+      24.7,
+      3.25
+     ],
+     "step": "over",
+     "through": [
+      24.7,
+      0,
+      21.45,
+      3.25
+     ]
     },
     {
-     "a": {
-      "fly": 21.45
-     },
-     "b": {
-      "fly": 21.45,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 22.45
-     }
+     "along": "hoist",
+     "at": 21.45,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 21.45,
-      "hoist": 3.25
-     },
-     "b": {
-      "fly": 18.2
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 21.45
-     }
+     "move": [
+      21.45,
+      0
+     ],
+     "step": "over",
+     "through": [
+      21.45,
+      3.25,
+      18.2,
+      0
+     ]
     },
     {
-     "a": {
-      "fly": 18.2
-     },
-     "b": {
-      "fly": 18.2,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 19.2
-     }
+     "along": "hoist",
+     "at": 18.2,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 18.2
-     },
-     "b": {
-      "fly": 14.95,
-      "hoist": 3.25
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 18.2,
-      "hoist": 3.25
-     }
+     "move": [
+      18.2,
+      3.25
+     ],
+     "step": "over",
+     "through": [
+      18.2,
+      0,
+      14.95,
+      3.25
+     ]
     },
     {
-     "a": {
-      "fly": 14.95
-     },
-     "b": {
-      "fly": 14.95,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 15.95
-     }
+     "along": "hoist",
+     "at": 14.95,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 14.95,
-      "hoist": 3.25
-     },
-     "b": {
-      "fly": 11.7
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 14.95
-     }
+     "move": [
+      14.95,
+      0
+     ],
+     "step": "over",
+     "through": [
+      14.95,
+      3.25,
+      11.7,
+      0
+     ]
     },
     {
-     "a": {
-      "fly": 11.7
-     },
-     "b": {
-      "fly": 11.7,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 12.7
-     }
+     "along": "hoist",
+     "at": 11.7,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 11.7
-     },
-     "b": {
-      "fly": 8.45,
-      "hoist": 3.25
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 11.7,
-      "hoist": 3.25
-     }
+     "move": [
+      11.7,
+      3.25
+     ],
+     "step": "over",
+     "through": [
+      11.7,
+      0,
+      8.45,
+      3.25
+     ]
     },
     {
-     "a": {
-      "fly": 8.45
-     },
-     "b": {
-      "fly": 8.45,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 9.45
-     }
+     "along": "hoist",
+     "at": 8.45,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 8.45,
-      "hoist": 3.25
-     },
-     "b": {
-      "fly": 5.2
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 8.45
-     }
+     "move": [
+      8.45,
+      0
+     ],
+     "step": "over",
+     "through": [
+      8.45,
+      3.25,
+      5.2,
+      0
+     ]
     },
     {
-     "a": {
-      "fly": 5.2
-     },
-     "b": {
-      "fly": 5.2,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 6.2
-     }
+     "along": "hoist",
+     "at": 5.2,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 5.2
-     },
-     "b": {
-      "fly": 1.95,
-      "hoist": 3.25
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 5.2,
-      "hoist": 3.25
-     }
+     "move": [
+      5.2,
+      3.25
+     ],
+     "step": "over",
+     "through": [
+      5.2,
+      0,
+      1.95,
+      3.25
+     ]
     },
     {
-     "a": {
-      "fly": 1.95
-     },
-     "b": {
-      "fly": 1.95,
-      "hoist": 1
-     },
-     "kind": "tuck",
-     "moving": {
-      "fly": 0.95
-     }
+     "along": "hoist",
+     "at": 1.95,
+     "move": "hoist",
+     "step": "tuck"
     }
    ]
   }
  },
- "hoist": 13,
  "layers": [
   {
-   "along": "fly",
-   "blend": "normal",
    "colors": [
     "red",
     "white",
@@ -280,7 +173,6 @@
     "red"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     1,
@@ -298,73 +190,63 @@
    ]
   },
   {
-   "blend": "normal",
-   "corner": "upper-hoist",
    "fly": 9.88,
    "hoist": 7,
-   "layer": "panel",
+   "layer": "canton",
    "layers": [
     {
-     "blend": "normal",
      "color": "blue",
-     "layer": "field",
-     "opacity": 1
+     "layer": "field"
     },
     {
-     "blend": "normal",
      "color": "white",
+     "inner": 0.1529391909045421,
      "layer": "charge",
-     "opacity": 1,
+     "radius": 0.4004,
      "repeat": {
       "columns": 11,
-      "kind": "grid",
+      "form": "grid",
       "rows": 9,
       "stagger": true
      },
-     "shape": {
-      "inner": 0.1529391909045421,
-      "kind": "star",
-      "points": 5,
-      "radius": 0.4004
-     }
+     "shape": "star"
     }
-   ],
-   "opacity": 1
+   ]
   }
  ],
  "meta": {
   "date": "1960-07-04",
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Executive Order 10834",
+    "source": [
      "https://www.govinfo.gov/content/pkg/FR-1959-08-25/pdf/FR-1959-08-25.pdf",
      "https://www.archives.gov/federal-register/codification/executive-order/10834.html",
      "https://www.archives.gov/federal-register/executive-orders/1959.html"
-    ],
-    "text": "Executive Order 10834"
+    ]
    },
    {
-    "sources": [
+    "law": "United States Flag Code, 4 U.S.C. 1, 2 and 7",
+    "source": [
      "https://www.law.cornell.edu/uscode/text/4/1",
      "https://www.law.cornell.edu/uscode/text/4/2",
      "https://www.law.cornell.edu/uscode/text/4/7"
-    ],
-    "text": "United States Flag Code, 4 U.S.C. 1, 2 and 7"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "United States",
-  "notes": [
+  "note": [
    "From the law: every proportion and the stars' positions, in the table and drawing attached to Executive Order 10834, and the red, white and blue in words, in 4 U.S.C. 1. The display rule is 4 U.S.C. 7(i). The order also authorizes other sizes for executive agencies, which aren't drawn here.",
    "From elsewhere: no law gives a shade. The hex, Pantone and CMYK values are the State Department ECA bureau's 2017 design guide, a government page and not law. Federal Specification DDD-F-416F names the colors as Old Glory Red and Blue from the Standard Color Reference of America, 10th edition, for procurement. FOTW reports the same RGB from the Album des Pavillons 2023, with different Pantones.",
    "Amendments: the National Archives' disposition table lists nothing that amends or revokes Executive Order 10834. 4 U.S.C. 1 and 2 stand as enacted in 1947. Section 7 was amended in 2007 and 2018, in its half-staff subsection only."
   ],
   "render-license": "CC0-1.0",
   "series": "united-states",
-  "sources": [
+  "source": [
    "https://web.archive.org/web/20231226213113/https://eca.state.gov/files/bureau/eca_design_guide.pdf",
    "https://everyspec.com/FED_SPECS/F/download.php?spec=DDD-F-416F.049205.pdf",
    "https://www.crwflags.com/fotw/flags/us.html"
@@ -372,15 +254,57 @@
   "version": "50-star"
  },
  "palette": {
-  "blue": "#0a3161",
-  "red": "#b31942",
-  "white": "#ffffff"
+  "blue": {
+   "cmyk": [
+    100,
+    68,
+    0,
+    54
+   ],
+   "color": "#0a3161",
+   "pantone": "282 C",
+   "reference": [
+    {
+     "system": "Federal Specification DDD-F-416F",
+     "value": "Old Glory Blue"
+    }
+   ]
+  },
+  "red": {
+   "cmyk": [
+    0,
+    100,
+    66,
+    13
+   ],
+   "color": "#b31942",
+   "pantone": "193 C",
+   "reference": [
+    {
+     "system": "Federal Specification DDD-F-416F",
+     "value": "Old Glory Red"
+    }
+   ]
+  },
+  "white": {
+   "cmyk": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "color": "#ffffff"
+  }
  },
- "variants": {
+ "proportion": {
+  "fly": 24.7,
+  "hoist": 13
+ },
+ "variant": {
   "vertical": {
    "from": "transpose",
    "upright": true
   }
  },
- "version": 1
+ "vexyl": 1
 }

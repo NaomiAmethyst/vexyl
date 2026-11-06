@@ -1,124 +1,43 @@
 {
- "color-refs": {
-  "black": [
-   {
-    "system": "pantone",
-    "value": "Black"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 0 0 100"
-   },
-   {
-    "system": "ral",
-    "value": "9017"
-   }
-  ],
-  "gold": [
-   {
-    "system": "pantone",
-    "value": "7405"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 12 100 5"
-   },
-   {
-    "system": "ral",
-    "value": "1028"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "485"
-   },
-   {
-    "system": "Federal government style guide",
-    "value": "#ff0000"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 100 100 0"
-   },
-   {
-    "system": "ral",
-    "value": "3020"
-   }
-  ]
- },
- "fly": 5,
- "folds": {
+ "fold": {
   "storage": {
    "description": "In half lengthwise twice, then in half twice toward the hoist",
    "steps": [
     {
-     "a": {
-      "hoist": 1.5
-     },
-     "b": {
-      "fly": 1,
-      "hoist": 1.5
-     },
-     "kind": "under",
-     "moving": {
-      "hoist": 2.5
-     }
+     "along": "fly",
+     "at": 1.5,
+     "move": "bottom",
+     "step": "under"
     },
     {
-     "a": {
-      "hoist": 0.75
-     },
-     "b": {
-      "fly": 1,
-      "hoist": 0.75
-     },
-     "kind": "under",
-     "moving": {
-      "hoist": 1.75
-     }
+     "along": "fly",
+     "at": 0.75,
+     "move": "bottom",
+     "step": "under"
     },
     {
-     "a": {
-      "fly": 2.5
-     },
-     "b": {
-      "fly": 2.5,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 3.5
-     }
+     "along": "hoist",
+     "at": 2.5,
+     "move": "fly",
+     "step": "over"
     },
     {
-     "a": {
-      "fly": 1.25
-     },
-     "b": {
-      "fly": 1.25,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 2.25
-     }
+     "along": "hoist",
+     "at": 1.25,
+     "move": "fly",
+     "step": "over"
     }
    ]
   }
  },
- "hoist": 3,
  "layers": [
   {
-   "along": "fly",
-   "blend": "normal",
    "colors": [
     "black",
     "red",
     "gold"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     1,
@@ -127,32 +46,32 @@
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Basic Law for the Federal Republic of Germany, Article 22(2)",
+    "source": [
      "https://www.gesetze-im-internet.de/gg/art_22.html"
-    ],
-    "text": "Basic Law for the Federal Republic of Germany, Article 22(2)"
+    ]
    },
    {
-    "sources": [
+    "law": "Order on the German Flags of 13 November 1996, as amended 22 November 2005, section I no. 1",
+    "source": [
      "https://www.gesetze-im-internet.de/flaggano_1996/BJNR172900996.html"
-    ],
-    "text": "Order on the German Flags of 13 November 1996, as amended 22 November 2005, section I no. 1"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Germany",
-  "notes": [
+  "note": [
    "The geometry is from the 1996 order. The law names the colors only.",
    "Hex, CMYK and Pantone are the national colors in the federal government's style guide, which isn't a law and covers its branding. Its pure red #ff0000 doesn't resemble its own Pantone 485, so the red drawn here is the Commons drawing's #dd0000, which isn't legal or the style guide's. FOTW reports no Album des Pavillons values to use in its place, so the guide's are kept. FOTW reports RAL 3020 and 1028 from a 1998 letter from the interior ministry.",
    "The banner's transposed shape only records the stripes' direction, because the order fixes no proportion for it. The federal service flag, with the arms, is a separate flag."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.gesetze-im-internet.de/gg/art_22.html",
    "https://www.gesetze-im-internet.de/flaggano_1996/BJNR172900996.html",
    "https://styleguide.bundesregierung.de/sg-de/basiselemente/farben",
@@ -160,14 +79,54 @@
   ]
  },
  "palette": {
-  "black": "#000000",
-  "gold": "#ffcc00",
-  "red": "#dd0000"
+  "black": {
+   "cmyk": [
+    0,
+    0,
+    0,
+    100
+   ],
+   "color": "#000000",
+   "pantone": "Black",
+   "ral": "9017"
+  },
+  "gold": {
+   "cmyk": [
+    0,
+    12,
+    100,
+    5
+   ],
+   "color": "#ffcc00",
+   "pantone": "7405",
+   "ral": "1028"
+  },
+  "red": {
+   "cmyk": [
+    0,
+    100,
+    100,
+    0
+   ],
+   "color": "#dd0000",
+   "pantone": "485",
+   "ral": "3020",
+   "reference": [
+    {
+     "system": "Federal government style guide",
+     "value": "#ff0000"
+    }
+   ]
+  }
  },
- "variants": {
+ "proportion": {
+  "fly": 5,
+  "hoist": 3
+ },
+ "variant": {
   "hanging": {
    "from": "transpose"
   }
  },
- "version": 1
+ "vexyl": 1
 }

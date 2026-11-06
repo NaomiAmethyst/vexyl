@@ -123,6 +123,9 @@ func (p *parser) line(n *kdl.Node) *Line {
 		p.errf(n, "needs `period` or `count`")
 		return nil
 	}
+	if l.Period != 0 && l.Count != 0 {
+		p.errf(n, "needs `period` or `count`, not both")
+	}
 	return l
 }
 
@@ -250,6 +253,9 @@ func (p *parser) panel(n *kdl.Node, depth int) Layer {
 		if l.Corner != "" && l.At != nil {
 			p.errf(n, "needs either `corner` or `at`, not both")
 		}
+		if l.Width != 0 {
+			p.errf(n, "only a side panel has a `width`")
+		}
 	}
 	if len(l.Layers) == 0 {
 		p.errf(n, "needs at least one layer")
@@ -303,6 +309,9 @@ func (p *parser) define(n *kdl.Node) {
 	nodes := n.Children().Nodes
 	if len(nodes) == 1 && slices.Contains(shapeKinds, nodes[0].Name()) {
 		c := nodes[0]
+		if d.Fly != 0 {
+			p.errf(n, "only a design has its own grid, and a shape takes its size from what uses it")
+		}
 		s := Shape{Kind: c.Name()}
 		if s.Kind == "path" && len(c.Arguments()) > 0 {
 			// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
@@ -366,6 +375,9 @@ func (p *parser) outline(n *kdl.Node) *Outline {
 		}
 		if o.Kind == "tongued" && o.Tongue == 0 {
 			p.errf(n, "needs a `tongue`")
+		}
+		if (o.Tip != 0 && o.Kind != "pennant") || (o.Tongue != 0 && o.Kind != "tongued") || (o.Taper != 0 && o.Kind != "swallowtail") || (o.Depth != 0 && o.Kind == "pennant") {
+			p.errf(n, "has a value that a %s doesn't use", o.Kind)
 		}
 		return o
 	}
@@ -551,7 +563,7 @@ func (p *parser) color(n *kdl.Node, flag *Flag) string {
 		return ""
 	}
 	var refs []ColorRef
-	named := func(c *kdl.Node) { refs = append(refs, ColorRef{c.Name(), p.str(c)}) }
+	named := func(c *kdl.Node) { refs = append(refs, ColorRef{System: c.Name(), Value: p.str(c)}) }
 	p.children(n, []string{"dye", "reference"}, map[string]func(*kdl.Node){
 		"pantone": named,
 		"ncs":     named,
@@ -572,7 +584,7 @@ func (p *parser) color(n *kdl.Node, flag *Flag) string {
 				}
 				parts[i] = strconv.FormatFloat(x, 'f', -1, 64)
 			}
-			refs = append(refs, ColorRef{"cmyk", strings.Join(parts, " ")})
+			refs = append(refs, ColorRef{System: "cmyk", Value: strings.Join(parts, " "), Numbers: v})
 		},
 		"reference": func(c *kdl.Node) {
 			p.noProps(c)
@@ -582,7 +594,7 @@ func (p *parser) color(n *kdl.Node, flag *Flag) string {
 				p.errf(c, "needs a system's name and a value")
 				return
 			}
-			refs = append(refs, ColorRef{a[0].String(), a[1].String()})
+			refs = append(refs, ColorRef{System: a[0].String(), Value: a[1].String(), Other: true})
 		},
 	})
 	if refs != nil {
@@ -645,6 +657,7 @@ func (p *parser) foldStep(n *kdl.Node) *FoldStep {
 			return nil
 		}
 		s.A, s.B, s.Moving = Point{line[0], line[1]}, Point{line[2], line[3]}, Point{point[0], point[1]}
+		s.Through, s.MoveTo = line, point
 		return s
 	}
 	along := n.Prop("along")
@@ -653,6 +666,7 @@ func (p *parser) foldStep(n *kdl.Node) *FoldStep {
 		return nil
 	}
 	at := p.prop(n, "at")
+	s.Along, s.At, s.Move = along.String(), at, move
 	switch along.String() {
 	case "fly":
 		s.A, s.B = Point{0, at}, Point{1, at}

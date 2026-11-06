@@ -24,6 +24,14 @@ type FoldStep struct {
 	A, B Point
 	// Moving is a point on the side that moves.
 	Moving Point
+
+	// Along, At and Move are the crease as it was written, or Through and MoveTo if it was
+	// written as any line.
+	Along   string
+	At      float64
+	Move    string
+	Through []float64
+	MoveTo  []float64
 }
 
 // matrix maps (x, y) to (a*x + c*y + e, b*x + d*y + f), as SVG writes it.

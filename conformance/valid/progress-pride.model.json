@@ -1,10 +1,6 @@
 {
- "fly": 6000,
- "hoist": 3810,
  "layers": [
   {
-   "along": "fly",
-   "blend": "normal",
    "colors": [
     "red",
     "orange",
@@ -14,7 +10,6 @@
     "violet"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     1,
@@ -26,7 +21,6 @@
   },
   {
    "angle": 45,
-   "blend": "normal",
    "colors": [
     "white",
     "pink",
@@ -35,9 +29,7 @@
     "black"
    ],
    "depth": 2864,
-   "from": "hoist",
    "layer": "chevrons",
-   "opacity": 1,
    "ratio": [
     951,
     469,
@@ -49,35 +41,61 @@
  ],
  "meta": {
   "design-rights": "Creative Commons license excluding commercial use; check the designer's terms",
-  "designers": [
+  "designer": [
    "Daniel Quasar"
   ],
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Progress Pride Flag",
-  "notes": [
+  "note": [
    "No official construction sheet was found, so the proportion and chevron sizes follow the Commons drawing, and its nearly 45-degree arms are treated as exactly 45.",
    "This file's license covers the encoding, not the design. Check the designer's current terms before using the flag."
   ],
-  "sources": [
+  "source": [
    "https://en.wikipedia.org/wiki/Progress_flag",
    "https://commons.wikimedia.org/wiki/File:LGBTQ%2B_rainbow_flag_Quasar_%22Progress%22_variant.svg"
   ]
  },
  "palette": {
-  "black": "#000000",
-  "brown": "#613915",
-  "green": "#008026",
-  "indigo": "#004dff",
-  "orange": "#ff8c00",
-  "pink": "#ffafc8",
-  "red": "#e40303",
-  "sky": "#74d7ee",
-  "violet": "#750787",
-  "white": "#ffffff",
-  "yellow": "#ffed00"
+  "black": {
+   "color": "#000000"
+  },
+  "brown": {
+   "color": "#613915"
+  },
+  "green": {
+   "color": "#008026"
+  },
+  "indigo": {
+   "color": "#004dff"
+  },
+  "orange": {
+   "color": "#ff8c00"
+  },
+  "pink": {
+   "color": "#ffafc8"
+  },
+  "red": {
+   "color": "#e40303"
+  },
+  "sky": {
+   "color": "#74d7ee"
+  },
+  "violet": {
+   "color": "#750787"
+  },
+  "white": {
+   "color": "#ffffff"
+  },
+  "yellow": {
+   "color": "#ffed00"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 6000,
+  "hoist": 3810
+ },
+ "vexyl": 1
 }

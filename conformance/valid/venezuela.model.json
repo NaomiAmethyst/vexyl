@@ -1,49 +1,12 @@
 {
- "color-refs": {
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "286 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "99 80 0 0"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "186 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "10 100 74 2"
-   }
-  ],
-  "yellow": [
-   {
-    "system": "pantone",
-    "value": "116 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 19 93 0"
-   }
-  ]
- },
- "fly": 180,
- "hoist": 120,
  "layers": [
   {
-   "along": "fly",
-   "blend": "normal",
    "colors": [
     "yellow",
     "blue",
     "red"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     1,
@@ -51,60 +14,51 @@
    ]
   },
   {
-   "blend": "normal",
+   "at": [
+    {
+     "fly": 90.03,
+     "hoist": 85.82
+    }
+   ],
    "color": "white",
+   "inner": 1.9824035983880464,
    "layer": "charge",
-   "opacity": 1,
+   "radius": 5.19,
    "repeat": {
     "count": 8,
+    "form": "arc",
     "from": -66.5,
-    "kind": "arc",
     "radius": 36.72,
     "to": 66.5,
     "turn": true
    },
-   "shape": {
-    "at": {
-     "fly": 90.03,
-     "hoist": 85.82
-    },
-    "ats": [
-     {
-      "fly": 90.03,
-      "hoist": 85.82
-     }
-    ],
-    "inner": 1.9824035983880464,
-    "kind": "star",
-    "points": 5,
-    "radius": 5.19
-   }
+   "shape": "star"
   }
  ],
  "meta": {
   "date": "2006-03-09",
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Law on the National Flag, National Anthem and Coat of Arms of the Bolivarian Republic of Venezuela, 2006, Article 3",
+    "source": [
      "https://docs.venezuela.justia.com/federales/leyes/ley-de-bandera-nacional-himno-nacional-y-escudo-de-armas-de-la-republica-bolivariana-de-venezuela.pdf",
      "https://web.archive.org/web/20070113132248/http://www.asambleanacional.gov.ve/ns2/leyes.asp?id=722"
-    ],
-    "text": "Law on the National Flag, National Anthem and Coat of Arms of the Bolivarian Republic of Venezuela, 2006, Article 3"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Venezuela",
-  "notes": [
+  "note": [
    "The law fixes the colors' order, the equal stripes, and the number and arrangement of the stars, not their sizes. Its Fourth Transitional Provision calls for a regulation on the flag's form and dimensions, which wasn't found. The proportion is FOTW's. The arc, star size and star rotation are from the Commons drawing and aren't legal values.",
    "The law gives no shades. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW. White is plain white.",
    "This is the form with the eight stars only, which Article 3 gives the merchant marine. The form for the Presidency, the armed forces and public buildings adds the coat of arms at the hoist end of the yellow stripe, and isn't drawn here.",
    "The date is the Gaceta Oficial publication that FOTW reports, on which the law's final provision puts it in force. The gazette itself wasn't read."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://docs.venezuela.justia.com/federales/leyes/ley-de-bandera-nacional-himno-nacional-y-escudo-de-armas-de-la-republica-bolivariana-de-venezuela.pdf",
    "https://web.archive.org/web/20070113132248/http://www.asambleanacional.gov.ve/ns2/leyes.asp?id=722",
    "https://www.crwflags.com/fotw/flags/ve.html",
@@ -112,10 +66,43 @@
   ]
  },
  "palette": {
-  "blue": "#0035ad",
-  "red": "#d21034",
-  "white": "#ffffff",
-  "yellow": "#ffce00"
+  "blue": {
+   "cmyk": [
+    99,
+    80,
+    0,
+    0
+   ],
+   "color": "#0035ad",
+   "pantone": "286 C"
+  },
+  "red": {
+   "cmyk": [
+    10,
+    100,
+    74,
+    2
+   ],
+   "color": "#d21034",
+   "pantone": "186 C"
+  },
+  "white": {
+   "color": "#ffffff"
+  },
+  "yellow": {
+   "cmyk": [
+    0,
+    19,
+    93,
+    0
+   ],
+   "color": "#ffce00",
+   "pantone": "116 C"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 180,
+  "hoist": 120
+ },
+ "vexyl": 1
 }

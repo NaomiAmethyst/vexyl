@@ -3,10 +3,10 @@
 Every Vexyl library has to pass this. [SDK.md](../SDK.md) says what the suite checks, and why.
 
 ```
-python3 conformance/run.py [--only render,model,invalid,accepted,sanitize] [--filter TEXT] [--resvg PATH] COMMAND...
+python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct] [--filter TEXT] [--resvg PATH] COMMAND...
 ```
 
-It needs Python with numpy and Pillow, and resvg at the version in `manifest.json`, since
+It needs Python with numpy, Pillow and jsonschema, and resvg at the version in `manifest.json`, since
 different rasterizers draw differently. COMMAND runs the library under test, and has to offer:
 
 ```
@@ -22,7 +22,9 @@ A render that's refused exits nonzero.
 
 | Path | Holds |
 |---|---|
-| `manifest.json` | The tolerance, and each flag with its renders |
+| `manifest.json` | The suite's `version`, the `format` version it's for, the tolerance, and each flag with its renders |
+| `model.schema.json` | The canonical model as a JSON Schema, which every library's models and every fixture have to fit |
+| `distinct.json` | Pairs of document bodies that mean different things, so their models have to differ |
 | `valid/NAME.kdl` | A flag |
 | `valid/NAME.model.json` | Its expected model |
 | `valid/NAME/*.svg` | Its expected renders |

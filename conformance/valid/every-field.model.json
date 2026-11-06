@@ -1,0 +1,795 @@
+{
+ "adapt": {
+  "narrower": "hoist-center",
+  "range": [
+   1,
+   3
+  ],
+  "wider": "extend"
+ },
+ "border": {
+  "color": "gold",
+  "width": 0.25
+ },
+ "define": {
+  "dot": {
+   "radius": 0.5,
+   "shape": "disc"
+  },
+  "plain": {
+   "layers": [
+    {
+     "color": "red",
+     "layer": "field"
+    }
+   ]
+  },
+  "tile": {
+   "layers": [
+    {
+     "color": "white",
+     "layer": "field"
+    }
+   ],
+   "proportion": {
+    "fly": 2,
+    "hoist": 2
+   }
+  }
+ },
+ "fold": {
+  "storage": {
+   "description": "In half, then diagonally",
+   "source": [
+    "https://example.test/how-to-fold"
+   ],
+   "steps": [
+    {
+     "along": "fly",
+     "at": 10,
+     "move": "bottom",
+     "step": "over"
+    },
+    {
+     "along": "hoist",
+     "at": 20,
+     "move": "fly",
+     "step": "under"
+    },
+    {
+     "move": [
+      0,
+      10
+     ],
+     "step": "tuck",
+     "through": [
+      0,
+      0,
+      20,
+      10
+     ]
+    }
+   ]
+  }
+ },
+ "layers": [
+  {
+   "color": "blue",
+   "layer": "field",
+   "opacity": 0
+  },
+  {
+   "anchor": "end",
+   "blend": "multiply",
+   "clip": {
+    "fly": 1,
+    "hoist": 1,
+    "shape": "rect"
+   },
+   "color": "white",
+   "cut": [
+    {
+     "depth": 1,
+     "from": "top",
+     "shape": "pile"
+    },
+    {
+     "shape": "pall",
+     "width": 0.1
+    }
+   ],
+   "layer": "field",
+   "opacity": 0.5
+  },
+  {
+   "along": "hoist",
+   "colors": [
+    "blue",
+    "white"
+   ],
+   "edge": {
+    "depth": 1,
+    "form": "wavy",
+    "period": 8
+   },
+   "grow": [
+    1,
+    0
+   ],
+   "layer": "bars",
+   "ratio": [
+    1,
+    2
+   ],
+   "rotate": 1
+  },
+  {
+   "colors": [
+    "blue",
+    "white"
+   ],
+   "edge": {
+    "count": 4,
+    "depth": 0.5,
+    "form": "zigzag"
+   },
+   "layer": "bars",
+   "ratio": [
+    1,
+    1
+   ]
+  },
+  {
+   "angle": 45,
+   "apex": 0,
+   "colors": [
+    "red",
+    "gold"
+   ],
+   "depth": 4,
+   "fimbriate": {
+    "color": "blue",
+    "width": 0.1
+   },
+   "from": "fly",
+   "layer": "chevrons",
+   "ratio": [
+    2,
+    1
+   ],
+   "rotate": 1
+  },
+  {
+   "along": "bend",
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.1
+   },
+   "layer": "band",
+   "offset": 1,
+   "rotate": 1,
+   "width": 1
+  },
+  {
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.1
+   },
+   "fly": [
+    0,
+    1,
+    3
+   ],
+   "hoist": [
+    1,
+    1,
+    2
+   ],
+   "layer": "cross"
+  },
+  {
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.1
+   },
+   "layer": "saltire",
+   "width": 1
+  },
+  {
+   "color": "red",
+   "counterchange": true,
+   "layer": "saltire",
+   "width": 1
+  },
+  {
+   "colors": [
+    "red",
+    "gold",
+    "none",
+    "blue"
+   ],
+   "layer": "quarters",
+   "split": {
+    "fly": 0,
+    "hoist": 0
+   }
+  },
+  {
+   "colors": [
+    "red",
+    "gold",
+    "white",
+    "blue"
+   ],
+   "diagonal": true,
+   "layer": "quarters"
+  },
+  {
+   "colors": [
+    "red",
+    "gold"
+   ],
+   "columns": 3,
+   "flow": "bend",
+   "layer": "checks",
+   "rows": 2
+  },
+  {
+   "colors": [
+    "red",
+    "gold",
+    "red"
+   ],
+   "from": "lower-hoist",
+   "layer": "rays",
+   "ratio": [
+    1,
+    2,
+    1
+   ],
+   "rotate": 5
+  },
+  {
+   "colors": [
+    "red",
+    "gold"
+   ],
+   "from": {
+    "fly": 0,
+    "hoist": 0
+   },
+   "layer": "rays",
+   "measure": "edge",
+   "ratio": [
+    1,
+    1
+   ]
+  },
+  {
+   "base": [
+    0,
+    2
+   ],
+   "color": "gold",
+   "from": "bottom",
+   "hollow": 0.1,
+   "layer": "pile",
+   "tip": [
+    1,
+    2
+   ]
+  },
+  {
+   "color": "gold",
+   "depth": 1,
+   "fimbriate": {
+    "color": "white",
+    "width": 0.1
+   },
+   "flat": 0.5,
+   "layer": "pile"
+  },
+  {
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.1
+   },
+   "from": "top",
+   "junction": 3,
+   "layer": "pall",
+   "width": 0.5
+  },
+  {
+   "at": [
+    {
+     "fly": 0,
+     "hoist": 0
+    }
+   ],
+   "color": "red",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.1
+   },
+   "layer": "charge",
+   "radius": 1,
+   "repeat": {
+    "count": 4,
+    "form": "ring",
+    "radius": 2,
+    "turn": true
+   },
+   "shape": "disc"
+  },
+  {
+   "at": [
+    "center",
+    {
+     "fly": 1,
+     "hoist": 1
+    }
+   ],
+   "color": "red",
+   "hollow": 0.1,
+   "layer": "charge",
+   "radius": 1,
+   "rotate": 10,
+   "shape": "triangle"
+  },
+  {
+   "color": "red",
+   "layer": "charge",
+   "radius": 1,
+   "repeat": {
+    "count": 3,
+    "form": "arc",
+    "from": 0,
+    "radius": 2,
+    "to": 90,
+    "turn": true
+   },
+   "shape": "cardioid"
+  },
+  {
+   "color": "red",
+   "fly": 1,
+   "hoist": 2,
+   "layer": "charge",
+   "repeat": {
+    "columns": 2,
+    "form": "grid",
+    "rows": 2,
+    "stagger": true
+   },
+   "shape": "ellipse"
+  },
+  {
+   "color": "red",
+   "fly": 1,
+   "hoist": 2,
+   "layer": "charge",
+   "repeat": {
+    "count": 2,
+    "fly": 1,
+    "form": "line",
+    "hoist": 1
+   },
+   "shape": "rect"
+  },
+  {
+   "color": "red",
+   "layer": "charge",
+   "shape": "lozenge"
+  },
+  {
+   "color": "red",
+   "from": 0,
+   "inner": 1,
+   "layer": "charge",
+   "radius": 2,
+   "shape": "ring",
+   "to": 90
+  },
+  {
+   "color": "red",
+   "layer": "charge",
+   "radius": 2,
+   "shape": "plus",
+   "width": 1
+  },
+  {
+   "color": "red",
+   "inner": 1.1547005383792517,
+   "layer": "charge",
+   "lines": 0.1,
+   "points": 6,
+   "radius": 2,
+   "shape": "star"
+  },
+  {
+   "color": "red",
+   "inner": 1,
+   "layer": "charge",
+   "radius": 2,
+   "shape": "star"
+  },
+  {
+   "color": "red",
+   "inner": 2,
+   "layer": "charge",
+   "offset": 1,
+   "radius": 2,
+   "shape": "crescent"
+  },
+  {
+   "color": "red",
+   "disc": 1,
+   "gap": 0.5,
+   "layer": "charge",
+   "points": 8,
+   "radius": 3,
+   "shape": "sun",
+   "spread": 0.5
+  },
+  {
+   "color": "red",
+   "layer": "charge",
+   "radius": 2,
+   "shape": "heart",
+   "spread": 2.8284271247461903
+  },
+  {
+   "box": [
+    0,
+    0,
+    1,
+    1
+   ],
+   "color": "red",
+   "d": "M0 0H1V1Z",
+   "evenodd": true,
+   "fly": 1,
+   "hoist": 1,
+   "layer": "charge",
+   "shape": "path"
+  },
+  {
+   "color": "red",
+   "layer": "charge",
+   "point": [
+    {
+     "fly": 0,
+     "hoist": 0
+    },
+    {
+     "fly": 1,
+     "hoist": 0
+    },
+    {
+     "fly": 1,
+     "hoist": 1
+    }
+   ],
+   "shape": "polygon"
+  },
+  {
+   "color": "gold",
+   "layer": "charge",
+   "radius": 0.5,
+   "shape": "disc"
+  },
+  {
+   "at": [
+    {
+     "fly": 4,
+     "hoist": 4
+    }
+   ],
+   "color": "gold",
+   "fly": 2,
+   "hoist": 2,
+   "layer": "charge",
+   "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\"><rect width=\"1\" height=\"1\" fill=\"currentColor\"></rect></svg>",
+   "rotate": 10,
+   "shape": "svg"
+  },
+  {
+   "along": "bend",
+   "at": {
+    "fly": 0,
+    "hoist": 0
+   },
+   "layer": "emblem",
+   "layers": [
+    {
+     "color": "red",
+     "layer": "charge",
+     "radius": 1,
+     "shape": "disc"
+    }
+   ],
+   "rotate": 10
+  },
+  {
+   "layer": "group",
+   "layers": [
+    {
+     "color": "white",
+     "layer": "field",
+     "opacity": 0.1
+    }
+   ]
+  },
+  {
+   "edge": {
+    "count": 4,
+    "depth": 0.5,
+    "form": "zigzag"
+   },
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "red",
+     "layer": "field"
+    }
+   ],
+   "side": "top",
+   "width": 1
+  },
+  {
+   "corner": "upper-fly",
+   "fly": 2,
+   "hoist": 2,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "red",
+     "layer": "field"
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 5,
+    "hoist": 5
+   },
+   "fly": 2,
+   "hoist": 2,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "red",
+     "layer": "field"
+    }
+   ]
+  },
+  {
+   "fly": 4,
+   "hoist": 4,
+   "layer": "canton",
+   "layers": [
+    {
+     "layer": "use",
+     "name": "tile"
+    }
+   ]
+  },
+  {
+   "layer": "use",
+   "name": "plain"
+  }
+ ],
+ "meta": {
+  "adapted-from": [
+   {
+    "author": [
+     "An author"
+    ],
+    "license": "CC0-1.0",
+    "part": "the whole of it",
+    "url": "https://example.test/work"
+   }
+  ],
+  "date": "2000-01-02",
+  "description": "Uses every field the canonical model has, so a library can't guess one",
+  "design-rights": "Public domain",
+  "designer": [
+   "A designer"
+  ],
+  "encoder": [
+   "An encoder"
+  ],
+  "law": [
+   {
+    "law": "An instrument",
+    "source": [
+     "https://example.test/law"
+    ]
+   },
+   {
+    "law": "An instrument with no source"
+   }
+  ],
+  "license": "CC0-1.0",
+  "name": "Every field",
+  "note": [
+   "A remark",
+   "Another remark"
+  ],
+  "render-license": "CC0-1.0",
+  "restriction": [
+   {
+    "restriction": "A limit",
+    "source": [
+     "https://example.test/limit"
+    ]
+   }
+  ],
+  "series": "every-field",
+  "source": [
+   "https://example.test/source"
+  ],
+  "until": "2001",
+  "version": "1"
+ },
+ "outline": {
+  "depth": 4,
+  "form": "swallowtail",
+  "taper": 1
+ },
+ "palette": {
+  "blue": {
+   "cmyk": [
+    100,
+    1e-07,
+    0,
+    40
+   ],
+   "color": "#003399",
+   "dye": [
+    "Example Blue",
+    "Another Blue"
+   ],
+   "munsell": "5PB 3/10",
+   "ncs": "4055-R95B",
+   "pantone": "301 C",
+   "ral": "5002",
+   "reference": [
+    {
+     "system": "CIE xyY",
+     "value": "0.1556 0.1354 6.5"
+    },
+    {
+     "system": "pantone",
+     "value": "not the named system"
+    }
+   ],
+   "thread": "Example Thread"
+  },
+  "dawn": {
+   "along": "hoist",
+   "gradient": [
+    "red",
+    "gold",
+    "blue"
+   ],
+   "stops": [
+    0,
+    0.25,
+    1
+   ]
+  },
+  "even": {
+   "gradient": [
+    "blue",
+    "white"
+   ],
+   "stops": [
+    0,
+    1
+   ]
+  },
+  "gold": {
+   "color": "#ffcc00"
+  },
+  "red": {
+   "color": "#cc0000"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 40,
+  "hoist": 20
+ },
+ "reverse": {
+  "layers": [
+   {
+    "color": "red",
+    "layer": "field"
+   }
+  ]
+ },
+ "variant": {
+  "longer": {
+   "ratio": 2.5
+  },
+  "official": {
+   "border": {
+    "color": "gold",
+    "side": "outside",
+    "width": 0.01
+   },
+   "layers": [
+    {
+     "color": "red",
+     "layer": "field"
+    }
+   ],
+   "outline": {
+    "form": "polygon",
+    "point": [
+     {
+      "fly": 0,
+      "hoist": 0
+     },
+     {
+      "fly": 2,
+      "hoist": 0
+     },
+     {
+      "fly": 2,
+      "hoist": 1
+     },
+     {
+      "fly": 0,
+      "hoist": 1
+     }
+    ]
+   },
+   "proportion": {
+    "fly": 2,
+    "hoist": 1
+   }
+  },
+  "point": {
+   "outline": {
+    "form": "pennant",
+    "tip": 2
+   }
+  },
+  "shaped": {
+   "border": {
+    "color": "white",
+    "width": 0.1
+   },
+   "outline": {
+    "box": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "d": "M0 0H1V1H0Z",
+    "form": "path"
+   }
+  },
+  "tongue": {
+   "outline": {
+    "depth": 4,
+    "form": "tongued",
+    "tongue": 2
+   }
+  },
+  "turned": {
+   "from": "transpose",
+   "upright": true
+  }
+ },
+ "vexyl": 1
+}

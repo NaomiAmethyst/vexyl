@@ -562,7 +562,7 @@ func (p *parser) layer(n *kdl.Node, depth int) Layer {
 		}
 		return l
 	case "canton":
-		l := &Panel{Effects: newEffects(), Corner: "upper-hoist"}
+		l := &Panel{Effects: newEffects(), Corner: "upper-hoist", Canton: true}
 		p.noValues(n)
 		p.container(n, depth, &l.Effects, &l.Layers, map[string]func(*kdl.Node){
 			"fly":   func(c *kdl.Node) { l.Fly = p.positive(c, p.number(c)) },

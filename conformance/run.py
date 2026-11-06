@@ -3,7 +3,7 @@
 # Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 """Runs Vexyl's conformance suite against an implementation.
 
-    run.py [--only render,model,invalid,accepted,sanitize] [--filter TEXT] [--resvg PATH] COMMAND...
+    run.py [--only render,model,invalid,accepted,sanitize,distinct] [--filter TEXT] [--resvg PATH] COMMAND...
 
 COMMAND is how to run the implementation, which has to offer these, as `vexyl` does:
 
@@ -24,6 +24,7 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 
+import jsonschema
 import numpy as np
 from PIL import Image
 
@@ -252,9 +253,52 @@ def check_models(command, manifest, wanted, failures):
         if done.returncode:
             failures.append(f"{case['name']} model: failed: {done.stderr.strip()[:200]}")
             continue
+        got = json.loads(done.stdout)
+        problem = schema_problem(got)
+        if problem:
+            failures.append(f"{case['name']} model: {problem}")
         with open(os.path.join(HERE, case["model"])) as f:
-            if not numbers_close(json.loads(done.stdout), json.load(f)):
+            if not numbers_close(got, json.load(f)):
                 failures.append(f"{case['name']} model: differs")
+    return count
+
+
+def schema_problem(model):
+    """Says what's wrong with a model by the schema, if anything is."""
+    with open(os.path.join(HERE, "model.schema.json")) as f:
+        schema = json.load(f)
+    error = jsonschema.exceptions.best_match(jsonschema.Draft202012Validator(schema).iter_errors(model))
+    return None if error is None else f"at {error.json_path}: {error.message[:200]}"
+
+
+def check_distinct(command, wanted, failures):
+    """Two documents that mean different things can't have the same model."""
+    with open(os.path.join(HERE, "distinct.json")) as f:
+        cases = json.load(f)
+    header = 'vexyl 1\nmeta { name "T"; }\npalette { a "#112233"; b "#445566"; }\nproportion hoist=10 fly=20\n'
+    def document(body):
+        if body.startswith("G "):
+            return ('vexyl 1\nmeta { name "T"; }\npalette { a "#112233"; b "#445566"; g gradient a b { stops ' + body[2:]
+                    + '; }; }\nproportion hoist=10 fly=20\nfield g\n')
+        return header + body + "\n"
+    count = 0
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "doc.kdl")
+        for case in cases:
+            if wanted and wanted not in case["name"]:
+                continue
+            count += 1
+            models = []
+            for side in ("a", "b"):
+                with open(path, "w") as f:
+                    f.write(document(case[side]))
+                done = subprocess.run(command + ["model", path], capture_output=True, text=True)
+                if done.returncode:
+                    failures.append(f"{case['name']}: model failed: {done.stderr.strip()[:200]}")
+                    break
+                models.append(json.loads(done.stdout))
+            if len(models) == 2 and numbers_close(models[0], models[1]):
+                failures.append(f"{case['name']}: both have the same model")
     return count
 
 
@@ -336,7 +380,7 @@ def check_sanitize(command, wanted, failures):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--only", default="render,model,invalid,accepted,sanitize")
+    ap.add_argument("--only", default="render,model,invalid,accepted,sanitize,distinct")
     ap.add_argument("--filter", help="only cases whose names contain this")
     ap.add_argument("--resvg", default="resvg")
     ap.add_argument("command", nargs="+")
@@ -360,6 +404,8 @@ def main():
         totals["accepted documents"] = check_accepted(command, args.filter, failures)
     if "sanitize" in only:
         totals["sanitizer outputs"] = check_sanitize(command, args.filter, failures)
+    if "distinct" in only:
+        totals["distinct pairs"] = check_distinct(command, args.filter, failures)
     for failure in failures:
         print("FAIL", failure)
     print(", ".join(f"{v} {k}" for k, v in totals.items()) + f": {len(failures)} failed")

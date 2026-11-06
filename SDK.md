@@ -77,21 +77,103 @@ These MUST be errors, so that no option is ever silently ignored:
 ## 4. The model
 
 `model` gives a flag as plain maps, lists, strings, numbers and booleans. It's the same in every
-language, so the suite can compare what a library understood, apart from how it draws:
+language, so the suite can compare what a library understood, apart from how it draws. Its numbers
+compare allowing a difference of one part in a million. [`conformance/model.schema.json`](conformance/model.schema.json)
+is the same thing as a schema, and every library's models have to fit it.
 
-- Names are the format's own terms in kebab-case, like `border-outside`.
-- A flag's `layers`, and any other layers, say what they are in a `layer` field, such as `bars`.
-- Anything empty, zero or false is left out.
-- Defaults have been applied, as they are for drawing: a star's `inner` has been worked out, and
-  `count` has expanded a bar's colors.
-- Inline SVG is as it is after being sanitized, and the source's other content isn't kept anywhere.
-  It's written as `<svg xmlns="..." viewBox="X Y W H" ...>`, then its elements with nothing between
-  them and never self-closed, with attributes in source order, IDs and references as written, and
-  `& < > " ' tab LF CR` in values as `&amp; &lt; &gt; &#34; &#39; &#x9; &#xA; &#xD;`.
-- A `use` gives the name of what it uses, and that's found under the flag's definitions.
+Three rules say what's there:
 
-The suite's `.model.json` files show every field. They compare with numbers allowed to differ by
-one part in a million.
+- **A name is the format's own term.** A node's name is its key, so the top level has the nodes of
+  section 4 of the format: `vexyl`, `meta`, `palette`, `proportion`, `outline`, `border`, `define`,
+  `layers`, `reverse`, `adapt`, `variant` and `fold`. A repeatable node gives a list under its own
+  name, such as `note`, `cut`, `at` or `point`, and a named one gives a map under its own name, such
+  as `define`, `variant` and `fold`.
+- **A value is left out only if it equals the format's default.** The fixed defaults are below. A
+  zero that means something stays, so `at` at the origin isn't the same as no `at`, and two flags
+  that draw differently never have the same model.
+- **What depends on other values is worked out.** `inner` on a star, `spread` on a heart, `stops`
+  on a gradient and `ratio` on `bars`, `chevrons` and `rays` are always there, and `count` has
+  expanded a list's colors, so `colors` and `ratio` are the same length.
+
+Anything that can't be worked out without a region stays left out: a `lozenge` without a size, a
+pall without a `junction`, a pile without a `base`.
+
+### 4.1 Fields
+
+Each thing that comes in kinds says which it is in a field of its own: `layer`, `shape`, `form` or
+`step`. Where nothing's said about the type below, a field is a number, or a string if it names
+something.
+
+| Value | Fields, with any default |
+|---|---|
+| Top level | `vexyl` 1; `meta`; `palette`; `proportion`; `outline`; `border`; `define`; `layers`; `reverse`; `adapt`; `variant`; `fold`. The first four are always there |
+| `proportion` | `hoist`, `fly` |
+| `meta` | `name`, `description`, `version`, `date`, `until`, `series`, `design-rights`, `license`, `render-license`; lists of `note`, `designer`, `encoder`, `source`, `law`, `restriction` and `adapted-from` |
+| `law`, `restriction` | The text under its own name, as `law` or `restriction`, and a list of `source` |
+| `adapted-from` | `url`, a list of `author`, `license`, `part` |
+| A `palette` color | `color`, `pantone`, `ncs`, `ral`, `munsell`, `thread`; a list of `dye`; `cmyk` as four numbers; a list of `reference`, each with `system` and `value` |
+| A `palette` gradient | `gradient`, a list of colors; `stops`; `along` (`fly`) |
+| `border` | `color`, `width`, `side` (`inside`) |
+| `fimbriate` | `color`, `width` |
+| `outline` | `form`: `polygon` with `point`; `path` with `d`, `box`; `swallowtail` with `depth`, `taper` (0); `tongued` with `depth`, `tongue`; `pennant` with `tip` (0) |
+| A `define` | A shape, or a design with `layers` and its own `proportion` |
+| `reverse` | `layers`. `reverse mirror` is the default, so it isn't there |
+| `adapt` | `range` as two numbers; `wider`; `narrower`. `cut` means the same as `extend`, so it reads `extend` |
+| A `variant` | `from` (`none`), `upright` (false), `ratio`, `proportion`, `outline`, `border`, `layers` |
+| A `fold` | `description`; a list of `source`; `steps` |
+| A step | `step`: `over`, `under` or `tuck`, with `along`, `at` and `move` as they were written, or `through` as four numbers and `move` as two |
+| `edge` | `form`: `wavy` or `zigzag`, with `depth`, then `period` or `count` |
+| `repeat` | `form`: `ring` with `count`, `radius`, `turn` (false); `arc` with those and `from`, `to`; `grid` with `rows`, `columns`, `stagger` (false); `line` with `count`, `fly` (0), `hoist` (0) |
+
+Every layer has `layer`, and may have `anchor` (none), `opacity` (1), `blend` (`normal`), `clip`, and
+a list of `cut`. Layers don't otherwise repeat each other, and `layer` is the node's own name:
+
+| `layer` | Other fields, with any default |
+|---|---|
+| `field` | `color` |
+| `bars` | `colors`, `ratio`, `along` (`fly`), `rotate` (0), `grow`, `edge` |
+| `chevrons` | `colors`, `ratio`, `depth`, `from` (`hoist`), `angle`, `apex`, `rotate` (0), `fimbriate` |
+| `band` | `color`, `width`, `along` (`fly`), `offset` (0), `rotate` (0), `fimbriate` |
+| `cross` | `color`, `fly` and `hoist` as three numbers each, `fimbriate` |
+| `saltire` | `color`, `width`, `counterchange` (false), `fimbriate` |
+| `quarters` | `colors`, `diagonal` (false), `split` |
+| `checks` | `colors`, `rows`, `columns`, `flow` (`bend-sinister`) |
+| `rays` | `colors`, `ratio`, `from` (`center`) as a name or a position, `rotate` (0), `measure` (`angle`) |
+| `pile` | `color`, `from` (`hoist`), `base`, `tip`, `depth`, `flat`, `hollow`, `fimbriate` |
+| `pall` | `color`, `width`, `from` (`hoist`), `junction`, `hollow`, `fimbriate` |
+| `charge` | A shape's fields, then `color`, `fimbriate`, `repeat` |
+| `emblem` | `at`, `along`, `rotate` (0), and `layers`, each a `charge` |
+| `group` | `layers` |
+| `panel` | `side`, `width`, `corner`, `at`, `fly`, `hoist`, `edge`, `layers` |
+| `canton` | `fly`, `hoist`, `layers` |
+| `use` | `name`, whose definition is under `define` |
+
+A shape has `shape`, `at`, `rotate` (0) and `hollow`, then:
+
+| `shape` | Other fields, with any default |
+|---|---|
+| `disc`, `triangle`, `cardioid` | `radius` |
+| `ellipse`, `rect`, `lozenge` | `fly`, `hoist` |
+| `ring` | `radius`, `inner`, and `from` and `to` together if it's an arc |
+| `plus` | `radius`, `width` |
+| `star` | `radius`, `inner`, `points` (5), `lines` |
+| `crescent` | `radius`, `inner`, `offset` |
+| `sun` | `radius`, `disc`, `gap` (0), `points` (12), `spread` (1) |
+| `heart` | `radius`, `spread` |
+| `path` | `d`, `box` as four numbers, `fly`, `hoist`, `evenodd` (false) |
+| `polygon` | `point` |
+| `svg` | `fly`, `hoist`, `markup` |
+| `pile`, `pall` | As the layers of those names, only in a `clip` or `cut` |
+
+A position is `fly` and `hoist`, both always there. A shape's `at` is a list of positions and the
+word `center`. One `at center` is the default, so it isn't there.
+
+A charge using a defined shape gives that shape's fields, with the charge's changes applied.
+
+Inline SVG is as it is after being sanitized, and the source's other content isn't kept anywhere.
+It's written as `<svg xmlns="..." viewBox="X Y W H" ...>`, then its elements with nothing between
+them and never self-closed, with attributes in source order, IDs and references as written, and
+`& < > " ' tab LF CR` in values as `&amp; &lt; &gt; &#34; &#39; &#x9; &#xA; &#xD;`.
 
 ## 5. SVG output
 
@@ -113,12 +195,15 @@ place where a document can carry another format's markup, and a gap here is a se
 ## 6. Conformance
 
 A library passes when the suite in [`conformance/`](conformance/README.md) reports no failures,
-at the suite's version for the format's version. It has three parts:
+at the suite's version for the format's version, which `manifest.json` gives as `version` and
+`format`. It has these parts:
 
 | Part | Checks |
 |---|---|
 | Renders | Each flag, in each form, compared with the expected SVG as pixels |
 | Models | Each flag's model, compared with the expected JSON |
+| Models fit | Each flag's model fits `model.schema.json` |
+| Distinct models | Documents that mean different things have different models |
 | Invalid documents | Each is refused, with a problem on the expected line |
 | Accepted documents | Each is valid, including those exactly at a limit |
 | Sanitizer output | Each piece of artwork comes out as expected, in the model and in a render |

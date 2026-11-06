@@ -639,6 +639,12 @@ func TestRejected(t *testing.T) {
 		{"variant before adapt", header + "variant v { from rotate; }\nadapt { wider extend; }\n", "out of order"},
 		{"fold before variant", header + "field a\nfold f { over along=hoist at=5 move=fly; }\nvariant v { from rotate; }\n", "out of order"},
 		{"ring with no arc", header + `charge ring a { radius 2; inner 1; from 90; to 450; }`, "same place"},
+		{"pennant with a depth", header + "outline pennant { depth 1; }\n", "doesn't use"},
+		{"swallowtail with a tip", header + "outline swallowtail { depth 1; tip 1; }\n", "doesn't use"},
+		{"tongued with a taper", header + "outline tongued { depth 1; tongue 1; taper 1; }\n", "doesn't use"},
+		{"edge with both a period and a count", header + `bars a b { edge wavy depth=1 period=1 count=2; }`, "not both"},
+		{"a shape definition with its own grid", header + "define d hoist=1 fly=1 { disc { radius 1; }; }\n", "only a design"},
+		{"corner panel with a width", header + `panel { corner upper-fly; fly 1; hoist 1; width 1; field a; }`, "only a side panel"},
 		{"not utf-8", header + "field \"\xff\"\n", "UTF-8"},
 		{"problem after crlf", "vexyl 1\r\nmeta { name \"T\"; }\r\npalette { a \"#112233\"; }\r\nproportion hoist=10 fly=20\r\nfield nope\r\n", "isn't in the palette"},
 		{"problem after cr", "vexyl 1\rmeta { name \"T\"; }\rpalette { a \"#112233\"; }\rproportion hoist=10 fly=20\rfield nope\r", "isn't in the palette"},
@@ -1511,11 +1517,16 @@ func TestModel(t *testing.T) {
 	m := parse(t, header+`bars a b { along hoist; }`).Model().(map[string]any)
 	layers := m["layers"].([]any)
 	bar := layers[0].(map[string]any)
-	if bar["layer"] != "bars" || bar["along"] != "hoist" || m["fly"] != 20.0 {
+	if bar["layer"] != "bars" || bar["along"] != "hoist" || m["proportion"].(map[string]any)["fly"] != 20.0 {
 		t.Errorf("model: %+v", m)
 	}
 	if _, present := m["outline"]; present {
 		t.Errorf("empty fields should be left out: %+v", m)
+	}
+	// A use gives only its name, however much it would expand to.
+	used := parse(t, header+exponentialDocument(10)).Model().(map[string]any)["layers"].([]any)[0].(map[string]any)
+	if len(used) != 2 || used["layer"] != "use" || used["name"] != "d10" {
+		t.Errorf("use: %+v", used)
 	}
 }
 
@@ -1572,9 +1583,12 @@ palette {
 }
 proportion hoist=1 fly=1
 field a`)
-	want := []ColorRef{{"pantone", "301 C"}, {"ncs", "4055-R95B"}, {"cmyk", "100 50.5 0 10"},
-		{"dye", "One"}, {"dye", "Two"}, {"CIE xyY", "0.1 0.2 3"}}
-	if !slices.Equal(f.ColorRefs["a"], want) {
+	want := []ColorRef{{System: "pantone", Value: "301 C"}, {System: "ncs", Value: "4055-R95B"},
+		{System: "cmyk", Value: "100 50.5 0 10", Numbers: []float64{100, 50.5, 0, 10}},
+		{System: "dye", Value: "One"}, {System: "dye", Value: "Two"}, {System: "CIE xyY", Value: "0.1 0.2 3", Other: true}}
+	if !slices.EqualFunc(f.ColorRefs["a"], want, func(a, b ColorRef) bool {
+		return a.System == b.System && a.Value == b.Value && slices.Equal(a.Numbers, b.Numbers) && a.Other == b.Other
+	}) {
 		t.Errorf("got %v", f.ColorRefs["a"])
 	}
 	if len(f.ColorRefs["b"]) != 0 {

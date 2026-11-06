@@ -1,105 +1,72 @@
 {
- "color-refs": {
-  "gold": [
-   {
-    "system": "pantone",
-    "value": "123"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "485"
-   }
-  ]
- },
- "fly": 180,
- "hoist": 90,
  "layers": [
   {
-   "blend": "normal",
    "color": "red",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
    "colors": [
     "gold"
    ],
    "depth": 90,
-   "from": "hoist",
    "layer": "chevrons",
-   "opacity": 1,
    "ratio": [
     1
    ]
   },
   {
-   "blend": "normal",
    "colors": [
     "black"
    ],
    "depth": 60,
-   "from": "hoist",
    "layer": "chevrons",
-   "opacity": 1,
    "ratio": [
     1
    ]
   },
   {
-   "blend": "normal",
-   "color": "white",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 20,
      "hoist": 45
-    },
-    "ats": [
-     {
-      "fly": 20,
-      "hoist": 45
-     }
-    ],
-    "inner": 5.824981671564104,
-    "kind": "star",
-    "points": 5,
-    "radius": 15.25,
-    "rotate": -23.96
-   }
+    }
+   ],
+   "color": "white",
+   "inner": 5.824981671564104,
+   "layer": "charge",
+   "radius": 15.25,
+   "rotate": -23.96,
+   "shape": "star"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Constitution of the Democratic Republic of Timor-Leste, Section 15",
+    "source": [
      "https://timor-leste.gov.tl/wp-content/uploads/2010/03/Constituicao_RDTL_PT.pdf"
-    ],
-    "text": "Constitution of the Democratic Republic of Timor-Leste, Section 15"
+    ]
    },
    {
-    "sources": [
+    "law": "Law No. 2/2007 on National Symbols, Articles 3 and 4",
+    "source": [
      "https://www.wipo.int/edocs/lexdocs/laws/pt/tl/tl018pt.pdf"
-    ],
-    "text": "Law No. 2/2007 on National Symbols, Articles 3 and 4"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Timor-Leste",
-  "notes": [
+  "note": [
    "The constitution gives the triangles and the star's place and direction, but no proportion or star size.",
    "The 1:2 proportion and the star's size are from the technical note of the UNTAET Independence Day committee of May 2002, as reported on FOTW, which isn't a law. FOTW reports that 2:3 flags are also used officially.",
    "Law 2/2007 refers to the constitution for the design, and to an official picture in its Annex A. The copy read lacks that annex. FOTW describes it as a crude picture of about 7:12, and Wikipedia reports it as 1:2.",
    "Pantone 123 and 485 are from the same UNTAET note. The hex values are Flag Color Codes', and aren't official. The constitution names only the colors."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://timor-leste.gov.tl/wp-content/uploads/2010/03/Constituicao_RDTL_PT.pdf",
    "https://www.wipo.int/edocs/lexdocs/laws/pt/tl/tl018pt.pdf",
    "https://www.crwflags.com/fotw/flags/tl'un.html",
@@ -108,10 +75,24 @@
   ]
  },
  "palette": {
-  "black": "#000000",
-  "gold": "#ffc72c",
-  "red": "#da291c",
-  "white": "#ffffff"
+  "black": {
+   "color": "#000000"
+  },
+  "gold": {
+   "color": "#ffc72c",
+   "pantone": "123"
+  },
+  "red": {
+   "color": "#da291c",
+   "pantone": "485"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 180,
+  "hoist": 90
+ },
+ "vexyl": 1
 }

@@ -1,333 +1,229 @@
 {
- "color-refs": {
-  "black": [
-   {
-    "system": "munsell",
-    "value": "N 0.5"
-   }
-  ],
-  "blue": [
-   {
-    "system": "munsell",
-    "value": "5.0PB 3.0/12"
-   },
-   {
-    "system": "pantone",
-    "value": "294 C"
-   },
-   {
-    "system": "CIE xyY",
-    "value": "0.1556 0.1354 6.5"
-   }
-  ],
-  "red": [
-   {
-    "system": "munsell",
-    "value": "6.0R 4.5/14"
-   },
-   {
-    "system": "pantone",
-    "value": "186 C"
-   },
-   {
-    "system": "CIE xyY",
-    "value": "0.5640 0.3194 15.3"
-   }
-  ],
-  "white": [
-   {
-    "system": "munsell",
-    "value": "N 9.5"
-   }
-  ]
- },
- "fly": 144,
- "hoist": 96,
  "layers": [
   {
-   "blend": "normal",
    "color": "white",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
    "along": "bend",
-   "blend": "normal",
-   "charges": [
+   "layer": "emblem",
+   "layers": [
     {
-     "blend": "normal",
      "color": "blue",
-     "opacity": 1,
-     "shape": {
-      "kind": "disc",
-      "radius": 24
-     }
+     "layer": "charge",
+     "radius": 24,
+     "shape": "disc"
     },
     {
-     "blend": "normal",
      "clip": {
-      "at": {
-       "hoist": -12
-      },
-      "ats": [
+      "at": [
        {
+        "fly": 0,
         "hoist": -12
        }
       ],
       "fly": 48,
       "hoist": 24,
-      "kind": "rect"
+      "shape": "rect"
      },
      "color": "red",
-     "opacity": 1,
-     "shape": {
-      "kind": "disc",
-      "radius": 24
-     }
+     "layer": "charge",
+     "radius": 24,
+     "shape": "disc"
     },
     {
-     "blend": "normal",
+     "at": [
+      {
+       "fly": -12,
+       "hoist": 0
+      }
+     ],
      "color": "red",
-     "opacity": 1,
-     "shape": {
-      "at": {
-       "fly": -12
-      },
-      "ats": [
-       {
-        "fly": -12
-       }
-      ],
-      "kind": "disc",
-      "radius": 12
-     }
+     "layer": "charge",
+     "radius": 12,
+     "shape": "disc"
     },
     {
-     "blend": "normal",
+     "at": [
+      {
+       "fly": 12,
+       "hoist": 0
+      }
+     ],
      "color": "blue",
-     "opacity": 1,
-     "shape": {
-      "at": {
-       "fly": 12
-      },
-      "ats": [
-       {
-        "fly": 12
-       }
-      ],
-      "kind": "disc",
-      "radius": 12
-     }
+     "layer": "charge",
+     "radius": 12,
+     "shape": "disc"
     },
     {
-     "blend": "normal",
+     "at": [
+      {
+       "fly": -50,
+       "hoist": 0
+      }
+     ],
      "color": "black",
-     "opacity": 1,
+     "fly": 4,
+     "hoist": 24,
+     "layer": "charge",
      "repeat": {
       "count": 3,
       "fly": 6,
-      "kind": "line"
+      "form": "line"
      },
-     "shape": {
-      "at": {
-       "fly": -50
-      },
-      "ats": [
-       {
-        "fly": -50
-       }
-      ],
-      "fly": 4,
-      "hoist": 24,
-      "kind": "rect"
-     }
+     "shape": "rect"
     },
     {
-     "blend": "normal",
-     "color": "black",
-     "cuts": [
+     "at": [
       {
-       "at": {
-        "fly": 44
-       },
-       "ats": [
+       "fly": 38,
+       "hoist": 0
+      }
+     ],
+     "color": "black",
+     "cut": [
+      {
+       "at": [
         {
-         "fly": 44
+         "fly": 44,
+         "hoist": 0
         }
        ],
        "fly": 20,
        "hoist": 2,
-       "kind": "rect"
+       "shape": "rect"
       }
      ],
-     "opacity": 1,
+     "fly": 4,
+     "hoist": 24,
+     "layer": "charge",
      "repeat": {
       "count": 3,
       "fly": 6,
-      "kind": "line"
+      "form": "line"
      },
-     "shape": {
-      "at": {
-       "fly": 38
-      },
-      "ats": [
-       {
-        "fly": 38
-       }
-      ],
-      "fly": 4,
-      "hoist": 24,
-      "kind": "rect"
-     }
+     "shape": "rect"
     }
-   ],
-   "layer": "emblem",
-   "opacity": 1
+   ]
   },
   {
    "along": "bend-sinister",
-   "blend": "normal",
-   "charges": [
+   "layer": "emblem",
+   "layers": [
     {
-     "blend": "normal",
+     "at": [
+      {
+       "fly": -50,
+       "hoist": 0
+      }
+     ],
      "color": "black",
-     "opacity": 1,
+     "fly": 4,
+     "hoist": 24,
+     "layer": "charge",
      "repeat": {
       "count": 2,
       "fly": 12,
-      "kind": "line"
+      "form": "line"
      },
-     "shape": {
-      "at": {
-       "fly": -50
-      },
-      "ats": [
-       {
-        "fly": -50
-       }
-      ],
-      "fly": 4,
-      "hoist": 24,
-      "kind": "rect"
-     }
+     "shape": "rect"
     },
     {
-     "blend": "normal",
-     "color": "black",
-     "cuts": [
+     "at": [
       {
-       "at": {
-        "fly": -44
-       },
-       "ats": [
+       "fly": -44,
+       "hoist": 0
+      }
+     ],
+     "color": "black",
+     "cut": [
+      {
+       "at": [
         {
-         "fly": -44
+         "fly": -44,
+         "hoist": 0
         }
        ],
        "fly": 8,
        "hoist": 2,
-       "kind": "rect"
+       "shape": "rect"
       }
      ],
-     "opacity": 1,
-     "shape": {
-      "at": {
-       "fly": -44
-      },
-      "ats": [
-       {
-        "fly": -44
-       }
-      ],
-      "fly": 4,
-      "hoist": 24,
-      "kind": "rect"
-     }
+     "fly": 4,
+     "hoist": 24,
+     "layer": "charge",
+     "shape": "rect"
     },
     {
-     "blend": "normal",
-     "color": "black",
-     "opacity": 1,
-     "shape": {
-      "at": {
-       "fly": 44
-      },
-      "ats": [
-       {
-        "fly": 44
-       }
-      ],
-      "fly": 4,
-      "hoist": 24,
-      "kind": "rect"
-     }
-    },
-    {
-     "blend": "normal",
-     "color": "black",
-     "cuts": [
+     "at": [
       {
-       "at": {
-        "fly": 44
-       },
-       "ats": [
+       "fly": 44,
+       "hoist": 0
+      }
+     ],
+     "color": "black",
+     "fly": 4,
+     "hoist": 24,
+     "layer": "charge",
+     "shape": "rect"
+    },
+    {
+     "at": [
+      {
+       "fly": 38,
+       "hoist": 0
+      }
+     ],
+     "color": "black",
+     "cut": [
+      {
+       "at": [
         {
-         "fly": 44
+         "fly": 44,
+         "hoist": 0
         }
        ],
        "fly": 20,
        "hoist": 2,
-       "kind": "rect"
+       "shape": "rect"
       }
      ],
-     "opacity": 1,
+     "fly": 4,
+     "hoist": 24,
+     "layer": "charge",
      "repeat": {
       "count": 2,
       "fly": 12,
-      "kind": "line"
+      "form": "line"
      },
-     "shape": {
-      "at": {
-       "fly": 38
-      },
-      "ats": [
-       {
-        "fly": 38
-       }
-      ],
-      "fly": 4,
-      "hoist": 24,
-      "kind": "rect"
-     }
+     "shape": "rect"
     }
-   ],
-   "layer": "emblem",
-   "opacity": 1
+   ]
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "National Flag Act (대한민국국기법), Article 7",
+    "source": [
      "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=150692"
-    ],
-    "text": "National Flag Act (대한민국국기법), Article 7"
+    ]
    },
    {
-    "sources": [
+    "law": "Enforcement Decree of the National Flag Act (대한민국국기법 시행령), Articles 6 and 8 and Annex 2",
+    "source": [
      "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=195596",
      "https://www.law.go.kr/LSW/flDownload.do?flSeq=30715691",
      "https://ko.wikisource.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%EA%B5%AD%EA%B8%B0%EB%B2%95_%EC%8B%9C%ED%96%89%EB%A0%B9"
-    ],
-    "text": "Enforcement Decree of the National Flag Act (대한민국국기법 시행령), Articles 6 and 8 and Annex 2"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "South Korea",
-  "notes": [
+  "note": [
    "From the law: the proportion, in Article 7 of the Act, the construction, in Article 6 of the decree, and the CIE and Munsell values, in the decree's Annex 2.",
    "Derived: the red and blue hex values were converted for this file from Annex 2's CIE values to sRGB, assuming D65, since the annex doesn't name an illuminant. Black and white are plain, and Annex 2 gives them only as Munsell values.",
    "From elsewhere: the Pantone values aren't in the law. FOTW reports them from a 1997 ministry document and from the Album des Pavillons.",
@@ -335,15 +231,45 @@
    "Amendments: the national law center's current texts are the Act as of 28 January 2014 (No. 12342) and the decree as of 26 July 2017 (No. 28211). Wikisource's 2014 decree has the same Article 6."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.crwflags.com/fotw/flags/kr.html"
   ]
  },
  "palette": {
-  "black": "#000000",
-  "blue": "#0047a0",
-  "red": "#cd2e3a",
-  "white": "#ffffff"
+  "black": {
+   "color": "#000000",
+   "munsell": "N 0.5"
+  },
+  "blue": {
+   "color": "#0047a0",
+   "munsell": "5.0PB 3.0/12",
+   "pantone": "294 C",
+   "reference": [
+    {
+     "system": "CIE xyY",
+     "value": "0.1556 0.1354 6.5"
+    }
+   ]
+  },
+  "red": {
+   "color": "#cd2e3a",
+   "munsell": "6.0R 4.5/14",
+   "pantone": "186 C",
+   "reference": [
+    {
+     "system": "CIE xyY",
+     "value": "0.5640 0.3194 15.3"
+    }
+   ]
+  },
+  "white": {
+   "color": "#ffffff",
+   "munsell": "N 9.5"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 144,
+  "hoist": 96
+ },
+ "vexyl": 1
 }

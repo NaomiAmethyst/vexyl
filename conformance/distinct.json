@@ -1,0 +1,297 @@
+[
+ {
+  "name": "a position at the origin, and none",
+  "a": "charge disc a { radius 1; at fly=0 hoist=0; }",
+  "b": "charge disc a { radius 1; }"
+ },
+ {
+  "name": "two positions, and only one",
+  "a": "charge disc a { radius 1; at center; at fly=0 hoist=0; }",
+  "b": "charge disc a { radius 1; at fly=0 hoist=0; }"
+ },
+ {
+  "name": "an apex at the start, and none",
+  "a": "chevrons a { depth 1; angle 45; apex 0; }",
+  "b": "chevrons a { depth 1; angle 45; }"
+ },
+ {
+  "name": "no opacity, and full",
+  "a": "field a { opacity 0; }",
+  "b": "field a"
+ },
+ {
+  "name": "a split at the origin, and none",
+  "a": "quarters a b a b { split fly=0 hoist=0; }",
+  "b": "quarters a b a b"
+ },
+ {
+  "name": "an emblem at the origin, and none",
+  "a": "emblem { at fly=0 hoist=0; charge disc a { radius 1; }; }",
+  "b": "emblem { charge disc a { radius 1; }; }"
+ },
+ {
+  "name": "a panel at the origin, and none",
+  "a": "panel { at fly=0 hoist=0; fly 1; hoist 1; field a; }",
+  "b": "panel { fly 1; hoist 1; field a; }"
+ },
+ {
+  "name": "rays from the origin, and the center",
+  "a": "rays a b { from fly=0 hoist=0; }",
+  "b": "rays a b"
+ },
+ {
+  "name": "a ring's arc from up, and no arc",
+  "a": "charge ring a { radius 2; inner 1; from 0; to 90; }",
+  "b": "charge ring a { radius 2; inner 1; }"
+ },
+ {
+  "name": "an arc ending at up, and at another place",
+  "a": "charge ring a { radius 2; inner 1; from 90; to 0; }",
+  "b": "charge ring a { radius 2; inner 1; from 90; to 10; }"
+ },
+ {
+  "name": "a bar that doesn't grow, and one that does",
+  "a": "bars a b { grow 0 1; }",
+  "b": "bars a b { grow 1 1; }"
+ },
+ {
+  "name": "a grow of evens, and none",
+  "a": "bars a b { grow 1 1; }",
+  "b": "bars a b"
+ },
+ {
+  "name": "a stop at the start, and elsewhere",
+  "a": "G 0 1",
+  "b": "G 0.5 1"
+ },
+ {
+  "name": "a point at the origin, and elsewhere",
+  "a": "charge polygon a { point fly=0 hoist=0; point fly=1 hoist=0; point fly=1 hoist=1; }",
+  "b": "charge polygon a { point fly=0 hoist=1; point fly=1 hoist=0; point fly=1 hoist=1; }"
+ },
+ {
+  "name": "a line stepping only one way, and the other",
+  "a": "charge disc a { radius 1; repeat line count=2 fly=1; }",
+  "b": "charge disc a { radius 1; repeat line count=2 hoist=1; }"
+ },
+ {
+  "name": "an arc's start at up, and elsewhere",
+  "a": "charge disc a { radius 1; repeat arc count=2 radius=1 from=0 to=90; }",
+  "b": "charge disc a { radius 1; repeat arc count=2 radius=1 from=1 to=90; }"
+ },
+ {
+  "name": "a box at the origin, and elsewhere",
+  "a": "charge path a { d \"M0 0Z\"; box \"0 0 1 1\"; fly 1; }",
+  "b": "charge path a { d \"M0 0Z\"; box \"1 0 1 1\"; fly 1; }"
+ },
+ {
+  "name": "a box's fly, and hoist",
+  "a": "charge path a { d \"M0 0Z\"; box \"0 0 1 1\"; fly 1; }",
+  "b": "charge path a { d \"M0 0Z\"; box \"0 0 1 1\"; hoist 1; }"
+ },
+ {
+  "name": "a cross's fly, and hoist",
+  "a": "cross a { fly 0 1 1; hoist 1 1 0; }",
+  "b": "cross a { fly 1 1 0; hoist 0 1 1; }"
+ },
+ {
+  "name": "a pile's base at the start",
+  "a": "pile a { depth 1; base 0 1; }",
+  "b": "pile a { depth 1; }"
+ },
+ {
+  "name": "a pile's tip at the start",
+  "a": "pile a { tip 0 1; }",
+  "b": "pile a { tip 1 1; }"
+ },
+ {
+  "name": "a pile's edge",
+  "a": "pile a { depth 1; from top; }",
+  "b": "pile a { depth 1; }"
+ },
+ {
+  "name": "a pile's flat",
+  "a": "pile a { depth 1; flat 1; }",
+  "b": "pile a { depth 1; }"
+ },
+ {
+  "name": "a pall's junction",
+  "a": "pall a { width 1; junction 1; }",
+  "b": "pall a { width 1; }"
+ },
+ {
+  "name": "a pile, and a pall",
+  "a": "pile a { depth 1; }",
+  "b": "pall a { width 1; }"
+ },
+ {
+  "name": "a canton, and a panel in another corner",
+  "a": "canton { fly 1; hoist 1; field a; }",
+  "b": "panel { corner upper-fly; fly 1; hoist 1; field a; }"
+ },
+ {
+  "name": "edge and angle measures",
+  "a": "rays a b { measure edge; }",
+  "b": "rays a b"
+ },
+ {
+  "name": "evenodd",
+  "a": "charge path a { d \"M0 0Z\"; box \"0 0 1 1\"; fly 1; evenodd; }",
+  "b": "charge path a { d \"M0 0Z\"; box \"0 0 1 1\"; fly 1; }"
+ },
+ {
+  "name": "a hollow shape",
+  "a": "charge disc a { radius 1; hollow 0.5; }",
+  "b": "charge disc a { radius 1; }"
+ },
+ {
+  "name": "a star's lines",
+  "a": "charge star a { radius 1; lines 0.5; }",
+  "b": "charge star a { radius 1; }"
+ },
+ {
+  "name": "a star's points",
+  "a": "charge star a { radius 1; points 6; }",
+  "b": "charge star a { radius 1; }"
+ },
+ {
+  "name": "a star's inner",
+  "a": "charge star a { radius 1; inner 0.1; }",
+  "b": "charge star a { radius 1; }"
+ },
+ {
+  "name": "a sun's gap",
+  "a": "charge sun a { radius 2; disc 1; gap 0.1; }",
+  "b": "charge sun a { radius 2; disc 1; }"
+ },
+ {
+  "name": "a sun's spread",
+  "a": "charge sun a { radius 2; disc 1; spread 0.5; }",
+  "b": "charge sun a { radius 2; disc 1; }"
+ },
+ {
+  "name": "a turn",
+  "a": "charge disc a { radius 1; repeat ring count=2 radius=1 turn=#true; }",
+  "b": "charge disc a { radius 1; repeat ring count=2 radius=1; }"
+ },
+ {
+  "name": "a stagger",
+  "a": "charge disc a { radius 1; repeat grid rows=2 columns=2 stagger=#true; }",
+  "b": "charge disc a { radius 1; repeat grid rows=2 columns=2; }"
+ },
+ {
+  "name": "rotations",
+  "a": "band a { width 1; rotate 1; }",
+  "b": "band a { width 1; }"
+ },
+ {
+  "name": "offsets",
+  "a": "band a { width 1; offset 1; }",
+  "b": "band a { width 1; }"
+ },
+ {
+  "name": "axes",
+  "a": "band a { width 1; along hoist; }",
+  "b": "band a { width 1; }"
+ },
+ {
+  "name": "blends",
+  "a": "field a { blend multiply; }",
+  "b": "field a"
+ },
+ {
+  "name": "anchors",
+  "a": "charge disc a { radius 1; anchor end; }",
+  "b": "charge disc a { radius 1; }"
+ },
+ {
+  "name": "clips",
+  "a": "field a { clip { disc { radius 1; }; }; }",
+  "b": "field a"
+ },
+ {
+  "name": "a pile as a clip, and a pall",
+  "a": "field a { clip { pile { depth 1; }; }; }",
+  "b": "field a { clip { pall { width 1; }; }; }"
+ },
+ {
+  "name": "cuts",
+  "a": "field a { cut { disc { radius 1; }; }; }",
+  "b": "field a"
+ },
+ {
+  "name": "diagonal quarters",
+  "a": "quarters a b a b { diagonal; }",
+  "b": "quarters a b a b"
+ },
+ {
+  "name": "a counterchange",
+  "a": "saltire a { width 1; counterchange; }",
+  "b": "saltire a { width 1; }"
+ },
+ {
+  "name": "a check's flow",
+  "a": "checks a b { rows 2; columns 2; flow bend; }",
+  "b": "checks a b { rows 2; columns 2; }"
+ },
+ {
+  "name": "what a definition holds",
+  "a": "define d { field a; }\nuse d\n",
+  "b": "define d { field b; }\nuse d\n"
+ },
+ {
+  "name": "a definition's grid",
+  "a": "define d hoist=1 fly=1 { field a; }\nuse d\n",
+  "b": "define d { field a; }\nuse d\n"
+ },
+ {
+  "name": "a reverse",
+  "a": "field a\nreverse { field b; }\n",
+  "b": "field a\n"
+ },
+ {
+  "name": "an outside border",
+  "a": "border a 1 outside\nfield a\n",
+  "b": "border a 1\nfield a\n"
+ },
+ {
+  "name": "wider and narrower",
+  "a": "field a\nadapt { wider extend; }\n",
+  "b": "field a\nadapt { narrower extend; }\n"
+ },
+ {
+  "name": "a range",
+  "a": "field a\nadapt { wider extend; range 1 2; }\n",
+  "b": "field a\nadapt { wider extend; }\n"
+ },
+ {
+  "name": "a variant turning",
+  "a": "field a\nvariant v { from rotate; }\n",
+  "b": "field a\nvariant v { from transpose; }\n"
+ },
+ {
+  "name": "a variant upright",
+  "a": "field a\nvariant v { from rotate; upright; }\n",
+  "b": "field a\nvariant v { from rotate; }\n"
+ },
+ {
+  "name": "a variant's outside border",
+  "a": "field a\nvariant v { border a 1 outside; }\n",
+  "b": "field a\nvariant v { border a 1; }\n"
+ },
+ {
+  "name": "a fold's crease",
+  "a": "field a\nfold f { over along=hoist at=5 move=fly; }\n",
+  "b": "field a\nfold f { over along=hoist at=5 move=hoist; }\n"
+ },
+ {
+  "name": "a fold's direction",
+  "a": "field a\nfold f { over along=hoist at=5 move=fly; }\n",
+  "b": "field a\nfold f { under along=hoist at=5 move=fly; }\n"
+ },
+ {
+  "name": "a fold through any line",
+  "a": "field a\nfold f { over through=\"0 0 1 1\" move=\"0 1\"; }\n",
+  "b": "field a\nfold f { over through=\"0 0 1 1\" move=\"1 0\"; }\n"
+ }
+]

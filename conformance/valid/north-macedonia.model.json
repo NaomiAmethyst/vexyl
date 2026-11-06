@@ -1,261 +1,210 @@
 {
- "color-refs": {
-  "red": [
-   {
-    "system": "pantone",
-    "value": "485 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 100 90 0"
-   }
-  ],
-  "yellow": [
-   {
-    "system": "pantone",
-    "value": "108 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 0 100 0"
-   }
-  ]
- },
- "fly": 280,
- "hoist": 140,
  "layers": [
   {
-   "blend": "normal",
    "color": "red",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "hoist": 56
-     },
-     {
-      "hoist": 84
-     },
-     {
-      "fly": 140,
-      "hoist": 70
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 0,
+     "hoist": 56
+    },
+    {
+     "fly": 0,
+     "hoist": 84
+    },
+    {
+     "fly": 140,
+     "hoist": 70
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "fly": 280,
-      "hoist": 56
-     },
-     {
-      "fly": 280,
-      "hoist": 84
-     },
-     {
-      "fly": 140,
-      "hoist": 70
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 280,
+     "hoist": 56
+    },
+    {
+     "fly": 280,
+     "hoist": 84
+    },
+    {
+     "fly": 140,
+     "hoist": 70
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "fly": 126
-     },
-     {
-      "fly": 154
-     },
-     {
-      "fly": 140,
-      "hoist": 60
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 126,
+     "hoist": 0
+    },
+    {
+     "fly": 154,
+     "hoist": 0
+    },
+    {
+     "fly": 140,
+     "hoist": 60
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "fly": 126,
-      "hoist": 140
-     },
-     {
-      "fly": 154,
-      "hoist": 140
-     },
-     {
-      "fly": 140,
-      "hoist": 80
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 126,
+     "hoist": 140
+    },
+    {
+     "fly": 154,
+     "hoist": 140
+    },
+    {
+     "fly": 140,
+     "hoist": 80
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {},
-     {
-      "fly": 42
-     },
-     {
-      "fly": 142.5,
-      "hoist": 70
-     },
-     {
-      "fly": 140,
-      "hoist": 70
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 0,
+     "hoist": 0
+    },
+    {
+     "fly": 42,
+     "hoist": 0
+    },
+    {
+     "fly": 142.5,
+     "hoist": 70
+    },
+    {
+     "fly": 140,
+     "hoist": 70
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "fly": 280
-     },
-     {
-      "fly": 238
-     },
-     {
-      "fly": 137.5,
-      "hoist": 70
-     },
-     {
-      "fly": 140,
-      "hoist": 70
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 280,
+     "hoist": 0
+    },
+    {
+     "fly": 238,
+     "hoist": 0
+    },
+    {
+     "fly": 137.5,
+     "hoist": 70
+    },
+    {
+     "fly": 140,
+     "hoist": 70
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "hoist": 140
-     },
-     {
-      "fly": 42,
-      "hoist": 140
-     },
-     {
-      "fly": 142.5,
-      "hoist": 70
-     },
-     {
-      "fly": 140,
-      "hoist": 70
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 0,
+     "hoist": 140
+    },
+    {
+     "fly": 42,
+     "hoist": 140
+    },
+    {
+     "fly": 142.5,
+     "hoist": 70
+    },
+    {
+     "fly": 140,
+     "hoist": 70
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "polygon",
-    "vertices": [
-     {
-      "fly": 280,
-      "hoist": 140
-     },
-     {
-      "fly": 238,
-      "hoist": 140
-     },
-     {
-      "fly": 137.5,
-      "hoist": 70
-     },
-     {
-      "fly": 140,
-      "hoist": 70
-     }
-    ]
-   }
+   "point": [
+    {
+     "fly": 280,
+     "hoist": 140
+    },
+    {
+     "fly": 238,
+     "hoist": 140
+    },
+    {
+     "fly": 137.5,
+     "hoist": 70
+    },
+    {
+     "fly": 140,
+     "hoist": 70
+    }
+   ],
+   "shape": "polygon"
   },
   {
-   "blend": "normal",
    "color": "yellow",
    "fimbriate": {
     "color": "red",
     "width": 5
    },
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "kind": "disc",
-    "radius": 20
-   }
+   "radius": 20,
+   "shape": "disc"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Law on the Flag of the Republic of Macedonia, 5 October 1995, Official Gazette 47/95",
+    "source": [
      "https://www.crwflags.com/fotw/flags/mk.html",
      "https://heraldika.org.mk/en/news/drzhavnoto-zname/"
-    ],
-    "text": "Law on the Flag of the Republic of Macedonia, 5 October 1995, Official Gazette 47/95"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "North Macedonia",
-  "notes": [
+  "note": [
    "The law's Article 2 was read only in English, as FOTW and the Macedonian Heraldic Society reproduce it. The Official Gazette wasn't read.",
    "Article 2 gives only the proportion, the disc and the sun's position. The rays and the red ring come from the drawing annexed to the law, which wasn't read directly: the sizes are from the Macedonian Heraldic Society's construction sheet and from Zeljko Heimer's reconstruction on FOTW, which agree on them. The aim of each ray's edge inside the disc doesn't show.",
    "The Pantone and CMYK values are the Album des Pavillons 2000's, as FOTW reports them, and are approximate. No source read gives a screen color for this flag, so the hex values are the Commons drawing's and aren't official."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.crwflags.com/fotw/flags/mk.html",
    "https://heraldika.org.mk/en/news/drzhavnoto-zname/",
    "https://heraldika.org.mk/wp-content/uploads/2017/09/Konstrukcija-na-znameto-na-Republika-Makedonija-1024x390.png",
@@ -263,8 +212,30 @@
   ]
  },
  "palette": {
-  "red": "#d82126",
-  "yellow": "#f8e92e"
+  "red": {
+   "cmyk": [
+    0,
+    100,
+    90,
+    0
+   ],
+   "color": "#d82126",
+   "pantone": "485 C"
+  },
+  "yellow": {
+   "cmyk": [
+    0,
+    0,
+    100,
+    0
+   ],
+   "color": "#f8e92e",
+   "pantone": "108 C"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 280,
+  "hoist": 140
+ },
+ "vexyl": 1
 }

@@ -1,17 +1,12 @@
 {
- "fly": 5,
- "hoist": 3,
  "layers": [
   {
-   "along": "fly",
-   "blend": "normal",
    "colors": [
     "magenta",
     "lavender",
     "royal"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     2,
     1,
@@ -20,26 +15,36 @@
   }
  ],
  "meta": {
-  "designers": [
+  "designer": [
    "Michael Page"
   ],
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Bisexual Pride Flag",
-  "notes": [
+  "note": [
    "No primary construction sheet was found. The 2:1:2 stripes and colors follow the Commons drawing."
   ],
-  "sources": [
+  "source": [
    "https://en.wikipedia.org/wiki/Bisexual_pride_flag",
    "https://commons.wikimedia.org/wiki/File:Bisexual_Pride_Flag.svg"
   ]
  },
  "palette": {
-  "lavender": "#9b4f96",
-  "magenta": "#d60270",
-  "royal": "#0038a8"
+  "lavender": {
+   "color": "#9b4f96"
+  },
+  "magenta": {
+   "color": "#d60270"
+  },
+  "royal": {
+   "color": "#0038a8"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 5,
+  "hoist": 3
+ },
+ "vexyl": 1
 }

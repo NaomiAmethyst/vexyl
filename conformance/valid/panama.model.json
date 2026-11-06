@@ -1,129 +1,113 @@
 {
- "color-refs": {
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "295 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "100 46 0 70"
-   },
-   {
-    "system": "Pantone uncoated, Decree 337",
-    "value": "296 U"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "187 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 100 79 20"
-   },
-   {
-    "system": "Pantone uncoated, Decree 337",
-    "value": "186 U"
-   }
-  ]
- },
- "fly": 12,
- "hoist": 8,
  "layers": [
   {
-   "blend": "normal",
    "colors": [
     "white",
     "red",
     "blue",
     "white"
    ],
-   "layer": "quarters",
-   "opacity": 1
+   "layer": "quarters"
   },
   {
-   "blend": "normal",
-   "color": "blue",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 3,
      "hoist": 2
-    },
-    "ats": [
-     {
-      "fly": 3,
-      "hoist": 2
-     }
-    ],
-    "inner": 0.42229016305777883,
-    "kind": "star",
-    "points": 5,
-    "radius": 1.10557
-   }
+    }
+   ],
+   "color": "blue",
+   "inner": 0.42229016305777883,
+   "layer": "charge",
+   "radius": 1.10557,
+   "shape": "star"
   },
   {
-   "blend": "normal",
-   "color": "red",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 9,
      "hoist": 6
-    },
-    "ats": [
-     {
-      "fly": 9,
-      "hoist": 6
-     }
-    ],
-    "inner": 0.42229016305777883,
-    "kind": "star",
-    "points": 5,
-    "radius": 1.10557
-   }
+    }
+   ],
+   "color": "red",
+   "inner": 0.42229016305777883,
+   "layer": "charge",
+   "radius": 1.10557,
+   "shape": "star"
   }
  ],
  "meta": {
   "design-rights": "Article 2 of Law 34 of 1949 makes the State of Panama the holder of the intellectual property in the national symbols.",
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Single Text of Law No. 34 of 1949 on the symbols of the Nation, with the amendments of Law No. 2 of 2012, Official Gazette 26981-A",
+    "source": [
      "https://web.archive.org/web/20210831190006/https://www.gacetaoficial.gob.pa/pdfTemp/26981_A/37116.pdf"
-    ],
-    "text": "Single Text of Law No. 34 of 1949 on the symbols of the Nation, with the amendments of Law No. 2 of 2012, Official Gazette 26981-A"
+    ]
    },
    {
-    "sources": [
+    "law": "Executive Decree No. 337 of 22 December 2017 approving the Manual on the symbols of the Nation, Official Gazette 28432-A",
+    "source": [
      "https://web.archive.org/web/20220422095100/https://www.gacetaoficial.gob.pa/pdfTemp/28432_A/65219.pdf"
-    ],
-    "text": "Executive Decree No. 337 of 22 December 2017 approving the Manual on the symbols of the Nation, Official Gazette 28432-A"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Panama",
-  "notes": [
+  "note": [
    "The hex, RGB, Pantone and CMYK values are in the Manual of Executive Decree 337 of 2017. The law itself only says that silk reference flags are kept.",
    "The law says a star is a quarter of the height or a sixth of the length without saying how a star is measured. Decree 337's drawing measures it from top to feet, which is what this follows."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://web.archive.org/web/20210831190006/https://www.gacetaoficial.gob.pa/pdfTemp/26981_A/37116.pdf",
    "https://web.archive.org/web/20220422095100/https://www.gacetaoficial.gob.pa/pdfTemp/28432_A/65219.pdf",
    "https://www.crwflags.com/fotw/flags/pa_law.html"
   ]
  },
  "palette": {
-  "blue": "#072357",
-  "red": "#da121a",
-  "white": "#ffffff"
+  "blue": {
+   "cmyk": [
+    100,
+    46,
+    0,
+    70
+   ],
+   "color": "#072357",
+   "pantone": "295 C",
+   "reference": [
+    {
+     "system": "Pantone uncoated, Decree 337",
+     "value": "296 U"
+    }
+   ]
+  },
+  "red": {
+   "cmyk": [
+    0,
+    100,
+    79,
+    20
+   ],
+   "color": "#da121a",
+   "pantone": "187 C",
+   "reference": [
+    {
+     "system": "Pantone uncoated, Decree 337",
+     "value": "186 U"
+    }
+   ]
+  },
+  "white": {
+   "color": "#ffffff"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 12,
+  "hoist": 8
+ },
+ "vexyl": 1
 }

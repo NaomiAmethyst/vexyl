@@ -97,6 +97,10 @@ type Reference struct {
 // Vexyl doesn't convert between systems, so it's only ever passed along.
 type ColorRef struct {
 	System, Value string
+	// Numbers are the same value as numbers, for cmyk.
+	Numbers []float64
+	// Other is for a system named in a `reference`, rather than one of the format's own.
+	Other bool
 }
 
 // Point is a position in grid units: Fly from the hoist edge of the region,
@@ -349,6 +353,8 @@ type Panel struct {
 	// Line shapes a band's inner edge.
 	Line   *Line
 	Layers []Layer
+	// Canton says it was written as a canton.
+	Canton bool
 }
 
 // Use paints a design from a Define in the current region.

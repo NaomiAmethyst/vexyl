@@ -1,52 +1,6 @@
 {
- "color-refs": {
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "294"
-   },
-   {
-    "system": "cmyk",
-    "value": "100 70 0 0"
-   }
-  ],
-  "green": [
-   {
-    "system": "pantone",
-    "value": "356"
-   },
-   {
-    "system": "cmyk",
-    "value": "100 0 100 0"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "1795"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 100 100 0"
-   }
-  ],
-  "yellow": [
-   {
-    "system": "pantone",
-    "value": "122"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 20 100 0"
-   }
-  ]
- },
- "fly": 6,
- "hoist": 3,
  "layers": [
   {
-   "blend": "normal",
-   "by-edge": true,
    "colors": [
     "blue",
     "yellow",
@@ -56,7 +10,7 @@
    ],
    "from": "lower-hoist",
    "layer": "rays",
-   "opacity": 1,
+   "measure": "edge",
    "ratio": [
     2,
     2,
@@ -68,43 +22,85 @@
  ],
  "meta": {
   "date": "1996-06-18",
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "National Symbols Act, Act 3 of 1996, Chapter 145A, section 3 and Schedule Part I",
+    "source": [
      "https://web.archive.org/web/20240821222841id_/https://seylii.org/akn/sc/act/1996/3/eng@1996-06-18/source.pdf"
-    ],
-    "text": "National Symbols Act, Act 3 of 1996, Chapter 145A, section 3 and Schedule Part I"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Seychelles",
-  "notes": [
+  "note": [
    "The law's Schedule defines the flag by a small drawing. The proportion and divisions are measured from that drawing, and they agree with FOTW's reading of it.",
    "The Pantone and CMYK values are the Act's. The hex values are the Album des Pavillons 2023's, as reported by FOTW. They aren't legal, and the Album's own CMYK differs from the Act's. The Act gives no value for white."
   ],
   "render-license": "CC0-1.0",
-  "restrictions": [
+  "restriction": [
    {
-    "sources": [
+    "restriction": "Section 8 of the Act: without the President's written authorisation, the flag or a deceptively similar design can't be applied to goods, or used or registered as a trade mark or design.",
+    "source": [
      "https://web.archive.org/web/20240821222841id_/https://seylii.org/akn/sc/act/1996/3/eng@1996-06-18/source.pdf"
-    ],
-    "text": "Section 8 of the Act: without the President's written authorisation, the flag or a deceptively similar design can't be applied to goods, or used or registered as a trade mark or design."
+    ]
    }
   ],
-  "sources": [
+  "source": [
    "https://web.archive.org/web/20240821222841id_/https://seylii.org/akn/sc/act/1996/3/eng@1996-06-18/source.pdf",
    "https://www.crwflags.com/fotw/flags/sc.html"
   ]
  },
  "palette": {
-  "blue": "#003580",
-  "green": "#007229",
-  "red": "#d81f2a",
-  "white": "#ffffff",
-  "yellow": "#fdd44f"
+  "blue": {
+   "cmyk": [
+    100,
+    70,
+    0,
+    0
+   ],
+   "color": "#003580",
+   "pantone": "294"
+  },
+  "green": {
+   "cmyk": [
+    100,
+    0,
+    100,
+    0
+   ],
+   "color": "#007229",
+   "pantone": "356"
+  },
+  "red": {
+   "cmyk": [
+    0,
+    100,
+    100,
+    0
+   ],
+   "color": "#d81f2a",
+   "pantone": "1795"
+  },
+  "white": {
+   "color": "#ffffff"
+  },
+  "yellow": {
+   "cmyk": [
+    0,
+    20,
+    100,
+    0
+   ],
+   "color": "#fdd44f",
+   "pantone": "122"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 6,
+  "hoist": 3
+ },
+ "vexyl": 1
 }

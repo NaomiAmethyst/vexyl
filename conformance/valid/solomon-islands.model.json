@@ -1,44 +1,12 @@
 {
- "color-refs": {
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "293 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "94 73 0 0"
-   }
-  ],
-  "gold": [
-   {
-    "system": "pantone",
-    "value": "116 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 19 93 0"
-   }
-  ],
-  "green": [
-   {
-    "system": "pantone",
-    "value": "357 C"
-   }
-  ]
- },
- "fly": 200,
- "hoist": 100,
  "layers": [
   {
    "along": "bend-sinister",
-   "blend": "normal",
    "colors": [
     "blue",
     "green"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     1
@@ -46,74 +14,90 @@
   },
   {
    "along": "bend-sinister",
-   "blend": "normal",
    "color": "gold",
    "layer": "band",
-   "opacity": 1,
    "width": 10
   },
   {
-   "blend": "normal",
-   "color": "white",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 35,
      "hoist": 30
     },
-    "ats": [
-     {
-      "fly": 35,
-      "hoist": 30
-     },
-     {
-      "fly": 54.741,
-      "hoist": 13.08
-     },
-     {
-      "fly": 54.741,
-      "hoist": 46.92
-     },
-     {
-      "fly": 15.259,
-      "hoist": 46.92
-     },
-     {
-      "fly": 15.259,
-      "hoist": 13.08
-     }
-    ],
-    "inner": 3.8196601125010523,
-    "kind": "star",
-    "points": 5,
-    "radius": 10
-   }
+    {
+     "fly": 54.741,
+     "hoist": 13.08
+    },
+    {
+     "fly": 54.741,
+     "hoist": 46.92
+    },
+    {
+     "fly": 15.259,
+     "hoist": 46.92
+    },
+    {
+     "fly": 15.259,
+     "hoist": 13.08
+    }
+   ],
+   "color": "white",
+   "inner": 3.8196601125010523,
+   "layer": "charge",
+   "radius": 10,
+   "shape": "star"
   }
  ],
  "meta": {
   "date": "1977-11-18",
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Solomon Islands",
-  "notes": [
+  "note": [
    "No law defining this flag was found. The chairman of the Law Reform Commission wrote in 2008, as FOTW quotes him, that the flag should be described in an Act of Parliament. FOTW gives the adoption date from the same letter.",
    "The 1:2 proportion and the star positions are as the Commons drawing has them, not from any official sheet. The widths are FOTW's estimates, and Commons draws the diagonal a little narrower, at 9.",
    "The hex and Pantone values are the Album des Pavillons 2023's, as reported by FOTW. Its CMYK for green looks like a mistake, so it's left out."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.crwflags.com/fotw/flags/sb.html",
    "https://commons.wikimedia.org/wiki/File:Flag_of_the_Solomon_Islands.svg"
   ]
  },
  "palette": {
-  "blue": "#0047b6",
-  "gold": "#ffce00",
-  "green": "#0f4d2a",
-  "white": "#ffffff"
+  "blue": {
+   "cmyk": [
+    94,
+    73,
+    0,
+    0
+   ],
+   "color": "#0047b6",
+   "pantone": "293 C"
+  },
+  "gold": {
+   "cmyk": [
+    0,
+    19,
+    93,
+    0
+   ],
+   "color": "#ffce00",
+   "pantone": "116 C"
+  },
+  "green": {
+   "color": "#0f4d2a",
+   "pantone": "357 C"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 200,
+  "hoist": 100
+ },
+ "vexyl": 1
 }

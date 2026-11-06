@@ -1,49 +1,13 @@
 {
- "color-refs": {
-  "blue": [
-   {
-    "system": "pantone",
-    "value": "300 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "88 57 0 0"
-   }
-  ],
-  "green": [
-   {
-    "system": "pantone",
-    "value": "347 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "84 12 94 1"
-   }
-  ],
-  "yellow": [
-   {
-    "system": "pantone",
-    "value": "116 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 19 93 0"
-   }
-  ]
- },
- "fly": 240,
- "hoist": 160,
  "layers": [
   {
    "along": "hoist",
-   "blend": "normal",
    "colors": [
     "blue",
     "yellow",
     "green"
    ],
    "layer": "bars",
-   "opacity": 1,
    "ratio": [
     1,
     2,
@@ -51,60 +15,83 @@
    ]
   },
   {
-   "blend": "normal",
-   "color": "green",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 102,
      "hoist": 77.943
     },
-    "ats": [
-     {
-      "fly": 102,
-      "hoist": 77.943
-     },
-     {
-      "fly": 138,
-      "hoist": 77.943
-     },
-     {
-      "fly": 120,
-      "hoist": 109.119
-     }
-    ],
-    "fly": 30,
-    "hoist": 51.962,
-    "kind": "lozenge"
-   }
+    {
+     "fly": 138,
+     "hoist": 77.943
+    },
+    {
+     "fly": 120,
+     "hoist": 109.119
+    }
+   ],
+   "color": "green",
+   "fly": 30,
+   "hoist": 51.962,
+   "layer": "charge",
+   "shape": "lozenge"
   }
  ],
  "meta": {
-  "designers": [
+  "designer": [
    "Julien van der Wal"
   ],
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Saint Vincent and the Grenadines",
-  "notes": [
+  "note": [
    "No law defining this flag was found. FOTW's contributor also found no legal document on its colors. The foreign ministry's page gives only the adoption date of 12 October 1985 and the meanings.",
    "The proportion and stripes are the Album des Pavillons 2000's, as FOTW reports them. The lozenges' sizes and places aren't from any written source: they follow the Commons drawing.",
    "The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as FOTW reports them. Sources disagree on the blue: the London 2012 manual has a darker Pantone 286, as Commons draws it."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.crwflags.com/fotw/flags/vc.html",
    "https://web.archive.org/web/20230418185825/http://foreign.gov.vc/foreign/index.php/the-national-flag",
    "https://commons.wikimedia.org/wiki/File:Flag_of_Saint_Vincent_and_the_Grenadines.svg"
   ]
  },
  "palette": {
-  "blue": "#0067c6",
-  "green": "#009543",
-  "yellow": "#ffce00"
+  "blue": {
+   "cmyk": [
+    88,
+    57,
+    0,
+    0
+   ],
+   "color": "#0067c6",
+   "pantone": "300 C"
+  },
+  "green": {
+   "cmyk": [
+    84,
+    12,
+    94,
+    1
+   ],
+   "color": "#009543",
+   "pantone": "347 C"
+  },
+  "yellow": {
+   "cmyk": [
+    0,
+    19,
+    93,
+    0
+   ],
+   "color": "#ffce00",
+   "pantone": "116 C"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 240,
+  "hoist": 160
+ },
+ "vexyl": 1
 }

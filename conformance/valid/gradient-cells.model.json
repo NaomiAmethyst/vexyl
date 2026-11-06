@@ -1,62 +1,38 @@
 {
- "fly": 40,
- "gradients": {
-  "shade": {
-   "along": "fly",
-   "colors": [
-    "dark",
-    "pale"
-   ],
-   "stops": [
-    null,
-    1
-   ]
-  }
- },
- "hoist": 20,
  "layers": [
   {
-   "blend": "normal",
    "colors": [
     "shade",
     "gold",
     "gold",
     "shade"
    ],
-   "layer": "quarters",
-   "opacity": 1
+   "layer": "quarters"
   },
   {
-   "blend": "normal",
    "corner": "upper-hoist",
    "fly": 20,
    "hoist": 10,
    "layer": "panel",
    "layers": [
     {
-     "blend": "normal",
      "colors": [
       "shade",
       "gold"
      ],
      "columns": 4,
-     "flow": "bend-sinister",
      "layer": "checks",
-     "opacity": 1,
      "rows": 2
     }
-   ],
-   "opacity": 1
+   ]
   },
   {
-   "blend": "normal",
    "corner": "lower-fly",
    "fly": 20,
    "hoist": 10,
    "layer": "panel",
    "layers": [
     {
-     "blend": "normal",
      "colors": [
       "shade",
       "gold",
@@ -65,9 +41,7 @@
       "shade",
       "gold"
      ],
-     "from": "center",
      "layer": "rays",
-     "opacity": 1,
      "ratio": [
       1,
       1,
@@ -77,8 +51,7 @@
       1
      ]
     }
-   ],
-   "opacity": 1
+   ]
   }
  ],
  "meta": {
@@ -86,9 +59,29 @@
   "name": "Gradient cells"
  },
  "palette": {
-  "dark": "#112244",
-  "gold": "#ffcc00",
-  "pale": "#ddeeff"
+  "dark": {
+   "color": "#112244"
+  },
+  "gold": {
+   "color": "#ffcc00"
+  },
+  "pale": {
+   "color": "#ddeeff"
+  },
+  "shade": {
+   "gradient": [
+    "dark",
+    "pale"
+   ],
+   "stops": [
+    0,
+    1
+   ]
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 40,
+  "hoist": 20
+ },
+ "vexyl": 1
 }

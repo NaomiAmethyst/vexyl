@@ -1,0 +1,341 @@
+vexyl 1
+meta {
+  name "Every field"
+  description "Uses every field the canonical model has, so a library can't guess one"
+  version "1"
+  date "2000-01-02"
+  until "2001"
+  series "every-field"
+  note "A remark"
+  note "Another remark"
+  law "An instrument" {
+    source "https://example.test/law"
+  }
+  law "An instrument with no source"
+  restriction "A limit" {
+    source "https://example.test/limit"
+  }
+  designer "A designer"
+  design-rights "Public domain"
+  encoder "An encoder"
+  license "CC0-1.0"
+  render-license "CC0-1.0"
+  adapted-from "https://example.test/work" {
+    author "An author"
+    license "CC0-1.0"
+    part "the whole of it"
+  }
+  source "https://example.test/source"
+}
+palette {
+  blue "#003399" {
+    pantone "301 C"
+    ncs "4055-R95B"
+    ral "5002"
+    munsell "5PB 3/10"
+    thread "Example Thread"
+    dye "Example Blue"
+    dye "Another Blue"
+    cmyk 100 0.0000001 0 40
+    reference "CIE xyY" "0.1556 0.1354 6.5"
+    reference "pantone" "not the named system"
+  }
+  white "#ffffff"
+  red "#cc0000"
+  gold "#ffcc00"
+  even gradient blue white
+  dawn gradient red gold blue along=hoist {
+    stops 0 0.25 1
+  }
+}
+proportion hoist=20 fly=40
+outline swallowtail {
+  depth 4
+  taper 1
+}
+border gold 0.25
+define dot {
+  disc {
+    radius 0.5
+  }
+}
+define tile hoist=2 fly=2 {
+  field white
+}
+define plain {
+  field red
+}
+field blue {
+  opacity 0
+}
+field white {
+  anchor end
+  opacity 0.5
+  blend multiply
+  clip {
+    rect {
+      fly 1
+      hoist 1
+    }
+  }
+  cut {
+    pile {
+      from top
+      depth 1
+    }
+  }
+  cut {
+    pall {
+      width 0.1
+    }
+  }
+}
+bars blue white {
+  along hoist
+  ratio 1 2
+  rotate 1
+  grow 1 0
+  edge wavy depth=1 period=8
+}
+bars blue white {
+  edge zigzag depth=0.5 count=4
+}
+chevrons red gold {
+  from fly
+  depth 4
+  angle 45
+  apex 0
+  ratio 2 1
+  rotate 1
+  fimbriate blue 0.1
+}
+band red {
+  along bend
+  width 1
+  offset 1
+  rotate 1
+  fimbriate white 0.1
+}
+cross red {
+  fly 0 1 3
+  hoist 1 1 2
+  fimbriate white 0.1
+}
+saltire red {
+  width 1
+  fimbriate white 0.1
+}
+saltire red {
+  width 1
+  counterchange
+}
+quarters red gold none blue {
+  split fly=0 hoist=0
+}
+quarters red gold white blue {
+  diagonal
+}
+checks red gold {
+  rows 2
+  columns 3
+  flow bend
+}
+rays red gold {
+  from lower-hoist
+  count 3
+  ratio 1 2 1
+  rotate 5
+}
+rays red gold {
+  from fly=0 hoist=0
+  count 2
+  measure edge
+}
+pile gold {
+  from bottom
+  base 0 2
+  tip 1 2
+  hollow 0.1
+}
+pile gold {
+  depth 1
+  flat 0.5
+  fimbriate white 0.1
+}
+pall red {
+  from top
+  width 0.5
+  junction 3
+  fimbriate white 0.1
+}
+charge disc red {
+  at fly=0 hoist=0
+  radius 1
+  fimbriate white 0.1
+  repeat ring count=4 radius=2 turn=#true
+}
+charge triangle red {
+  at center
+  at fly=1 hoist=1
+  radius 1
+  rotate 10
+  hollow 0.1
+}
+charge cardioid red {
+  radius 1
+  repeat arc count=3 radius=2 from=0 to=90 turn=#true
+}
+charge ellipse red {
+  fly 1
+  hoist 2
+  repeat grid rows=2 columns=2 stagger=#true
+}
+charge rect red {
+  fly 1
+  hoist 2
+  repeat line count=2 fly=1 hoist=1
+}
+charge lozenge red
+charge ring red {
+  radius 2
+  inner 1
+  from 0
+  to 90
+}
+charge plus red {
+  radius 2
+  width 1
+}
+charge star red {
+  radius 2
+  points 6
+  lines 0.1
+}
+charge star red {
+  radius 2
+  inner 1
+}
+charge crescent red {
+  radius 2
+  inner 2
+  offset 1
+}
+charge sun red {
+  radius 3
+  disc 1
+  gap 0.5
+  points 8
+  spread 0.5
+}
+charge heart red {
+  radius 2
+}
+charge path red {
+  d "M0 0H1V1Z"
+  box "0 0 1 1"
+  fly 1
+  hoist 1
+  evenodd
+}
+charge polygon red {
+  point fly=0 hoist=0
+  point fly=1 hoist=0
+  point fly=1 hoist=1
+}
+charge dot gold
+charge svg gold {
+  fly 2
+  hoist 2
+  at fly=4 hoist=4
+  rotate 10
+  markup #"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect width="1" height="1" fill="currentColor"/></svg>"#
+}
+emblem {
+  at fly=0 hoist=0
+  along bend
+  rotate 10
+  charge disc red {
+    radius 1
+  }
+}
+group {
+  field white {
+    opacity 0.1
+  }
+}
+panel {
+  side top
+  width 1
+  edge zigzag depth=0.5 count=4
+  field red
+}
+panel {
+  corner upper-fly
+  fly 2
+  hoist 2
+  field red
+}
+panel {
+  at fly=5 hoist=5
+  fly 2
+  hoist 2
+  field red
+}
+canton {
+  fly 4
+  hoist 4
+  use tile
+}
+use plain
+reverse {
+  field red
+}
+adapt {
+  range 1 3
+  wider extend
+  narrower hoist-center
+}
+variant turned {
+  from transpose
+  upright
+}
+variant longer {
+  ratio 2.5
+}
+variant official {
+  proportion hoist=1 fly=2
+  outline {
+    polygon {
+      point fly=0 hoist=0
+      point fly=2 hoist=0
+      point fly=2 hoist=1
+      point fly=0 hoist=1
+    }
+  }
+  border gold 0.01 outside
+  field red
+}
+variant shaped {
+  outline {
+    path "M0 0H1V1H0Z" box="0 0 1 1"
+  }
+  border white 0.1 inside
+}
+variant tongue {
+  outline tongued {
+    depth 4
+    tongue 2
+  }
+}
+variant point {
+  outline pennant {
+    tip 2
+  }
+}
+fold storage {
+  description "In half, then diagonally"
+  source "https://example.test/how-to-fold"
+  over along=fly at=10 move=bottom
+  under along=hoist at=20 move=fly
+  tuck through="0 0 20 10" move="0 10"
+}

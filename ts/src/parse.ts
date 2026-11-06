@@ -596,7 +596,7 @@ class Parser {
 				return l;
 			}
 			case "canton": {
-				const l: PanelLayer = { layer: "panel", ...newEffects(), corner: "upper-hoist", layers: [] };
+				const l: PanelLayer = { layer: "panel", ...newEffects(), corner: "upper-hoist", layers: [], canton: true };
 				this.noValues(n);
 				this.container(n, depth, l, l.layers, {
 					fly: (c) => { l.fly = this.positive(c, this.number(c)); },
@@ -1624,6 +1624,9 @@ class Parser {
 			this.errf(n, "needs `period` or `count`");
 			return null;
 		}
+		if (l.period && l.count) {
+			this.errf(n, "needs `period` or `count`, not both");
+		}
 		return l;
 	}
 
@@ -1771,6 +1774,9 @@ class Parser {
 			if (l.corner && l.at !== undefined) {
 				this.errf(n, "needs either `corner` or `at`, not both");
 			}
+			if (l.width) {
+				this.errf(n, "only a side panel has a `width`");
+			}
 		}
 		if (l.layers.length === 0) {
 			this.errf(n, "needs at least one layer");
@@ -1824,6 +1830,9 @@ class Parser {
 		}
 		if (nodes.length === 1 && shapeKinds.includes(nodes[0]!.getName())) {
 			const c = nodes[0]!;
+			if (d.fly) {
+				this.errf(n, "only a design has its own grid, and a shape takes its size from what uses it");
+			}
 			const s: ShapeDraft = { kind: c.getName() };
 			if (s.kind === "path" && c.hasArguments()) {
 				// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
@@ -1892,6 +1901,9 @@ class Parser {
 			}
 			if (kind === "tongued" && tongue === 0) {
 				this.errf(n, "needs a `tongue`");
+			}
+			if ((tip !== 0 && kind !== "pennant") || (tongue !== 0 && kind !== "tongued") || (taper !== 0 && kind !== "swallowtail") || (depth !== 0 && kind === "pennant")) {
+				this.errf(n, `has a value that a ${kind} doesn't use`);
 			}
 			// Each form reads all four, so a stray one is kept for the model to report.
 			return { kind, depth, tip, tongue, taper } as Outline;
@@ -2090,7 +2102,7 @@ class Parser {
 						this.errf(c, "needs 4 values from 0 to 100");
 					}
 				}
-				refs.push({ system: "cmyk", value: v.map(formatNumber).join(" ") });
+				refs.push({ system: "cmyk", value: v.map(formatNumber).join(" "), numbers: v });
 			},
 			reference: (c) => {
 				this.noProps(c);
@@ -2100,7 +2112,7 @@ class Parser {
 					this.errf(c, "needs a system's name and a value");
 					return;
 				}
-				refs.push({ system: a1[0], value: a1[1] });
+				refs.push({ system: a1[0], value: a1[1], other: true });
 			},
 		});
 		if (refs.length > 0) {
@@ -2163,6 +2175,7 @@ class Parser {
 				kind,
 				through: [{ fly: line[0]!, hoist: line[1]! }, { fly: line[2]!, hoist: line[3]! }],
 				moving: { fly: point[0]!, hoist: point[1]! },
+				written: { through: line, moveTo: point },
 			};
 		}
 		const along = propValue(n, "along");
@@ -2176,14 +2189,14 @@ class Parser {
 				this.errf(n, "a crease along the fly moves top or bottom");
 				return null;
 			}
-			return { kind, through: [{ fly: 0, hoist: at }, { fly: 1, hoist: at }], moving: { fly: 0, hoist: move === "top" ? at - 1 : at + 1 } };
+			return { kind, through: [{ fly: 0, hoist: at }, { fly: 1, hoist: at }], moving: { fly: 0, hoist: move === "top" ? at - 1 : at + 1 }, written: { along, at, move } };
 		}
 		if (along === "hoist") {
 			if (move !== "hoist" && move !== "fly") {
 				this.errf(n, "a crease along the hoist moves hoist or fly");
 				return null;
 			}
-			return { kind, through: [{ fly: at, hoist: 0 }, { fly: at, hoist: 1 }], moving: { fly: move === "hoist" ? at - 1 : at + 1, hoist: 0 } };
+			return { kind, through: [{ fly: at, hoist: 0 }, { fly: at, hoist: 1 }], moving: { fly: move === "hoist" ? at - 1 : at + 1, hoist: 0 }, written: { along, at, move } };
 		}
 		this.errf(n, "along must be fly or hoist");
 		return null;

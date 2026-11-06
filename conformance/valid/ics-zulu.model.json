@@ -1,9 +1,6 @@
 {
- "fly": 2,
- "hoist": 2,
  "layers": [
   {
-   "blend": "normal",
    "colors": [
     "yellow",
     "blue",
@@ -11,29 +8,40 @@
     "black"
    ],
    "diagonal": true,
-   "layer": "quarters",
-   "opacity": 1
+   "layer": "quarters"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
   "license": "CC-BY-SA-4.0",
   "name": "International code signal flag Z",
-  "notes": [
+  "note": [
    "Sizes follow the drawing on Commons, not a checked construction sheet."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://commons.wikimedia.org/wiki/File:ICS_Zulu.svg"
   ]
  },
  "palette": {
-  "black": "#000000",
-  "blue": "#0000ff",
-  "red": "#ff0000",
-  "yellow": "#ffff00"
+  "black": {
+   "color": "#000000"
+  },
+  "blue": {
+   "color": "#0000ff"
+  },
+  "red": {
+   "color": "#ff0000"
+  },
+  "yellow": {
+   "color": "#ffff00"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 2,
+  "hoist": 2
+ },
+ "vexyl": 1
 }

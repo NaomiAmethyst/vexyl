@@ -598,10 +598,10 @@ field a`);
 	assert.deepEqual(f.colorRefs["a"], [
 		{ system: "pantone", value: "301 C" },
 		{ system: "ncs", value: "4055-R95B" },
-		{ system: "cmyk", value: "100 50.5 0 10" },
+		{ system: "cmyk", value: "100 50.5 0 10", numbers: [100, 50.5, 0, 10] },
 		{ system: "dye", value: "One" },
 		{ system: "dye", value: "Two" },
-		{ system: "CIE xyY", value: "0.1 0.2 3" },
+		{ system: "CIE xyY", value: "0.1 0.2 3", other: true },
 	]);
 	assert.equal(f.colorRefs["b"], undefined);
 	assert.ok(!svg(f).includes("301 C"));
@@ -704,11 +704,14 @@ test("the tree writes out as the same drawing", () => {
 });
 
 test("the model", () => {
-	const m = model(parse(header + "bars a b { along hoist; }")) as { layers: { layer: string; along: string }[]; fly: number; outline?: unknown };
+	const m = model(parse(header + "bars a b { along hoist; }")) as { layers: { layer: string; along: string }[]; proportion: { fly: number }; outline?: unknown };
 	assert.equal(m.layers[0]!.layer, "bars");
 	assert.equal(m.layers[0]!.along, "hoist");
-	assert.equal(m.fly, 20);
+	assert.equal(m.proportion.fly, 20);
 	assert.ok(!("outline" in m));
+	// Numbers stay numbers, and a zero that means something stays.
+	const cmyk = model(parse('vexyl 1\nmeta { name "T"; }\npalette { a "#112233" { cmyk 100 0.0000001 0 40; }; }\nproportion hoist=1 fly=1\n')) as { palette: { a: { cmyk: number[] } } };
+	assert.deepEqual(cmyk.palette.a.cmyk, [100, 0.0000001, 0, 40]);
 });
 
 function deepFreeze(value: unknown): void {

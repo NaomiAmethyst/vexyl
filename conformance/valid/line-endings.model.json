@@ -1,33 +1,21 @@
 {
- "fly": 20,
- "hoist": 10,
  "layers": [
   {
-   "blend": "normal",
    "color": "blue",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 10,
      "hoist": 5
-    },
-    "ats": [
-     {
-      "fly": 10,
-      "hoist": 5
-     }
-    ],
-    "fly": 8,
-    "hoist": 8,
-    "kind": "svg",
-    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"><path fill=\"#ffcc00\" d=\"M1 1     H9 V9     H1 Z\"></path></svg>"
-   }
+    }
+   ],
+   "fly": 8,
+   "hoist": 8,
+   "layer": "charge",
+   "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"><path fill=\"#ffcc00\" d=\"M1 1     H9 V9     H1 Z\"></path></svg>",
+   "shape": "svg"
   }
  ],
  "meta": {
@@ -36,8 +24,16 @@
   "name": "Line endings"
  },
  "palette": {
-  "blue": "#0044aa",
-  "gold": "#ffcc00"
+  "blue": {
+   "color": "#0044aa"
+  },
+  "gold": {
+   "color": "#ffcc00"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 20,
+  "hoist": 10
+ },
+ "vexyl": 1
 }

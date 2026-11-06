@@ -1,119 +1,109 @@
 {
- "color-refs": {
-  "green": [
-   {
-    "system": "dye",
-    "value": "Procion Brilliant Green H-2RS, 50 parts per 1000"
-   },
-   {
-    "system": "pantone",
-    "value": "3298 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "88 32 71 24"
-   },
-   {
-    "system": "Album des Pavillons 2000",
-    "value": "Pantone 342c, CMYK 100-0-69-43"
-   },
-   {
-    "system": "Flags and Anthems Manual London 2012",
-    "value": "PMS 342"
-   }
-  ],
-  "red": [
-   {
-    "system": "dye",
-    "value": "Procion Brilliant Orange H-2RS, 60 parts per 1000"
-   },
-   {
-    "system": "pantone",
-    "value": "1787 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "0 88 59 0"
-   },
-   {
-    "system": "Album des Pavillons 2000",
-    "value": "Pantone 485c, CMYK 0-100-80-5"
-   },
-   {
-    "system": "Flags and Anthems Manual London 2012",
-    "value": "PMS 485"
-   },
-   {
-    "system": "An official model checked by Christopher Southworth, FOTW 2004",
-    "value": "PMS 032C"
-   }
-  ]
- },
- "fly": 10,
- "hoist": 6,
  "layers": [
   {
-   "blend": "normal",
    "color": "green",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
-   "color": "red",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 4.5,
      "hoist": 3
-    },
-    "ats": [
-     {
-      "fly": 4.5,
-      "hoist": 3
-     }
-    ],
-    "kind": "disc",
-    "radius": 2
-   }
+    }
+   ],
+   "color": "red",
+   "layer": "charge",
+   "radius": 2,
+   "shape": "disc"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Bangladesh National Anthem, Flag and Emblem Order, 1972 (P.O. No. 130 of 1972), Article 3 and Second Schedule",
+    "source": [
      "https://bdlaws.minlaw.gov.bd/act-details-418.html",
      "https://bdlaws.minlaw.gov.bd/upload/act/418___Schedule.pdf"
-    ],
-    "text": "Bangladesh National Anthem, Flag and Emblem Order, 1972 (P.O. No. 130 of 1972), Article 3 and Second Schedule"
+    ]
    },
    {
-    "sources": [
+    "law": "People's Republic of Bangladesh Flag Rules, 1972 (revised up to July 2005), rule 3",
+    "source": [
      "https://web.archive.org/web/20160303180402/http://lib.pmo.gov.bd/legalms/pdf/national-flag-rules.pdf",
      "https://www.dpp.gov.bd/upload_file/gazettes/39124_35463.pdf"
-    ],
-    "text": "People's Republic of Bangladesh Flag Rules, 1972 (revised up to July 2005), rule 3"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Bangladesh",
-  "notes": [
+  "note": [
    "From the law: the proportion, the disc's radius and place, bottle green and red, and the Procion dyes, in the Order's Second Schedule and rule 3 of the Flag Rules.",
    "From elsewhere: the law gives dyes, not screen colors. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW, and the references are other reports on the same FOTW page.",
    "Amendments: the Order was amended in 2010 (Articles 4A and 5), and SRO 38-Law/2021 replaced paragraph I of rule 4 of the Rules, on flying days. Neither touches the design."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://www.crwflags.com/fotw/flags/bd'.html"
   ]
  },
  "palette": {
-  "green": "#006a52",
-  "red": "#f4364c"
+  "green": {
+   "cmyk": [
+    88,
+    32,
+    71,
+    24
+   ],
+   "color": "#006a52",
+   "dye": [
+    "Procion Brilliant Green H-2RS, 50 parts per 1000"
+   ],
+   "pantone": "3298 C",
+   "reference": [
+    {
+     "system": "Album des Pavillons 2000",
+     "value": "Pantone 342c, CMYK 100-0-69-43"
+    },
+    {
+     "system": "Flags and Anthems Manual London 2012",
+     "value": "PMS 342"
+    }
+   ]
+  },
+  "red": {
+   "cmyk": [
+    0,
+    88,
+    59,
+    0
+   ],
+   "color": "#f4364c",
+   "dye": [
+    "Procion Brilliant Orange H-2RS, 60 parts per 1000"
+   ],
+   "pantone": "1787 C",
+   "reference": [
+    {
+     "system": "Album des Pavillons 2000",
+     "value": "Pantone 485c, CMYK 0-100-80-5"
+    },
+    {
+     "system": "Flags and Anthems Manual London 2012",
+     "value": "PMS 485"
+    },
+    {
+     "system": "An official model checked by Christopher Southworth, FOTW 2004",
+     "value": "PMS 032C"
+    }
+   ]
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 10,
+  "hoist": 6
+ },
+ "vexyl": 1
 }

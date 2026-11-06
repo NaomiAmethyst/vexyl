@@ -822,6 +822,36 @@
   "line": 5
  },
  {
+  "name": "pennant with a depth",
+  "file": "invalid/pennant-with-a-depth.kdl",
+  "line": 5
+ },
+ {
+  "name": "swallowtail with a tip",
+  "file": "invalid/swallowtail-with-a-tip.kdl",
+  "line": 5
+ },
+ {
+  "name": "tongued with a taper",
+  "file": "invalid/tongued-with-a-taper.kdl",
+  "line": 5
+ },
+ {
+  "name": "edge with both a period and a count",
+  "file": "invalid/edge-with-both-a-period-and-a-count.kdl",
+  "line": 5
+ },
+ {
+  "name": "a shape definition with its own grid",
+  "file": "invalid/a-shape-definition-with-its-own-grid.kdl",
+  "line": 5
+ },
+ {
+  "name": "corner panel with a width",
+  "file": "invalid/corner-panel-with-a-width.kdl",
+  "line": 5
+ },
+ {
   "name": "not utf-8",
   "file": "invalid/not-utf-8.kdl"
  },

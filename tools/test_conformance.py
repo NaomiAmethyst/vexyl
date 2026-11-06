@@ -102,6 +102,98 @@ class OutputChecks(unittest.TestCase):
         self.assertTrue(run.artwork_differs(want, got('<rect id="p-r" fill="url(#p-g)"/>', ' onload="x"')))
 
 
+class Schema(unittest.TestCase):
+    def schema(self):
+        with open(os.path.join(ROOT, "conformance", "model.schema.json")) as f:
+            return json.load(f)
+
+    def models(self):
+        for name in sorted(os.listdir(os.path.join(ROOT, "conformance", "valid"))):
+            if name.endswith(".model.json"):
+                with open(os.path.join(ROOT, "conformance", "valid", name)) as f:
+                    yield name, json.load(f)
+
+    def test_every_fixture_fits_the_schema(self):
+        count = 0
+        for name, model in self.models():
+            count += 1
+            self.assertIsNone(run.schema_problem(model), name)
+        self.assertGreater(count, 0)
+
+    def test_the_schema_refuses_what_it_should(self):
+        for name, model in self.models():
+            if name == "sweden.model.json":
+                self.assertTrue(run.schema_problem({**model, "colour": 1}))
+                self.assertTrue(run.schema_problem({k: v for k, v in model.items() if k != "meta"}))
+                self.assertTrue(run.schema_problem({**model, "layers": [{"layer": "sparkle"}]}))
+
+    def test_every_field_in_the_schema_is_used_by_a_fixture(self):
+        # A library can't guess a name that no fixture shows, as `even-odd` once showed.
+        used = set()
+
+        def visit(value, path):
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    used.add((path, key))
+                    visit(item, key)
+            elif isinstance(value, list):
+                for item in value:
+                    visit(item, path)
+        names = set()
+
+        def fields(value):
+            if isinstance(value, dict):
+                names.update(value.get("properties", {}))
+                for item in value.values():
+                    fields(item)
+            elif isinstance(value, list):
+                for item in value:
+                    fields(item)
+        fields(self.schema())
+        for _, model in self.models():
+            visit(model, "")
+        seen = {key for _, key in used}
+        self.assertEqual(names - seen, set())
+
+    def test_every_shape_form_and_layer_is_used(self):
+        seen = set()
+
+        def visit(value):
+            if isinstance(value, dict):
+                for key in ("layer", "shape", "form", "step"):
+                    if isinstance(value.get(key), str):
+                        seen.add((key, value[key]))
+                for item in value.values():
+                    visit(item)
+            elif isinstance(value, list):
+                for item in value:
+                    visit(item)
+        for _, model in self.models():
+            visit(model)
+        wanted = set()
+
+        def constants(value, key=None):
+            if isinstance(value, dict):
+                props = value.get("properties", {})
+                for name in ("layer", "shape", "form", "step"):
+                    field = props.get(name, {})
+                    for const in ([field["const"]] if "const" in field else field.get("enum", [])):
+                        wanted.add((name, const))
+                for item in value.values():
+                    constants(item)
+            elif isinstance(value, list):
+                for item in value:
+                    constants(item)
+        constants(self.schema())
+        self.assertEqual(wanted - seen, set())
+
+    def test_the_manifest_has_a_version(self):
+        with open(os.path.join(ROOT, "conformance", "manifest.json")) as f:
+            manifest = json.load(f)
+        self.assertEqual(manifest["version"], 1)
+        self.assertEqual(manifest["format"], 1)
+
+
 class Flags(unittest.TestCase):
     def test_options_become_flags(self):
         self.assertEqual(run.flags_for({"ratio": "1:2", "fit": "pad", "fold_step": 1}),

@@ -1,62 +1,48 @@
 {
- "fly": 30,
- "hoist": 20,
  "layers": [
   {
-   "blend": "normal",
    "color": "night",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 10,
      "hoist": 10
-    },
-    "ats": [
-     {
-      "fly": 10,
-      "hoist": 10
-     }
-    ],
-    "fly": 8,
-    "hoist": 8,
-    "kind": "svg",
-    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><linearGradient id=\"shade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#f0a0c8\"></stop><stop offset=\"1\" stop-color=\"#8cc8f0\"></stop></linearGradient></defs><circle cx=\"50\" cy=\"50\" r=\"50\" fill=\"url(#shade)\"></circle></svg>"
-   }
+    }
+   ],
+   "fly": 8,
+   "hoist": 8,
+   "layer": "charge",
+   "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><linearGradient id=\"shade\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#f0a0c8\"></stop><stop offset=\"1\" stop-color=\"#8cc8f0\"></stop></linearGradient></defs><circle cx=\"50\" cy=\"50\" r=\"50\" fill=\"url(#shade)\"></circle></svg>",
+   "shape": "svg"
   },
   {
-   "blend": "normal",
-   "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "at": {
+   "at": [
+    {
      "fly": 20,
      "hoist": 10
-    },
-    "ats": [
-     {
-      "fly": 20,
-      "hoist": 10
-     }
-    ],
-    "fly": 8,
-    "hoist": 8,
-    "kind": "svg",
-    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><linearGradient id=\"shade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#b69cff\"></stop><stop offset=\"1\" stop-color=\"#7a5cf0\"></stop></linearGradient></defs><rect x=\"10\" y=\"10\" width=\"80\" height=\"80\" style=\"fill:url(#shade)\"></rect></svg>",
-    "rotate": 45
-   }
+    }
+   ],
+   "fly": 8,
+   "hoist": 8,
+   "layer": "charge",
+   "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><linearGradient id=\"shade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#b69cff\"></stop><stop offset=\"1\" stop-color=\"#7a5cf0\"></stop></linearGradient></defs><rect x=\"10\" y=\"10\" width=\"80\" height=\"80\" style=\"fill:url(#shade)\"></rect></svg>",
+   "rotate": 45,
+   "shape": "svg"
   }
  ],
  "meta": {
   "name": "Inline SVG Test"
  },
  "palette": {
-  "night": "#1b1035"
+  "night": {
+   "color": "#1b1035"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "vexyl": 1
 }

@@ -20,6 +20,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "conformance")
 # These were calibrated by disturbing the fixtures: all of them still pass with numbers rounded
 # to 4 decimals, and colors 2 off, charges moved by 0.5% of the hoist and stars 3% too large fail.
+# Goes up when what a library has to do to pass changes, for a given version of the format.
+SUITE_VERSION = 1
+FORMAT_VERSION = 1
 TOLERANCE = {"heights": [16, 32, 128, 512], "threshold": 48, "solid_percent": 0.05, "mean_channel": 0.25,
              "worst_tile": 16, "worst_tile_height": 512}
 
@@ -39,13 +42,13 @@ def main():
             json.dump(model, f, indent=1, sort_keys=True, ensure_ascii=False)
             f.write("\n")
         wanted = [("default", {}), ("reverse", {"side": "reverse"})]
-        for variant in sorted(model.get("variants", {})):
+        for variant in sorted(model.get("variant", {})):
             wanted.append((f"variant-{variant}", {"variant": variant}))
             wanted.append((f"variant-{variant}-reverse", {"variant": variant, "side": "reverse"}))
-        for fold in sorted(model.get("folds", {})):
+        for fold in sorted(model.get("fold", {})):
             wanted.append((f"fold-{fold}", {"fold": fold}))
             wanted.append((f"fold-{fold}-step-1", {"fold": fold, "fold_step": 1}))
-            for variant, form in sorted(model.get("variants", {}).items()):
+            for variant, form in sorted(model.get("variant", {}).items()):
                 if form.get("from", "none") == "none":
                     wanted.append((f"variant-{variant}-fold-{fold}", {"variant": variant, "fold": fold}))
         # Other proportions: the same request is drawn or refused, depending on the flag's rules.
@@ -71,7 +74,7 @@ def main():
         cases.append({"name": name, "file": file, "model": f"valid/{name}.model.json", "renders": renders})
     version = subprocess.run([resvg, "--version"], check=True, capture_output=True, text=True).stdout.strip()
     with open(f"{OUT}/manifest.json", "w") as f:
-        json.dump({"resvg": version, "tolerance": TOLERANCE, "cases": cases}, f, indent=1)
+        json.dump({"version": SUITE_VERSION, "format": FORMAT_VERSION, "resvg": version, "tolerance": TOLERANCE, "cases": cases}, f, indent=1)
         f.write("\n")
 
 

@@ -1,58 +1,62 @@
 {
- "fly": 27,
- "hoist": 16,
  "layers": [
   {
-   "blend": "normal",
    "color": "red",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
    "color": "blue",
    "fimbriate": {
     "color": "white",
     "width": 1
    },
-   "fly-parts": [
+   "fly": [
     7,
     2,
     18
    ],
-   "hoist-part": [
+   "hoist": [
     7,
     2,
     7
    ],
-   "layer": "cross",
-   "opacity": 1
+   "layer": "cross"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Norway (state and war flag)",
-  "notes": [
+  "note": [
    "Sizes follow the drawing on Commons, not a checked construction sheet.",
    "Colors match norway.kdl, which says where they come from."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "https://commons.wikimedia.org/wiki/File:Flag_of_Norway,_state.svg"
   ]
  },
  "outline": {
   "depth": 11,
-  "kind": "tongued",
+  "form": "tongued",
   "tongue": 4
  },
  "palette": {
-  "blue": "#002569",
-  "red": "#e62d23",
-  "white": "#ffffff"
+  "blue": {
+   "color": "#002569"
+  },
+  "red": {
+   "color": "#e62d23"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 27,
+  "hoist": 16
+ },
+ "vexyl": 1
 }

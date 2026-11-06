@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { parse, svg, svgTree, treeToSvg, validate, type ChargeLayer, type SvgShape } from "../src/index.js";
+import { model, parse, svg, svgTree, treeToSvg, validate, type ChargeLayer, type SvgShape } from "../src/index.js";
 import { idMark, maxSvgDepth, SanitizeError, sanitizeSvg, usesCurrentColor } from "../src/sanitize.js";
 import { XmlDecoder, XmlError } from "../src/xml.js";
 import { header, readRepo, root } from "./helpers.js";
@@ -421,6 +421,16 @@ test("what a page gets has passed the sanitizer, and the tree matches", () => {
 	const again = treeToSvg(tree);
 	assert.match(again, new RegExp(`fill="url\\(#${flag.idPrefix}svg\\d+-g\\)"`));
 	assert.ok(!again.includes("urn:i"));
+});
+
+test("the suite's distinct documents have distinct models", () => {
+	for (const c of JSON.parse(readRepo("conformance/distinct.json")) as { name: string; a: string; b: string }[]) {
+		const doc = (body: string): string =>
+			body.startsWith("G ")
+				? `vexyl 1\nmeta { name "T"; }\npalette { a "#112233"; b "#445566"; g gradient a b { stops ${body.slice(2)}; }; }\nproportion hoist=10 fly=20\nfield g\n`
+				: `${header}${body}\n`;
+		assert.notEqual(JSON.stringify(model(parse(doc(c.a)))), JSON.stringify(model(parse(doc(c.b)))), c.name);
+	}
 });
 
 test("the suite's documents, without needing its rasterizer", () => {

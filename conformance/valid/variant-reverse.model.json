@@ -1,31 +1,20 @@
 {
- "fly": 40,
- "folds": {
+ "fold": {
   "half": {
    "steps": [
     {
-     "a": {
-      "fly": 20
-     },
-     "b": {
-      "fly": 20,
-      "hoist": 1
-     },
-     "kind": "over",
-     "moving": {
-      "fly": 21
-     }
+     "along": "hoist",
+     "at": 20,
+     "move": "fly",
+     "step": "over"
     }
    ]
   }
  },
- "hoist": 20,
  "layers": [
   {
-   "blend": "normal",
    "color": "green",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   }
  ],
  "meta": {
@@ -33,55 +22,50 @@
   "name": "A variant's reverse"
  },
  "palette": {
-  "green": "#006633",
-  "red": "#cc0000",
-  "white": "#ffffff"
+  "green": {
+   "color": "#006633"
+  },
+  "red": {
+   "color": "#cc0000"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 40,
+  "hoist": 20
  },
  "reverse": {
   "layers": [
    {
-    "blend": "normal",
     "color": "red",
-    "layer": "field",
-    "opacity": 1
+    "layer": "field"
    }
   ]
  },
- "variants": {
+ "variant": {
   "own": {
-   "from": "none",
    "layers": [
     {
-     "blend": "normal",
      "color": "white",
-     "layer": "field",
-     "opacity": 1
+     "layer": "field"
     },
     {
-     "blend": "normal",
-     "color": "red",
-     "layer": "charge",
-     "opacity": 1,
-     "shape": {
-      "at": {
+     "at": [
+      {
        "fly": 8,
        "hoist": 10
-      },
-      "ats": [
-       {
-        "fly": 8,
-        "hoist": 10
-       }
-      ],
-      "kind": "disc",
-      "radius": 4
-     }
+      }
+     ],
+     "color": "red",
+     "layer": "charge",
+     "radius": 4,
+     "shape": "disc"
     }
    ]
   },
-  "same": {
-   "from": "none"
-  }
+  "same": {}
  },
- "version": 1
+ "vexyl": 1
 }

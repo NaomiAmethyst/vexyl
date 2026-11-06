@@ -130,6 +130,10 @@ export interface Reference {
 export interface ColorRef {
 	system: string;
 	value: string;
+	/** The same value as numbers, for cmyk. */
+	numbers?: number[];
+	/** Says the system was named in a `reference`, rather than being one of the format's own. */
+	other?: boolean;
 }
 
 /** A linear blend between solid palette colors, across the shape it fills. */
@@ -341,6 +345,8 @@ export interface PanelLayer extends Effects {
 	hoist?: number;
 	edge?: ShapedEdge;
 	layers: Layer[];
+	/** Says it was written as a canton. */
+	canton?: boolean;
 }
 
 export interface UseLayer extends Effects {
@@ -527,6 +533,8 @@ export interface FoldStep {
 	through: [Point, Point];
 	/** A point on the side that moves. */
 	moving: Point;
+	/** The crease as it was written. */
+	written: { along?: string; at?: number; move?: string; through?: number[]; moveTo?: number[] };
 }
 
 /** What to draw. Every option is optional, and none gives the flag as it is. */

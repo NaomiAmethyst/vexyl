@@ -1,84 +1,75 @@
 {
- "color-refs": {
-  "green": [
-   {
-    "system": "pantone",
-    "value": "361 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "78 0 100 0"
-   }
-  ],
-  "red": [
-   {
-    "system": "pantone",
-    "value": "186 C"
-   },
-   {
-    "system": "cmyk",
-    "value": "10 100 74 2"
-   }
-  ]
- },
- "fly": 90,
- "hoist": 60,
  "layers": [
   {
-   "blend": "normal",
    "color": "red",
-   "layer": "field",
-   "opacity": 1
+   "layer": "field"
   },
   {
-   "blend": "normal",
    "color": "green",
+   "inner": 4.847836221584085,
    "layer": "charge",
-   "opacity": 1,
-   "shape": {
-    "inner": 4.847836221584085,
-    "kind": "star",
-    "lines": 1.4266,
-    "points": 5,
-    "radius": 12.6918
-   }
+   "lines": 1.4266,
+   "radius": 12.6918,
+   "shape": "star"
   }
  ],
  "meta": {
-  "encoders": [
+  "encoder": [
    "Naomi Persephone Amethyst"
   ],
-  "laws": [
+  "law": [
    {
-    "sources": [
+    "law": "Constitution of the Kingdom of Morocco, 2011, Article 4",
+    "source": [
      "https://www.constituteproject.org/constitution/Morocco_2011"
-    ],
-    "text": "Constitution of the Kingdom of Morocco, 2011, Article 4"
+    ]
    },
    {
-    "sources": [
+    "law": "Dahir No. 1-05-99 of 23 November 2005 on the characteristics of the emblem of the Kingdom and the national anthem, Article 1",
+    "source": [
      "http://www.sgg.gov.ma/BO/bo_fr/2005/BO_5378_Fr.pdf"
-    ],
-    "text": "Dahir No. 1-05-99 of 23 November 2005 on the characteristics of the emblem of the Kingdom and the national anthem, Article 1"
+    ]
    }
   ],
   "license": "CC-BY-SA-4.0",
   "name": "Morocco",
-  "notes": [
+  "note": [
    "The law says rouge vif and vert palmier, with no shade. The hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW. The Album itself wasn't read.",
    "The law's star is formed of five branches in a continuous line, so this draws no interlacing, though flags with an interlaced star are in official use according to FOTW's contributors.",
    "Reading the circle as enclosing the star's outer tips, and the branch's length as tip to tip, is this file's interpretation of the law's wording."
   ],
   "render-license": "CC0-1.0",
-  "sources": [
+  "source": [
    "http://www.sgg.gov.ma/BO/bo_fr/2005/BO_5378_Fr.pdf",
    "https://www.constituteproject.org/constitution/Morocco_2011",
    "https://www.crwflags.com/fotw/flags/ma.html"
   ]
  },
  "palette": {
-  "green": "#12ad2b",
-  "red": "#d21034"
+  "green": {
+   "cmyk": [
+    78,
+    0,
+    100,
+    0
+   ],
+   "color": "#12ad2b",
+   "pantone": "361 C"
+  },
+  "red": {
+   "cmyk": [
+    10,
+    100,
+    74,
+    2
+   ],
+   "color": "#d21034",
+   "pantone": "186 C"
+  }
  },
- "version": 1
+ "proportion": {
+  "fly": 90,
+  "hoist": 60
+ },
+ "vexyl": 1
 }

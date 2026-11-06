@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -142,91 +141,4 @@ func rawName(n xml.Name) string {
 		return n.Space + ":" + n.Local
 	}
 	return n.Local
-}
-
-// Model returns the flag as plain maps, lists and values, in the canonical form that
-// the conformance suite compares. Fields are named in kebab-case, a layer says which
-// kind it is, and anything empty or zero is left out.
-func (f *Flag) Model() any {
-	return modelOf(reflect.ValueOf(f))
-}
-
-var upperCase = regexp.MustCompile(`[A-Z]`)
-
-func kebab(name string) string {
-	s := upperCase.ReplaceAllStringFunc(name, func(c string) string { return "-" + strings.ToLower(c) })
-	return strings.TrimPrefix(s, "-")
-}
-
-func modelOf(v reflect.Value) any {
-	switch v.Kind() {
-	case reflect.Pointer:
-		if v.IsNil() {
-			return nil
-		}
-		return modelOf(v.Elem())
-	case reflect.Interface:
-		if v.IsNil() {
-			return nil
-		}
-		out := modelOf(v.Elem())
-		// A layer's type is the only thing that says what it is.
-		if m, ok := out.(map[string]any); ok {
-			t := v.Elem().Type()
-			if t.Kind() == reflect.Pointer {
-				t = t.Elem()
-			}
-			m["layer"] = kebab(t.Name())
-		}
-		return out
-	case reflect.Struct:
-		out := map[string]any{}
-		modelFields(v, out)
-		return out
-	case reflect.Map:
-		if v.Len() == 0 {
-			return nil
-		}
-		out := map[string]any{}
-		for _, k := range v.MapKeys() {
-			if item := modelOf(v.MapIndex(k)); item != nil {
-				out[fmt.Sprint(k.Interface())] = item
-			}
-		}
-		return out
-	case reflect.Slice:
-		if v.Len() == 0 {
-			return nil
-		}
-		out := make([]any, v.Len())
-		for i := range out {
-			out[i] = modelOf(v.Index(i))
-		}
-		return out
-	}
-	if v.IsZero() {
-		return nil
-	}
-	return v.Interface()
-}
-
-func modelFields(v reflect.Value, out map[string]any) {
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		if field.Anonymous {
-			modelFields(v.Field(i), out)
-			continue
-		}
-		if !field.IsExported() {
-			continue
-		}
-		item := modelOf(v.Field(i))
-		if m, ok := item.(map[string]any); ok && len(m) == 0 {
-			continue
-		}
-		if item != nil {
-			out[kebab(field.Name)] = item
-		}
-	}
 }
