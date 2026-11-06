@@ -935,6 +935,7 @@ variant vertical {
 | `from none`, `from rotate` or `from transpose` | How the design turns; the default is `none` |
 | `upright` | Keeps charges and emblems the right way up as the design turns |
 | `ratio N` | Its proportion by the flag's `adapt` rules, as fly divided by hoist before turning |
+| `proportion hoist=H fly=F` | Its own true shape and grid, for a form that's fixed rather than adapted |
 | `outline ...`, `border ...` | Replace the flag's own |
 | `<layers>` | Replace the flag's own, for a form with a different design |
 
@@ -952,8 +953,15 @@ A variant with `upright` puts each charge back the right way up around its own p
 leaving where it sits on the flag alone. A polygon doesn't have a position to turn around,
 so it turns with the flag.
 
+A `proportion` is for a form that a law or specification fixes in its own right, like an
+official size beside the flag's usual one. Unlike `ratio`, it doesn't need `adapt`, and so
+says nothing about the shapes in between. A variant with a `proportion` MUST have its own
+layers, drawn on its own grid, and MUST NOT also have a `ratio`. The flag's own outline and
+border don't carry over, since they were made for its shape, but the variant can give its own.
+
 Rendering takes a variant's name, a side and a proportion as options. Asking for a
-proportion overrides a variant's `ratio`.
+proportion overrides a variant's `ratio`. A proportion asked of a variant with its own is
+reached by the flag's `adapt` rules, starting from the variant's shape.
 
 ## 13. Folding
 

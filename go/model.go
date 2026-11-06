@@ -142,9 +142,11 @@ type Variant struct {
 	// Upright keeps charges and emblems the right way up as the design turns.
 	Upright bool
 	// Ratio is the form's proportion as fly divided by hoist, or zero to keep it.
-	Ratio   float64
-	Outline *Outline
-	Border  *Edge
+	Ratio float64
+	// Fly and Hoist give the form its own true shape and grid, or are zero to keep the flag's.
+	Fly, Hoist float64
+	Outline    *Outline
+	Border     *Edge
 	// BorderOutside is as on a Flag.
 	BorderOutside bool
 	// Layers replace the flag's own if there are any.

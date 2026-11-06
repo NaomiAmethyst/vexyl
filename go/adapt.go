@@ -440,6 +440,11 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 	}
 	if variant != nil {
 		turn, upright = variant.From, variant.Upright
+		// The flag's outline and border were drawn for its own shape.
+		if variant.Fly > 0 {
+			out.Fly, out.Hoist = variant.Fly, variant.Hoist
+			out.Outline, out.Border, out.BorderOutside = nil, nil, false
+		}
 		if len(variant.Layers) > 0 {
 			out.Layers = variant.Layers
 		}

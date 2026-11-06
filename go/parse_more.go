@@ -426,6 +426,12 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 		"ratio": func(c *kdl.Node) {
 			v.Ratio = p.positive(c, p.number(c))
 		},
+		"proportion": func(c *kdl.Node) {
+			p.only(c, 0, "hoist", "fly")
+			v.Hoist = p.positive(c, p.prop(c, "hoist"))
+			v.Fly = p.positive(c, p.prop(c, "fly"))
+			p.noChildren(c)
+		},
 		"outline": func(c *kdl.Node) { v.Outline = p.outline(c) },
 		"border":  func(c *kdl.Node) { v.Border, v.BorderOutside = p.border(c, nil) },
 	}
@@ -445,6 +451,14 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 			seen[c.Name()] = true
 			p.plain(c)
 			handler(c)
+		}
+	}
+	if seen["proportion"] {
+		if seen["ratio"] {
+			p.errf(n, "can't have both `proportion` and `ratio`")
+		}
+		if len(v.Layers) == 0 {
+			p.errf(n, "with a `proportion` needs its own layers")
 		}
 	}
 	flag.Variants[name] = v

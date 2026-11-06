@@ -996,6 +996,42 @@ func TestVariants(t *testing.T) {
 	}
 }
 
+func TestVariantProportion(t *testing.T) {
+	src := header + `charge disc a { radius 2; at center; }
+variant long { proportion hoist=5 fly=10; field b; charge disc a { radius 1; at center; }; }`
+	long := render(t, src, Options{Variant: "long"})
+	if !strings.Contains(long, `viewBox="0 0 10 5"`) || !strings.Contains(long, `cx="5" cy="2.5" r="1"`) {
+		t.Errorf("variant should have its own shape and grid: %s", long)
+	}
+	if base := render(t, src, Options{}); strings.Contains(base, `viewBox="0 0 10 5"`) {
+		t.Errorf("the flag itself should keep its shape: %s", base)
+	}
+	for _, c := range []struct{ name, src, want string }{
+		{"no layers", `variant v { proportion hoist=5 fly=10; }`, "needs its own layers"},
+		{"with a ratio", adaptHeader + `variant v { proportion hoist=5 fly=10; ratio 2; field a; }`, "both `proportion` and `ratio`"},
+		{"missing a side", `variant v { proportion hoist=5; field a; }`, "fly"},
+	} {
+		text := c.src
+		if !strings.Contains(text, "vexyl") {
+			text = header + text
+		}
+		if _, err := Parse(strings.NewReader(text), "test"); err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s: err = %v", c.name, err)
+		}
+	}
+}
+
+func TestVariantProportionDropsTheFlagsOutline(t *testing.T) {
+	variant := "variant v { proportion hoist=5 fly=10; field b; }"
+	with := render(t, header+"outline swallowtail { depth 2; }\nfield a\n"+variant, Options{Variant: "v"})
+	without := render(t, header+"field a\n"+variant, Options{Variant: "v"})
+	// The IDs come from the whole source, which differs.
+	ids := regexp.MustCompile(`vx-[0-9a-f]+-`)
+	if ids.ReplaceAllString(with, "") != ids.ReplaceAllString(without, "") {
+		t.Errorf("a swallowtail drawn for the flag's shape shouldn't carry over: %s", with)
+	}
+}
+
 func TestVariantRatioNeedsRules(t *testing.T) {
 	_, err := Parse(strings.NewReader(adaptHeader+`variant tall { ratio 3; }`), "test")
 	if err == nil || !strings.Contains(err.Error(), "no `adapt` rules") {
