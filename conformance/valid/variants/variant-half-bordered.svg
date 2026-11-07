@@ -2,16 +2,16 @@
   <title>Variants Test</title>
   <g transform="matrix(-1 0 0 -1 30 20)">
     <polygon points="-1,-1 31,-1 31,21 -1,21" fill="#f2c14e"/>
-    <clipPath id="vx-0a783205ac005d8c-a35c-flag1">
+    <clipPath id="vx-cb6d37f55be78485-a35c-flag1">
       <polygon points="0,0 30,0 30,20 0,20"/>
     </clipPath>
-    <g clip-path="url(#vx-0a783205ac005d8c-a35c-flag1)">
+    <g clip-path="url(#vx-cb6d37f55be78485-a35c-flag1)">
       <polygon points="0,0 0,20 30,20 30,0" fill="#1b1035"/>
       <polygon points="15,0 15,20 30,20 30,0" fill="#7b4fd6"/>
-      <clipPath id="vx-0a783205ac005d8c-a35c-panel2">
+      <clipPath id="vx-cb6d37f55be78485-a35c-panel2">
         <polygon points="0,0 4,0 4,20 0,20"/>
       </clipPath>
-      <g transform="translate(0 0)" clip-path="url(#vx-0a783205ac005d8c-a35c-panel2)" style="isolation:isolate">
+      <g transform="translate(0 0)" clip-path="url(#vx-cb6d37f55be78485-a35c-panel2)" style="isolation:isolate">
         <polygon points="0,0 4,0 4,20 0,20" fill="#f2c14e"/>
       </g>
       <g transform="translate(15 10) matrix(-1 0 0 -1 0 0) translate(-15 -10)">

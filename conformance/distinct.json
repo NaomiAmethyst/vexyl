@@ -270,6 +270,21 @@
   "b": "field a\nvariant v { from transpose; }\n"
  },
  {
+  "name": "a variant turned either way",
+  "a": "field a\nvariant v { from rotate; }\n",
+  "b": "field a\nvariant v { from counter-rotate; }\n"
+ },
+ {
+  "name": "a variant reflected across either diagonal",
+  "a": "field a\nvariant v { from transpose; }\n",
+  "b": "field a\nvariant v { from anti-transpose; }\n"
+ },
+ {
+  "name": "a variant mirrored or turned all the way around",
+  "a": "field a\nvariant v { from mirror; }\n",
+  "b": "field a\nvariant v { from half-turn; }\n"
+ },
+ {
   "name": "a variant turned upside down or all the way around",
   "a": "field a\nvariant v { from half-turn; }\n",
   "b": "field a\nvariant v { from invert; }\n"

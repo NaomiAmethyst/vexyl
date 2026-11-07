@@ -102,6 +102,14 @@ export function num(v: number): string {
 	return rounded === 0 ? "0" : formatNumber(rounded);
 }
 
+/**
+ * Writes a scale, whose size says nothing about how many places it needs: a path drawn in a box
+ * tens of thousands wide, on a grid of a few units, is scaled by a very small number.
+ */
+export function factor(v: number): string {
+	return formatNumber(Number(v.toPrecision(10)));
+}
+
 /** Escapes text for XML, whether in an attribute or not. */
 export function esc(s: string): string {
 	if (!/[^\x20\x21\x23-\x25\x28-\x3b\x3d\x3f-\x7e]/.test(s)) {

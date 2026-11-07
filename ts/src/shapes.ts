@@ -3,7 +3,7 @@
 
 import { add, clipConvex, mul, regionCenter, regionCorners, regionReach, rotate, sub, sum, type Geom, type Region, type Vec } from "./geometry.js";
 import { maxCopies } from "./limits.js";
-import { num } from "./text.js";
+import { factor, num } from "./text.js";
 import { RenderError } from "./types.js";
 import type { Axis, Outline, PallShape, PanelLayer, PathShape, PileShape, Point, PolygonShape, RaysLayer, RingShape, Shape, ShapedEdge, SunShape } from "./types.js";
 
@@ -126,7 +126,7 @@ export function pathGeom(s: PathShape, center: Vec, rotation: number): Geom {
 	if (rotation !== 0) {
 		transform += ` rotate(${num(rotation)})`;
 	}
-	transform += ` scale(${num(scale)}) translate(${num(-s.box[0] - s.box[2] / 2)} ${num(-s.box[1] - s.box[3] / 2)})`;
+	transform += ` scale(${factor(scale)}) translate(${num(-s.box[0] - s.box[2] / 2)} ${num(-s.box[1] - s.box[3] / 2)})`;
 	const geom: Geom = { path: s.d, transform, scale };
 	if (s.evenodd) {
 		geom.evenodd = true;
@@ -291,7 +291,7 @@ export function outlineGeom(o: Outline, w: number, h: number): Geom {
 	// A flag's own curved outline is stretched to its box.
 	const sx = w / o.box[2];
 	const sy = h / o.box[3];
-	return { path: o.d, scale: 1, transform: `scale(${num(sx)} ${num(sy)}) translate(${num(-o.box[0])} ${num(-o.box[1])})` };
+	return { path: o.d, scale: 1, transform: `scale(${factor(sx)} ${factor(sy)}) translate(${num(-o.box[0])} ${num(-o.box[1])})` };
 }
 
 /** Samples a wavy or zigzag line along a span, as distances along it and displacements from it. */

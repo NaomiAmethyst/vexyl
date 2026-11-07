@@ -1,0 +1,39 @@
+{
+ "layers": [
+  {
+   "color": "white",
+   "layer": "field"
+  },
+  {
+   "box": [
+    0,
+    0,
+    55000,
+    39000
+   ],
+   "color": "black",
+   "d": "M0 0H55000V39000H0ZM5000 5000V34000H50000V5000Z",
+   "evenodd": true,
+   "fly": 1.9683,
+   "hoist": 1.416,
+   "layer": "charge",
+   "shape": "path"
+  }
+ ],
+ "meta": {
+  "name": "Tiny Grid Test"
+ },
+ "palette": {
+  "black": {
+   "color": "#000000"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 3,
+  "hoist": 2
+ },
+ "vexyl": 1
+}

@@ -193,7 +193,8 @@ them and never self-closed, with attributes in source order, IDs and references 
 A library MUST give an SVG that draws the same image as the reference, within the suite's
 tolerance. It needn't give the same text, so the order of elements, IDs and number formatting
 are its own. It SHOULD write coordinates to at least 6 decimal places, because the tolerance is
-calibrated for rounding to 4.
+calibrated for rounding to 4. Scales need significant digits rather than places: a path in a box
+tens of thousands wide, on a grid of a few units, is scaled by a very small number.
 
 `svgTree` gives elements with a name, attributes in order, text and children. Only a `title` or
 `desc` holds any text, because SVG lettering isn't allowed. Writing the tree out MUST give a

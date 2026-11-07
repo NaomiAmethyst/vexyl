@@ -2471,6 +2471,47 @@
    ]
   },
   {
+   "name": "tiny-grid",
+   "file": "valid/tiny-grid.kdl",
+   "model": "valid/tiny-grid.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/tiny-grid/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/tiny-grid/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/tiny-grid/pad-center.svg"
+    }
+   ]
+  },
+  {
    "name": "variant-reverse",
    "file": "valid/variant-reverse.kdl",
    "model": "valid/variant-reverse.model.json",
@@ -2569,6 +2610,24 @@
       "fit": "pad"
      },
      "svg": "valid/variant-reverse/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/variant-reverse/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/variant-reverse/pad-end.svg"
     }
    ]
   },
@@ -2590,6 +2649,21 @@
      "svg": "valid/variants/reverse.svg"
     },
     {
+     "name": "variant-anti",
+     "options": {
+      "variant": "anti"
+     },
+     "svg": "valid/variants/variant-anti.svg"
+    },
+    {
+     "name": "variant-anti-reverse",
+     "options": {
+      "variant": "anti",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-anti-reverse.svg"
+    },
+    {
      "name": "variant-banner",
      "options": {
       "variant": "banner"
@@ -2603,6 +2677,21 @@
       "side": "reverse"
      },
      "svg": "valid/variants/variant-banner-reverse.svg"
+    },
+    {
+     "name": "variant-counter",
+     "options": {
+      "variant": "counter"
+     },
+     "svg": "valid/variants/variant-counter.svg"
+    },
+    {
+     "name": "variant-counter-reverse",
+     "options": {
+      "variant": "counter",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-counter-reverse.svg"
     },
     {
      "name": "variant-distress",
@@ -2665,6 +2754,21 @@
      "svg": "valid/variants/variant-half-bordered-reverse.svg"
     },
     {
+     "name": "variant-mirrored",
+     "options": {
+      "variant": "mirrored"
+     },
+     "svg": "valid/variants/variant-mirrored.svg"
+    },
+    {
+     "name": "variant-mirrored-reverse",
+     "options": {
+      "variant": "mirrored",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-mirrored-reverse.svg"
+    },
+    {
      "name": "variant-plain",
      "options": {
       "variant": "plain"
@@ -2715,24 +2819,6 @@
       "fit": "pad"
      },
      "svg": "valid/variants/pad-center.svg"
-    },
-    {
-     "name": "pad-start",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
-     },
-     "svg": "valid/variants/pad-start.svg"
-    },
-    {
-     "name": "pad-end",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
-     },
-     "svg": "valid/variants/pad-end.svg"
     }
    ]
   },

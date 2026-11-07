@@ -103,12 +103,23 @@
   ]
  },
  "variant": {
+  "anti": {
+   "from": "anti-transpose",
+   "outline": {
+    "depth": 6,
+    "form": "swallowtail"
+   }
+  },
   "banner": {
    "from": "rotate",
    "outline": {
     "depth": 6,
     "form": "swallowtail"
    }
+  },
+  "counter": {
+   "from": "counter-rotate",
+   "upright": true
   },
   "distress": {
    "from": "invert"
@@ -128,6 +139,9 @@
    },
    "from": "half-turn",
    "upright": true
+  },
+  "mirrored": {
+   "from": "mirror"
   },
   "plain": {
    "layers": [

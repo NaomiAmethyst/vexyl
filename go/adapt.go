@@ -397,6 +397,12 @@ func view(kind string, x0, y0, width, tall float64) (transform, upright string) 
 		return "matrix(0 1 1 0 0 0)", "matrix(0 1 1 0 0 0)"
 	case "rotate":
 		return fmt.Sprintf("matrix(0 1 -1 0 %s 0)", num(2*y0+tall)), "matrix(0 -1 1 0 0 0)"
+	case "anti-transpose":
+		return fmt.Sprintf("matrix(0 -1 -1 0 %s %s)", num(2*y0+tall), num(2*x0+width)), "matrix(0 -1 -1 0 0 0)"
+	case "counter-rotate":
+		return fmt.Sprintf("matrix(0 -1 1 0 0 %s)", num(2*x0+width)), "matrix(0 1 -1 0 0 0)"
+	case "mirror":
+		return fmt.Sprintf("matrix(-1 0 0 1 %s 0)", num(2*x0+width)), "matrix(-1 0 0 1 0 0)"
 	case "half-turn":
 		return fmt.Sprintf("matrix(-1 0 0 -1 %s %s)", num(2*x0+width), num(2*y0+tall)), "matrix(-1 0 0 -1 0 0)"
 	case "invert":

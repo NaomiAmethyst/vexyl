@@ -356,6 +356,12 @@ export function view(kind: Turn, x0: number, y0: number, width: number, tall: nu
 			return { transform: "matrix(0 1 1 0 0 0)", upright: "matrix(0 1 1 0 0 0)" };
 		case "rotate":
 			return { transform: `matrix(0 1 -1 0 ${num(2 * y0 + tall)} 0)`, upright: "matrix(0 -1 1 0 0 0)" };
+		case "anti-transpose":
+			return { transform: `matrix(0 -1 -1 0 ${num(2 * y0 + tall)} ${num(2 * x0 + width)})`, upright: "matrix(0 -1 -1 0 0 0)" };
+		case "counter-rotate":
+			return { transform: `matrix(0 -1 1 0 0 ${num(2 * x0 + width)})`, upright: "matrix(0 1 -1 0 0 0)" };
+		case "mirror":
+			return { transform: `matrix(-1 0 0 1 ${num(2 * x0 + width)} 0)`, upright: "matrix(-1 0 0 1 0 0)" };
 		case "half-turn":
 			return { transform: `matrix(-1 0 0 -1 ${num(2 * x0 + width)} ${num(2 * y0 + tall)})`, upright: "matrix(-1 0 0 -1 0 0)" };
 		case "invert":

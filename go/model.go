@@ -157,7 +157,8 @@ type Adapt struct {
 
 // Variant is a named form of a flag.
 type Variant struct {
-	// From is how the design turns: none, rotate, transpose, half-turn or invert.
+	// From is how the design turns: none, rotate, counter-rotate, half-turn, transpose,
+	// anti-transpose, invert or mirror.
 	From string
 	// Upright keeps charges and emblems the right way up as the design turns.
 	Upright bool

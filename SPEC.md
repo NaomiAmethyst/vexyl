@@ -1012,7 +1012,7 @@ variant vertical {
 
 | Child | Meaning |
 |---|---|
-| `from none`, `from rotate`, `from transpose`, `from half-turn` or `from invert` | How the design turns; the default is `none` |
+| `from` and one of `none`, `rotate`, `counter-rotate`, `half-turn`, `transpose`, `anti-transpose`, `invert` or `mirror` | How the design turns; the default is `none` |
 | `upright` | Keeps charges and emblems the right way up as the design turns |
 | `ratio N` | Its proportion by the flag's `adapt` rules, as fly divided by hoist before turning |
 | `proportion hoist=H fly=F` | Its own true shape and grid, for a form that's fixed rather than adapted |
@@ -1025,16 +1025,23 @@ from a crossbar looks from the front. `from rotate` turns it a quarter turn cloc
 which moves the upper hoist corner to the upper right. `from half-turn` turns it all the
 way around, which moves the upper hoist corner to the lower fly. `from invert` turns it
 upside down with its hoist still at the hoist, as a flag flown union down is, which moves
-the upper hoist corner to the lower hoist.
+the upper hoist corner to the lower hoist. `from counter-rotate` is a quarter turn the other way, which moves the upper
+hoist corner to the lower left. `from anti-transpose` reflects it across the other diagonal,
+which moves the upper hoist corner to the lower right. `from mirror` swaps its hoist and fly,
+as seeing the obverse from behind would, without giving the reverse's own design.
 
 ```
-transpose: (x, y) -> (y, x)
-rotate:    (x, y) -> (H - y, x)
-half-turn: (x, y) -> (F - x, H - y)
-invert:    (x, y) -> (x, H - y)
+transpose:      (x, y) -> (y, x)
+anti-transpose: (x, y) -> (H - y, F - x)
+rotate:         (x, y) -> (H - y, x)
+counter-rotate: (x, y) -> (y, F - x)
+half-turn:      (x, y) -> (F - x, H - y)
+invert:         (x, y) -> (x, H - y)
+mirror:         (x, y) -> (F - x, y)
 ```
 
-`transpose` and `rotate` swap the flag's width and height. `half-turn` and `invert` keep them.
+`transpose`, `anti-transpose`, `rotate` and `counter-rotate` swap the flag's width and height.
+The others keep them.
 
 A variant with `upright` puts each charge back the right way up around its own position,
 leaving where it sits on the flag alone. A polygon doesn't have a position to turn around,

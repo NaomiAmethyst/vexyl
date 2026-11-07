@@ -10,7 +10,7 @@ NPM     ?= npm
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check check-ts conformance conformance-ts conformance-fixtures conformance-prove fuzz install uninstall clean web check-web
+.PHONY: all test check check-ts check-rescale conformance conformance-ts conformance-fixtures conformance-prove fuzz install uninstall clean web check-web
 
 all: vexyl
 
@@ -63,6 +63,12 @@ check-web: web/node_modules
 	cd web && $(NPM) run build
 	cd web && $(NPM) test
 	cd web && $(NPM) run e2e
+
+# Rescales every flag on other grids and compares the pictures, which needs what conformance needs.
+check-rescale: web/node_modules
+	rm -rf web/node_modules/.rescale
+	cd web && node test/rescale-corpus.mjs node_modules/.rescale
+	python3 web/test/rescale_corpus.py web/node_modules/.rescale
 
 fuzz:
 	cd go && $(GO) test -run '^$$' -fuzz '^FuzzSanitize$$' -fuzztime 60s .

@@ -98,7 +98,7 @@ func pathGeom(s *Shape, center vec, rotation float64) geom {
 	if rotation != 0 {
 		transform += fmt.Sprintf(" rotate(%s)", num(rotation))
 	}
-	transform += fmt.Sprintf(" scale(%s) translate(%s %s)", num(scale),
+	transform += fmt.Sprintf(" scale(%s) translate(%s %s)", factor(scale),
 		num(-s.Box[0]-s.Box[2]/2), num(-s.Box[1]-s.Box[3]/2))
 	return geom{path: s.D, transform: transform, scale: scale, evenodd: s.EvenOdd}
 }
@@ -238,7 +238,7 @@ func (o *Outline) geom(w, h float64) geom {
 	// A flag's own curved outline is stretched to its box.
 	sx, sy := w/o.Box[2], h/o.Box[3]
 	return geom{path: o.D, scale: 1, transform: fmt.Sprintf("scale(%s %s) translate(%s %s)",
-		num(sx), num(sy), num(-o.Box[0]), num(-o.Box[1]))}
+		factor(sx), factor(sy), num(-o.Box[0]), num(-o.Box[1]))}
 }
 
 // linePoints samples a wavy or zigzag line along a span, as distances along it and

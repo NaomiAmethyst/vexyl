@@ -11,7 +11,7 @@ import { inLimits } from "./limits.js";
 import { encodePathName, tagAttribute } from "./paths.js";
 import { idMark } from "./sanitize.js";
 import { circlePath, forRegion, outlineGeom, panelEdge, panelRect, rayPolys } from "./shapes.js";
-import { esc, hash, num } from "./text.js";
+import { esc, factor, hash, num } from "./text.js";
 import { RenderError } from "./types.js";
 import type {
 	ChargeLayer, ChecksLayer, Effects, EmblemLayer, Fimbriation, Flag, Layer, Options, PanelLayer, QuartersLayer, SaltireLayer, SvgElement, SvgShape,
@@ -104,7 +104,7 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	let vy = y0;
 	let vw = width;
 	let vh = tall;
-	const sideways = turn === "rotate" || turn === "transpose";
+	const sideways = turn === "rotate" || turn === "counter-rotate" || turn === "transpose" || turn === "anti-transpose";
 	if (sideways) {
 		[vx, vy, vw, vh] = [y0, x0, tall, width];
 	}
@@ -505,7 +505,7 @@ class Renderer {
 					return;
 				}
 				// A design with its own grid is scaled to fill the region it's used in.
-				this.line(`<g transform="scale(${num(reg.w / d.fly)} ${num(reg.h / d.hoist)})">`);
+				this.line(`<g transform="scale(${factor(reg.w / d.fly)} ${factor(reg.h / d.hoist)})">`);
 				this.depth++;
 				this.layers(d.layers, { w: d.fly, h: d.hoist }, "");
 				this.using--;

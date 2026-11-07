@@ -60,6 +60,22 @@ variant banner {
   }
 }
 
+variant counter {
+  from counter-rotate
+  upright
+}
+
+variant anti {
+  from anti-transpose
+  outline swallowtail {
+    depth 6
+  }
+}
+
+variant mirrored {
+  from mirror
+}
+
 variant half {
   from half-turn
 }

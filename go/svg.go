@@ -170,7 +170,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 		transform = strings.TrimSpace(transform + fmt.Sprintf(" matrix(-1 0 0 1 %s 0)", num(2*x0+width)))
 	}
 	vx, vy, vw, vh := x0, y0, width, tall
-	sideways := turn == "rotate" || turn == "transpose"
+	sideways := turn == "rotate" || turn == "counter-rotate" || turn == "transpose" || turn == "anti-transpose"
 	if sideways {
 		vx, vy, vw, vh = y0, x0, tall, width
 	}
@@ -519,7 +519,7 @@ func (r *renderer) content(l Layer, reg region, path string) {
 			return
 		}
 		// A design with its own grid is scaled to fill the region it's used in.
-		r.line(`<g transform="scale(%s %s)">`, num(reg.w/l.design.Fly), num(reg.h/l.design.Hoist))
+		r.line(`<g transform="scale(%s %s)">`, factor(reg.w/l.design.Fly), factor(reg.h/l.design.Hoist))
 		r.depth++
 		r.layers(l.design.Layers, region{w: l.design.Fly, h: l.design.Hoist}, "")
 		r.depth--
@@ -881,6 +881,13 @@ func num(v float64) string {
 	if v == 0 {
 		return "0"
 	}
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+// factor writes a scale, whose size says nothing about how many places it needs: a path drawn
+// in a box tens of thousands wide, on a grid of a few units, is scaled by a very small number.
+func factor(v float64) string {
+	v, _ = strconv.ParseFloat(strconv.FormatFloat(v, 'e', 9, 64), 64)
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 

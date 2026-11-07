@@ -1,0 +1,20 @@
+// An invented flag with a path in a very large box on a very small grid, where its scale is tiny.
+vexyl 1
+meta {
+  name "Tiny Grid Test"
+}
+palette {
+  white "#ffffff"
+  black "#000000"
+}
+proportion hoist=2 fly=3
+
+field white
+charge path black {
+  d "M0 0H55000V39000H0ZM5000 5000V34000H50000V5000Z"
+  box "0 0 55000 39000"
+  evenodd
+  fly 1.9683
+  hoist 1.416
+  at center
+}
