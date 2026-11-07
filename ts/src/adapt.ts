@@ -350,12 +350,16 @@ class Adapter {
 }
 
 /** How a variant turns a flag, as a transform and what undoes it for charges. */
-export function view(kind: Turn, y0: number, tall: number): { transform: string; upright: string } {
+export function view(kind: Turn, x0: number, y0: number, width: number, tall: number): { transform: string; upright: string } {
 	switch (kind) {
 		case "transpose":
 			return { transform: "matrix(0 1 1 0 0 0)", upright: "matrix(0 1 1 0 0 0)" };
 		case "rotate":
 			return { transform: `matrix(0 1 -1 0 ${num(2 * y0 + tall)} 0)`, upright: "matrix(0 -1 1 0 0 0)" };
+		case "half-turn":
+			return { transform: `matrix(-1 0 0 -1 ${num(2 * x0 + width)} ${num(2 * y0 + tall)})`, upright: "matrix(-1 0 0 -1 0 0)" };
+		case "invert":
+			return { transform: `matrix(1 0 0 -1 0 ${num(2 * y0 + tall)})`, upright: "matrix(1 0 0 -1 0 0)" };
 		default:
 			return { transform: "", upright: "" };
 	}

@@ -110,6 +110,25 @@
     "form": "swallowtail"
    }
   },
+  "distress": {
+   "from": "invert"
+  },
+  "distress-upright": {
+   "from": "invert",
+   "upright": true
+  },
+  "half": {
+   "from": "half-turn"
+  },
+  "half-bordered": {
+   "border": {
+    "color": "gold",
+    "side": "outside",
+    "width": 1
+   },
+   "from": "half-turn",
+   "upright": true
+  },
   "plain": {
    "layers": [
     {

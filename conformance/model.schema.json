@@ -3931,7 +3931,9 @@
     "from": {
      "enum": [
       "rotate",
-      "transpose"
+      "transpose",
+      "half-turn",
+      "invert"
      ]
     },
     "upright": {

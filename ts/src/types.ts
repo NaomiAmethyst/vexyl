@@ -61,7 +61,7 @@ export type CornerName = "upper-hoist" | "upper-fly" | "lower-hoist" | "lower-fl
 export type BlendMode = "normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten";
 export type Anchor = "start" | "center" | "end" | "scale";
 export type AdaptRule = "extend" | "center" | "scale" | "hoist-extend" | "hoist-center" | "hoist-scale";
-export type Turn = "none" | "rotate" | "transpose";
+export type Turn = "none" | "rotate" | "transpose" | "half-turn" | "invert";
 export type RayOrigin = "center" | EdgeName | CornerName;
 
 /** A parsed and validated Vexyl document. Rendering never changes it. */

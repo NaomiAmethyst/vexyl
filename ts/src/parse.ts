@@ -31,7 +31,7 @@ const anchorValues = ["start", "center", "end", "scale"];
 const cornerValues = ["upper-hoist", "upper-fly", "lower-hoist", "lower-fly"];
 const rayFromNames = ["center", "hoist", "fly", "top", "bottom", ...cornerValues];
 const shapeKinds = ["disc", "ring", "rect", "plus", "triangle", "star", "heart", "cardioid", "polygon", "crescent", "sun", "lozenge", "ellipse", "path"];
-const viewValues = ["none", "rotate", "transpose"];
+const viewValues = ["none", "rotate", "transpose", "half-turn", "invert"];
 const modeValues = ["extend", "center", "scale", "hoist-extend", "hoist-center", "hoist-scale"];
 
 // These put no conditions on a work, so a file that adapts one can license its renders however it likes.

@@ -2605,6 +2605,66 @@
      "svg": "valid/variants/variant-banner-reverse.svg"
     },
     {
+     "name": "variant-distress",
+     "options": {
+      "variant": "distress"
+     },
+     "svg": "valid/variants/variant-distress.svg"
+    },
+    {
+     "name": "variant-distress-reverse",
+     "options": {
+      "variant": "distress",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-distress-reverse.svg"
+    },
+    {
+     "name": "variant-distress-upright",
+     "options": {
+      "variant": "distress-upright"
+     },
+     "svg": "valid/variants/variant-distress-upright.svg"
+    },
+    {
+     "name": "variant-distress-upright-reverse",
+     "options": {
+      "variant": "distress-upright",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-distress-upright-reverse.svg"
+    },
+    {
+     "name": "variant-half",
+     "options": {
+      "variant": "half"
+     },
+     "svg": "valid/variants/variant-half.svg"
+    },
+    {
+     "name": "variant-half-reverse",
+     "options": {
+      "variant": "half",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-half-reverse.svg"
+    },
+    {
+     "name": "variant-half-bordered",
+     "options": {
+      "variant": "half-bordered"
+     },
+     "svg": "valid/variants/variant-half-bordered.svg"
+    },
+    {
+     "name": "variant-half-bordered-reverse",
+     "options": {
+      "variant": "half-bordered",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-half-bordered-reverse.svg"
+    },
+    {
      "name": "variant-plain",
      "options": {
       "variant": "plain"

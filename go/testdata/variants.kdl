@@ -60,6 +60,25 @@ variant banner {
   }
 }
 
+variant half {
+  from half-turn
+}
+
+variant distress {
+  from invert
+}
+
+variant distress-upright {
+  from invert
+  upright
+}
+
+variant half-bordered {
+  from half-turn
+  upright
+  border gold 1 outside
+}
+
 variant plain {
   field violet
 }

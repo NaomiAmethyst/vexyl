@@ -94,7 +94,7 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	if (f.border?.side === "outside") {
 		[x0, y0, width, tall] = bounds(outerBorder(f));
 	}
-	const turned = view(turn, y0, tall);
+	const turned = view(turn, x0, y0, width, tall);
 	let transform = turned.transform;
 	if (mirror) {
 		// The back is the mirror image, then turned as the front would be.
@@ -104,7 +104,8 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	let vy = y0;
 	let vw = width;
 	let vh = tall;
-	if (turn !== "none") {
+	const sideways = turn === "rotate" || turn === "transpose";
+	if (sideways) {
 		[vx, vy, vw, vh] = [y0, x0, tall, width];
 	}
 	if (upright) {
@@ -112,7 +113,7 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	}
 	if (canvas !== 0) {
 		// The canvas ratio is the design's, so a turned flag's is the other way up.
-		const want = turn !== "none" ? 1 / canvas : canvas;
+		const want = sideways ? 1 / canvas : canvas;
 		const share = opts.align === "start" ? 0 : opts.align === "end" ? 1 : 0.5;
 		if (vw / vh < want) {
 			const extra = vh * want - vw;

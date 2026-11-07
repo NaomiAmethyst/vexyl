@@ -270,6 +270,11 @@
   "b": "field a\nvariant v { from transpose; }\n"
  },
  {
+  "name": "a variant turned upside down or all the way around",
+  "a": "field a\nvariant v { from half-turn; }\n",
+  "b": "field a\nvariant v { from invert; }\n"
+ },
+ {
   "name": "a variant upright",
   "a": "field a\nvariant v { from rotate; upright; }\n",
   "b": "field a\nvariant v { from rotate; }\n"

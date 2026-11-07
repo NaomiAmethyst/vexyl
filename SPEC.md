@@ -1012,7 +1012,7 @@ variant vertical {
 
 | Child | Meaning |
 |---|---|
-| `from none`, `from rotate` or `from transpose` | How the design turns; the default is `none` |
+| `from none`, `from rotate`, `from transpose`, `from half-turn` or `from invert` | How the design turns; the default is `none` |
 | `upright` | Keeps charges and emblems the right way up as the design turns |
 | `ratio N` | Its proportion by the flag's `adapt` rules, as fly divided by hoist before turning |
 | `proportion hoist=H fly=F` | Its own true shape and grid, for a form that's fixed rather than adapted |
@@ -1022,12 +1022,19 @@ variant vertical {
 `from transpose` reflects the flag across its diagonal, so its hoist runs along the top
 and its upper hoist corner stays at the viewer's upper left. It's how a flag hanging
 from a crossbar looks from the front. `from rotate` turns it a quarter turn clockwise,
-which moves the upper hoist corner to the upper right.
+which moves the upper hoist corner to the upper right. `from half-turn` turns it all the
+way around, which moves the upper hoist corner to the lower fly. `from invert` turns it
+upside down with its hoist still at the hoist, as a flag flown union down is, which moves
+the upper hoist corner to the lower hoist.
 
 ```
 transpose: (x, y) -> (y, x)
 rotate:    (x, y) -> (H - y, x)
+half-turn: (x, y) -> (F - x, H - y)
+invert:    (x, y) -> (x, H - y)
 ```
+
+`transpose` and `rotate` swap the flag's width and height. `half-turn` and `invert` keep them.
 
 A variant with `upright` puts each charge back the right way up around its own position,
 leaving where it sits on the flag alone. A polygon doesn't have a position to turn around,

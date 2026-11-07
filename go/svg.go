@@ -170,7 +170,8 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 		transform = strings.TrimSpace(transform + fmt.Sprintf(" matrix(-1 0 0 1 %s 0)", num(2*x0+width)))
 	}
 	vx, vy, vw, vh := x0, y0, width, tall
-	if turn != "none" {
+	sideways := turn == "rotate" || turn == "transpose"
+	if sideways {
 		vx, vy, vw, vh = y0, x0, tall, width
 	}
 	if upright {
@@ -179,7 +180,7 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 	if canvas != 0 {
 		// The canvas ratio is the design's, so a turned flag's is the other way up.
 		want := canvas
-		if turn != "none" {
+		if sideways {
 			want = 1 / canvas
 		}
 		share := map[string]float64{"start": 0, "end": 1}[opts.Align]
