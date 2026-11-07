@@ -14,7 +14,8 @@ import { circlePath, forRegion, outlineGeom, panelEdge, panelRect, rayPolys } fr
 import { esc, factor, hash, num } from "./text.js";
 import { RenderError } from "./types.js";
 import type {
-	ChargeLayer, ChecksLayer, Effects, EmblemLayer, Fimbriation, Flag, Layer, Options, PanelLayer, QuartersLayer, SaltireLayer, SvgElement, SvgShape,
+	ChargeLayer, ChecksLayer, Effects, EmblemLayer, Fimbriation, Flag, Layer, Options, PanelLayer, QuartersLayer, SaltireLayer, Shape, SvgElement,
+	SvgShape,
 } from "./types.js";
 import { XmlDecoder } from "./xml.js";
 
@@ -342,7 +343,7 @@ class Renderer {
 		if (this.using === 0) {
 			this.tag = path;
 		}
-		const { attrs, style } = this.effects(l, reg);
+		const { attrs, style } = this.effects(l, reg, cutMoves(l, reg));
 		if (l.layer === "group") {
 			// A group composites as a unit, so its children blend only with each other.
 			style.push("isolation:isolate");
@@ -361,8 +362,8 @@ class Renderer {
 		}
 	}
 
-	/** Writes any clip and mask a layer needs, and gives its attributes. */
-	private effects(e: Effects, reg: Region): { attrs: string[]; style: string[] } {
+	/** Writes any clip and mask a layer needs, and gives its attributes. A charge's cuts are drawn once for each of its moves, if it has them. */
+	private effects(e: Effects, reg: Region, moves: string[] | undefined): { attrs: string[]; style: string[] } {
 		const attrs: string[] = [];
 		const style: string[] = [];
 		if (e.opacity !== 1) {
@@ -387,9 +388,15 @@ class Renderer {
 			this.line(`<mask id="${id}" maskUnits="userSpaceOnUse" x="${num(x)}" y="${num(y)}" width="${num(w)}" height="${num(h)}">`);
 			this.depth++;
 			this.unmarked({ poly: rectPoly(x, y, x + w, y + h) }, 'fill="#fff"');
-			for (const c of e.cuts) {
-				const cut = forRegion(c, reg);
-				this.unmarked(shapeGeom(cut, position(cut, reg), 0), 'fill="#000"');
+			for (const move of moves ?? [""]) {
+				for (const c of e.cuts) {
+					const cut = forRegion(c, reg);
+					const g = shapeGeom(cut, position(cut, reg), 0);
+					if (move !== "") {
+						g.transform = `${move} ${g.transform ?? ""}`.trim();
+					}
+					this.unmarked(g, 'fill="#000"');
+				}
 			}
 			this.depth--;
 			this.line("</mask>");
@@ -637,40 +644,9 @@ class Renderer {
 		}
 		const copies: Geom[] = [];
 		const centers: Vec[] = [];
-		const addCopy = (center: Vec, turn: number): void => {
-			copies.push(shapeGeom(s, center, turn));
-			centers.push(center);
-		};
-		const repeat = c.repeat;
-		if ((s.ats?.length ?? 0) > 1) {
-			for (const p of s.ats!) {
-				addCopy(p === null ? regionCenter(reg) : { x: p.fly, y: p.hoist }, 0);
-			}
-		} else if (repeat === undefined) {
-			addCopy(at, 0);
-		} else if (repeat.kind === "ring") {
-			for (let i = 0; i < repeat.count; i++) {
-				const a = (i * 360) / repeat.count;
-				addCopy(add(at, rotate({ x: 0, y: -repeat.radius }, a)), repeat.turn ? a : 0);
-			}
-		} else if (repeat.kind === "arc") {
-			for (let i = 0; i < repeat.count; i++) {
-				const a = repeat.from + ((repeat.to - repeat.from) * i) / (repeat.count - 1);
-				addCopy(add(at, rotate({ x: 0, y: -repeat.radius }, a)), repeat.turn ? a : 0);
-			}
-		} else if (repeat.kind === "line") {
-			for (let i = 0; i < repeat.count; i++) {
-				addCopy(add(at, mul({ x: repeat.fly, y: repeat.hoist }, i)), 0);
-			}
-		} else {
-			for (let row = 1; row <= repeat.rows; row++) {
-				for (let col = 1; col <= repeat.columns; col++) {
-					if (repeat.stagger && (row + col) % 2 === 1) {
-						continue;
-					}
-					addCopy({ x: (reg.w * col) / (repeat.columns + 1), y: (reg.h * row) / (repeat.rows + 1) }, 0);
-				}
-			}
+		for (const p of chargePlaces(c, s, reg)) {
+			copies.push(shapeGeom(s, p.at, p.turn));
+			centers.push(p.at);
 		}
 		const hollow = s.hollow ?? 0;
 		const lines = s.kind === "star" ? (s.lines ?? 0) : 0;
@@ -854,3 +830,75 @@ class Renderer {
 	}
 }
 
+
+/** Where one copy of a charge goes, and how far it turns with its repeat. */
+interface CopyPlace {
+	at: Vec;
+	turn: number;
+}
+
+/** Where each copy of a charge goes, in the order they're painted. */
+function chargePlaces(c: ChargeLayer, s: Shape, reg: Region): CopyPlace[] {
+	const places: CopyPlace[] = [];
+	const addPlace = (at: Vec, turn: number): void => {
+		places.push({ at, turn });
+	};
+	const at = position(s, reg);
+	const repeat = c.repeat;
+	if ((s.ats?.length ?? 0) > 1) {
+		for (const p of s.ats!) {
+			addPlace(p === null ? regionCenter(reg) : { x: p.fly, y: p.hoist }, 0);
+		}
+	} else if (repeat === undefined) {
+		addPlace(at, 0);
+	} else if (repeat.kind === "ring") {
+		for (let i = 0; i < repeat.count; i++) {
+			const a = (i * 360) / repeat.count;
+			addPlace(add(at, rotate({ x: 0, y: -repeat.radius }, a)), repeat.turn ? a : 0);
+		}
+	} else if (repeat.kind === "arc") {
+		for (let i = 0; i < repeat.count; i++) {
+			const a = repeat.from + ((repeat.to - repeat.from) * i) / (repeat.count - 1);
+			addPlace(add(at, rotate({ x: 0, y: -repeat.radius }, a)), repeat.turn ? a : 0);
+		}
+	} else if (repeat.kind === "line") {
+		for (let i = 0; i < repeat.count; i++) {
+			addPlace(add(at, mul({ x: repeat.fly, y: repeat.hoist }, i)), 0);
+		}
+	} else {
+		for (let row = 1; row <= repeat.rows; row++) {
+			for (let col = 1; col <= repeat.columns; col++) {
+				if (repeat.stagger && (row + col) % 2 === 1) {
+					continue;
+				}
+				addPlace({ x: (reg.w * col) / (repeat.columns + 1), y: (reg.h * row) / (repeat.rows + 1) }, 0);
+			}
+		}
+	}
+	return places;
+}
+
+/**
+ * A transform for each copy of a charge, which takes its cuts from where they're written, for the first copy, to that copy.
+ * The first needs none. A layer that isn't a charge with several copies gets undefined, and its cuts apply once.
+ */
+function cutMoves(l: Layer, reg: Region): string[] | undefined {
+	if (l.layer !== "charge" || l.cuts.length === 0 || l.shape.kind === "svg") {
+		return undefined;
+	}
+	const places = chargePlaces(l, forRegion(l.shape, reg), reg);
+	if (places.length < 2) {
+		return undefined;
+	}
+	const first = places[0]!;
+	return places.map((p, i) => {
+		if (i === 0) {
+			return "";
+		}
+		const turn = p.turn - first.turn;
+		if (turn !== 0) {
+			return `translate(${num(p.at.x)} ${num(p.at.y)}) rotate(${num(turn)}) translate(${num(-first.at.x)} ${num(-first.at.y)})`;
+		}
+		return `translate(${num(p.at.x - first.at.x)} ${num(p.at.y - first.at.y)})`;
+	});
+}

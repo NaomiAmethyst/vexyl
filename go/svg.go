@@ -366,7 +366,7 @@ func (r *renderer) layer(l Layer, reg region, path string) {
 	if r.using == 0 {
 		r.tag = path
 	}
-	attrs, style := r.effects(l.effects(), reg)
+	attrs, style := r.effects(l.effects(), reg, cutMoves(l, reg))
 	if _, isGroup := l.(*Group); isGroup {
 		// A group composites as a unit, so its children blend only with each other.
 		style = append(style, "isolation:isolate")
@@ -385,8 +385,9 @@ func (r *renderer) layer(l Layer, reg region, path string) {
 	r.content(l, reg, path)
 }
 
-// effects writes any clip and mask a layer needs, and returns its attributes.
-func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
+// effects writes any clip and mask a layer needs, and returns its attributes. A charge's
+// cuts are drawn once for each of its moves, if it has them.
+func (r *renderer) effects(e *Effects, reg region, moves []string) (attrs, style []string) {
 	if e.Opacity != 1 {
 		attrs = append(attrs, fmt.Sprintf(`opacity="%s"`, num(e.Opacity)))
 	}
@@ -409,9 +410,18 @@ func (r *renderer) effects(e *Effects, reg region) (attrs, style []string) {
 		r.line(`<mask id="%s" maskUnits="userSpaceOnUse" x="%s" y="%s" width="%s" height="%s">`, id, num(x), num(y), num(w), num(h))
 		r.depth++
 		r.unmarked(geom{poly: rectPoly(x, y, x+w, y+h)}, `fill="#fff"`)
-		for i := range e.Cuts {
-			cut := e.Cuts[i].forRegion(reg)
-			r.unmarked(shapeGeom(cut, position(cut, reg), 0), `fill="#000"`)
+		if moves == nil {
+			moves = []string{""}
+		}
+		for _, move := range moves {
+			for i := range e.Cuts {
+				cut := e.Cuts[i].forRegion(reg)
+				g := shapeGeom(cut, position(cut, reg), 0)
+				if move != "" {
+					g.transform = strings.TrimSpace(move + " " + g.transform)
+				}
+				r.unmarked(g, `fill="#000"`)
+			}
 		}
 		r.depth--
 		r.line(`</mask>`)
@@ -671,10 +681,42 @@ func (r *renderer) charge(c *Charge, reg region) {
 	}
 	var copies []geom
 	var centers []vec
-	add := func(center vec, turn float64) {
-		copies = append(copies, shapeGeom(s, center, turn))
-		centers = append(centers, center)
+	for _, p := range chargePlaces(c, s, reg) {
+		copies = append(copies, shapeGeom(s, p.at, p.turn))
+		centers = append(centers, p.at)
 	}
+	draw := func(shapes []geom) {
+		switch {
+		case s.Hollow > 0:
+			r.outlineOnly(c.Color, s.Hollow, shapes)
+		case s.Lines > 0:
+			r.outlineOnly(c.Color, s.Lines, shapes)
+		default:
+			r.paint(c.Color, nil, c.Fimbriate, shapes, shapes)
+		}
+	}
+	if r.upright == "" || s.Kind == "polygon" {
+		draw(copies)
+		return
+	}
+	for i := range copies {
+		r.keepUpright(centers[i], func() { draw(copies[i : i+1]) })
+	}
+}
+
+// copyPlace is where one copy of a charge goes, and how far it turns with its repeat.
+type copyPlace struct {
+	at   vec
+	turn float64
+}
+
+// chargePlaces gives where each copy of a charge goes, in the order they're painted.
+func chargePlaces(c *Charge, s *Shape, reg region) []copyPlace {
+	var places []copyPlace
+	add := func(at vec, turn float64) {
+		places = append(places, copyPlace{at, turn})
+	}
+	at := position(s, reg)
 	switch {
 	case len(s.Ats) > 1:
 		for _, p := range s.Ats {
@@ -721,23 +763,32 @@ func (r *renderer) charge(c *Charge, reg region) {
 			}
 		}
 	}
-	draw := func(shapes []geom) {
-		switch {
-		case s.Hollow > 0:
-			r.outlineOnly(c.Color, s.Hollow, shapes)
-		case s.Lines > 0:
-			r.outlineOnly(c.Color, s.Lines, shapes)
-		default:
-			r.paint(c.Color, nil, c.Fimbriate, shapes, shapes)
+	return places
+}
+
+// cutMoves gives a transform for each copy of a charge, which takes its cuts from where
+// they're written, for the first copy, to that copy. The first needs none. A layer that
+// isn't a charge with several copies gets nil, and its cuts apply once.
+func cutMoves(l Layer, reg region) []string {
+	c, ok := l.(*Charge)
+	if !ok || len(c.Cuts) == 0 || c.Shape.Kind == "svg" {
+		return nil
+	}
+	places := chargePlaces(c, c.Shape.forRegion(reg), reg)
+	if len(places) < 2 {
+		return nil
+	}
+	first := places[0]
+	moves := make([]string, len(places))
+	for i, p := range places[1:] {
+		if turn := p.turn - first.turn; turn != 0 {
+			moves[i+1] = fmt.Sprintf("translate(%s %s) rotate(%s) translate(%s %s)",
+				num(p.at.x), num(p.at.y), num(turn), num(-first.at.x), num(-first.at.y))
+		} else {
+			moves[i+1] = fmt.Sprintf("translate(%s %s)", num(p.at.x-first.at.x), num(p.at.y-first.at.y))
 		}
 	}
-	if r.upright == "" || s.Kind == "polygon" {
-		draw(copies)
-		return
-	}
-	for i := range copies {
-		r.keepUpright(centers[i], func() { draw(copies[i : i+1]) })
-	}
+	return moves
 }
 
 // keepUpright undoes a turned variant's rotation around a point, if there is one.

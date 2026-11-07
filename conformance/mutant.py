@@ -17,6 +17,9 @@ import zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TAG = re.compile(r' data-vexyl-layer="[^"]*"')
+# A cut that a charge's copy has moved. A path's cut has a transform of its own, so this is only
+# for fixtures that have none.
+MOVED_CUT = re.compile(r'\s*<(?:circle|polygon|path) [^>]*fill="#000" transform="translate\([^"]*"/>')
 
 
 def run(command, args):
@@ -49,6 +52,9 @@ def main():
         finish(subprocess.CompletedProcess(args, 0, b"v1.AAAA\n", b""))
     if done.returncode:
         finish(done)
+    if render and name == "cuts-once":
+        # Cuts a charge's first copy only, as if its cuts applied once, where they're written.
+        rewrite_output(args, lambda t: MOVED_CUT.sub("", t))
     if render and tagged:
         if name == "tags-dropped":
             rewrite_output(args, lambda t: TAG.sub("", t))

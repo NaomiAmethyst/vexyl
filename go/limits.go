@@ -87,10 +87,15 @@ func layerSize(l Layer, longer float64) int {
 	if e.Clip != nil {
 		size = shapeParts(e.Clip)
 	}
+	cuts := 0
 	for i := range e.Cuts {
-		size = addSize(size, shapeParts(&e.Cuts[i]))
+		cuts = addSize(cuts, shapeParts(&e.Cuts[i]))
 	}
-	return addSize(size, contentSize(l, longer))
+	// A charge's cuts go with each of its copies.
+	if c, ok := l.(*Charge); ok {
+		cuts = mulSize(chargeCopies(c), cuts)
+	}
+	return addSize(addSize(size, cuts), contentSize(l, longer))
 }
 
 func contentSize(l Layer, longer float64) int {

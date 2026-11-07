@@ -492,6 +492,11 @@
   "line": 11
  },
  {
+  "name": "cuts on copies past the limit",
+  "file": "invalid/cuts-on-copies-past-the-limit.kdl",
+  "line": 5
+ },
+ {
   "name": "inline svg past the limit by its bytes",
   "file": "invalid/inline-svg-past-the-limit-by-its-bytes.kdl",
   "line": 25

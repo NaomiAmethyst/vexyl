@@ -1,0 +1,219 @@
+{
+ "layers": [
+  {
+   "color": "night",
+   "layer": "field"
+  },
+  {
+   "at": [
+    {
+     "fly": 4,
+     "hoist": 4
+    }
+   ],
+   "color": "gold",
+   "cut": [
+    {
+     "at": [
+      {
+       "fly": 2.25,
+       "hoist": 4
+      }
+     ],
+     "radius": 0.4,
+     "shape": "disc"
+    }
+   ],
+   "inner": 2,
+   "layer": "charge",
+   "offset": 1,
+   "radius": 2.5,
+   "repeat": {
+    "count": 3,
+    "fly": 6,
+    "form": "line"
+   },
+   "shape": "crescent"
+  },
+  {
+   "at": [
+    {
+     "fly": 29,
+     "hoist": 8
+    }
+   ],
+   "color": "white",
+   "cut": [
+    {
+     "at": [
+      {
+       "fly": 29.75,
+       "hoist": 2.5
+      }
+     ],
+     "radius": 0.6,
+     "shape": "disc"
+    }
+   ],
+   "fly": 1.5,
+   "hoist": 3,
+   "layer": "charge",
+   "repeat": {
+    "count": 6,
+    "form": "ring",
+    "radius": 4,
+    "turn": true
+   },
+   "shape": "rect"
+  },
+  {
+   "at": [
+    {
+     "fly": 10,
+     "hoist": 17
+    }
+   ],
+   "color": "pink",
+   "cut": [
+    {
+     "at": [
+      {
+       "fly": 3.5,
+       "hoist": 17
+      }
+     ],
+     "radius": 0.6,
+     "shape": "disc"
+    }
+   ],
+   "fly": 1,
+   "hoist": 3,
+   "layer": "charge",
+   "repeat": {
+    "count": 5,
+    "form": "arc",
+    "from": -90,
+    "radius": 5,
+    "to": 90,
+    "turn": true
+   },
+   "shape": "rect"
+  },
+  {
+   "at": [
+    {
+     "fly": 22,
+     "hoist": 15
+    },
+    {
+     "fly": 26,
+     "hoist": 18
+    },
+    {
+     "fly": 30,
+     "hoist": 15
+    }
+   ],
+   "clip": {
+    "at": [
+     {
+      "fly": 25,
+      "hoist": 16.5
+     }
+    ],
+    "fly": 10,
+    "hoist": 8,
+    "shape": "rect"
+   },
+   "color": "violet",
+   "cut": [
+    {
+     "at": [
+      {
+       "fly": 22,
+       "hoist": 15
+      }
+     ],
+     "fly": 2.6,
+     "hoist": 0.5,
+     "shape": "rect"
+    }
+   ],
+   "layer": "charge",
+   "radius": 1.2,
+   "shape": "disc"
+  },
+  {
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "violet",
+     "layer": "field"
+    },
+    {
+     "cut": [
+      {
+       "fly": 6,
+       "hoist": 3,
+       "shape": "rect"
+      }
+     ],
+     "layer": "group",
+     "layers": [
+      {
+       "color": "white",
+       "cut": [
+        {
+         "at": [
+          {
+           "fly": 4,
+           "hoist": 1.5
+          }
+         ],
+         "fly": 0.4,
+         "hoist": 2,
+         "shape": "rect"
+        }
+       ],
+       "layer": "charge",
+       "radius": 0.9,
+       "repeat": {
+        "columns": 8,
+        "form": "grid",
+        "rows": 1
+       },
+       "shape": "disc"
+      }
+     ]
+    }
+   ],
+   "side": "bottom",
+   "width": 3
+  }
+ ],
+ "meta": {
+  "name": "Repeated Cuts Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "pink": {
+   "color": "#f0a0c8"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 36,
+  "hoist": 24
+ },
+ "vexyl": 1
+}

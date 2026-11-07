@@ -287,7 +287,7 @@ function paint_layers(layers, region, target):
         target.begin_layer(layer.opacity, layer.blend)
         target.push_clip(region)
         if layer.clip: target.push_clip(shape(layer.clip, region))
-        if layer.cuts: target.push_mask_excluding(shapes(layer.cuts, region))
+        if layer.cuts: target.push_mask_excluding(shapes(cut_shapes(layer, region), region))
         paint_content(layer, region, target)
         target.pop_all_pushed_by_this_layer()
         target.end_layer()
@@ -310,7 +310,7 @@ or on the flag at the top level. A group or canton is composited as a unit, so
 its children never blend with anything outside it.
 
 `clip` and `cut` take any shape, including `pile` and `pall`, or a shape from a
-`define`. They use a shape's whole area, so it can't be `hollow` or have `lines`. The shapes use the coordinates of the region the layer sits in. They apply to the layer as a whole, after any `repeat`.
+`define`. They use a shape's whole area, so it can't be `hollow` or have `lines`. The shapes use the coordinates of the region the layer sits in. A `clip` applies to the layer as a whole, after any `repeat`, and so does a `cut` on any layer but a charge. A charge's own cuts go with each of its copies, as §8.2 says.
 
 ## 7. Divisions and ordinaries
 
@@ -695,6 +695,32 @@ for i in 0 .. N-1:
     paint charge at at + (A * i, B * i)
 ```
 
+**Cuts go with the copies.** A charge's `cut`s are part of each copy. They're written for the
+first copy, just where they'd be on a charge with only that copy, and each other copy takes them
+with it: moved as far as it's moved from the first, and turned as far as the repeat turns it
+beyond the first. That holds for every `repeat`, and for several `at`s. The first copy is the
+first one painted: the top of a ring, `from` on an arc, the charge's position on a line, the
+top-left cell of a grid, or the first `at`. So a row of crescents with a hole in each needs only
+one cut, and a ring that turns its copies turns their cuts too.
+
+```
+function cut_shapes(layer, region):
+    if layer is not a charge: return layer.cuts
+    copies = each (position, turn) the charge is painted at, in order, with turn 0 unless a ring or arc turns it
+    first = copies[0]
+    result = []
+    for (p, turn) in copies:
+        for cut in layer.cuts:
+            add cut to result, turned by turn - first.turn about first.position,
+                then moved by p - first.position
+    return result
+```
+
+All the copies' cuts together are removed from the charge's paint, as any cut is, so a cut
+reaching past its own copy cuts the next one too. A charge with one copy is drawn as it always
+was. A `clip` on a charge still applies once, to all its copies together, as a `cut` on a `group`
+does, which is the way to cut across several copies at once.
+
 ### 8.3 SVG escape hatch
 
 Artwork that isn't geometry is inlined in the document, usually as a KDL raw
@@ -1045,7 +1071,10 @@ The others keep them.
 
 A variant with `upright` puts each charge back the right way up around its own position,
 leaving where it sits on the flag alone. A polygon doesn't have a position to turn around,
-so it turns with the flag.
+so it turns with the flag. Each copy from a `repeat` or several `at`s is put back around its own
+position. A charge's `clip` and `cut`s are shapes in the region, so they turn with the flag, for
+one copy or many. `upright` applies to the whole variant. To keep only some charges upright, a
+variant gives its own layers, turning those charges itself.
 
 A `proportion` is for a form that a law or specification fixes in its own right, like an
 official size beside the flag's usual one. Unlike `ratio`, it doesn't need `adapt`, and so
@@ -1156,7 +1185,8 @@ out once, when it's read:
 
 ```
 function size(layer):
-    n = sum of parts(s) for s in the layer's clip and cuts
+    cuts = sum of parts(s) for s in the layer's cuts
+    n = parts(the layer's clip, if it has one) + (copies * cuts for a charge, or cuts)
     case layer:
         bars:               n + colors * (1 + waves(edge)), or n + colors with no edge
         chevrons, rays:     n + colors
@@ -1188,11 +1218,12 @@ largest. The deepest nests 3 levels.
 
 ## 16. Open questions
 
-[`docs/missing-from-spec.md`](docs/missing-from-spec.md) records the survey behind much
-of this format's vocabulary.
+There are no open questions. [`docs/missing-from-spec.md`](docs/missing-from-spec.md) records
+the survey behind much of this format's vocabulary. These were decided:
 
-- **Cuts on repeats:** a cut applies after `repeat`, so a repeated crescent needs
-  several cuts. It might be better to have a `cut` inside a charge travel with it.
-- **Cardioid anchor:** placing it by its cusp is exact but awkward for centering.
-- **Emblem upright rules:** `upright` applies to a whole variant, but some flags may
-  keep only some charges upright. A variant can replace its layers for now.
+- **Cuts on repeats:** a charge's cuts go with each of its copies, turning with them, so a
+  repeated crescent needs only one cut (§8.2).
+- **Cardioid anchor:** a cardioid keeps its cusp as its position, which is exact. Centering one
+  by hand is awkward, so an editor helps with that instead.
+- **Upright charges:** `upright` applies to a whole variant. A variant that keeps only some
+  charges upright gives its own layers (§12).

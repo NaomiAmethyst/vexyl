@@ -1,0 +1,112 @@
+// An invented flag exercising a charge's own cuts, which go with each of its copies: a row
+// of crescents with one hole, a ring and an arc whose copies turn and take their notches
+// with them, a grid, several positions under a clip that applies once, and a group's cut
+// that applies once.
+vexyl 1
+meta {
+  name "Repeated Cuts Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+  pink "#f0a0c8"
+}
+proportion hoist=24 fly=36
+
+field night
+
+// Each crescent has a hole in its body, though only the first is written.
+charge crescent gold {
+  radius 2.5
+  inner 2
+  offset 1
+  at fly=4 hoist=4
+  repeat line count=3 fly=6
+  cut {
+    disc {
+      radius 0.4
+      at fly=2.25 hoist=4
+    }
+  }
+}
+
+// The first copy, at the top, has its notch in its upper fly corner. Each other copy
+// turns with the ring, and so does its notch.
+charge rect white {
+  fly 1.5
+  hoist 3
+  at fly=29 hoist=8
+  repeat ring count=6 radius=4 turn=#true
+  cut {
+    disc {
+      radius 0.6
+      at fly=29.75 hoist=2.5
+    }
+  }
+}
+
+// The first copy lies across at the hoist end, with a notch in its outer end.
+charge rect pink {
+  fly 1
+  hoist 3
+  at fly=10 hoist=17
+  repeat arc count=5 radius=5 from=-90 to=90 turn=#true
+  cut {
+    disc {
+      radius 0.6
+      at fly=3.5 hoist=17
+    }
+  }
+}
+
+// Three discs with a slot each, clipped once, so that the last is cut in half.
+charge disc violet {
+  radius 1.2
+  at fly=22 hoist=15
+  at fly=26 hoist=18
+  at fly=30 hoist=15
+  clip {
+    rect {
+      fly 10
+      hoist 8
+      at fly=25 hoist=16.5
+    }
+  }
+  cut {
+    rect {
+      fly 2.6
+      hoist 0.5
+      at fly=22 hoist=15
+    }
+  }
+}
+
+panel {
+  side bottom
+  width 3
+  field violet
+
+  // Every disc has a slot, written for the first, and the group's cut takes the
+  // middle of the row away once.
+  group {
+    cut {
+      rect {
+        fly 6
+        hoist 3
+      }
+    }
+    charge disc white {
+      radius 0.9
+      repeat grid rows=1 columns=8
+      cut {
+        rect {
+          fly 0.4
+          hoist 2
+          at fly=4 hoist=1.5
+        }
+      }
+    }
+  }
+}

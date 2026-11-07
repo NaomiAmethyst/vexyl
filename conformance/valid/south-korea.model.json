@@ -85,11 +85,11 @@
       {
        "at": [
         {
-         "fly": 44,
+         "fly": 38,
          "hoist": 0
         }
        ],
-       "fly": 20,
+       "fly": 6,
        "hoist": 2,
        "shape": "rect"
       }
@@ -179,11 +179,11 @@
       {
        "at": [
         {
-         "fly": 44,
+         "fly": 38,
          "hoist": 0
         }
        ],
-       "fly": 20,
+       "fly": 6,
        "hoist": 2,
        "shape": "rect"
       }

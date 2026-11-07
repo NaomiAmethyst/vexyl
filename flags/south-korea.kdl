@@ -87,9 +87,9 @@ emblem {
     repeat line count=3 fly=6
     cut {
       rect {
-        fly 20
+        fly 6
         hoist 2
-        at fly=44 hoist=0
+        at fly=38 hoist=0
       }
     }
   }
@@ -131,9 +131,9 @@ emblem {
     repeat line count=2 fly=12
     cut {
       rect {
-        fly 20
+        fly 6
         hoist 2
-        at fly=44 hoist=0
+        at fly=38 hoist=0
       }
     }
   }

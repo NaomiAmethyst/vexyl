@@ -573,6 +573,7 @@ func TestRejected(t *testing.T) {
 		{"just past the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 20) + "field a\n", "paints too much"},
 		{"star points past the limit", header + "charge star a { radius 1; points 10000; repeat grid rows=5 columns=4; }\nfield a\n", "paints too much"},
 		{"path data past the limit", header + strings.Repeat(pathCopies(128), 7), "paints too much"},
+		{"cuts on copies past the limit", header + "charge disc a { radius 1; repeat grid rows=100 columns=100; cut { star { radius 1; points 20; }; }; }\n", "paints too much"},
 		{"inline svg past the limit by its bytes", header + svgChain(17), "paints too much"},
 		{"reverse past the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "reverse {\n" + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "field a\n}\n", "paints too much"},
 		{"variants past the limit", header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "variant v {\n" + strings.Repeat("checks a b { rows 100; columns 100; }\n", 10) + "field a\n}\n", "paints too much"},
@@ -816,6 +817,53 @@ func TestEmblemMaskCoversVisibleArea(t *testing.T) {
 	reach := num(math.Hypot(20, 10))
 	if want := `x="-` + reach + `" y="-` + reach + `"`; !strings.Contains(out, want) {
 		t.Errorf("no %q in %s", want, out)
+	}
+}
+
+// A charge's cuts are written for its first copy and go with each of the others, turning
+// with copies that a repeat turns. Anything else's cuts, and every clip, apply once.
+func TestCutsGoWithCopies(t *testing.T) {
+	cut := `cut { disc { radius 0.5; at fly=2 hoist=3; }; }`
+	tests := []struct {
+		name, src string
+		cuts      int
+		want      []string
+	}{
+		{"line", `charge disc a { radius 1; at fly=2 hoist=3; repeat line count=3 fly=4; ` + cut + ` }`, 3,
+			[]string{`transform="translate(4 0)"`, `transform="translate(8 0)"`}},
+		{"positions", `charge disc a { radius 1; at fly=2 hoist=3; at fly=5 hoist=1; ` + cut + ` }`, 2,
+			[]string{`transform="translate(3 -2)"`}},
+		{"grid", `charge disc a { radius 1; repeat grid rows=1 columns=3; ` + cut + ` }`, 3,
+			[]string{`transform="translate(5 0)"`, `transform="translate(10 0)"`}},
+		{"ring without turning", `charge disc a { radius 1; at fly=2 hoist=5; repeat ring count=2 radius=2; ` + cut + ` }`, 2,
+			[]string{`transform="translate(0 4)"`}},
+		{"ring turning", `charge disc a { radius 1; at fly=2 hoist=5; repeat ring count=4 radius=2 turn=#true; ` + cut + ` }`, 4,
+			[]string{`transform="translate(4 5) rotate(90) translate(-2 -3)"`, `transform="translate(2 7) rotate(180) translate(-2 -3)"`}},
+		{"arc turning", `charge disc a { radius 1; at fly=4 hoist=3; repeat arc count=2 radius=2 from=-90 to=90 turn=#true; ` + cut + ` }`, 2,
+			[]string{`transform="translate(6 3) rotate(180) translate(-2 -3)"`}},
+		{"one copy", `charge disc a { radius 1; at fly=2 hoist=3; ` + cut + ` }`, 1, nil},
+		{"group", `group { ` + cut + `; charge disc a { radius 1; at fly=2 hoist=3; repeat line count=3 fly=4; }; }`, 1, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := svgOf(t, parse(t, header+tt.src))
+			if got := strings.Count(out, `fill="#000"`); got != tt.cuts {
+				t.Errorf("found %d cuts, want %d: %s", got, tt.cuts, out)
+			}
+			if got := strings.Count(out, ` transform=`); got != max(tt.cuts-1, 0) {
+				t.Errorf("found %d moved cuts, want %d: %s", got, tt.cuts-1, out)
+			}
+			for _, want := range tt.want {
+				if !strings.Contains(out, want) {
+					t.Errorf("no %q in %s", want, out)
+				}
+			}
+		})
+	}
+	out := svgOf(t, parse(t, header+`charge disc a { radius 1; repeat line count=3 fly=4; clip { disc { radius 0.5; }; }; }`))
+	// The other clip is the flag's own.
+	if got := strings.Count(out, "<clipPath "); got != 2 || strings.Contains(out, " transform=") {
+		t.Errorf("a clip on copies should apply once: %s", out)
 	}
 }
 

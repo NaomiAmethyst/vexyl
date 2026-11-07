@@ -16,6 +16,10 @@
   "file": "accepted/paints-exactly-the-limit-with-path-data.kdl"
  },
  {
+  "name": "paints exactly the limit with cuts on copies",
+  "file": "accepted/paints-exactly-the-limit-with-cuts-on-copies.kdl"
+ },
+ {
   "name": "inline svg counted by its bytes",
   "file": "accepted/inline-svg-counted-by-its-bytes.kdl"
  },

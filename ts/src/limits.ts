@@ -64,11 +64,16 @@ function chargeCopies(c: ChargeLayer): number {
 
 /** What a layer paints. A definition's size was worked out when it was read, so a chain of them is never walked. */
 export function layerSize(l: Layer, longer: number): number {
-	let size = l.clip !== undefined ? shapeParts(l.clip) : 0;
+	const size = l.clip !== undefined ? shapeParts(l.clip) : 0;
+	let cuts = 0;
 	for (const cut of l.cuts) {
-		size = addSize(size, shapeParts(cut));
+		cuts = addSize(cuts, shapeParts(cut));
 	}
-	return addSize(size, contentSize(l, longer));
+	// A charge's cuts go with each of its copies.
+	if (l.layer === "charge") {
+		cuts = mulSize(chargeCopies(l), cuts);
+	}
+	return addSize(addSize(size, cuts), contentSize(l, longer));
 }
 
 function contentSize(l: Layer, longer: number): number {
