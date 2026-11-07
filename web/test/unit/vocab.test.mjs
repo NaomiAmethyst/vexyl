@@ -6,7 +6,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { load, loadLibrary } from "./load.mjs";
+import { load, loadLibrary, handWrittenDirs } from "./load.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const v = await load("vocab");
@@ -73,7 +73,7 @@ const walk = (dir, out = []) => {
 };
 
 test("across real flags, the only things the form leaves to the source are the known ones", () => {
-	const dirs = [join(repo, "conformance/valid"), join(repo, "conformance/accepted"), resolve(repo, "../vexyl-flags/reviewed"), resolve(repo, "../vexyl-flags/flags/pride")].filter(existsSync);
+	const dirs = [join(repo, "conformance/valid"), join(repo, "conformance/accepted"), ...handWrittenDirs(), resolve(repo, "../vexyl-flags/imported/pride")].filter(existsSync);
 	const left = new Map();
 	let looked = 0;
 	const visit = (nodes, parent) => {

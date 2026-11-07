@@ -387,12 +387,12 @@ export class App {
 	}
 
 	private async lookUpTier(ref: Ref): Promise<void> {
-		if (ref.kind !== "github" || ref.repo !== "vexyl-flags" || !ref.path.startsWith("reviewed/")) {
+		if (ref.kind !== "github" || ref.repo !== "vexyl-flags" || !ref.path.startsWith("flags/")) {
 			return;
 		}
 		try {
 			const tiers = await evidenceTiers(ref.owner, ref.repo, ref.branch);
-			const name = ref.path.slice("reviewed/".length).replace(/\.kdl$/, "");
+			const name = ref.path.slice(ref.path.lastIndexOf("/") + 1).replace(/\.kdl$/, "");
 			this.set({ tier: tiers.get(name) ?? null });
 		} catch {
 			// Without the list, the file just doesn't say.

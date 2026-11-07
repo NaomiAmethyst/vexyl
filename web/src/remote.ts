@@ -235,7 +235,7 @@ export async function fetchRef(r: Ref): Promise<{ text: string; ref: Ref } | { c
 
 /** The evidence tier of a flag in vexyl-flags, from its own list. */
 export async function evidenceTiers(owner: string, repo: string, branch: string): Promise<Map<string, string>> {
-	const text = await fetchText(`https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch)}/reviewed/evidence.tsv`);
+	const text = await fetchText(`https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch)}/evidence.tsv`);
 	return parseEvidence(text);
 }
 

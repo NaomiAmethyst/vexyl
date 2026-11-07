@@ -82,8 +82,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: vexyl.Float(1200)})
   sources where possible, with notes on what each relies on.
 - [`vexyl-flags`](https://github.com/NaomiAmethyst/vexyl-flags), a separate repo, holds
   about 2,000 flags, most converted from Wikimedia Commons, and is how the format is stress
-  tested. Its `reviewed/` folder is where hand-written flags are maintained, and the ones in
-  `flags/` here are copies, kept as test fixtures.
+  tested. Its `flags/` folder is where hand-written flags are maintained, and its `imported/`
+  holds the conversions. The ones in `flags/` here are copies, kept as test fixtures.
 - [`docs/missing-from-spec.md`](docs/missing-from-spec.md) is the survey of real flags
   behind the format's vocabulary.
 - [`docs/logo/`](docs/logo) holds the logo, which is itself a Vexyl flag.

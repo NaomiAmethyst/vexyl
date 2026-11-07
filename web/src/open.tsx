@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
+import { Fragment } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { defaultRepo, gistRef, openHref, parseRef, refFromLink, type Ref } from "./address.js";
 import { Spinner, Tabs, useApp } from "./common.js";
@@ -88,6 +89,15 @@ function Thumb(props: { url: string; size: number }): preact.JSX.Element {
 
 const niceName = (file: string): string => file.replace(/\.kdl$/, "").split(/[-_]/).map((w) => (w === "" ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(" ");
 
+/** Which kind of flag a folder in vexyl-flags holds, for heading its part of the list. */
+function folderGroup(name: string): string {
+	return name.startsWith("flags/") ? "Written by hand" : name.startsWith("imported/") ? "Imported" : "";
+}
+
+function folderLabel(name: string): string {
+	return name === "" ? "Top level" : name.replace(/^(flags|imported)\//, "");
+}
+
 function GithubTab(props: OpenProps): preact.JSX.Element {
 	const [owner, setRepoText] = useState(`${defaultRepo.owner}/${defaultRepo.repo}`);
 	const [branch, setBranch] = useState(defaultRepo.branch);
@@ -137,7 +147,9 @@ function GithubTab(props: OpenProps): preact.JSX.Element {
 			const dir = f.path.includes("/") ? f.path.slice(0, f.path.lastIndexOf("/")) : "";
 			m.set(dir, (m.get(dir) ?? 0) + 1);
 		}
-		return [...m.entries()].sort((a, b) => b[1] - a[1]);
+		// Hand-written flags come first, then imported ones, each largest first.
+		const rank = (name: string): number => (name.startsWith("flags/") ? 0 : name.startsWith("imported/") ? 1 : 2);
+		return [...m.entries()].sort((a, b) => rank(a[0]) - rank(b[0]) || b[1] - a[1]);
 	}, [tree]);
 	const files = useMemo(() => {
 		const q = query.trim().toLowerCase();
@@ -145,7 +157,7 @@ function GithubTab(props: OpenProps): preact.JSX.Element {
 	}, [tree, folder, query]);
 	const refOf = (path: string): Ref & { kind: "github" } => ({ kind: "github", owner: loaded!.owner, repo: loaded!.repo, branch: loaded!.branch, path });
 	const rawOf = (path: string): string => `https://raw.githubusercontent.com/${loaded!.owner}/${loaded!.repo}/${encodeURIComponent(loaded!.branch)}/${path.split("/").map(encodeURIComponent).join("/")}`;
-	const tierOf = (path: string): string | undefined => (path.startsWith("reviewed/") ? tiers.get(path.slice(9).replace(/\.kdl$/, "")) : undefined);
+	const tierOf = (path: string): string | undefined => (path.startsWith("flags/") ? tiers.get(path.slice(path.lastIndexOf("/") + 1).replace(/\.kdl$/, "")) : undefined);
 	return (
 		<div class="stack gap">
 			<form class="repo-form" onSubmit={(e) => { e.preventDefault(); void load(); }}>
@@ -161,14 +173,21 @@ function GithubTab(props: OpenProps): preact.JSX.Element {
 				<div class="browser">
 					<nav aria-label="Folders" class="browser-col folders">
 						{folders.length === 0 ? <p class="nx-empty">No flags here.</p> : null}
-						{folders.map(([name, count]) => (
-							<button key={name} type="button" class={`row compact${folder === name ? " on" : ""}`} aria-pressed={folder === name ? "true" : "false"} onClick={() => { setFolder(name); setPicked(null); }}>
-								<span class="row-label">{name === "" ? "Top level" : name.replace(/^flags\//, "")}</span><span class="row-note">{count}</span>
-							</button>
-						))}
+						{folders.map(([name, count], i) => {
+							const group = folderGroup(name);
+							const first = i === 0 || folderGroup(folders[i - 1]![0]) !== group;
+							return (
+								<Fragment key={name}>
+									{first && group !== "" ? <span class="nx-label folder-group">{group}</span> : null}
+									<button type="button" class={`row compact${folder === name ? " on" : ""}`} aria-pressed={folder === name ? "true" : "false"} onClick={() => { setFolder(name); setPicked(null); }}>
+										<span class="row-label">{folderLabel(name)}{group === "Imported" ? <span class="visually-hidden"> (imported)</span> : null}</span><span class="row-note">{count}</span>
+									</button>
+								</Fragment>
+							);
+						})}
 					</nav>
 					<div class="browser-col files">
-						<input class="nx-input" aria-label="Search this folder" placeholder={`Search ${(folder ?? "").replace(/^flags\//, "") || "these"}`} value={query} onInput={(e) => { setQuery((e.currentTarget as HTMLInputElement).value); }} />
+						<input class="nx-input" aria-label="Search this folder" placeholder={`Search ${folderLabel(folder ?? "") || "these"}`} value={query} onInput={(e) => { setQuery((e.currentTarget as HTMLInputElement).value); }} />
 						<div class="file-list">
 							{files.map((f) => {
 								const r = refOf(f.path);

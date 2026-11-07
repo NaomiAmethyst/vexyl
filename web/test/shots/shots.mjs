@@ -15,7 +15,7 @@ mkdirSync(out, { recursive: true });
 const srv = await serve();
 
 const screens = {
-	"workspace": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.waitForSelector('.thumb[data-form="fold:triangle"] img'); },
+	"workspace": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.waitForSelector('.thumb[data-form="fold:triangle"] img'); },
 	"panel-selected": async (p) => { await screens.workspace(p); await p.locator('.row[data-path="1.1"]').click(); await p.locator(".panel-head h2").waitFor(); await p.waitForTimeout(300); },
 	"panel-details": async (p) => { await screens.workspace(p); await p.locator('.row[data-path="meta"]').click(); await p.locator(".panel-head h2").waitFor(); await p.waitForTimeout(300); },
 	"panel-color": async (p) => { await screens.workspace(p); await p.locator('.row[data-path="palette"]').click(); await p.locator('.color-chip[data-path="palette/red"]').click(); await p.waitForTimeout(300); },
@@ -37,32 +37,32 @@ const screens = {
 		await p.waitForTimeout(200);
 	},
 	"problems-form": async (p) => { await screens["problems-source"](p); await p.getByRole("radio", { name: "Form" }).click(); await p.locator(".crumbs .back", { hasText: "Structure" }).click(); await p.locator(".row.bad").first().waitFor(); await p.waitForTimeout(300); },
-	"artwork": async (p) => { await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl")); await ready(p); await p.waitForTimeout(1500); },
-	"bolivia": async (p) => { await p.goto(openUrl(srv.base, "reviewed/bolivia.kdl")); await ready(p); await p.waitForTimeout(700); },
-	"open-github": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("button", { name: "reviewed" }).click(); await p.locator('a.file-row[data-file="reviewed/japan.kdl"]').click(); await p.locator(".preview img").waitFor(); await p.waitForTimeout(900); },
+	"artwork": async (p) => { await p.goto(openUrl(srv.base, "imported/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl")); await ready(p); await p.waitForTimeout(1500); },
+	"bolivia": async (p) => { await p.goto(openUrl(srv.base, "flags/country/bolivia.kdl")); await ready(p); await p.waitForTimeout(700); },
+	"open-github": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("button", { name: /^country \d+$/ }).click(); await p.locator('a.file-row[data-file="flags/country/japan.kdl"]').click(); await p.locator(".preview img").waitFor(); await p.waitForTimeout(900); },
 	"open-gist": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Gist" }).click(); await p.getByLabel("Gist link or ID").waitFor(); },
 	"open-computer": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "This computer" }).click(); await p.getByText("Drop a .kdl file here").waitFor(); },
 	"open-paste": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Paste" }).click(); await p.getByLabel("KDL").waitFor(); },
 	"open-link": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Link" }).click(); await p.getByLabel("Link to a KDL file").waitFor(); },
-	"share-github": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
+	"share-github": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
 	"share-edited": async (p) => {
-		await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p);
+		await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p);
 		await p.locator('.row[data-path="proportion"]').click(); await p.getByRole("radio", { name: "Change the shape" }).click(); await p.getByLabel("Fly").fill("25");
 		await fromTopbar(p, "Share");
 		await p.waitForFunction(() => document.querySelector('[aria-label="Link to share"]')?.value.includes("#v1."));
 	},
 	"share-large": async (p) => {
-		await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl")); await ready(p);
+		await p.goto(openUrl(srv.base, "imported/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl")); await ready(p);
 		await p.locator('.row[data-path="proportion"]').click(); await p.getByRole("radio", { name: "Change the shape" }).click(); await p.getByLabel("Fly").fill("31"); await p.locator(".dirty").waitFor({ timeout: 30000 });
 		await fromTopbar(p, "Share");
 		await p.getByText("This file is too large").waitFor({ timeout: 60000 });
 	},
-	"compare-side": async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); await p.waitForTimeout(300); },
+	"compare-side": async (p) => { await p.goto(openUrl(srv.base, "flags/historical/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); await p.waitForTimeout(300); },
 	"compare-slider": async (p) => { await screens["compare-side"](p); await p.getByRole("radio", { name: "Slider" }).click(); await p.waitForTimeout(300); },
 	"compare-differences": async (p) => { await screens["compare-side"](p); await p.getByRole("radio", { name: "Differences" }).click(); await p.waitForFunction(() => document.querySelector("[data-percent]")?.getAttribute("data-percent") !== ""); },
 	"compare-source": async (p) => { await screens["compare-side"](p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 	"not-found": async (p, world) => { world.repoMissing = true; await p.goto(`${srv.base}?view=open`); await p.getByText("doesn't have").waitFor(); world.repoMissing = false; },
-	"no-file": async (p) => { await p.goto(openUrl(srv.base, "reviewed/no-such-flag.kdl")); await p.getByRole("heading", { name: "That flag didn't open" }).waitFor(); },
+	"no-file": async (p) => { await p.goto(openUrl(srv.base, "flags/country/no-such-flag.kdl")); await p.getByRole("heading", { name: "That flag didn't open" }).waitFor(); },
 };
 
 const only = process.argv[3]?.split(",");

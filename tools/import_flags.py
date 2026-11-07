@@ -9,8 +9,8 @@ INDEX is a JSON index from fetch_flags.py, whose entries are keyed family/name, 
 holds family/name.svg files. Each flag is converted by svg2vexyl.py and validated and rendered
 by VEXYL, then its source and result are rasterized with resvg and compared. If EXPORT
 is given, flags that match, have a known license and aren't excluded are written there, along
-with a report. REVIEWED is a folder of hand-written flags and a map.tsv saying which import each
-replaces. Treat the downloaded files as untrusted.
+with a report. HAND is a vexyl-flags checkout, whose flags/ holds hand-written flags and whose
+map.tsv says which import each replaces, so that those imports are left out. Treat the downloaded files as untrusted.
 """
 import collections
 import concurrent.futures
@@ -163,26 +163,20 @@ def vocabulary(text):
     return "named"
 
 
-def overlay(reviewed, export, rows, vexyl):
-    """Puts hand-written flags in place of the imports they replace."""
+def overlay(hand, export, rows, vexyl):
+    """Leaves out the imports that hand-written flags replace, checking that each of those is valid."""
     by_key = {row.split("\t")[0]: row for row in rows[1:]}
-    for line in open(f"{reviewed}/map.tsv"):
+    for line in open(f"{hand}/map.tsv"):
         name, family, replaces = (line.rstrip("\n").split("\t") + [""])[:3]
         if name == "name":
             continue
-        for old in replaces.split(","):
+        subprocess.run([vexyl, "check", f"{hand}/flags/{family}/{name}.kdl"], check=True, capture_output=True)
+        for old in replaces.split(",") + [f"{family}/{name}"]:
             if old:
                 by_key.pop(old, None)
                 path = f"{export}/{old}.kdl"
                 if os.path.exists(path):
                     os.remove(path)
-        key = f"{family}/{name}"
-        os.makedirs(f"{export}/{family}", exist_ok=True)
-        text = open(f"{reviewed}/{name}.kdl").read()
-        subprocess.run([vexyl, "check", f"{reviewed}/{name}.kdl"], check=True, capture_output=True)
-        open(f"{export}/{key}.kdl", "w").write(text)
-        found = re.search(r'^  license "([^"]+)"', text, re.M)
-        by_key[key] = f"{key}\treviewed: {vocabulary(text)}\t\t\t\t{found.group(1) if found else ''}"
     return rows[:1] + [by_key[k] for k in sorted(by_key)]
 
 
@@ -233,12 +227,12 @@ def main():
             with open(f"{out}/kdl/{r['key']}.kdl") as f, open(path, "w") as g:
                 g.write(f.read())
             rows.append(f"{r['key']}\t{r['vocabulary']}\t{r['native']}\t{r['inline']}\t{r['diff']}\t{r['license']}")
-        reviewed = sys.argv[6] if len(sys.argv) > 6 else None
-        if reviewed:
-            rows = overlay(reviewed, export, rows, vexyl)
-        with open(f"{export}/../report.tsv", "w") as f:
+        hand = sys.argv[6] if len(sys.argv) > 6 else None
+        if hand:
+            rows = overlay(hand, export, rows, vexyl)
+        with open(f"{export}/report.tsv", "w") as f:
             f.write("\n".join(rows) + "\n")
-        with open(f"{export}/../left-out.tsv", "w") as f:
+        with open(f"{export}/left-out.tsv", "w") as f:
             f.write("flag\twhy\n" + "".join(f"{key}\t{why}\n" for why, key in names))
         counts = collections.Counter(row.split("\t")[1] for row in rows[1:])
         print("exported", len(rows)-1, "left out", dict(left_out), "vocabulary", dict(counts))

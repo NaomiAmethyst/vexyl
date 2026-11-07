@@ -6,17 +6,14 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { load, loadLibrary } from "./load.mjs";
+import { load, loadLibrary, handWrittenDirs, kdlFiles } from "./load.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const { applyOps, outline } = await load("document");
 const lib = await loadLibrary();
 
 const flags = readdirSync(join(repo, "conformance/valid")).filter((f) => f.endsWith(".kdl")).map((f) => join(repo, "conformance/valid", f));
-const reviewed = resolve(repo, "../vexyl-flags/reviewed");
-if (existsSync(reviewed)) {
-	flags.push(...readdirSync(reviewed).filter((f) => f.endsWith(".kdl")).map((f) => join(reviewed, f)));
-}
+flags.push(...handWrittenDirs().flatMap(kdlFiles));
 
 const n = (raw) => ({ v: Number(raw), raw });
 const s = (v) => ({ v });

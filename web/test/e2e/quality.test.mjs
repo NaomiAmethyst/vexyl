@@ -17,25 +17,25 @@ after(async () => {
 });
 
 const screens = {
-	workspace: async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.waitForSelector('.thumb[data-form="fold:triangle"] img'); },
-	panel: async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.locator('.row[data-path="1.1"]').click(); await p.locator(".panel-head h2").waitFor(); },
-	source: async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.getByRole("radio", { name: "Source" }).click(); await p.locator(".cm-line").first().waitFor(); },
+	workspace: async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.waitForSelector('.thumb[data-form="fold:triangle"] img'); },
+	panel: async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.locator('.row[data-path="1.1"]').click(); await p.locator(".panel-head h2").waitFor(); },
+	source: async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.getByRole("radio", { name: "Source" }).click(); await p.locator(".cm-line").first().waitFor(); },
 	problems: async (p) => {
 		await p.goto(`${srv.base}?view=open`);
 		await p.getByRole("tab", { name: "Paste" }).click();
-		await p.getByLabel("KDL").fill(readFlag("reviewed/united-states.kdl").replace("bars red white", "bars red whit"));
+		await p.getByLabel("KDL").fill(readFlag("flags/country/united-states.kdl").replace("bars red white", "bars red whit"));
 		await p.getByRole("button", { name: "Open", exact: true }).click();
 		await p.locator(".status.bad").waitFor();
 		await p.getByRole("radio", { name: "Source" }).click();
 		await p.locator(".cm-problem").first().waitFor();
 	},
-	open: async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("button", { name: "reviewed" }).click(); await p.locator('a.file-row[data-file="reviewed/japan.kdl"]').click(); await p.locator(".preview img").waitFor(); },
+	open: async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("button", { name: /^country \d+$/ }).click(); await p.locator('a.file-row[data-file="flags/country/japan.kdl"]').click(); await p.locator(".preview img").waitFor(); },
 	"open-paste": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Paste" }).click(); await p.getByLabel("KDL").waitFor(); },
 	"open-gist": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Gist" }).click(); await p.getByLabel("Gist link or ID").waitFor(); },
 	"open-computer": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "This computer" }).click(); await p.getByText("Drop a .kdl file here").waitFor(); },
 	"open-link": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Link" }).click(); await p.getByLabel("Link to a KDL file").waitFor(); },
-	share: async (p) => { await p.goto(openUrl(srv.base, "reviewed/japan.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
-	compare: async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); },
+	share: async (p) => { await p.goto(openUrl(srv.base, "flags/country/japan.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
+	compare: async (p) => { await p.goto(openUrl(srv.base, "flags/historical/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); },
 	"compare-source": async (p) => { await screens.compare(p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 };
 
@@ -51,7 +51,7 @@ const basicScreens = {
 	"basic-ring": async (p) => { await basicScreens["basic-symbol"](p); await p.getByRole("radio", { name: "Ring" }).click(); await p.getByLabel("How many in the ring").waitFor(); },
 	"basic-details": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Details" }).click(); await p.getByLabel("Name").waitFor(); for (const part of await p.locator("details.details-part summary").all()) { await part.click(); } },
 	"basic-source": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Source" }).click(); await p.locator(".cm-line").first().waitFor(); },
-	"basic-also": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.locator(".also li").first().waitFor(); await p.getByText("This flag is written from a law.").waitFor(); },
+	"basic-also": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.locator(".also li").first().waitFor(); await p.getByText("This flag is written from a law.").waitFor(); },
 	"basic-download": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Download", exact: true }).click(); await p.locator(".menu-items").waitFor(); await p.mouse.move(0, 0); },
 	"basic-edit-colors": async (p) => { await basicScreens["basic-stripes"](p); await p.getByRole("button", { name: "Edit colors" }).click(); await p.getByRole("button", { name: "Change red" }).click(); await p.getByLabel("Color of red").waitFor(); },
 	"basic-replace-color": async (p) => { await basicScreens["basic-stripes"](p); await p.getByRole("button", { name: "Edit colors" }).click(); await p.getByRole("button", { name: "Remove red" }).click(); await p.getByText("Replace it with:").waitFor(); },
@@ -59,9 +59,9 @@ const basicScreens = {
 
 /** Screens that only a narrow screen has, in each editor. */
 const narrowScreens = {
-	"menu-narrow": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menu", { name: "Menu" }).waitFor(); },
+	"menu-narrow": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menu", { name: "Menu" }).waitFor(); },
 	"basic-menu-narrow": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "stripes-block"); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menuitemradio", { name: "Advanced" }).waitFor(); },
-	"palette-replace": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.locator('.row[data-path="palette"]').click(); await p.locator('.color-chip[data-path="palette/red"]').click(); await p.getByRole("button", { name: "Remove", exact: true }).click(); await p.getByText("Replace it with:").waitFor(); },
+	"palette-replace": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.locator('.row[data-path="palette"]').click(); await p.locator('.color-chip[data-path="palette/red"]').click(); await p.getByRole("button", { name: "Remove", exact: true }).click(); await p.getByText("Replace it with:").waitFor(); },
 };
 
 const themes = [
@@ -232,7 +232,7 @@ test("everything works under a subpath, with relative references", async () => {
 	const p = await context.newPage();
 	const missing = [];
 	p.on("response", (r) => { if (r.status() >= 400 && r.url().startsWith(srv.base.split("/some")[0])) { missing.push(r.url()); } });
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	assert.deepEqual(missing, []);
 	assert.equal(await p.evaluate(() => document.fonts.check('13px "Geist"')), true);
@@ -255,7 +255,7 @@ test("a whole edit can be done from the keyboard alone", async () => {
 	await mockWorld(context);
 	const p = await context.newPage();
 	const errors = watch(p);
-	await p.goto(openUrl(srv.base, "reviewed/united-states.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/united-states.kdl"));
 	await ready(p);
 	// Rows are reachable, and Enter opens one.
 	assert.ok(await tabTo(p, () => document.activeElement?.getAttribute("data-path") === "0"));
@@ -290,16 +290,16 @@ test("Open and Share work from the keyboard", async () => {
 	await mockWorld(context);
 	const p = await context.newPage();
 	await p.goto(`${srv.base}?view=open`);
-	await p.getByRole("button", { name: "reviewed" }).waitFor();
+	await p.getByRole("button", { name: /^country \d+$/ }).waitFor();
 	await p.getByRole("tab", { name: "GitHub" }).focus();
 	await p.keyboard.press("ArrowRight");
 	await p.getByRole("tab", { name: "Gist", selected: true }).waitFor();
 	await p.keyboard.press("End");
 	await p.getByRole("tab", { name: "Link", selected: true }).waitFor();
 	await p.keyboard.press("Home");
-	await p.getByRole("button", { name: "reviewed" }).focus();
+	await p.getByRole("button", { name: /^country \d+$/ }).focus();
 	await p.keyboard.press("Enter");
-	const row = p.locator('a.file-row[data-file="reviewed/japan.kdl"]');
+	const row = p.locator('a.file-row[data-file="flags/country/japan.kdl"]');
 	await row.focus();
 	await p.keyboard.press("Enter");
 	await p.locator(".preview-name", { hasText: "Japan" }).waitFor();
@@ -318,7 +318,7 @@ test("Compare's every control works from the keyboard", async () => {
 	const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
 	await mockWorld(context);
 	const p = await context.newPage();
-	await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl"));
+	await p.goto(openUrl(srv.base, "flags/historical/azerbaijan-1991.kdl"));
 	await ready(p);
 	await p.getByRole("link", { name: "Compare" }).focus();
 	await p.keyboard.press("Enter");
@@ -340,7 +340,7 @@ test("with reduced motion, nothing animates", async () => {
 	const context = await browser.newContext({ reducedMotion: "reduce" });
 	await mockWorld(context);
 	const p = await context.newPage();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="0"]').click();
 	assert.equal(await p.locator(".form-page.panel").evaluate((e) => getComputedStyle(e).animationName), "none");

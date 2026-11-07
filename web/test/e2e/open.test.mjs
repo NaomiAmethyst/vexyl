@@ -31,20 +31,20 @@ test("the GitHub tab lists the default repository's flags, with real links", asy
 	await p.getByRole("tab", { name: "GitHub" }).waitFor();
 	assert.equal(await p.getByLabel("Repository").inputValue(), "NaomiAmethyst/vexyl-flags");
 	assert.equal(await p.getByLabel("Branch").inputValue(), "main");
-	await p.getByRole("button", { name: "reviewed" }).click();
-	const row = p.locator('a.file-row[data-file="reviewed/japan.kdl"]');
+	await p.getByRole("button", { name: /^country \d+$/ }).click();
+	const row = p.locator('a.file-row[data-file="flags/country/japan.kdl"]');
 	await row.waitFor();
-	assert.equal(await row.getAttribute("href"), "?open=github:NaomiAmethyst/vexyl-flags/reviewed/japan.kdl");
+	assert.equal(await row.getAttribute("href"), "?open=github:NaomiAmethyst/vexyl-flags/flags/country/japan.kdl");
 	await row.click();
 	await p.locator(".preview-name", { hasText: "Japan" }).waitFor();
 	await p.locator(".preview img").waitFor();
 	assert.ok(p.url().includes("view=open"), "a plain click previews it");
 	await p.getByRole("searchbox", { name: "Search this folder" }).or(p.getByLabel("Search this folder")).fill("united-st");
-	await p.locator('a.file-row[data-file="reviewed/united-states.kdl"]').waitFor();
+	await p.locator('a.file-row[data-file="flags/country/united-states.kdl"]').waitFor();
 	assert.equal(await p.locator("a.file-row").count(), 1);
 	await p.locator(".preview").getByRole("link", { name: "Open this flag" }).click();
 	await ready(p);
-	assert.ok(p.url().includes("?open=github:NaomiAmethyst/vexyl-flags/reviewed/japan.kdl"), p.url());
+	assert.ok(p.url().includes("?open=github:NaomiAmethyst/vexyl-flags/flags/country/japan.kdl"), p.url());
 	assert.equal(log.requests.filter((u) => u.includes("api.github.com")).length, 1, "the tree is one request");
 	assert.deepEqual(errors, []);
 	await context.close();
@@ -53,11 +53,11 @@ test("the GitHub tab lists the default repository's flags, with real links", asy
 test("a row opens in a new tab on a middle click", async () => {
 	const { p, context } = await fresh();
 	await p.goto(`${srv.base}?view=open`);
-	await p.getByRole("button", { name: "reviewed" }).click();
-	const row = p.locator('a.file-row[data-file="reviewed/japan.kdl"]');
+	await p.getByRole("button", { name: /^country \d+$/ }).click();
+	const row = p.locator('a.file-row[data-file="flags/country/japan.kdl"]');
 	const [tab] = await Promise.all([context.waitForEvent("page"), row.click({ button: "middle" })]);
 	await ready(tab);
-	assert.ok(tab.url().includes("reviewed/japan.kdl"));
+	assert.ok(tab.url().includes("flags/country/japan.kdl"));
 	assert.equal(await tab.locator(".flag-name").textContent(), "Japan");
 	await context.close();
 });
@@ -65,7 +65,7 @@ test("a row opens in a new tab on a middle click", async () => {
 test("the tree is asked for once, and after that with an ETag", async () => {
 	const { p, context, log } = await fresh();
 	await p.goto(`${srv.base}?view=open`);
-	await p.getByRole("button", { name: "reviewed" }).waitFor();
+	await p.getByRole("button", { name: /^country \d+$/ }).waitFor();
 	const asked = [];
 	p.on("request", (r) => {
 		if (r.url().includes("/git/trees/")) {
@@ -73,7 +73,7 @@ test("the tree is asked for once, and after that with an ETag", async () => {
 		}
 	});
 	await p.reload();
-	await p.getByRole("button", { name: "reviewed" }).waitFor();
+	await p.getByRole("button", { name: /^country \d+$/ }).waitFor();
 	assert.deepEqual(asked, ['"tree-etag"']);
 	assert.ok(log.requests.length > 0);
 	await context.close();
@@ -93,9 +93,9 @@ test("a repository that isn't there is handled, and the other tabs still work", 
 
 test("a file that isn't there says so", async () => {
 	const { p, context } = await fresh({ repoMissing: true });
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await p.getByRole("heading", { name: "That flag didn't open" }).waitFor();
-	await p.getByText("doesn't have reviewed/japan.kdl").waitFor();
+	await p.getByText("doesn't have flags/country/japan.kdl").waitFor();
 	await context.close();
 });
 
@@ -107,7 +107,7 @@ test("rate limiting is explained", async () => {
 });
 
 test("a gist with one flag opens straight away", async () => {
-	const body = readFlag("reviewed/japan.kdl");
+	const body = readFlag("flags/country/japan.kdl");
 	const { p, context } = await fresh({ gists: { [gistId]: { files: { "japan.kdl": { filename: "japan.kdl", raw_url: "https://gist.githubusercontent.com/x/raw/japan.kdl", size: body.length, content: body }, "notes.txt": { filename: "notes.txt", raw_url: "https://gist.githubusercontent.com/x/raw/n", size: 1, content: "x" } } } } });
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "Gist" }).click();
@@ -120,8 +120,8 @@ test("a gist with one flag opens straight away", async () => {
 });
 
 test("a gist with several flags lists them, by real links", async () => {
-	const a = readFlag("reviewed/japan.kdl");
-	const b = readFlag("reviewed/sweden.kdl");
+	const a = readFlag("flags/country/japan.kdl");
+	const b = readFlag("flags/country/sweden.kdl");
 	const { p, context } = await fresh({ gists: { [gistId]: { files: { "a.kdl": { filename: "a.kdl", raw_url: "https://gist.githubusercontent.com/x/raw/a", size: a.length, content: a }, "b.kdl": { filename: "b.kdl", raw_url: "https://gist.githubusercontent.com/x/raw/b", size: b.length, content: b } } } } });
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "Gist" }).click();
@@ -153,7 +153,7 @@ test("a file from this computer stays in the browser, and survives a reload", as
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "This computer" }).click();
 	await p.getByText("It stays in your browser. Nothing is uploaded.").waitFor();
-	await p.locator('input[type="file"]').setInputFiles({ name: "mine.kdl", mimeType: "text/plain", buffer: Buffer.from(readFlag("reviewed/sweden.kdl")) });
+	await p.locator('input[type="file"]').setInputFiles({ name: "mine.kdl", mimeType: "text/plain", buffer: Buffer.from(readFlag("flags/country/sweden.kdl")) });
 	await ready(p);
 	assert.equal(await p.locator(".file-name").textContent(), "mine.kdl");
 	assert.deepEqual(log.writes, [], "nothing's sent anywhere");
@@ -189,17 +189,17 @@ test("a GitHub page link becomes the raw file", async () => {
 	const { p, context, log } = await fresh();
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "Link" }).click();
-	await p.getByLabel("Link to a KDL file").fill("https://github.com/NaomiAmethyst/vexyl-flags/blob/main/reviewed/japan.kdl");
+	await p.getByLabel("Link to a KDL file").fill("https://github.com/NaomiAmethyst/vexyl-flags/blob/main/flags/country/japan.kdl");
 	await p.getByRole("button", { name: "Open", exact: true }).click();
 	await ready(p);
-	assert.ok(p.url().includes("?open=github:NaomiAmethyst/vexyl-flags/reviewed/japan.kdl"), p.url());
-	assert.ok(log.requests.some((u) => u === "https://raw.githubusercontent.com/NaomiAmethyst/vexyl-flags/main/reviewed/japan.kdl"));
+	assert.ok(p.url().includes("?open=github:NaomiAmethyst/vexyl-flags/flags/country/japan.kdl"), p.url());
+	assert.ok(log.requests.some((u) => u === "https://raw.githubusercontent.com/NaomiAmethyst/vexyl-flags/main/flags/country/japan.kdl"));
 	assert.ok(!log.requests.some((u) => u.startsWith("https://github.com/")), "the page itself is never fetched");
 	await context.close();
 });
 
 test("a link to a site that allows it opens, and one that doesn't is explained", async () => {
-	const body = readFlag("reviewed/japan.kdl");
+	const body = readFlag("flags/country/japan.kdl");
 	const { p, context } = await fresh({
 		custom: (url) => {
 			if (url.hostname === "allowed.test") {
@@ -249,7 +249,7 @@ test("a bad address says so", async () => {
 
 test("each tab keeps its own draft, through a reload", async () => {
 	const { p, context } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
 	await p.getByRole("radio", { name: "Change the shape" }).click();
@@ -270,7 +270,7 @@ test("each tab keeps its own draft, through a reload", async () => {
 
 test("two tabs on one flag keep separate drafts, and each is told", async () => {
 	const { p, context } = await fresh();
-	const url = openUrl(srv.base, "reviewed/japan.kdl");
+	const url = openUrl(srv.base, "flags/country/japan.kdl");
 	await p.goto(url);
 	await ready(p);
 	const other = await context.newPage();
@@ -298,7 +298,7 @@ test("two tabs on one flag keep separate drafts, and each is told", async () => 
 
 test("closing with unsaved work warns, and after saving it doesn't", async () => {
 	const { p, context } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
 	await p.getByRole("radio", { name: "Change the shape" }).click();
@@ -323,7 +323,7 @@ test("a draft from a closed tab is offered back", async () => {
 	const { p, context } = await fresh();
 	const keeper = await context.newPage();
 	await keeper.goto(srv.base + "favicon.svg");
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
 	await p.getByRole("radio", { name: "Change the shape" }).click();
@@ -331,7 +331,7 @@ test("a draft from a closed tab is offered back", async () => {
 	await p.waitForTimeout(700);
 	await p.close();
 	const next = await context.newPage();
-	await next.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await next.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(next);
 	await next.getByText("There's an unsaved draft of this flag").waitFor();
 	await next.getByRole("button", { name: "Restore it" }).click();

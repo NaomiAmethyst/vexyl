@@ -76,7 +76,7 @@ function walk(dir, out = []) {
 
 let treeCache;
 function treeJson(root) {
-	treeCache ??= walk(root).filter((p) => p.endsWith(".kdl") && (relative(root, p).startsWith("reviewed/") || /^flags\/(country|pride|brazil)\//.test(relative(root, p)))).map((p) => ({ path: relative(root, p), type: "blob", size: statSync(p).size }));
+	treeCache ??= walk(root).filter((p) => p.endsWith(".kdl") && (relative(root, p).startsWith("flags/") || /^imported\/(country|pride|brazil)\//.test(relative(root, p)))).map((p) => ({ path: relative(root, p), type: "blob", size: statSync(p).size }));
 	return JSON.stringify({ sha: "x", tree: treeCache, truncated: false });
 }
 

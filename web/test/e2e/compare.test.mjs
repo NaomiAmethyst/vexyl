@@ -21,7 +21,7 @@ async function azerbaijan() {
 	await mockWorld(context);
 	const p = await context.newPage();
 	const errors = watch(p);
-	await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl"));
+	await p.goto(openUrl(srv.base, "flags/historical/azerbaijan-1991.kdl"));
 	await ready(p);
 	await p.getByRole("link", { name: "Compare" }).click();
 	await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor({ timeout: 30000 });

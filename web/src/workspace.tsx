@@ -430,7 +430,7 @@ function About(): preact.JSX.Element {
 			{notes.length > 0 ? <p class="plain">{notes[0]}</p> : null}
 			{adapted.length > 0 ? <p class="nx-note">Adapted from {adapted.map((a, i) => <span key={i}>{i > 0 ? ", " : ""}<FileLink href={String(a.args[0]?.v ?? "")}>{a.kids.find((k) => k.name === "author")?.args[0]?.v as string ?? "a work"}</FileLink></span>)}.</p> : null}
 			<div class="chips">
-				{tier !== null ? <span class="nx-chip" title="Its evidence tier, from reviewed/evidence.tsv">{tier === "C" ? "No law read, tier C" : `Law read, tier ${tier}`}</span> : null}
+				{tier !== null ? <span class="nx-chip" title="Its evidence tier, from evidence.tsv">{tier === "C" ? "No law read, tier C" : `Law read, tier ${tier}`}</span> : null}
 				{license !== undefined ? <span class="nx-chip">File: {licenseName(license)}</span> : null}
 				{render !== undefined ? <span class="nx-chip">Renders: {licenseName(render)}</span> : null}
 				{license === undefined && render === undefined ? <span class="nx-chip">No license given</span> : null}

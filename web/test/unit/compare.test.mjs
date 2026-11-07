@@ -6,10 +6,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { load, loadLibrary } from "./load.mjs";
+import { load, loadLibrary, kdlFiles } from "./load.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const flags = resolve(repo, "../vexyl-flags/reviewed");
+const flags = resolve(repo, "../vexyl-flags/flags");
+/** A hand-written flag by its file name, whichever family it's filed under. */
+const flagFile = (name) => kdlFiles(flags).find((p) => p.endsWith(`/${name}`));
 const { compareModels, unchangedSentence } = await load("whatchanged");
 const { lineDiff } = await load("linediff");
 const { diffShapes } = await load("shapediff");
@@ -18,7 +20,7 @@ const lib = await loadLibrary();
 const hasFlags = existsSync(flags);
 
 test("Azerbaijan 1991 and 2018 come to what the mock says", { skip: !hasFlags }, () => {
-	const model = (f) => lib.model(lib.parse(readFileSync(resolve(flags, f), "utf8")));
+	const model = (f) => lib.model(lib.parse(readFileSync(flagFile(f), "utf8")));
 	const { changes, unchanged } = compareModels(model("azerbaijan-1991.kdl"), model("azerbaijan.kdl"));
 	const rows = changes.map((c) => [c.term, c.name, c.a.text, c.b.text]);
 	assert.deepEqual(rows, [

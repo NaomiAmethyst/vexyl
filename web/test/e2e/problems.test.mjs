@@ -44,7 +44,7 @@ const typeAtLine = async (p, text, replace) => {
 
 test("a problem appears in Source, on objects in Form, and pauses only the SVG", async () => {
 	const { p, context, errors } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/united-states.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/united-states.kdl"));
 	await ready(p);
 	const good = await p.locator(".stage-image").getAttribute("src");
 	// Spoils the palette reference in `bars red white {`.
@@ -91,7 +91,7 @@ test("a problem appears in Source, on objects in Form, and pauses only the SVG",
 
 test("a syntax error pauses the form, and it says why", async () => {
 	const { p, context, errors } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await typeAtLine(p, "palette {", ' "unterminated');
 	await p.locator(".status", { hasText: /problem/ }).waitFor();
@@ -186,7 +186,7 @@ fold ${JSON.stringify(evil)} {
 
 test("typing in a 2 MB flag leaves the page responsive", async () => {
 	const { p, context, errors } = await fresh();
-	await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl"));
+	await p.goto(openUrl(srv.base, "imported/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl"));
 	await ready(p);
 	await p.getByRole("radio", { name: "Source" }).click();
 	await p.locator(".cm-line", { hasText: "vexyl 1" }).click();

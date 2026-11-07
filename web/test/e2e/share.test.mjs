@@ -27,11 +27,11 @@ const linkBox = (p) => p.getByLabel("Link to share");
 
 test("a flag from GitHub shares as a link to the file, or a copy of what's on screen", async () => {
 	const { p, context, errors } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.getByRole("link", { name: "Share" }).click();
 	await p.getByRole("heading", { name: "Share Japan" }).waitFor();
-	assert.equal(await linkBox(p).inputValue(), `${srv.base}?open=github:NaomiAmethyst/vexyl-flags/reviewed/japan.kdl`);
+	assert.equal(await linkBox(p).inputValue(), `${srv.base}?open=github:NaomiAmethyst/vexyl-flags/flags/country/japan.kdl`);
 	await p.getByText("it follows any changes made there").waitFor();
 	await p.getByRole("radio", { name: "A copy of what's on screen" }).click();
 	await p.waitForFunction(() => document.querySelector('[aria-label="Link to share"]')?.value.includes("#v1."));
@@ -39,14 +39,14 @@ test("a flag from GitHub shares as a link to the file, or a copy of what's on sc
 	const next = await context.newPage();
 	await next.goto(link);
 	await ready(next);
-	assert.equal(await savedText(next), readFlag("reviewed/japan.kdl"));
+	assert.equal(await savedText(next), readFlag("flags/country/japan.kdl"));
 	assert.deepEqual(errors, []);
 	await context.close();
 });
 
 test("an edited flag shares by holding it, and a link gives exactly that", async () => {
 	const { p, context, log } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
 	await p.getByRole("radio", { name: "Change the shape" }).click();
@@ -70,7 +70,7 @@ test("a pasted flag can only share by holding it", async () => {
 	const { p, context } = await fresh();
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "Paste" }).click();
-	await p.getByLabel("KDL").fill(readFlag("reviewed/sweden.kdl"));
+	await p.getByLabel("KDL").fill(readFlag("flags/country/sweden.kdl"));
 	await p.getByRole("button", { name: "Open", exact: true }).click();
 	await ready(p);
 	await p.getByRole("link", { name: "Share" }).click();
@@ -81,7 +81,7 @@ test("a pasted flag can only share by holding it", async () => {
 
 test("a flag too large for a link says what to do instead", async () => {
 	const { p, context } = await fresh();
-	await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl"));
+	await p.goto(openUrl(srv.base, "imported/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
 	await p.getByRole("radio", { name: "Change the shape" }).click();
@@ -96,7 +96,7 @@ test("a flag too large for a link says what to do instead", async () => {
 
 test("KDL and SVG can be downloaded or copied, and a bad link is explained", async () => {
 	const { p, context } = await fresh();
-	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
+	await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
 	await ready(p);
 	await p.getByRole("link", { name: "Share" }).click();
 	const [svg] = await Promise.all([p.waitForEvent("download"), p.getByRole("button", { name: "Download SVG" }).click()]);
@@ -105,7 +105,7 @@ test("KDL and SVG can be downloaded or copied, and a bad link is explained", asy
 	assert.equal(kdl.suggestedFilename(), "japan.kdl");
 	await p.getByRole("button", { name: "Copy KDL" }).click();
 	await p.getByText("Copied the KDL.").waitFor();
-	assert.equal(await p.evaluate(() => navigator.clipboard.readText()), readFlag("reviewed/japan.kdl"));
+	assert.equal(await p.evaluate(() => navigator.clipboard.readText()), readFlag("flags/country/japan.kdl"));
 	await p.getByRole("button", { name: "Copy SVG" }).click();
 	await p.getByText("Copied the SVG.").waitFor();
 	assert.ok((await p.evaluate(() => navigator.clipboard.readText())).startsWith("<svg"));

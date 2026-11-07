@@ -6,7 +6,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { load, loadLibrary } from "./load.mjs";
+import { load, loadLibrary, handWrittenDirs } from "./load.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const { applyOps, rescalePreview } = await load("document");
@@ -143,7 +143,7 @@ test("shapes read in the smallest whole numbers, exactly", () => {
 });
 
 test("every flag there is can be restated and is still valid", () => {
-	const dirs = [join(repo, "conformance/valid"), resolve(repo, "../vexyl-flags/reviewed")].filter(existsSync);
+	const dirs = [join(repo, "conformance/valid"), ...handWrittenDirs()].filter(existsSync);
 	let count = 0;
 	for (const dir of dirs) {
 		for (const file of readdirSync(dir).filter((f) => f.endsWith(".kdl"))) {

@@ -4,7 +4,7 @@
 // Builds the modules that have no page to run in, as the site's build does, for tests to import.
 
 import { build } from "esbuild";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,3 +39,20 @@ export const loadLibrary = async () => {
 	});
 	return import(file);
 };
+
+/** Every .kdl file under a folder, however deep, or none if it isn't there. */
+export function kdlFiles(dir) {
+	if (!existsSync(dir)) {
+		return [];
+	}
+	return readdirSync(dir).flatMap((f) => {
+		const p = join(dir, f);
+		return statSync(p).isDirectory() ? kdlFiles(p) : f.endsWith(".kdl") ? [p] : [];
+	});
+}
+
+/** The folders of hand-written flags in a vexyl-flags checkout beside this one, one per family. */
+export function handWrittenDirs() {
+	const root = resolve(web, "../../vexyl-flags/flags");
+	return existsSync(root) ? readdirSync(root).map((f) => join(root, f)).filter((p) => statSync(p).isDirectory()) : [];
+}
