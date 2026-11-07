@@ -127,8 +127,24 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .nx-input.mono { font-family: var(--font-mono); font-size: 0.78125rem; }
 .nx-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .nx-input.select { cursor: pointer; }
-.color-select { display: inline-flex; align-items: center; gap: 8px; }
-.color-select .nx-input { width: auto; min-width: 120px; }
+:root { --art-ground: rgba(var(--ink-rgb), 0.16); --art-mark: var(--accent); }
+.term-art { display: block; width: 100%; height: auto; border-radius: 3px; }
+.color-select { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.color-swatch { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 1px solid var(--line2); cursor: pointer; }
+.color-swatch.on { box-shadow: 0 0 0 2px var(--raised), 0 0 0 4px var(--accent); }
+.color-swatch.gap { background: linear-gradient(135deg, transparent 46%, var(--muted) 46%, var(--muted) 54%, transparent 54%); }
+.color-named { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 5px; border: 1px solid var(--line2); border-radius: 999px; background: none; color: var(--ink2); font: inherit; font-size: 0.71875rem; cursor: pointer; }
+.color-named:hover { border-color: var(--accent); }
+.color-named.on { border-color: var(--accent); background: rgba(var(--acc-rgb), 0.16); color: var(--ink); }
+.color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line2); box-sizing: border-box; }
+.color-dot.gap { background: linear-gradient(135deg, transparent 44%, var(--muted) 44%, var(--muted) 56%, transparent 56%); }
+.color-name { margin-left: 6px; font-size: 0.78125rem; color: var(--ink2); overflow-wrap: anywhere; }
+.color-new { margin-left: 2px; }
+.shape-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; }
+.shape-tile { display: flex; flex-direction: column; gap: 4px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: none; color: var(--ink2); font: inherit; cursor: pointer; }
+.shape-tile:hover { border-color: var(--accent); }
+.shape-tile.on { border-color: var(--accent); background: rgba(var(--acc-rgb), 0.14); color: var(--ink); }
+.shape-tile-name { font-size: 0.6875rem; text-align: center; overflow-wrap: anywhere; }
 .color-well { width: 38px; height: 36px; padding: 2px; border: 1px solid var(--line2); border-radius: 10px; background: var(--well); cursor: pointer; }
 .color-chip { display: inline-flex; align-items: center; gap: 2px; border: none; font: inherit; font-size: 0.71875rem; cursor: pointer; }
 .chip-x { font: inherit; background: none; border: none; color: inherit; cursor: pointer; padding: 0 0 0 4px; line-height: 1; font-size: 0.875rem; }
@@ -148,6 +164,7 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .more .stack { margin-top: 10px; }
 .source-only { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px dashed var(--line2); border-radius: 10px; }
 .panel-problems { position: sticky; top: -14px; z-index: 2; background: var(--raised); border-radius: 12px; }
+.field-placed { display: contents; }
 .field-problem { display: flex; flex-direction: column; gap: 6px; padding-left: 10px; border-left: 2px solid var(--danger); }
 .panel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .term-source { border-top: 1px solid var(--line); padding-top: 12px; }
@@ -158,6 +175,7 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .add-menu { margin-top: 8px; padding: 12px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line2); border-radius: 14px; background: var(--raised); }
 .add-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 4px; margin-top: 6px; }
 .add-item { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: none; color: var(--ink2); font: inherit; text-align: left; cursor: pointer; }
+.add-item .term-art { width: 60px; margin-bottom: 2px; }
 .add-item-name { font-weight: 500; color: var(--ink); font-size: 0.8125rem; }
 .add-item-desc { font-size: 0.71875rem; line-height: 1.35; color: var(--muted); }
 .field-heading { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); }

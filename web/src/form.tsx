@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useLayoutEffect } from "preact/hooks";
 import { decodePathName, encodePathName } from "vexyl/paths";
 import { FileLink, safeColor, Seg, useApp } from "./common.js";
 import { engine } from "./engine.js";
+import { TermArt } from "./termart.js";
 import { flyPerHoist, matching, shapeText } from "./exact.js";
 import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 import { app, findPath } from "./store.js";
@@ -76,8 +77,6 @@ function Input(props: { id?: string; label: string; value: string; number?: bool
 	);
 }
 
-const newColorChoice = "\0new";
-
 /** Names a brand new color and gives it a value, right where it's wanted. */
 function NewColor(props: { names: readonly string[]; onAdd: (name: string, hex: string) => void; onCancel: () => void }): preact.JSX.Element {
 	const [name, setName] = useState("");
@@ -108,37 +107,41 @@ function NewColor(props: { names: readonly string[]; onAdd: (name: string, hex: 
 	);
 }
 
+const mostUnnamedSwatches = 12;
+
+/** Picks a color by seeing it, with its name beside the one that's chosen. */
 function ColorSelect(props: { id: string; label: string; value: string; names: readonly string[]; colors: ReadonlyMap<string, string>; onPick: (v: string) => void; onNew?: (name: string, hex: string) => void; allowNone?: string; addOnly?: boolean; hideLabel?: boolean }): preact.JSX.Element {
 	const [creating, setCreating] = useState(false);
 	const all = props.value !== "" && !props.names.includes(props.value) && props.value !== "none" ? [props.value, ...props.names] : props.names;
+	const adding = props.addOnly === true;
+	const chosen = props.value === "" ? props.allowNone : props.value === "none" ? "none, a gap" : props.value;
+	// A long palette can't be told apart by eye alone, so each color says its name.
+	const named = all.length > mostUnnamedSwatches;
+	const swatch = (value: string, label: string, background: string | undefined, gap = false): preact.JSX.Element => {
+		const on = !adding && props.value === value;
+		const pressed = adding ? undefined : on ? "true" : "false";
+		const name = adding ? `Add ${label}` : label;
+		return named ? (
+			<button key={value} type="button" class={`color-named${on ? " on" : ""}`} data-color={value} aria-label={name} aria-pressed={pressed} onClick={() => { props.onPick(value); }}>
+				<span class={`color-dot${gap ? " gap" : ""}`} aria-hidden="true" style={background !== undefined ? { background } : undefined} />{label}
+			</button>
+		) : (
+			<button key={value} type="button" class={`color-swatch${gap ? " gap" : ""}${on ? " on" : ""}`} data-color={value} aria-label={name} aria-pressed={pressed} title={label} style={background !== undefined ? { background } : undefined} onClick={() => { props.onPick(value); }} />
+		);
+	};
 	return (
 		<>
-		<span class="color-select">
-			{props.addOnly === true ? null : <span class="swatch" aria-hidden="true" style={{ background: props.colors.get(props.value) ?? "transparent" }} />}
-			<select id={props.id} class="nx-input select" aria-label={props.hideLabel === true ? props.label : undefined} value={props.addOnly === true ? "" : props.value}
-				onChange={(e) => {
-					const v = (e.currentTarget as HTMLSelectElement).value;
-					if (v === newColorChoice) {
-						(e.currentTarget as HTMLSelectElement).value = props.addOnly === true ? "" : props.value;
-						setCreating(true);
-						return;
-					}
-					props.onPick(v);
-					if (props.addOnly === true) {
-						(e.currentTarget as HTMLSelectElement).value = "";
-					}
-				}}>
-				{props.addOnly === true ? <option value="" disabled>Add a color</option> : null}
-				{props.allowNone !== undefined ? <option value="">{props.allowNone}</option> : null}
-				{all.map((n) => <option key={n} value={n}>{n}</option>)}
-				<option value="none">none, a gap</option>
-				{props.onNew !== undefined ? <option value={newColorChoice}>A new color…</option> : null}
-			</select>
-		</span>
-		{creating && props.onNew !== undefined ? <NewColor names={props.names} onCancel={() => { setCreating(false); }} onAdd={(name, hex) => {
-			setCreating(false);
-			props.onNew!(name, hex);
-		}} /> : null}
+			<span id={props.id} class="color-select" role="group" aria-label={props.label}>
+				{props.allowNone !== undefined ? swatch("", props.allowNone, undefined, true) : null}
+				{all.map((n) => swatch(n, n, props.colors.get(n) ?? "transparent"))}
+				{swatch("none", "none, a gap", undefined, true)}
+				{props.onNew !== undefined ? <button type="button" class="nx-ghost small color-new" onClick={() => { setCreating(true); }}>New color</button> : null}
+				{!adding && !named && chosen !== undefined ? <span class="color-name">{chosen}</span> : null}
+			</span>
+			{creating && props.onNew !== undefined ? <NewColor names={props.names} onCancel={() => { setCreating(false); }} onAdd={(name, hex) => {
+				setCreating(false);
+				props.onNew!(name, hex);
+			}} /> : null}
 		</>
 	);
 }
@@ -325,16 +328,18 @@ function EdgeField(props: { node: ONode }): preact.JSX.Element {
 	);
 }
 
-function Fimbriate(props: { node: ONode; names: readonly string[]; colors: ReadonlyMap<string, string> }): preact.JSX.Element {
-	const { node } = props;
+function Fimbriate(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
+	const { node, ctx } = props;
 	const c = child(node, "fimbriate");
 	const id = fieldId("fimbriate", node.at);
 	return (
-		<Row label="Fimbriation" id={id} note="A narrow contrasting edge.">
+		<Row label="Fimbriation" note="A narrow contrasting edge.">
 			<div class="inline-fields">
-				<ColorSelect id={id} label="Fimbriation color" value={c === undefined ? "" : String(c.args[0]?.v)} names={props.names} colors={props.colors} allowNone="None" onPick={(v) => {
+				<ColorSelect id={id} label="Fimbriation color" value={c === undefined ? "" : String(c.args[0]?.v)} names={ctx.names} colors={ctx.colors} allowNone="None" onPick={(v) => {
 					edit(v === "" ? { op: "dropChild", at: node.at, name: "fimbriate" } : { op: "child", at: node.at, name: "fimbriate", args: [vStr(v), c?.args[1] ?? vNum("0.1")] });
-				}} />
+				}} {...newColorProps(ctx, node, (name, add) => {
+					edit({ op: "child", at: node.at, name: "fimbriate", args: [vStr(name), c?.args[1] ?? vNum("0.1")] }, add);
+				})} />
 				{c !== undefined ? <Input id={`${id}-w`} label="Width" hideLabel value={shown(c.args[1])} number onChange={(t) => { if (t !== "") { edit({ op: "child", at: node.at, name: "fimbriate", args: [c.args[0]!, vNum(t)] }); } }} /> : null}
 			</div>
 		</Row>
@@ -540,6 +545,7 @@ function ColorChips(props: { node: ONode; from: number; ctx: Ctx; id: string; la
 						}}>×</button>
 					</span>
 				))}
+				<span class="nx-note">Add:</span>
 				<ColorSelect id={`${id}-add`} label="Add a color" hideLabel value="" addOnly names={ctx.names} colors={ctx.colors} onPick={(v) => {
 					if (v !== "") {
 						setList([...list, vStr(v)]);
@@ -638,7 +644,7 @@ function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Eleme
 		case "colorArg": {
 			const value = String(node.args[f.i]?.v ?? "");
 			return (
-				<Row label={f.label} id={id} note={f.note}>
+				<Row label={f.label} note={f.note}>
 					<ColorSelect id={id} label={f.label} value={value} names={ctx.names} colors={ctx.colors} onPick={(v) => {
 						const args = [...node.args];
 						args[f.i] = vStr(v);
@@ -654,7 +660,7 @@ function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Eleme
 		}
 		case "colorArgs": {
 			return (
-				<Row label={f.label} id={`${id}-add`} note={f.note ?? "Click a color to change it. Drag one to move it."}>
+				<Row label={f.label} note={f.note ?? "Click a color to change it. Drag one to move it."}>
 					<ColorChips node={node} from={f.from} ctx={ctx} id={id} label={f.label} />
 				</Row>
 			);
@@ -742,7 +748,7 @@ function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Eleme
 		case "edge":
 			return <EdgeField node={node} />;
 		case "fimbriate":
-			return <Fimbriate node={node} names={ctx.names} colors={ctx.colors} />;
+			return <Fimbriate node={node} ctx={ctx} />;
 		case "repeat":
 			return <Repeat node={node} />;
 		case "steps":
@@ -1009,7 +1015,7 @@ function AddTerm(props: { nodes: readonly ONode[]; into: ONode | null; label?: s
 										addTerm(key, props.nodes, props.into);
 										setOpen(false);
 										button.current?.focus();
-									}}><span class="add-item-name">{label}</span><span class="add-item-desc">{describeTerm(key)}</span></button>
+									}}><TermArt term={key} /><span class="add-item-name">{label}</span><span class="add-item-desc">{describeTerm(key)}</span></button>
 								))}
 							</div>
 						</div>
@@ -1080,11 +1086,18 @@ function placeProblems(node: ONode, fields: readonly Field[], problems: readonly
 
 /** A box, with any problem with what's in it right beneath, where the eye already is. */
 function PlacedField(props: { f: Field; node: ONode; ctx: Ctx; problems: readonly string[] | undefined }): preact.JSX.Element {
-	const view = <FieldView f={props.f} node={props.node} ctx={props.ctx} />;
-	return props.problems === undefined ? view : (
-		<div class="field-problem">
-			{view}
-			{props.problems.map((m) => <span key={m} class="nx-error" role="alert">{m}</span>)}
+	const box = useRef<HTMLDivElement>(null);
+	const has = props.problems !== undefined;
+	useEffect(() => {
+		if (has) {
+			box.current?.scrollIntoView({ block: "nearest" });
+		}
+	}, [has]);
+	// The same element with or without a problem, or the box being typed in would lose its place.
+	return (
+		<div ref={box} class={has ? "field-problem" : "field-placed"}>
+			<FieldView f={props.f} node={props.node} ctx={props.ctx} />
+			{props.problems?.map((m) => <span key={m} class="nx-error" role="alert">{m}</span>)}
 		</div>
 	);
 }
@@ -1436,18 +1449,22 @@ function ProportionFields(props: { node: ONode; fields: readonly Field[]; ctx: C
 function ChargeShape(props: { node: ONode }): preact.JSX.Element {
 	const { node } = props;
 	const value = String(node.args[0]?.v ?? "");
-	const id = fieldId("shape", node.at);
-	const known = Object.hasOwn(shapes, value);
+	const pick = (shape: string): void => {
+		const args = [...node.args];
+		args[0] = vStr(shape);
+		edit({ op: "entries", at: node.at, args });
+	};
 	return (
-		<Row label="Shape" id={id} note="Changing the shape keeps sizes they share. Others stay in the file until you change them.">
-			<select id={id} class="nx-input select medium" value={value} onChange={(e) => {
-				const args = [...node.args];
-				args[0] = vStr((e.currentTarget as HTMLSelectElement).value);
-				edit({ op: "entries", at: node.at, args });
-			}}>
-				{known ? null : <option value={value}>{value}</option>}
-				{Object.entries(shapes).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
-			</select>
+		<Row label="Shape" note="Changing the shape keeps sizes they share. Others stay in the file until you change them.">
+			<div class="shape-picker" role="group" aria-label="Shape">
+				{Object.hasOwn(shapes, value) ? null : <button type="button" class="shape-tile on" aria-pressed="true" data-shape={value}><span class="shape-tile-name">{value}</span></button>}
+				{Object.entries(shapes).map(([k, s]) => (
+					<button key={k} type="button" class={`shape-tile${k === value ? " on" : ""}`} aria-pressed={k === value ? "true" : "false"} data-shape={k} onClick={() => { pick(k); }}>
+						<TermArt term={`charge:${k}`} />
+						<span class="shape-tile-name">{s.label}</span>
+					</button>
+				))}
+			</div>
 		</Row>
 	);
 }

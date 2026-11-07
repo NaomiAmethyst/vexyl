@@ -377,10 +377,10 @@ test("a color chip can be changed, moved, or made from nothing", async () => {
 	if (await p.locator(".chip-name").nth(1).getAttribute("aria-expanded") !== "true") {
 		await p.locator(".chip-name").nth(1).click();
 	}
-	await p.locator(".chip-editor select").selectOption(before[2]);
+	await p.locator(`.chip-editor .color-swatch[data-color="${before[2]}"]`).click();
 	await p.waitForFunction((v) => document.querySelectorAll(".chip-name")[1]?.textContent === v, before[2]);
 
-	await p.locator(".chips select").first().selectOption({ label: "A new color…" });
+	await p.locator(".chips > .color-select .color-new").click();
 	await p.getByLabel("New color's name").fill(before[0]);
 	await p.getByRole("alert").filter({ hasText: "already a color" }).waitFor();
 	await p.getByLabel("New color's name").fill("sky blue");
@@ -595,6 +595,37 @@ test("what depends on something else appears once that's given", async () => {
 	assert.equal(await p.getByLabel("Apex").count(), 0);
 	await p.getByLabel("Angle", { exact: true }).fill("30");
 	await p.getByLabel("Apex").waitFor();
+	await context.close();
+});
+
+test("colors and shapes are chosen by seeing them", async () => {
+	const { p, context, errors } = await page("reviewed/united-states.kdl");
+	await row(p, "1.1").click();
+	await p.locator('.shape-tile[data-shape="disc"]').click();
+	await p.locator('.shape-tile.on[data-shape="disc"]').waitFor();
+	await p.locator('[aria-label="Color"] .color-swatch[data-color="red"]').click();
+	await p.locator('[aria-label="Color"] .color-swatch.on[data-color="red"]').waitFor();
+	await p.locator('[aria-label="Color"] .color-name', { hasText: "red" }).waitFor();
+	await p.locator('[aria-label="Fimbriation color"] .color-swatch[data-color="blue"]').click();
+	await p.waitForFunction(() => document.querySelector("textarea[aria-label^='Source']") !== null);
+	const out = await savedText(p);
+	assert.ok(out.includes("charge disc red") && out.includes("fimbriate blue"), out);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a long palette names each color", async () => {
+	const colors = Array.from({ length: 13 }, (_, i) => `  c${i} "#${String(i + 10).padStart(2, "0")}3344"`).join("\n");
+	const body = `vexyl 1\nmeta {\n  name "T"\n}\npalette {\n${colors}\n}\nproportion hoist=2 fly=3\nfield c0\n`;
+	const { p, context } = await page(undefined);
+	await p.goto(`${srv.base}?view=open`);
+	await p.getByRole("tab", { name: "Paste" }).click();
+	await p.getByLabel("KDL").fill(body);
+	await p.getByRole("button", { name: "Open", exact: true }).click();
+	await ready(p);
+	await row(p, "0").click();
+	await p.locator('.color-named[data-color="c12"]', { hasText: "c12" }).click();
+	await p.locator('.color-named.on[data-color="c12"]').waitFor();
 	await context.close();
 });
 
