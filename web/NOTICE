@@ -1,0 +1,16 @@
+The Vexyl editor
+Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
+Licensed under the Apache License 2.0; see LICENSE.txt.
+
+It includes these, under their own licenses:
+
+Fonts, served from this site rather than from any other, each under the SIL Open Font License 1.1:
+  Geist and Geist Mono, (C) 2023 Vercel, made in collaboration with basement.studio
+  Instrument Serif, Copyright 2022 The Instrument Serif Project Authors
+  The licenses are in fonts/LICENSE-geist-sans.txt and fonts/LICENSE-instrument-serif.txt.
+
+Software, under the MIT License unless it says otherwise:
+  Preact, Copyright (c) 2015-present Jason Miller
+  CodeMirror and Lezer, Copyright (C) 2018-2021 by Marijn Haverbeke and others
+  fflate, Copyright (c) 2023 Arjun Barrett
+  @bgotink/kdl, Copyright (c) Bram Gotink

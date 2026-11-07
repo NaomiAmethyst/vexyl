@@ -95,6 +95,11 @@ fuzzers with `make fuzz`. Golden output
 lives in `go/testdata/golden`; after an intended change, rewrite it by running
 `go test . -update` in `go/`.
 
+## The editor
+
+[`web/`](web/README.md) is an editor for flags in this format, as a static site with no server. `make web` builds it
+into `web/dist`, and `make check-web` tests it. Both need Node, so `make check` leaves them out.
+
 ## License
 
 Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>.

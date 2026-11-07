@@ -4,3 +4,5 @@ Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 The code is licensed under the Apache License 2.0; see LICENSE. The specifications,
 SPEC.md and SDK.md, are licensed under CC BY-SA 4.0; see LICENSE-SPEC. Hand-written flag files
 state their own terms in their `license` and `render-license` fields.
+
+The editor in web/ includes other works, under their own licenses, listed in web/NOTICE.
