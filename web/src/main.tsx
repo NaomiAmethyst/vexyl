@@ -3,6 +3,7 @@
 
 import { render } from "preact";
 import { Logo, useApp } from "./common.js";
+import { ComparePage } from "./compare.js";
 import { GistChoice, LoadProblem, OpenPage } from "./open.js";
 import { SharePage } from "./share.js";
 import { redoInSource, undoInSource } from "./source.js";
@@ -34,6 +35,9 @@ function Root(): preact.JSX.Element {
 	}
 	if (s.view === "share") {
 		return <Plain><SharePage /></Plain>;
+	}
+	if (s.view === "compare") {
+		return <ComparePage />;
 	}
 	return <Workspace />;
 }

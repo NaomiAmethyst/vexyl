@@ -57,6 +57,10 @@ const screens = {
 		await p.getByRole("link", { name: "Share" }).click();
 		await p.getByText("This file is too large").waitFor({ timeout: 60000 });
 	},
+	"compare-side": async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await p.getByRole("link", { name: "Compare" }).click(); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); await p.waitForTimeout(300); },
+	"compare-slider": async (p) => { await screens["compare-side"](p); await p.getByRole("radio", { name: "Slider" }).click(); await p.waitForTimeout(300); },
+	"compare-differences": async (p) => { await screens["compare-side"](p); await p.getByRole("radio", { name: "Differences" }).click(); await p.waitForFunction(() => document.querySelector("[data-percent]")?.getAttribute("data-percent") !== ""); },
+	"compare-source": async (p) => { await screens["compare-side"](p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 	"not-found": async (p, world) => { world.repoMissing = true; await p.goto(`${srv.base}?view=open`); await p.getByText("doesn't have").waitFor(); world.repoMissing = false; },
 	"no-file": async (p) => { await p.goto(openUrl(srv.base, "reviewed/no-such-flag.kdl")); await p.getByRole("heading", { name: "That flag didn't open" }).waitFor(); },
 };

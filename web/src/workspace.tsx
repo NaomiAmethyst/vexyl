@@ -405,6 +405,7 @@ export function Header(): preact.JSX.Element {
 				</span>
 			) : null}
 			<a class="nx-ghost" href={app.href("open")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("open"); } }}>Open a flag</a>
+			<a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>
 			<a class="nx-ghost" href={app.href("share")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("share"); } }}>Share</a>
 			<button type="button" class="nx-ghost" onClick={() => {
 				download(`${stem}.kdl`, app.exportText(), "text/plain");

@@ -35,6 +35,8 @@ const screens = {
 	"open-computer": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "This computer" }).click(); await p.getByText("Drop a .kdl file here").waitFor(); },
 	"open-link": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Link" }).click(); await p.getByLabel("Link to a KDL file").waitFor(); },
 	share: async (p) => { await p.goto(openUrl(srv.base, "reviewed/japan.kdl")); await ready(p); await p.getByRole("link", { name: "Share" }).click(); await p.getByLabel("Link to share").waitFor(); },
+	compare: async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await p.getByRole("link", { name: "Compare" }).click(); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); },
+	"compare-source": async (p) => { await screens.compare(p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 };
 
 const themes = [
@@ -222,6 +224,28 @@ test("Open and Share work from the keyboard", async () => {
 	await p.getByRole("radio", { name: "The file, where it is" }).focus();
 	await p.keyboard.press("ArrowRight");
 	await p.getByRole("radio", { name: "A copy of what's on screen", checked: true }).waitFor();
+	await context.close();
+});
+
+test("Compare's every control works from the keyboard", async () => {
+	const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
+	await mockWorld(context);
+	const p = await context.newPage();
+	await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl"));
+	await ready(p);
+	await p.getByRole("link", { name: "Compare" }).focus();
+	await p.keyboard.press("Enter");
+	await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor();
+	await p.getByRole("radio", { name: "Side by side" }).focus();
+	await p.keyboard.press("ArrowRight");
+	await p.getByRole("slider", { name: "How much of A to show" }).focus();
+	await p.keyboard.press("Home");
+	assert.equal(await p.locator(".slider-stage").getAttribute("data-at"), "0");
+	await p.getByRole("button", { name: "Change B" }).focus();
+	await p.keyboard.press("Enter");
+	await p.locator(".chooser").getByRole("button", { name: "Cancel" }).focus();
+	await p.keyboard.press("Enter");
+	assert.equal(await p.locator(".chooser").count(), 0);
 	await context.close();
 });
 

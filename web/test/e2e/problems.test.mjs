@@ -172,6 +172,8 @@ fold ${JSON.stringify(evil)} {
 	await p.locator(".crumbs .back").first().click();
 	await p.locator('.thumb[data-form="variant:__proto__"]').click();
 	await p.waitForFunction(() => document.querySelector(".nx-muted")?.textContent?.includes("Variant") || document.querySelector(".nx-muted")?.textContent?.includes("__"));
+	await p.getByRole("link", { name: "Compare" }).click();
+	await p.getByRole("link", { name: "Back to editing" }).click();
 	assert.equal(await p.evaluate(() => globalThis.pwned), undefined);
 	assert.equal(await p.evaluate(() => ({}).polluted), undefined);
 	assert.deepEqual(errors, []);
