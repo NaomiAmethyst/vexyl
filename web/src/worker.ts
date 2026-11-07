@@ -2,7 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { model, RenderError, shareDecode, shareEncode, svg, svgTree, tagAttribute, validate, locate, parse, type Flag, type SvgElement } from "vexyl";
-import { applyOps, outline } from "./document.js";
+import { applyOps, outline, rescalePreview } from "./document.js";
 import { largestGrid, scaleFlag } from "./grid.js";
 import type { Analysis, PickNode, Request, RenderResult } from "./protocol.js";
 
@@ -104,6 +104,8 @@ function handle(req: Request): unknown {
 			return render(req.slot, req.options, req.pick, req.exact);
 		case "edit":
 			return applyOps(req.text, req.ops);
+		case "rescalePreview":
+			return rescalePreview(req.text, req.hoist);
 		case "shareEncode":
 			return { link: shareEncode(req.text) };
 		case "shareDecode":

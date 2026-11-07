@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState, useLayoutEffect } from "preact/hooks";
 import { decodePathName, encodePathName } from "vexyl/paths";
 import { FileLink, safeColor, Seg, useApp } from "./common.js";
-import type { ONode, Op, OVal } from "./protocol.js";
+import { engine } from "./engine.js";
+import { flyPerHoist, matching, shapeText } from "./exact.js";
+import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 import { app, findPath } from "./store.js";
 import { addable, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
 const numberText = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
+/** What a number can look like halfway through being typed, which isn't a mistake yet. */
+const typingNumber = /^[+-]?\d*\.?\d*([eE][+-]?\d*)?$/;
+/** A number the way a file has to write it, so that `.5` can be typed. */
+const tidyNumber = (t: string): string => t.replace(/^([+-]?)\./, "$10.");
 const vNum = (raw: string): OVal => ({ v: Number(raw), raw });
 const vStr = (v: string): OVal => ({ v });
 const shown = (o: OVal | undefined): string => (o === undefined || o.v === null ? "" : o.raw ?? String(o.v));
@@ -41,7 +47,7 @@ function fieldId(label: string, at: readonly number[], extra = ""): string {
 function Input(props: { id?: string; label: string; value: string; number?: boolean; mono?: boolean; onChange: (text: string) => void; wide?: boolean; hideLabel?: boolean; note?: string; readonly?: boolean; long?: boolean; placeholder?: string }): preact.JSX.Element {
 	const [draft, setDraft] = useState<string | null>(null);
 	const text = draft ?? props.value;
-	const bad = props.number === true && text !== "" && !numberText.test(text);
+	const bad = props.number === true && text !== "" && !numberText.test(tidyNumber(text)) && !typingNumber.test(text);
 	const id = props.id ?? fieldId(props.label, [Math.round(props.label.length)]);
 	const Tag = props.long === true ? "textarea" : "input";
 	return (
@@ -52,8 +58,10 @@ function Input(props: { id?: string; label: string; value: string; number?: bool
 				onInput={(e) => {
 					const v = (e.currentTarget as HTMLInputElement).value;
 					setDraft(v);
-					if (!(props.number === true && v !== "" && !numberText.test(v))) {
+					if (props.number !== true || v === "") {
 						props.onChange(v);
+					} else if (numberText.test(tidyNumber(v))) {
+						props.onChange(tidyNumber(v));
 					}
 				}}
 				onBlur={() => { setDraft(null); }}
@@ -176,8 +184,8 @@ function Nums(props: { node: ONode; f: Field & { k: "nums" } }): preact.JSX.Elem
 				const words = t.trim().split(/\s+/).filter((w) => w !== "");
 				if (words.length === 0) {
 					edit({ op: "dropChild", at: node.at, name: f.child });
-				} else if (words.every((w) => numberText.test(w))) {
-					edit({ op: "child", at: node.at, name: f.child, args: words.map(vNum) });
+				} else if (words.every((w) => numberText.test(tidyNumber(w)))) {
+					edit({ op: "child", at: node.at, name: f.child, args: words.map(tidyNumber).map(vNum) });
 				}
 			}} />
 		);
@@ -200,20 +208,49 @@ function Nums(props: { node: ONode; f: Field & { k: "nums" } }): preact.JSX.Elem
 	);
 }
 
-function At(props: { node: ONode; f: Field & { k: "at" } }): preact.JSX.Element {
-	const { node, f } = props;
+/** The middle of the region a term sits in, where a position it doesn't give stays. */
+function middleOf(node: ONode, nodes: readonly ONode[]): { fly: string; hoist: string } {
+	const proportion = nodes.find((n) => n.name === "proportion");
+	let fly = Number(prop(proportion, "fly")?.v ?? 0);
+	let hoist = Number(prop(proportion, "hoist")?.v ?? 0);
+	let list = nodes;
+	for (const i of node.at.slice(0, -1)) {
+		const holder: ONode | undefined = list[i];
+		if (holder === undefined) {
+			break;
+		}
+		const own = holder.name === "variant" ? child(holder, "proportion") : holder.name === "define" ? holder : undefined;
+		if (own !== undefined && prop(own, "fly") !== undefined) {
+			fly = Number(prop(own, "fly")?.v);
+			hoist = Number(prop(own, "hoist")?.v);
+		} else if (holder.name === "canton" || holder.name === "panel") {
+			const width = child(holder, "width")?.args[0]?.v;
+			const side = child(holder, "side")?.args[0]?.v;
+			fly = Number(side === "hoist" || side === "fly" ? width : child(holder, "fly")?.args[0]?.v ?? fly);
+			hoist = Number(side === "top" || side === "bottom" ? width : child(holder, "hoist")?.args[0]?.v ?? hoist);
+		}
+		list = holder.kids;
+	}
+	const half = (v: number): string => String(Number((v / 2).toFixed(6)));
+	return { fly: half(fly), hoist: half(hoist) };
+}
+
+function At(props: { node: ONode; nodes: readonly ONode[]; f: Field & { k: "at" } }): preact.JSX.Element {
+	const { node, nodes, f } = props;
 	const all = children(node, "at");
+	const middle = middleOf(node, nodes);
 	const row = (a: ONode | undefined, nth: number): preact.JSX.Element => {
 		const id = fieldId("at", node.at, `-${nth}`);
 		const center = a?.args[0]?.v === "center";
+		const set = (axis: "fly" | "hoist", t: string): void => {
+			const value = (name: "fly" | "hoist"): OVal => (name === axis ? (t === "" ? vNum(middle[name]) : vNum(t)) : prop(a, name) ?? vNum(middle[name]));
+			const other = axis === "fly" ? "hoist" : "fly";
+			edit(t === "" && (a === undefined || center || shown(prop(a, other)) === middle[other]) ? { op: "dropChild", at: node.at, name: "at", nth } : { op: "child", at: node.at, name: "at", nth, args: [], props: [["fly", value("fly")], ["hoist", value("hoist")]] });
+		};
 		return (
 			<div class="inline-fields" key={nth}>
-				<Input id={`${id}-f`} label="Fly" value={center ? "" : shown(prop(a, "fly"))} number placeholder={center || a === undefined ? "Center" : ""} onChange={(t) => {
-					edit(t === "" && shown(prop(a, "hoist")) === "" ? { op: "dropChild", at: node.at, name: "at", nth } : { op: "child", at: node.at, name: "at", nth, args: [], props: [["fly", t === "" ? vNum("0") : vNum(t)], ["hoist", prop(a, "hoist") ?? vNum("0")]] });
-				}} />
-				<Input id={`${id}-h`} label="Hoist" value={center ? "" : shown(prop(a, "hoist"))} number placeholder={center || a === undefined ? "Center" : ""} onChange={(t) => {
-					edit(t === "" && shown(prop(a, "fly")) === "" ? { op: "dropChild", at: node.at, name: "at", nth } : { op: "child", at: node.at, name: "at", nth, args: [], props: [["fly", prop(a, "fly") ?? vNum("0")], ["hoist", t === "" ? vNum("0") : vNum(t)]] });
-				}} />
+				<Input id={`${id}-f`} label="From the hoist edge" value={center ? "" : shown(prop(a, "fly"))} number placeholder={center || a === undefined ? `Center, ${middle.fly}` : ""} onChange={(t) => { set("fly", t); }} />
+				<Input id={`${id}-h`} label="From the top" value={center ? "" : shown(prop(a, "hoist"))} number placeholder={center || a === undefined ? `Center, ${middle.hoist}` : ""} onChange={(t) => { set("hoist", t); }} />
 				{a !== undefined && all.length > 1 ? <button type="button" class="nx-ghost small" aria-label={`Remove position ${nth + 1}`} onClick={() => { edit({ op: "dropChild", at: node.at, name: "at", nth }); }}>Remove</button> : null}
 			</div>
 		);
@@ -221,8 +258,8 @@ function At(props: { node: ONode; f: Field & { k: "at" } }): preact.JSX.Element 
 	return (
 		<Row label={f.label} note={f.note}>
 			<div class="stack">
-				{all.length === 0 ? row(undefined, 0) : all.map((a, i) => row(a, i))}
-				{f.many === true && all.length > 0 ? <button type="button" class="nx-ghost small self-start" onClick={() => { edit({ op: "child", at: node.at, name: "at", nth: all.length, args: [], props: [["fly", vNum("0")], ["hoist", vNum("0")]] }); }}>Add a position</button> : null}
+				{(all.length === 0 ? [undefined] : all).map((a, i) => row(a, i))}
+				{f.many === true && all.length > 0 ? <button type="button" class="nx-ghost small self-start" onClick={() => { edit({ op: "child", at: node.at, name: "at", nth: all.length, args: [], props: [["fly", vNum(middle.fly)], ["hoist", vNum(middle.hoist)]] }); }}>Add a position</button> : null}
 			</div>
 		</Row>
 	);
@@ -554,6 +591,7 @@ function newColorProps(ctx: Ctx, node: ONode, use: (name: string, add: Op) => vo
 }
 
 interface Ctx {
+	nodes: readonly ONode[];
 	paletteAt: number[] | null;
 	names: readonly string[];
 	colors: ReadonlyMap<string, string>;
@@ -615,7 +653,7 @@ function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Eleme
 			return <Records node={node} f={f} ctx={ctx} />;
 		case "at":
 			// A grid spreads its copies across the region, so it has no position of its own.
-			return child(node, "repeat")?.args[0]?.v === "grid" ? <></> : <At node={node} f={f} />;
+			return child(node, "repeat")?.args[0]?.v === "grid" ? <></> : <At node={node} nodes={ctx.nodes} f={f} />;
 		case "props": {
 			const c = child(node, f.child);
 			return (
@@ -787,6 +825,8 @@ interface RowDef {
 	mono?: boolean;
 	swatch?: string | undefined;
 	depth: number;
+	/** The layer it is, which can be moved or taken out from the row. */
+	layer?: ONode;
 }
 
 function layerRows(list: readonly ONode[], colors: ReadonlyMap<string, string>, depth: number, out: RowDef[], parent?: ONode): void {
@@ -797,7 +837,7 @@ function layerRows(list: readonly ONode[], colors: ReadonlyMap<string, string>, 
 		if (parent !== undefined && fieldIsOwn(parent, n)) {
 			continue;
 		}
-		out.push({ path: n.path, label: labelFor(n), note: noteFor(n), swatch: swatchFor(n, colors), depth });
+		out.push({ path: n.path, label: labelFor(n), note: noteFor(n), swatch: swatchFor(n, colors), depth, layer: n });
 		if (layerTerms[n.name]!.layers === true) {
 			layerRows(n.kids, colors, depth + 1, out, n);
 		}
@@ -820,7 +860,7 @@ export function groupsOf(nodes: readonly ONode[]): { label: string; rows: RowDef
 				flag.push({ path: "palette", label: "Colors", note: String(n.kids.length), depth: 0 });
 				break;
 			case "proportion":
-				flag.push({ path: "proportion", label: "Proportion", note: `${shown(prop(n, "hoist"))}:${shown(prop(n, "fly"))}`, mono: true, depth: 0 });
+				flag.push({ path: "proportion", label: "Proportion", note: shapeText(shown(prop(n, "hoist")), shown(prop(n, "fly"))) ?? `${shown(prop(n, "hoist"))}:${shown(prop(n, "fly"))}`, mono: true, depth: 0 });
 				break;
 			case "outline":
 				flag.push({ path: "outline", label: "Outline", note: String(n.args[0]?.v ?? "Drawn"), depth: 0 });
@@ -914,6 +954,7 @@ function AddTerm(props: { nodes: readonly ONode[]; into: ONode | null; label?: s
 			}
 		};
 		document.addEventListener("pointerdown", away);
+		box.current?.scrollIntoView({ block: "nearest" });
 		return () => { document.removeEventListener("pointerdown", away); };
 	}, [open]);
 	const groups = props.onlyCharges === true ? addable.filter((g) => g.group === "Charges") : props.into !== null ? addable.filter((g) => g.group !== "Flag") : addable;
@@ -995,19 +1036,8 @@ export function Form(): preact.JSX.Element {
 						<div class="row-group" key={g.label}>
 							<span class="nx-label row-group-label">{g.label}</span>
 							{g.rows.length === 0 ? <p class="nx-empty pad-row">Nothing yet.</p> : null}
-							{g.rows.map((r) => {
-								const bad = marked.has(r.path);
-								return (
-									<button key={r.path} type="button" class={`row depth-${Math.min(r.depth, 4)}${s.hover === r.path ? " hover" : ""}${bad ? " bad" : ""}`} data-path={r.path}
-										onClick={() => { app.select(r.path); }} onMouseEnter={() => { app.hover(r.path); }} onMouseLeave={() => { app.hover(null); }} onFocus={() => { app.hover(r.path); }} onBlur={() => { app.hover(null); }}>
-										{r.swatch !== undefined ? <span class="swatch" aria-hidden="true" style={{ background: r.swatch }} /> : null}
-										<span class="row-label">{r.label}</span>
-										<span class={`row-note${r.mono === true ? " mono" : ""}`}>{r.note}</span>
-										{bad ? <span class="visually-hidden">has a problem</span> : null}
-										<span class="row-go" aria-hidden="true">›</span>
-									</button>
-								);
-							})}
+							{g.label === "Layers" && g.rows.length > 1 ? <p class="nx-note pad-row">Each layer paints over the ones above it in this list.</p> : null}
+							{g.rows.map((r) => <RowView key={r.path} r={r} nodes={nodes} bad={marked.has(r.path)} hover={s.hover === r.path} />)}
 						</div>
 					))}
 					{!unreadable ? <AddTerm nodes={nodes} into={null} /> : null}
@@ -1047,7 +1077,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const toSource = (): void => {
 		app.setMode("source");
 	};
-	const ctx: Ctx = { paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, toSource };
+	const ctx: Ctx = { nodes, paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, toSource };
 	const hidden = onlyInSource(node, [...fields, ...extra], inPalette);
 	const title = inPalette ? decodePathName(node.path!.slice(8)) : isPalette ? "Colors" : node.name === "variant" || node.name === "fold" || node.name === "define" ? capitalize(String(node.args[0]?.v ?? labelFor(node))) : labelFor(node);
 	const desc = inPalette ? (node.args[0]?.v === "gradient" ? "A gradient between other colors, which can be used wherever a color is." : "Pantone, CMYK and other references travel with the color, and are never drawn from.") : isPalette ? "The flag's palette. Pantone, CMYK and other references travel with each color." : node.name === "charge" ? `${shapes[String(node.args[0]?.v)]?.label ?? "A shape"}, placed at a position.` : term?.desc ?? "";
@@ -1084,17 +1114,12 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 			{ownField !== undefined ? (
 				<FieldView f={{ k: "colorArg", label: "Field", i: 0 }} node={ownField} ctx={ctx} />
 			) : null}
-			{fields.map((f, i) => <FieldView key={`${node.at.join(".")}-${i}`} f={f} node={node} ctx={ctx} />)}
+			{node.name === "proportion" && node.at.length === 1 ? <ProportionFields key={node.at.join(".")} node={node} fields={fields} ctx={ctx} /> : fields.map((f, i) => <FieldView key={`${node.at.join(".")}-${i}`} f={f} node={node} ctx={ctx} />)}
 			{term?.layers === true ? (
 				<div class="field">
 					<span class="nx-label">{node.name === "emblem" ? "Charges" : "Layers"}</span>
 					<div class="stack-tight">
-						{childRows.map((r) => (
-							<button key={r.path} type="button" class={`row depth-${Math.min(r.depth, 4)}`} onClick={() => { app.select(r.path); }} onMouseEnter={() => { app.hover(r.path); }} onMouseLeave={() => { app.hover(null); }}>
-								{r.swatch !== undefined ? <span class="swatch" aria-hidden="true" style={{ background: r.swatch }} /> : null}
-								<span class="row-label">{r.label}</span><span class="row-note">{r.note}</span><span class="row-go" aria-hidden="true">›</span>
-							</button>
-						))}
+						{childRows.map((r) => <RowView key={r.path} r={r} nodes={nodes} bad={false} hover={false} />)}
 					</div>
 					{holder || node.name === "reverse" || node.name === "variant" || node.name === "define" ? <AddTerm nodes={nodes} into={node} label={node.name === "emblem" ? "Add a charge" : "Add a layer"} onlyCharges={node.name === "emblem"} /> : null}
 				</div>
@@ -1137,6 +1162,101 @@ function siblingsOf(node: ONode, nodes: readonly ONode[]): ONode[] {
 	return list.filter((n) => n.path !== undefined && layerTerms[n.name] !== undefined);
 }
 
+/** The layers a row can move among, which leaves out a panel's own field, as it has no row. */
+function rowSiblings(node: ONode, nodes: readonly ONode[]): ONode[] {
+	let parent: ONode | undefined;
+	let list = nodes;
+	for (const i of node.at.slice(0, -1)) {
+		parent = list[i];
+		list = parent?.kids ?? [];
+	}
+	return list.filter((n) => n.path !== undefined && layerTerms[n.name] !== undefined && !(parent !== undefined && fieldIsOwn(parent, n)));
+}
+
+/** Moves a layer to another's place among its siblings, stepping past each one between. */
+function moveLayer(node: ONode, siblings: readonly ONode[], to: number): void {
+	const from = siblings.indexOf(node);
+	if (from < 0 || to < 0 || to >= siblings.length || from === to) {
+		return;
+	}
+	const ops: Op[] = [];
+	const at = [...node.at];
+	const step = to > from ? 1 : -1;
+	for (let i = from + step; i !== to + step; i += step) {
+		const other = siblings[i]!.at.at(-1)!;
+		ops.push({ op: "move", at: [...at], delta: other - at.at(-1)! });
+		at[at.length - 1] = other;
+	}
+	edit(...ops);
+	app.hover(null);
+}
+
+let draggedRow: ONode | null = null;
+
+const sameLevel = (a: ONode, b: ONode): boolean => a.at.slice(0, -1).join(".") === b.at.slice(0, -1).join(".");
+
+/** A row in a list of what a flag has. A layer's can also be moved or taken out from where it is. */
+function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hover: boolean }): preact.JSX.Element {
+	const { r, nodes, bad } = props;
+	const [over, setOver] = useState(false);
+	const button = (
+		<button type="button" class={`row depth-${Math.min(r.depth, 4)}${props.hover ? " hover" : ""}${bad ? " bad" : ""}`} data-path={r.path}
+			onClick={() => { app.select(r.path); }} onMouseEnter={() => { app.hover(r.path); }} onMouseLeave={() => { app.hover(null); }} onFocus={() => { app.hover(r.path); }} onBlur={() => { app.hover(null); }}>
+			{r.swatch !== undefined ? <span class="swatch" aria-hidden="true" style={{ background: r.swatch }} /> : null}
+			<span class="row-label">{r.label}</span>
+			<span class={`row-note${r.mono === true ? " mono" : ""}`}>{r.note}</span>
+			{bad ? <span class="visually-hidden">has a problem</span> : null}
+			<span class="row-go" aria-hidden="true">›</span>
+		</button>
+	);
+	const layer = r.layer;
+	if (layer === undefined) {
+		return button;
+	}
+	const siblings = rowSiblings(layer, nodes);
+	const place = siblings.indexOf(layer);
+	return (
+		<div class={`row-wrap${over ? " row-over" : ""}`} draggable data-row={r.path}
+			onDragStart={(e) => {
+				e.stopPropagation();
+				e.dataTransfer?.setData("text/plain", r.label);
+				if (e.dataTransfer !== null) {
+					e.dataTransfer.effectAllowed = "move";
+				}
+				draggedRow = layer;
+			}}
+			onDragOver={(e) => {
+				if (draggedRow !== null && draggedRow !== layer && sameLevel(draggedRow, layer)) {
+					e.preventDefault();
+					e.stopPropagation();
+					setOver(true);
+				}
+			}}
+			onDragLeave={() => { setOver(false); }}
+			onDrop={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				setOver(false);
+				if (draggedRow !== null && sameLevel(draggedRow, layer)) {
+					moveLayer(draggedRow, siblings, place);
+				}
+				draggedRow = null;
+			}}
+			onDragEnd={() => {
+				draggedRow = null;
+				setOver(false);
+			}}>
+			<span class="row-grip" aria-hidden="true">⠿</span>
+			{button}
+			<span class="row-actions">
+				<button type="button" class="row-act" aria-label={`Move ${r.label} up the list`} title="Up the list" disabled={place <= 0} onClick={() => { moveLayer(layer, siblings, place - 1); }}>↑</button>
+				<button type="button" class="row-act" aria-label={`Move ${r.label} down the list`} title="Down the list" disabled={place < 0 || place >= siblings.length - 1} onClick={() => { moveLayer(layer, siblings, place + 1); }}>↓</button>
+				<button type="button" class="row-act" aria-label={`Remove ${r.label}`} title="Remove" onClick={() => { edit({ op: "remove", at: layer.at }); app.hover(null); }}>×</button>
+			</span>
+		</div>
+	);
+}
+
 function moveAmongLayers(node: ONode, siblings: readonly ONode[], delta: number): void {
 	const i = siblings.indexOf(node);
 	const other = siblings[i + delta];
@@ -1145,6 +1265,87 @@ function moveAmongLayers(node: ONode, siblings: readonly ONode[], delta: number)
 		edit({ op: "move", at: node.at, delta: moved });
 		app.select(null, false);
 	}
+}
+
+/** The flag's shape and grid, which can be restated without changing the picture, or changed. */
+function ProportionFields(props: { node: ONode; fields: readonly Field[]; ctx: Ctx }): preact.JSX.Element {
+	const { node, fields, ctx } = props;
+	const hoist = shown(prop(node, "hoist"));
+	const fly = shown(prop(node, "fly"));
+	const [mode, setMode] = useState("rescale");
+	const [draft, setDraft] = useState<{ hoist: string; fly: string } | null>(null);
+	const [preview, setPreview] = useState<RescalePreview | null>(null);
+	const text = app.state.text;
+	const wanted = draft !== null && draft.hoist !== hoist ? draft.hoist : null;
+	useEffect(() => {
+		setPreview(null);
+		if (wanted === null || wanted === "") {
+			return undefined;
+		}
+		let live = true;
+		const timer = setTimeout(() => {
+			void engine.ask({ kind: "rescalePreview", text, hoist: wanted }).then((p) => {
+				if (live) {
+					setPreview(p);
+				}
+			});
+		}, 200);
+		return () => {
+			live = false;
+			clearTimeout(timer);
+		};
+	}, [wanted, text]);
+	const shape = shapeText(hoist, fly);
+	const times = flyPerHoist(hoist, fly);
+	const rounded = preview?.rounded ?? [];
+	const fill = (h: string): void => { setDraft({ hoist: h, fly: matching(h, hoist, fly) ?? "" }); };
+	return (
+		<>
+			<div class="field">
+				<span class="nx-label">Shape</span>
+				<span class="proportion-shape">{shape ?? `${hoist}:${fly}`}</span>
+				<span class="nx-note">{times !== null ? `It's ${times} times as long as it is tall. ` : ""}Its grid is {hoist} by {fly} units, and every size in this file is measured in those.</span>
+			</div>
+			<Row label="When these numbers change">
+				<Seg label="When these numbers change" value={mode} options={[["rescale", "Rescale the grid"], ["shape", "Change the shape"]]} onPick={(v) => { setMode(v); setDraft(null); }} />
+			</Row>
+			{mode === "shape" ? (
+				<>
+					<p class="nx-note">Only these numbers change. Everything else stays where it is, so the design may need moving to fit.</p>
+					{fields.map((f, i) => <FieldView key={`${node.at.join(".")}-${i}`} f={f} node={node} ctx={ctx} />)}
+				</>
+			) : (
+				<>
+					<p class="nx-note">Every length is multiplied by the same amount, so the flag looks just the same on its new grid.</p>
+					<div class="chips">
+						<Input id={fieldId("rescale-hoist", node.at)} label="Hoist" number value={draft?.hoist ?? hoist} onChange={(t) => { setDraft({ hoist: t, fly: matching(t, hoist, fly) ?? "" }); }} />
+						<Input id={fieldId("rescale-fly", node.at)} label="Fly" number value={draft?.fly ?? fly} onChange={(t) => { setDraft({ hoist: matching(t, fly, hoist) ?? "", fly: t }); }} />
+					</div>
+					{preview?.error !== undefined ? <p class="nx-callout danger"><span>{preview.error}</span></p> : null}
+					{preview !== null && preview.error === undefined ? (
+						<div class="stack-tight" role="status">
+							<p class="nx-note">{preview.changed} {preview.changed === 1 ? "length" : "lengths"} will be multiplied by {preview.factor}.{preview.comments === true ? " Comments stay as they're written, so any numbers in them won't match." : ""}</p>
+							{rounded.length > 0 ? (
+								<p class="nx-callout warn"><span>{rounded.length} {rounded.length === 1 ? "number" : "numbers"} can't be written exactly and will be rounded: {rounded.slice(0, 3).map(([a, b]) => `${a} becomes ${b}`).join(", ")}{rounded.length > 3 ? ", and more" : ""}.</span></p>
+							) : null}
+							{rounded.length > 0 && (preview.exact ?? []).length > 0 ? (
+								<div class="chips">
+									<span class="nx-note">These stay exact:</span>
+									{preview.exact!.map(([h, f]) => <button key={h} type="button" class="nx-ghost small" onClick={() => { fill(h); }}>{h}:{f}</button>)}
+								</div>
+							) : null}
+							<div class="panel-actions">
+								<button type="button" class="nx-btn small" onClick={() => {
+									void app.edit([{ op: "rescale", hoist: wanted! }]).then(() => { setDraft(null); });
+								}}>Rescale</button>
+								<button type="button" class="nx-ghost small" onClick={() => { setDraft(null); }}>Cancel</button>
+							</div>
+						</div>
+					) : null}
+				</>
+			)}
+		</>
+	);
 }
 
 function ChargeShape(props: { node: ONode }): preact.JSX.Element {
@@ -1191,7 +1392,7 @@ function NameField(props: { node: ONode; kind: NameKind; nodes: readonly ONode[]
 	const current = kind === "color" ? node.name : String(node.args[0]?.v);
 	const [draft, setDraft] = useState<string | null>(null);
 	const box = useRef<HTMLInputElement>(null);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (namingNext !== null && namingNext === node.path) {
 			namingNext = null;
 			box.current?.focus({ preventScroll: true });

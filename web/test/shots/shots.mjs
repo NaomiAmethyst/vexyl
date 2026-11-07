@@ -47,13 +47,13 @@ const screens = {
 	"share-github": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.getByRole("link", { name: "Share" }).click(); await p.getByLabel("Link to share").waitFor(); },
 	"share-edited": async (p) => {
 		await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p);
-		await p.locator('.row[data-path="proportion"]').click(); await p.getByLabel("Fly").fill("25");
+		await p.locator('.row[data-path="proportion"]').click(); await p.getByRole("radio", { name: "Change the shape" }).click(); await p.getByLabel("Fly").fill("25");
 		await p.getByRole("link", { name: "Share" }).click();
 		await p.waitForFunction(() => document.querySelector('[aria-label="Link to share"]')?.value.includes("#v1."));
 	},
 	"share-large": async (p) => {
 		await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl")); await ready(p);
-		await p.locator('.row[data-path="proportion"]').click(); await p.getByLabel("Fly").fill("31"); await p.locator(".dirty").waitFor({ timeout: 30000 });
+		await p.locator('.row[data-path="proportion"]').click(); await p.getByRole("radio", { name: "Change the shape" }).click(); await p.getByLabel("Fly").fill("31"); await p.locator(".dirty").waitFor({ timeout: 30000 });
 		await p.getByRole("link", { name: "Share" }).click();
 		await p.getByText("This file is too large").waitFor({ timeout: 60000 });
 	},

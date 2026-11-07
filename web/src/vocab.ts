@@ -184,16 +184,16 @@ export const layers: Readonly<Record<string, Term>> = {
 			{ k: "num", label: "Width", child: "width" },
 			{ k: "choice", label: "Corner", child: "corner", none: "", options: [["", "None"], ...corners] },
 			{ k: "at", label: "Center" },
-			{ k: "num", label: "Fly", child: "fly" },
-			{ k: "num", label: "Hoist", child: "hoist" },
+			{ k: "num", label: "Width, along the fly", child: "fly" },
+			{ k: "num", label: "Height, along the hoist", child: "hoist" },
 			{ k: "edge" },
 		],
 	},
 	canton: {
 		label: "Canton", desc: "A panel in the upper hoist corner, with its own field and charges.", kind: "holder", layers: true, skeleton: "canton {\n  fly 2\n  hoist 1\n  field {a}\n}",
 		fields: [
-			{ k: "num", label: "Fly", child: "fly" },
-			{ k: "num", label: "Hoist", child: "hoist", note: "In grid units." },
+			{ k: "num", label: "Width, along the fly", child: "fly" },
+			{ k: "num", label: "Height, along the hoist", child: "hoist", note: "In grid units." },
 		],
 	},
 	use: {
@@ -204,7 +204,7 @@ export const layers: Readonly<Record<string, Term>> = {
 
 const radius: Field = { k: "num", label: "Radius", child: "radius" };
 const hollow: Field = { k: "num", label: "Hollow", child: "hollow", note: "Draws its outline at this width." };
-const size: readonly Field[] = [{ k: "num", label: "Fly", child: "fly" }, { k: "num", label: "Hoist", child: "hoist" }];
+const size: readonly Field[] = [{ k: "num", label: "Width, along the fly", child: "fly" }, { k: "num", label: "Height, along the hoist", child: "hoist" }];
 
 export interface ShapeTerm {
 	label: string;
@@ -313,7 +313,7 @@ export const parts: Readonly<Record<string, Term>> = {
 	variant: {
 		label: "Variant", desc: "A named form of the flag, such as a vertical or banner one.", kind: "part", layers: true, skeleton: "variant {name} {\n  from transpose\n  upright\n}",
 		fields: [
-			{ k: "choice", label: "Turns by", child: "from", none: "none", options: [["none", "None"], ["rotate", "Quarter turn"], ["half-turn", "Half turn"], ["transpose", "Diagonal"], ["invert", "Upside down"]] },
+			{ k: "choice", label: "Turns by", child: "from", none: "none", options: [["none", "None"], ["rotate", "Quarter turn clockwise"], ["counter-rotate", "Quarter turn counterclockwise"], ["half-turn", "Half turn"], ["transpose", "Across the diagonal"], ["anti-transpose", "Across the other diagonal"], ["invert", "Upside down"], ["mirror", "Mirrored"]] },
 			{ k: "flag", label: "Keep charges upright", child: "upright" },
 			{ k: "num", label: "Ratio", child: "ratio", note: "Its proportion by the flag's adapt rules, as fly divided by hoist." },
 			{ k: "props", label: "Its own proportion", child: "proportion", props: [["hoist", "Hoist"], ["fly", "Fly"]], note: "A form that's fixed rather than adapted. It needs its own layers." },
@@ -420,7 +420,7 @@ export function nameProblem(kind: NameKind, name: string, taken: readonly string
 
 /** What a box wants, as an example of how it's written. */
 const examples: Readonly<Record<string, string>> = {
-	Opacity: "0.5", Rotate: "45", Angle: "30", Count: "3", Rows: "2", Columns: "3", Points: "5", From: "0", To: "180", Hoist: "20", Fly: "30", Radius: "4", Inner: "3", Offset: "1.5",
+	Opacity: "0.5", Rotate: "45", Angle: "30", Count: "3", Rows: "2", Columns: "3", Points: "5", From: "0", To: "180", Hoist: "20", Fly: "30", "Width, along the fly": "6", "Height, along the hoist": "4", Radius: "4", Inner: "3", Offset: "1.5",
 	C: "100", M: "90", Y: "0", K: "0", Lowest: "1", Highest: "2",
 	Name: "Flag of Somewhere", Description: "In half lengthwise", Version: "1.0", Date: "1912-07-04", Until: "1959-07-04", Series: "flag-of-somewhere",
 	Notes: "Anything a reader should know", Law: "Flag Act 1912", Restriction: "Not for commercial use", Sources: "https://example.org/flag-act", Designers: "Their full name", Encoders: "Their full name", Authors: "Their full name",

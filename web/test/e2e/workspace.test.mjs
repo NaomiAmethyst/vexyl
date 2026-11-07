@@ -308,7 +308,7 @@ test("a new variant gets a name of its own, ready to change", async () => {
 
 	await p.getByRole("button", { name: /Structure/ }).click();
 	await addVariant();
-	await p.waitForFunction(() => document.querySelector("[id*=variant-name]")?.value === "vertical");
+	await p.waitForFunction(() => document.activeElement?.id?.includes("variant-name") && document.activeElement.value === "vertical");
 	await p.keyboard.type("distress");
 	await p.getByRole("alert").filter({ hasText: "already a variant" }).waitFor();
 	await p.keyboard.press("Enter");
@@ -323,7 +323,7 @@ test("a variant can be turned upside down or all the way around, and keeps its l
 	const { p, context, errors } = await page("reviewed/japan.kdl");
 	await p.getByRole("button", { name: "Add a term" }).click();
 	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
-	const turn = (name) => p.getByRole("radio", { name, exact: true }).click();
+	const turn = (label) => p.getByLabel("Turns by").selectOption({ label });
 	await turn("None");
 	await p.waitForFunction(() => !document.querySelector("textarea[aria-label='Source for this variant']")?.value.includes("from"));
 	await turn("Half turn");
@@ -341,7 +341,7 @@ test("a term's source can be edited in its panel", async () => {
 	const { p, context, errors } = await page("reviewed/japan.kdl");
 	await p.getByRole("button", { name: "Add a term" }).click();
 	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
-	await p.getByRole("radiogroup", { name: "Turns by" }).waitFor();
+	await p.getByLabel("Turns by").waitFor();
 	await p.locator(".term-source summary").click();
 	const source = p.getByLabel("Source for this variant");
 	await source.fill("variant distress {");
@@ -350,7 +350,7 @@ test("a term's source can be edited in its panel", async () => {
 	await source.fill("variant distress {\n  from invert\n}");
 	await p.getByRole("button", { name: "Apply" }).click();
 	await p.locator(".panel-head h2", { hasText: "Distress" }).waitFor();
-	assert.equal(await p.getByRole("radio", { name: "Upside down" }).getAttribute("aria-checked"), "true");
+	assert.equal(await p.getByLabel("Turns by").inputValue(), "invert");
 	assert.ok((await savedText(p)).includes("variant distress {\n  from invert\n}"));
 	assert.deepEqual(errors, []);
 	await context.close();
@@ -419,6 +419,131 @@ test("a new variant is what the big view shows", async () => {
 	await p.getByRole("button", { name: "Add a term" }).click();
 	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
 	await p.waitForFunction(() => document.querySelector(".nx-muted")?.textContent?.includes("variant"));
+	await context.close();
+});
+
+test("the add menu is never cut off, however little room there is", async () => {
+	const { p, context } = await page("reviewed/japan.kdl");
+	await p.setViewportSize({ width: 1000, height: 480 });
+	await p.getByRole("button", { name: "Add a term" }).click();
+	for (const name of ["Bars", "Gradient"]) {
+		const item = p.locator(".add-item", { hasText: new RegExp(`^${name}$`) }).first();
+		await item.scrollIntoViewIfNeeded();
+		const box = await item.boundingBox();
+		const page = await p.locator(".form-page").first().boundingBox();
+		assert.ok(box.y >= page.y && box.y + box.height <= page.y + page.height, name);
+	}
+	assert.ok(await p.evaluate(() => {
+		const menu = document.querySelector(".add-menu").getBoundingClientRect();
+		const page = document.querySelector(".form-page").getBoundingClientRect();
+		return menu.left >= page.left && menu.right <= page.right;
+	}));
+	await context.close();
+});
+
+test("layers can be moved and taken out from the structure, by button or by dragging", async () => {
+	const { p, context, errors } = await page("reviewed/united-states.kdl");
+	const order = () => p.locator(".row-wrap > .row .row-label").allTextContents();
+	const before = await order();
+	assert.equal(before[0], "Bars");
+	await p.locator('[data-row="1"]').hover();
+	await p.getByRole("button", { name: `Move ${before[1]} up the list` }).click();
+	await p.waitForFunction((first) => document.querySelector(".row-wrap > .row .row-label")?.textContent === first, before[1]);
+	assert.equal(await p.locator(".panel-head").count() === 0 || !(await p.locator(".panel-head").isVisible()), true, "the panel stays closed");
+	await p.locator('[data-row="1"]').dragTo(p.locator('[data-row="0"]'));
+	await p.waitForFunction((first) => document.querySelector(".row-wrap > .row .row-label")?.textContent === first, before[0]);
+	await p.getByRole("button", { name: `Remove ${before[0]}` }).click();
+	await p.waitForFunction((gone) => ![...document.querySelectorAll(".row-wrap > .row .row-label")].some((r) => r.textContent === gone), before[0]);
+	assert.ok(!(await savedText(p)).includes("count 13"));
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a flag can be rescaled from its proportion, keeping the picture, and is told what would be rounded", async () => {
+	const { p, context, errors } = await page("reviewed/united-states.kdl");
+	await p.locator('.row[data-path="proportion"]').click();
+	await p.locator(".proportion-shape", { hasText: "10:19" }).waitFor();
+	await p.getByLabel("Hoist", { exact: true }).fill("10");
+	assert.equal(await p.getByLabel("Fly", { exact: true }).inputValue(), "19");
+	await p.locator(".nx-callout.warn", { hasText: "7 becomes 5.384615" }).waitFor();
+	await p.getByRole("button", { name: "130:247" }).click();
+	await p.waitForFunction(() => !document.querySelector(".nx-callout.warn") && [...document.querySelectorAll("button")].some((b) => b.textContent === "Rescale"));
+	await p.getByRole("button", { name: "Rescale", exact: true }).click();
+	await p.waitForFunction(() => document.querySelector(".panel .nx-note")?.textContent?.includes("130 by 247"));
+	const out = await savedText(p);
+	assert.ok(out.includes("proportion hoist=130 fly=247") && out.includes("fly 98.8") && out.includes("hoist 70") && out.includes("radius 4.004"), out);
+	assert.ok(out.includes("count 13") && out.includes("rows=9"), "what isn't a length stays");
+	await p.locator(".status", { hasText: "Valid" }).waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("the source view's cursor can be seen in either theme", async () => {
+	for (const colorScheme of ["dark", "light"]) {
+		const { p, context } = await page("reviewed/japan.kdl", { colorScheme });
+		await p.getByRole("radio", { name: "Source" }).or(p.getByRole("tab", { name: "Source" })).first().click();
+		await p.locator(".cm-content").click();
+		const [caret, ink] = await p.locator(".cm-content").evaluate((content) => {
+			const probe = document.createElement("span");
+			probe.style.color = "var(--ink)";
+			document.body.append(probe);
+			return [getComputedStyle(content).caretColor, getComputedStyle(probe).color];
+		});
+		assert.equal(caret, ink);
+		await context.close();
+	}
+});
+
+test("a number can be typed one key at a time into any box, without losing its place", async () => {
+	const { p, context, errors } = await page(undefined);
+	await p.goto(`${srv.base}?view=open`);
+	await p.getByRole("button", { name: "Start a new flag" }).click();
+	await ready(p);
+	for (const name of ["Lozenge", "Star", "Rectangle", "Band", "Cross", "Canton", "Panel"]) {
+		await p.getByRole("button", { name: "Add a term" }).click();
+		await p.locator(".add-item", { hasText: new RegExp(`^${name}$`) }).first().click();
+		await p.locator(".row-wrap .row", { hasText: name }).click();
+		await p.locator(".panel-head h2", { hasText: name }).waitFor();
+		const boxes = p.locator('.panel input[inputmode="decimal"]:visible');
+		const count = await boxes.count();
+		assert.ok(count > 0, name);
+		for (let i = 0; i < count; i++) {
+			const box = boxes.nth(i);
+			await box.click();
+			await box.fill("");
+			await p.keyboard.type("1", { delay: 40 });
+			await p.waitForTimeout(60);
+			await p.keyboard.type(".");
+			assert.equal(await p.locator('.panel .nx-error[role="alert"]').count(), 0, `${name} ${i}: mid-number`);
+			await p.keyboard.type("5", { delay: 40 });
+			await p.waitForTimeout(60);
+			assert.equal(await boxes.nth(i).inputValue(), "1.5", `${name} box ${i}`);
+			assert.ok(await boxes.nth(i).evaluate((e) => e === document.activeElement), `${name} box ${i} keeps the cursor`);
+		}
+		await p.getByRole("button", { name: /Structure/ }).click();
+		await p.locator(".row-wrap").last().hover();
+		await p.getByRole("button", { name: /^Remove / }).last().click();
+		await p.waitForFunction(() => document.querySelectorAll(".row-wrap").length <= 1);
+	}
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a position given on one axis stays centered on the other, and .5 can be typed", async () => {
+	const { p, context } = await page(undefined);
+	await p.goto(`${srv.base}?view=open`);
+	await p.getByRole("button", { name: "Start a new flag" }).click();
+	await ready(p);
+	await p.getByRole("button", { name: "Add a term" }).click();
+	await p.locator(".add-item", { hasText: /^Lozenge$/ }).click();
+	await p.locator(".row-wrap .row", { hasText: "Lozenge" }).click();
+	const from = p.getByLabel("From the hoist edge");
+	assert.equal(await p.getByLabel("From the top").getAttribute("placeholder"), "Center, 1");
+	await from.click();
+	await p.keyboard.type(".5", { delay: 40 });
+	await p.waitForFunction(() => document.querySelector("textarea[aria-label^='Source']")?.value.includes("at fly=0.5 hoist=1"));
+	await from.fill("");
+	await p.waitForFunction(() => !document.querySelector("textarea[aria-label^='Source']")?.value.includes("at fly"));
 	await context.close();
 });
 
@@ -501,6 +626,7 @@ test("a CRLF file stays CRLF", async () => {
 	await ready(p);
 	assert.equal(await savedText(p), body);
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("3");
 	await p.locator(".dirty").waitFor();
 	assert.equal(await savedText(p), body.replace("fly=2", "fly=3"));

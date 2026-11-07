@@ -49,6 +49,7 @@ test("an edited flag shares by holding it, and a link gives exactly that", async
 	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("31");
 	await p.locator(".dirty").waitFor();
 	await p.getByRole("link", { name: "Share" }).click();
@@ -83,6 +84,7 @@ test("a flag too large for a link says what to do instead", async () => {
 	await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("31");
 	await p.locator(".dirty").waitFor({ timeout: 30000 });
 	await p.getByRole("link", { name: "Share" }).click();

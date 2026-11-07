@@ -7,7 +7,9 @@
 
 import { format, getLocation, Identifier, InvalidKdlError, Node as NodeClass, parse as parseKdl, Value, type Document, type Entry, type Node } from "@bgotink/kdl";
 import { encodePathName } from "vexyl/paths";
-import type { ONode, Op, OVal } from "./protocol.js";
+import { factorText } from "./exact.js";
+import { exactGrids, rescale } from "./rescale.js";
+import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 
 const layerNames = new Set(["field", "bars", "chevrons", "band", "cross", "saltire", "quarters", "checks", "rays", "pile", "pall", "charge", "emblem", "group", "panel", "canton", "use"]);
 const holdsLayers = new Set(["emblem", "group", "panel", "canton"]);
@@ -524,8 +526,22 @@ function apply(doc: Document, op: Op): void {
 		case "renameTerm":
 			renameTerm(doc, op.kind, op.from, op.to);
 			return;
+		case "rescale":
+			rescale(doc, op.hoist);
+			return;
 		case "replaceText":
 			throw new Error("that change can't be made with others");
+	}
+}
+
+/** Says what restating a flag on a grid with this hoist would do, changing nothing. */
+export function rescalePreview(text: string, hoist: string): RescalePreview {
+	try {
+		const doc = parseKdl(text) as Document;
+		const { factor, rounded, values } = rescale(doc, hoist, true);
+		return { factor: factorText(factor), changed: values.length, rounded, exact: rounded.length > 0 ? exactGrids(doc) : [], comments: /(^|\s)\/[/*]/m.test(text) };
+	} catch (e) {
+		return { error: (e as Error).message };
 	}
 }
 

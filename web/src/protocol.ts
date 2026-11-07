@@ -65,12 +65,27 @@ export type Op =
 	| { op: "move"; at: number[]; delta: number }
 	| { op: "renameColor"; from: string; to: string }
 	| { op: "renameTerm"; kind: "variant" | "fold" | "define"; from: string; to: string }
+	| { op: "rescale"; hoist: string }
 	| { op: "replaceText"; start: number; end: number; was: string; to: string };
+
+/** What restating a flag on another grid would do. */
+export interface RescalePreview {
+	/** What every length would be multiplied by, like `10/13`. */
+	factor?: string;
+	changed?: number;
+	/** Numbers that couldn't be written exactly, as they are and as they'd become. */
+	rounded?: [string, string][];
+	/** Grids in whole numbers, as hoist and fly, on which every length would be exact. */
+	exact?: [string, string][];
+	comments?: boolean;
+	error?: string;
+}
 
 export type Request =
 	| { kind: "analyze"; slot: string; text: string }
 	| { kind: "render"; slot: string; options: Options; pick?: boolean; exact?: boolean }
 	| { kind: "edit"; text: string; ops: Op[] }
+	| { kind: "rescalePreview"; text: string; hoist: string }
 	| { kind: "shareEncode"; text: string }
 	| { kind: "shareDecode"; link: string };
 
@@ -80,7 +95,9 @@ export type Reply<K extends Request["kind"]> = K extends "analyze"
 		? RenderResult
 		: K extends "edit"
 			? { text?: string; error?: string }
-			: K extends "shareEncode"
+			: K extends "rescalePreview"
+				? RescalePreview
+				: K extends "shareEncode"
 				? { link?: string; error?: string }
 				: K extends "shareDecode"
 					? { text?: string; error?: string }

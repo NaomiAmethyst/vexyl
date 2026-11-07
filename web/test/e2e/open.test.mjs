@@ -252,6 +252,7 @@ test("each tab keeps its own draft, through a reload", async () => {
 	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("31");
 	await p.locator(".dirty").waitFor();
 	await p.waitForTimeout(600);
@@ -278,8 +279,10 @@ test("two tabs on one flag keep separate drafts, and each is told", async () => 
 	await p.getByText("also open in another tab").waitFor();
 	await other.getByText("also open in another tab").waitFor();
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("31");
 	await other.locator('.row[data-path="proportion"]').click();
+	await other.getByRole("radio", { name: "Change the shape" }).click();
 	await other.getByLabel("Fly").fill("44");
 	await p.waitForTimeout(700);
 	p.on("dialog", (d) => d.accept());
@@ -298,6 +301,7 @@ test("closing with unsaved work warns, and after saving it doesn't", async () =>
 	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("31");
 	await p.locator(".dirty").waitFor();
 	// Only a page a person has used is allowed to ask.
@@ -322,6 +326,7 @@ test("a draft from a closed tab is offered back", async () => {
 	await p.goto(openUrl(srv.base, "reviewed/japan.kdl"));
 	await ready(p);
 	await p.locator('.row[data-path="proportion"]').click();
+	await p.getByRole("radio", { name: "Change the shape" }).click();
 	await p.getByLabel("Fly").fill("31");
 	await p.waitForTimeout(700);
 	await p.close();

@@ -77,6 +77,7 @@ meta {
   name "New flag"
 }
 palette {
+  black "#000000"
   white "#ffffff"
 }
 proportion hoist=2 fly=3
