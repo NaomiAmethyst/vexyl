@@ -56,10 +56,19 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .editor-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
 .editor-body { height: 640px; display: flex; flex-direction: column; min-height: 0; }
 .source-host { height: 100%; min-height: 0; }
+/* Beside each other, each column reaches the bottom of the screen, and whatever's spare goes to the
+   form and to the flag, which stops growing once it fills its width. */
+@media (min-width: 1100px) {
+  .work .column { min-height: calc(100dvh - 94px); }
+  .editor { flex: 1 1 auto; }
+  .editor-body { flex: 1 1 640px; height: auto; min-height: 640px; }
+  .big-view { flex: 1 1 auto; container-type: inline-size; }
+  .big-view .stage-box { flex: 1 1 340px; height: auto; min-height: 340px; max-height: calc(100cqw / var(--flag-ratio, 1.5) + 34px); }
+}
 
-.form-slider { flex: 1 1 auto; min-height: 0; overflow: hidden; }
-.form-track { height: 100%; }
-.form-page { height: 100%; overflow: auto; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; animation: slide-list 0.25s ease; }
+.form-slider { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.form-track { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.form-page { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; animation: slide-list 0.25s ease; }
 .form-page.panel { padding: 14px 18px 18px; gap: 14px; animation-name: slide-panel; }
 @keyframes slide-panel { from { transform: translateX(32px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes slide-list { from { transform: translateX(-32px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -138,15 +147,21 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .more summary, .term-source summary { cursor: pointer; color: var(--ink2); }
 .more .stack { margin-top: 10px; }
 .source-only { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px dashed var(--line2); border-radius: 10px; }
+.panel-problems { position: sticky; top: -14px; z-index: 2; background: var(--raised); border-radius: 12px; }
+.field-problem { display: flex; flex-direction: column; gap: 6px; padding-left: 10px; border-left: 2px solid var(--danger); }
 .panel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .term-source { border-top: 1px solid var(--line); padding-top: 12px; }
 .term-source pre { margin: 10px 0 0; padding: 12px; border-radius: 10px; background: var(--well); font-family: var(--font-mono); font-size: 0.78125rem; line-height: 1.6; color: var(--ink2); overflow-x: auto; }
 .term-source-edit { margin-top: 10px; }
 .term-source-edit textarea { box-sizing: border-box; width: 100%; resize: vertical; white-space: pre; overflow-x: auto; line-height: 1.5; }
-.add-term { align-self: stretch; margin-left: 12px; }
-.add-menu { margin-top: 8px; padding: 12px; width: min(420px, 100%); box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line2); border-radius: 14px; background: var(--raised); }
-.add-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.add-item { border: none; font: inherit; font-size: 0.71875rem; cursor: pointer; }
+.add-term { align-self: stretch; margin: 0 12px; }
+.add-menu { margin-top: 8px; padding: 12px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line2); border-radius: 14px; background: var(--raised); }
+.add-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 4px; margin-top: 6px; }
+.add-item { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: none; color: var(--ink2); font: inherit; text-align: left; cursor: pointer; }
+.add-item-name { font-weight: 500; color: var(--ink); font-size: 0.8125rem; }
+.add-item-desc { font-size: 0.71875rem; line-height: 1.35; color: var(--muted); }
+.field-heading { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+.field-heading h3 { margin: 0; font-size: 0.875rem; font-weight: 500; color: var(--ink); }
 .add-item:hover { background: rgba(var(--acc-rgb), 0.16); color: var(--accent); }
 
 .check { background-color: var(--check-b); background-image: linear-gradient(45deg, var(--check-a) 25%, transparent 25%, transparent 75%, var(--check-a) 75%), linear-gradient(45deg, var(--check-a) 25%, transparent 25%, transparent 75%, var(--check-a) 75%); background-size: 20px 20px; background-position: 0 0, 10px 10px; }
@@ -154,8 +169,8 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 @media (prefers-color-scheme: light) { :root { --check-a: #ece9f3; --check-b: #ffffff; } }
 @media (prefers-contrast: more) { :root { --check-a: #333; --check-b: #000; } }
 @media (prefers-contrast: more) and (prefers-color-scheme: light) { :root { --check-a: #ccc; --check-b: #fff; } }
-.stage-box { border-radius: 10px; border: 1px solid var(--line); height: 340px; padding: 16px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.stage { position: relative; max-width: 100%; max-height: 100%; height: 100%; cursor: pointer; }
+.stage-box { container-type: size; border-radius: 10px; border: 1px solid var(--line); height: 340px; padding: 16px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.stage { position: relative; width: min(100cqw, calc(100cqh * var(--flag-ratio, 1.5))); cursor: pointer; }
 .stage.dimmed .stage-image { opacity: 0.55; }
 .stage-image { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; }
 .pick { position: absolute; inset: 0; opacity: 0; }

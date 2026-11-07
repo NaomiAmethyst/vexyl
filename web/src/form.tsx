@@ -8,7 +8,7 @@ import { engine } from "./engine.js";
 import { flyPerHoist, matching, shapeText } from "./exact.js";
 import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 import { app, findPath } from "./store.js";
-import { addable, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
+import { addable, describeTerm, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
 const numberText = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
 /** What a number can look like halfway through being typed, which isn't a mistake yet. */
@@ -272,7 +272,7 @@ function Repeat(props: { node: ONode }): preact.JSX.Element {
 	const defaults: Record<string, [string, OVal][]> = { grid: [["rows", vNum("3")], ["columns", vNum("3")]], ring: [["count", vNum("6")], ["radius", vNum("1")]], arc: [["count", vNum("3")], ["radius", vNum("1")], ["from", vNum("-45")], ["to", vNum("45")]], line: [["count", vNum("3")], ["fly", vNum("1")]] };
 	return (
 		<div class="stack">
-			<Row label="Repeat">
+			<Row label="Repeat" note="Draws it many times at once: in a grid, around a ring or arc, or along a line.">
 				<Seg label="Repeat" value={form} options={[["once", "Once"], ["grid", "Grid"], ["ring", "Ring"], ["arc", "Arc"], ["line", "Line"]]} onPick={(v) => {
 					if (v === "once") {
 						edit({ op: "dropChild", at: node.at, name: "repeat" });
@@ -599,10 +599,42 @@ interface Ctx {
 	toSource: () => void;
 }
 
+/** Says what a number on this flag means, since every size is on its grid. */
+function gridNote(nodes: readonly ONode[]): string {
+	const p = nodes.find((n) => n.name === "proportion");
+	return p === undefined ? "" : `In this flag's grid units. The whole flag is ${shown(prop(p, "fly"))} wide by ${shown(prop(p, "hoist"))} tall.`;
+}
+
+/** Whether a field is worth showing yet. One that's been given a value always is, so that nothing disappears. */
+function fieldApplies(node: ONode, f: Field): boolean {
+	const w = f.when;
+	if (w === undefined || [...handledChildren([f])].some((name) => child(node, name) !== undefined)) {
+		return true;
+	}
+	return (w.has === undefined || child(node, w.has) !== undefined)
+		&& (w.lacks === undefined || w.lacks.every((name) => child(node, name) === undefined))
+		&& (w.is === undefined || w.is[1].includes(String(child(node, w.is[0])?.args[0]?.v ?? "")))
+		&& (w.isnt === undefined || !w.isnt[1].includes(String(child(node, w.isnt[0])?.args[0]?.v ?? "")))
+		&& (w.argIs === undefined || w.argIs[1].includes(String(node.args[w.argIs[0]]?.v ?? "")));
+}
+
+/** The fields that apply now, without a heading that has nothing left under it. */
+function shownFields(node: ONode, fields: readonly Field[]): Field[] {
+	const showing = fields.filter((f) => fieldApplies(node, f));
+	return showing.filter((f, i) => f.k !== "heading" || (showing[i + 1] !== undefined && showing[i + 1]!.k !== "heading"));
+}
+
 function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Element {
 	const { f, node, ctx } = props;
 	const id = fieldId("label" in f ? f.label : f.k, node.at);
 	switch (f.k) {
+		case "heading":
+			return (
+				<div class="field-heading">
+					<h3>{f.label}</h3>
+					{f.grid === true ? <span class="nx-note">{gridNote(ctx.nodes)}</span> : null}
+				</div>
+			);
 		case "colorArg": {
 			const value = String(node.args[f.i]?.v ?? "");
 			return (
@@ -769,7 +801,7 @@ function noteFor(n: ONode): string {
 			return "Upper hoist";
 		case "panel": {
 			const place = child(n, "side")?.args[0]?.v ?? child(n, "corner")?.args[0]?.v;
-			return place === undefined ? "" : String(place);
+			return place === undefined ? "" : placeLabel(String(place));
 		}
 		case "charge": {
 			const r = child(n, "repeat");
@@ -957,7 +989,7 @@ function AddTerm(props: { nodes: readonly ONode[]; into: ONode | null; label?: s
 		box.current?.scrollIntoView({ block: "nearest" });
 		return () => { document.removeEventListener("pointerdown", away); };
 	}, [open]);
-	const groups = props.onlyCharges === true ? addable.filter((g) => g.group === "Charges") : props.into !== null ? addable.filter((g) => g.group !== "Flag") : addable;
+	const groups = props.onlyCharges === true ? addable.filter((g) => g.group === "Charges") : props.into !== null ? addable.filter((g) => g.top !== true) : addable;
 	return (
 		<div class="add-term" ref={box} onKeyDown={(e) => {
 			if (e.key === "Escape" && open) {
@@ -973,11 +1005,11 @@ function AddTerm(props: { nodes: readonly ONode[]; into: ONode | null; label?: s
 							<span class="nx-label">{g.group}</span>
 							<div class="add-items">
 								{g.items.filter(([key]) => !onlyOnce.has(key) || !props.nodes.some((n) => n.name === key)).map(([key, label]) => (
-									<button key={key} type="button" class="nx-chip add-item" onClick={() => {
+									<button key={key} type="button" class="add-item" data-label={label} onClick={() => {
 										addTerm(key, props.nodes, props.into);
 										setOpen(false);
 										button.current?.focus();
-									}}>{label}</button>
+									}}><span class="add-item-name">{label}</span><span class="add-item-desc">{describeTerm(key)}</span></button>
 								))}
 							</div>
 						</div>
@@ -988,8 +1020,13 @@ function AddTerm(props: { nodes: readonly ONode[]; into: ONode | null; label?: s
 	);
 }
 
-function problemPaths(s: { problems: { line?: number; message: string }[]; spans: { path: string; line: number; endLine: number }[] }): Map<string, string[]> {
-	const out = new Map<string, string[]>();
+interface Marked {
+	message: string;
+	line: number;
+}
+
+function problemPaths(s: { problems: { line?: number; message: string }[]; spans: { path: string; line: number; endLine: number }[] }): Map<string, Marked[]> {
+	const out = new Map<string, Marked[]>();
 	for (const p of s.problems) {
 		if (p.line === undefined) {
 			continue;
@@ -1001,14 +1038,55 @@ function problemPaths(s: { problems: { line?: number; message: string }[]; spans
 			}
 		}
 		if (best !== undefined) {
-			out.set(best.path, [...(out.get(best.path) ?? []), p.message]);
+			const marked = { message: p.message, line: p.line };
+			out.set(best.path, [...(out.get(best.path) ?? []), marked]);
 			const top = best.path.startsWith("palette/") ? "palette" : null;
 			if (top !== null) {
-				out.set(top, [...(out.get(top) ?? []), p.message]);
+				out.set(top, [...(out.get(top) ?? []), marked]);
 			}
 		}
 	}
 	return out;
+}
+
+const fieldLabel = (f: Field): string => ("label" in f ? f.label : f.k === "fimbriate" ? "Fimbriation" : f.k === "edge" ? "Edge" : f.k === "repeat" ? "Repeat" : "");
+
+/** Says a problem in the words on the screen, naming a box by its label instead of its name in the file. */
+function inFormWords(message: string, fields: readonly Field[]): string {
+	const said = message.replace(/\b(an? )?`([a-z-]+)`/g, (whole, _article: string | undefined, name: string) => {
+		const f = fields.find((x) => handledChildren([x]).has(name));
+		return f !== undefined && fieldLabel(f) !== "" ? `"${fieldLabel(f)}"` : whole;
+	});
+	return said.charAt(0).toUpperCase() + said.slice(1);
+}
+
+/** Finds the box each problem is about, by the line it's on or else by what it names. The rest belong to the whole term. */
+function placeProblems(node: ONode, fields: readonly Field[], problems: readonly Marked[]): { at: Map<Field, string[]>; rest: string[] } {
+	const at = new Map<Field, string[]>();
+	const rest: string[] = [];
+	for (const p of problems) {
+		const kid = node.kids.find((k) => p.line >= k.line && p.line <= k.endLine && !(k.path !== undefined && layerTerms[k.name] !== undefined));
+		const names = kid !== undefined ? [kid.name] : [...p.message.matchAll(/`([a-z-]+)`/g)].map((m) => m[1]!);
+		const f = fields.find((x) => names.some((n) => handledChildren([x]).has(n)))
+			?? (/\bcolor\b/i.test(p.message) ? fields.find((x) => x.k === "colorArg" || x.k === "colorArgs") : undefined);
+		if (f === undefined) {
+			rest.push(inFormWords(p.message, fields));
+		} else {
+			at.set(f, [...(at.get(f) ?? []), inFormWords(p.message, fields)]);
+		}
+	}
+	return { at, rest };
+}
+
+/** A box, with any problem with what's in it right beneath, where the eye already is. */
+function PlacedField(props: { f: Field; node: ONode; ctx: Ctx; problems: readonly string[] | undefined }): preact.JSX.Element {
+	const view = <FieldView f={props.f} node={props.node} ctx={props.ctx} />;
+	return props.problems === undefined ? view : (
+		<div class="field-problem">
+			{view}
+			{props.problems.map((m) => <span key={m} class="nx-error" role="alert">{m}</span>)}
+		</div>
+	);
 }
 
 const panelFor = (path: string): string => path;
@@ -1020,7 +1098,7 @@ export function Form(): preact.JSX.Element {
 	const unreadable = analysis !== null && !analysis.readable;
 	const selected = s.selected !== null ? findPath(nodes, panelFor(s.selected)) : null;
 	const groups = groupsOf(nodes);
-	const marked = analysis !== null ? problemPaths(analysis) : new Map<string, string[]>();
+	const marked = analysis !== null ? problemPaths(analysis) : new Map<string, Marked[]>();
 	const paused = (): preact.JSX.Element | null => (unreadable ? <p class="nx-callout danger"><span>Line {analysis?.problems[0]?.line ?? "?"} of the file can't be read as KDL, so the form is showing how it last was, and can't change anything until that's fixed in Source.</span></p> : null);
 	if (analysis === null && nodes.length === 0) {
 		return <div class="form-body skeletons" aria-hidden="true"><span class="bone" /><span class="bone" /><span class="bone" /></div>;
@@ -1066,12 +1144,13 @@ function crumbsOf(node: ONode, nodes: readonly ONode[]): { label: string; path: 
 	return chain;
 }
 
-function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly string[]; paused: preact.JSX.Element | null }): preact.JSX.Element {
+function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly Marked[]; paused: preact.JSX.Element | null }): preact.JSX.Element {
 	const { node, nodes, problems } = props;
 	const [showSource, setShowSource] = useState(false);
 	const inPalette = node.path?.startsWith("palette/") === true;
 	const isPalette = node.name === "palette" && node.path === "palette";
 	const { term, fields, extra } = fieldsFor(node, inPalette);
+	const placed = placeProblems(node, [...fields, ...extra], problems);
 	const pal = paletteOf(nodes);
 	const defines = nodes.filter((n) => n.name === "define").map((n) => String(n.args[0]?.v));
 	const toSource = (): void => {
@@ -1080,7 +1159,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const ctx: Ctx = { nodes, paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, toSource };
 	const hidden = onlyInSource(node, [...fields, ...extra], inPalette);
 	const title = inPalette ? decodePathName(node.path!.slice(8)) : isPalette ? "Colors" : node.name === "variant" || node.name === "fold" || node.name === "define" ? capitalize(String(node.args[0]?.v ?? labelFor(node))) : labelFor(node);
-	const desc = inPalette ? (node.args[0]?.v === "gradient" ? "A gradient between other colors, which can be used wherever a color is." : "Pantone, CMYK and other references travel with the color, and are never drawn from.") : isPalette ? "The flag's palette. Pantone, CMYK and other references travel with each color." : node.name === "charge" ? `${shapes[String(node.args[0]?.v)]?.label ?? "A shape"}, placed at a position.` : term?.desc ?? "";
+	const desc = inPalette ? (node.args[0]?.v === "gradient" ? "A gradient between other colors, which can be used wherever a color is." : "Pantone, CMYK and other references travel with the color, and are never drawn from.") : isPalette ? "The flag's palette. Pantone, CMYK and other references travel with each color." : node.name === "charge" ? (shapes[String(node.args[0]?.v)]?.desc ?? "A definition, placed at a position.") : term?.desc ?? "";
 	const noun = inPalette ? "color" : ["meta", "palette"].includes(node.name) ? "block" : node.name === "variant" ? "variant" : node.name === "fold" ? "fold" : "term";
 	const text = app.state.text.slice(node.start, node.end);
 	const holder = term?.layers === true && node.name !== "reverse" && node.name !== "variant" && node.name !== "define";
@@ -1106,7 +1185,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 				<h2>{title}</h2>
 				{desc !== "" ? <p class="panel-desc">{desc}</p> : null}
 			</div>
-			{problems.length > 0 ? <p class="nx-callout danger"><span>{problems.join(" ")}</span></p> : null}
+			{placed.rest.length > 0 ? <p class="nx-callout danger panel-problems" role="alert"><span>{placed.rest.join(" ")}</span></p> : null}
 			{isPalette ? <Palette node={node} nodes={nodes} ctx={ctx} /> : null}
 			{node.name === "charge" ? <ChargeShape node={node} /> : null}
 			{inPalette ? <NameField key={node.at.join(".")} node={node} kind="color" nodes={nodes} /> : null}
@@ -1114,7 +1193,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 			{ownField !== undefined ? (
 				<FieldView f={{ k: "colorArg", label: "Field", i: 0 }} node={ownField} ctx={ctx} />
 			) : null}
-			{node.name === "proportion" && node.at.length === 1 ? <ProportionFields key={node.at.join(".")} node={node} fields={fields} ctx={ctx} /> : fields.map((f, i) => <FieldView key={`${node.at.join(".")}-${i}`} f={f} node={node} ctx={ctx} />)}
+			{node.name === "proportion" && node.at.length === 1 ? <ProportionFields key={node.at.join(".")} node={node} fields={fields} ctx={ctx} /> : shownFields(node, fields).map((f, i) => <PlacedField key={`${node.at.join(".")}-${i}`} f={f} node={node} ctx={ctx} problems={placed.at.get(f)} />)}
 			{term?.layers === true ? (
 				<div class="field">
 					<span class="nx-label">{node.name === "emblem" ? "Charges" : "Layers"}</span>
@@ -1125,9 +1204,9 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 				</div>
 			) : null}
 			{extra.length > 0 ? (
-				<details class="more">
-					<summary>Opacity, blend and anchor</summary>
-					<div class="stack gap">{extra.map((f, i) => <FieldView key={i} f={f} node={node} ctx={ctx} />)}</div>
+				<details class="more" open={extra.some((f) => placed.at.has(f)) ? true : undefined}>
+					<summary>Opacity and blending</summary>
+					<div class="stack gap">{extra.map((f, i) => <PlacedField key={i} f={f} node={node} ctx={ctx} problems={placed.at.get(f)} />)}</div>
 				</details>
 			) : null}
 			{hidden.length > 0 ? (
@@ -1267,6 +1346,9 @@ function moveAmongLayers(node: ONode, siblings: readonly ONode[], delta: number)
 	}
 }
 
+/** Above this, SPEC.md section 15 says a grid is asking for trouble. */
+const largestGoodGrid = 1e7;
+
 /** The flag's shape and grid, which can be restated without changing the picture, or changed. */
 function ProportionFields(props: { node: ONode; fields: readonly Field[]; ctx: Ctx }): preact.JSX.Element {
 	const { node, fields, ctx } = props;
@@ -1304,8 +1386,11 @@ function ProportionFields(props: { node: ONode; fields: readonly Field[]; ctx: C
 			<div class="field">
 				<span class="nx-label">Shape</span>
 				<span class="proportion-shape">{shape ?? `${hoist}:${fly}`}</span>
-				<span class="nx-note">{times !== null ? `It's ${times} times as long as it is tall. ` : ""}Its grid is {hoist} by {fly} units, and every size in this file is measured in those.</span>
+				<span class="nx-note">{times !== null ? `It's ${times} times as wide as it is tall. ` : ""}Its grid is {fly} wide by {hoist} tall, and every size in this file is measured in those units.</span>
 			</div>
+			{Number(prop(node, "hoist")?.v) > largestGoodGrid || Number(prop(node, "fly")?.v) > largestGoodGrid ? (
+				<p class="nx-callout warn"><span>This grid is very large. Some programs can't draw one this big correctly, so it's worth rescaling it to something smaller.</span></p>
+			) : null}
 			<Row label="When these numbers change">
 				<Seg label="When these numbers change" value={mode} options={[["rescale", "Rescale the grid"], ["shape", "Change the shape"]]} onPick={(v) => { setMode(v); setDraft(null); }} />
 			</Row>

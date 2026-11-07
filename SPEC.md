@@ -1145,6 +1145,11 @@ A renderer MUST also accept and MAY reject beyond these:
 A number MUST be finite, with a magnitude that's zero or from 1e-12 to 1e12, so that nothing worked
 out from it can overflow. A renderer MUST reject any other.
 
+A flag's grid SHOULD stay under 10000000 units in each direction. Anything larger is valid, but some
+SVG renderers lose precision past about 33000000, and draw clips and shapes wrongly or not at all.
+Multiplying every length by the same factor gives the same flag on a smaller grid. A tool MAY warn
+about a larger grid, and MAY draw on a smaller one, but MUST NOT change the document to do so unasked.
+
 The size of a flag is the total over its layers, the layers of its `reverse` and the layers of each
 `variant`. It's worked out without expanding anything, since each definition's size can be worked
 out once, when it's read:

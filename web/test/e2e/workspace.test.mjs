@@ -127,8 +127,10 @@ test("the gallery loads each form in the big view and the small sizes", async ()
 	const before = await big();
 	await p.locator('.thumb[data-form="reverse"]').click();
 	await p.waitForFunction((b) => document.querySelector(".stage-image")?.getAttribute("src") !== b, before);
-	assert.equal(await p.locator(".small-64").getAttribute("src"), await big());
-	assert.equal(await p.locator(".small-16").getAttribute("src"), await big());
+	await p.waitForFunction(() => {
+		const src = (q) => document.querySelector(q)?.getAttribute("src");
+		return src(".small-64") === src(".stage-image") && src(".small-16") === src(".stage-image");
+	});
 	assert.deepEqual(await p.locator(".smalls figcaption").allTextContents(), ["64 px", "32 px", "24 px", "16 px"]);
 	await p.locator('.thumb[data-form="variant:vertical"]').click();
 	await p.waitForFunction(() => { const i = document.querySelector(".stage-image"); return i.naturalHeight > i.naturalWidth; });
@@ -294,7 +296,7 @@ test("a new variant gets a name of its own, ready to change", async () => {
 	const { p, context, errors } = await page("reviewed/japan.kdl");
 	const addVariant = async () => {
 		await p.getByRole("button", { name: "Add a term" }).click();
-		await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+		await p.locator(".add-item[data-label='Variant']").click();
 	};
 	await addVariant();
 	const name = p.getByLabel("Name", { exact: true });
@@ -322,7 +324,7 @@ test("a new variant gets a name of its own, ready to change", async () => {
 test("a variant can be turned upside down or all the way around, and keeps its lines", async () => {
 	const { p, context, errors } = await page("reviewed/japan.kdl");
 	await p.getByRole("button", { name: "Add a term" }).click();
-	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	await p.locator(".add-item[data-label='Variant']").click();
 	const turn = (label) => p.getByLabel("Turns by").selectOption({ label });
 	await turn("None");
 	await p.waitForFunction(() => !document.querySelector("textarea[aria-label='Source for this variant']")?.value.includes("from"));
@@ -340,7 +342,7 @@ test("a variant can be turned upside down or all the way around, and keeps its l
 test("a term's source can be edited in its panel", async () => {
 	const { p, context, errors } = await page("reviewed/japan.kdl");
 	await p.getByRole("button", { name: "Add a term" }).click();
-	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	await p.locator(".add-item[data-label='Variant']").click();
 	await p.getByLabel("Turns by").waitFor();
 	await p.locator(".term-source summary").click();
 	const source = p.getByLabel("Source for this variant");
@@ -417,7 +419,7 @@ test("an empty box shows how what it wants is written", async () => {
 test("a new variant is what the big view shows", async () => {
 	const { p, context } = await page("reviewed/italy.kdl");
 	await p.getByRole("button", { name: "Add a term" }).click();
-	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	await p.locator(".add-item[data-label='Variant']").click();
 	await p.waitForFunction(() => document.querySelector(".nx-muted")?.textContent?.includes("variant"));
 	await context.close();
 });
@@ -427,7 +429,7 @@ test("the add menu is never cut off, however little room there is", async () => 
 	await p.setViewportSize({ width: 1000, height: 480 });
 	await p.getByRole("button", { name: "Add a term" }).click();
 	for (const name of ["Bars", "Gradient"]) {
-		const item = p.locator(".add-item", { hasText: new RegExp(`^${name}$`) }).first();
+		const item = p.locator(`.add-item[data-label='${name}']`).first();
 		await item.scrollIntoViewIfNeeded();
 		const box = await item.boundingBox();
 		const page = await p.locator(".form-page").first().boundingBox();
@@ -469,7 +471,7 @@ test("a flag can be rescaled from its proportion, keeping the picture, and is to
 	await p.getByRole("button", { name: "130:247" }).click();
 	await p.waitForFunction(() => !document.querySelector(".nx-callout.warn") && [...document.querySelectorAll("button")].some((b) => b.textContent === "Rescale"));
 	await p.getByRole("button", { name: "Rescale", exact: true }).click();
-	await p.waitForFunction(() => document.querySelector(".panel .nx-note")?.textContent?.includes("130 by 247"));
+	await p.waitForFunction(() => document.querySelector(".panel .nx-note")?.textContent?.includes("247 wide by 130 tall"));
 	const out = await savedText(p);
 	assert.ok(out.includes("proportion hoist=130 fly=247") && out.includes("fly 98.8") && out.includes("hoist 70") && out.includes("radius 4.004"), out);
 	assert.ok(out.includes("count 13") && out.includes("rows=9"), "what isn't a length stays");
@@ -501,20 +503,20 @@ test("a number can be typed one key at a time into any box, without losing its p
 	await ready(p);
 	for (const name of ["Lozenge", "Star", "Rectangle", "Band", "Cross", "Canton", "Panel"]) {
 		await p.getByRole("button", { name: "Add a term" }).click();
-		await p.locator(".add-item", { hasText: new RegExp(`^${name}$`) }).first().click();
+		await p.locator(`.add-item[data-label='${name}']`).first().click();
 		await p.locator(".row-wrap .row", { hasText: name }).click();
 		await p.locator(".panel-head h2", { hasText: name }).waitFor();
 		const boxes = p.locator('.panel input[inputmode="decimal"]:visible');
-		const count = await boxes.count();
-		assert.ok(count > 0, name);
-		for (let i = 0; i < count; i++) {
+		assert.ok(await boxes.count() > 0, name);
+		// Giving a value can show or hide the boxes that depend on it.
+		for (let i = 0; i < await boxes.count(); i++) {
 			const box = boxes.nth(i);
 			await box.click();
 			await box.fill("");
 			await p.keyboard.type("1", { delay: 40 });
 			await p.waitForTimeout(60);
 			await p.keyboard.type(".");
-			assert.equal(await p.locator('.panel .nx-error[role="alert"]').count(), 0, `${name} ${i}: mid-number`);
+			assert.equal(await p.getByText("That needs to be a number.").count(), 0, `${name} ${i}: mid-number`);
 			await p.keyboard.type("5", { delay: 40 });
 			await p.waitForTimeout(60);
 			assert.equal(await boxes.nth(i).inputValue(), "1.5", `${name} box ${i}`);
@@ -535,7 +537,7 @@ test("a position given on one axis stays centered on the other, and .5 can be ty
 	await p.getByRole("button", { name: "Start a new flag" }).click();
 	await ready(p);
 	await p.getByRole("button", { name: "Add a term" }).click();
-	await p.locator(".add-item", { hasText: /^Lozenge$/ }).click();
+	await p.locator(".add-item[data-label='Lozenge']").click();
 	await p.locator(".row-wrap .row", { hasText: "Lozenge" }).click();
 	const from = p.getByLabel("From the hoist edge");
 	assert.equal(await p.getByLabel("From the top").getAttribute("placeholder"), "Center, 1");
@@ -547,15 +549,64 @@ test("a position given on one axis stays centered on the other, and .5 can be ty
 	await context.close();
 });
 
+test("a mistake is shown at the box it's about, even far down a panel", async () => {
+	const { p, context } = await page("reviewed/united-states.kdl");
+	await p.setViewportSize({ width: 1440, height: 700 });
+	await row(p, "1.1").click();
+	const points = p.getByLabel("Points", { exact: true });
+	await points.fill("3");
+	const problem = p.locator(".field-problem", { has: p.getByLabel("Inner", { exact: true }) }).locator(".nx-error");
+	await problem.waitFor();
+	assert.ok(await problem.evaluate((e) => {
+		const box = e.getBoundingClientRect();
+		const page = e.closest(".form-page").getBoundingClientRect();
+		return box.top >= page.top && box.bottom <= page.bottom + 60;
+	}), "it can be seen from where the typing is");
+	assert.ok(!(await problem.textContent()).includes("`"), "and is in the form's words");
+	await context.close();
+});
+
+test("the form and the flag use the room there is, and the flag stops when it fills its width", async () => {
+	const { p, context } = await page("reviewed/japan.kdl");
+	await p.setViewportSize({ width: 1500, height: 1500 });
+	await p.waitForTimeout(300);
+	const sizes = () => p.evaluate(() => {
+		const r = (q) => document.querySelector(q).getBoundingClientRect();
+		const stage = r(".stage");
+		return { form: r(".editor-body").height, formBottom: r(".editor").bottom, about: r('[aria-label="About this file"]').bottom, box: r(".stage-box").width, stage: stage.width, stageHeight: stage.height, h: innerHeight };
+	});
+	let s = await sizes();
+	assert.ok(s.form > 640, `the form grows: ${s.form}`);
+	assert.ok(s.about >= s.h - 60, `the left column reaches the bottom: ${s.about} of ${s.h}`);
+	assert.ok(s.stage > s.box * 0.9, `the flag fills its width: ${s.stage} of ${s.box}`);
+	assert.ok(Math.abs(s.stage / s.stageHeight - 1.5) < 0.02, "at its own shape");
+	await p.setViewportSize({ width: 1440, height: 700 });
+	await p.waitForTimeout(300);
+	s = await sizes();
+	assert.equal(Math.round(s.form), 640, "and stays usable when there's little room");
+	await context.close();
+});
+
+test("what depends on something else appears once that's given", async () => {
+	const { p, context } = await page("reviewed/japan.kdl");
+	await p.getByRole("button", { name: "Add a term" }).click();
+	await p.locator(".add-item[data-label='Chevrons']").click();
+	await p.locator(".row-wrap .row", { hasText: "Chevrons" }).click();
+	assert.equal(await p.getByLabel("Apex").count(), 0);
+	await p.getByLabel("Angle", { exact: true }).fill("30");
+	await p.getByLabel("Apex").waitFor();
+	await context.close();
+});
+
 test("what a flag can only have one of isn't offered twice, and a new flag can be started at any time", async () => {
 	const { p, context } = await page("reviewed/japan.kdl");
 	const add = p.getByRole("button", { name: "Add a term" });
 	await add.click();
-	await p.locator(".add-item", { hasText: /^Adapt$/ }).click();
+	await p.locator(".add-item[data-label='Adapt']").click();
 	await p.locator(".status", { hasText: "Valid" }).waitFor();
 	await p.waitForFunction(() => document.querySelector(".row[data-path='adapt']") !== null);
 	await add.click();
-	assert.equal(await p.locator(".add-item", { hasText: /^Adapt$/ }).count(), 0);
+	assert.equal(await p.locator(".add-item[data-label='Adapt']").count(), 0);
 	await p.keyboard.press("Escape");
 	await p.getByRole("link", { name: "Open a flag" }).click();
 	await p.getByRole("button", { name: "Start a new flag" }).waitFor();
@@ -577,7 +628,7 @@ test("add a term offers a skeleton that's valid, for every kind it offers", asyn
 	await p.keyboard.press("Escape");
 	for (const name of ["Bars", "Canton", "Star", "Crescent", "Polygon", "Inline artwork", "Adapt"]) {
 		await add.click();
-		await p.locator(".add-item", { hasText: new RegExp(`^${name}$`) }).first().click();
+		await p.locator(`.add-item[data-label='${name}']`).first().click();
 		await p.waitForFunction(() => !document.querySelector(".spinner"));
 		await p.locator(".status", { hasText: "Valid" }).waitFor();
 	}

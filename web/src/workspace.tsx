@@ -257,7 +257,7 @@ function BigView(): preact.JSX.Element {
 	const alt = `${name}, ${labelOf(s.form, items, padded).toLowerCase()}, as drawn from its file`;
 	const refusalText = image?.refused !== undefined && model !== null && !Object.hasOwn(model, "adapt") ? `${name} doesn't say how it adapts to other proportions, so it won't be stretched to fit.` : `${image?.refused ?? ""} It won't be stretched to fit.`;
 	return (
-		<section class="card" aria-label="Big view">
+		<section class="card big-view" aria-label="Big view" style={image !== undefined && image.width > 0 && image.height > 0 ? { "--flag-ratio": String(image.width / image.height) } : undefined}>
 			<div class="title-row">
 				<h1 class="flag-name">{name}</h1>
 				<span class="nx-muted">{labelOf(s.form, items, padded)}</span>

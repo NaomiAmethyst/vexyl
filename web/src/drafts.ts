@@ -168,6 +168,7 @@ async function isHeld(tab: string): Promise<boolean> {
  * new ID of its own.
  */
 export async function claimTab(): Promise<{ tab: string; inherited: Draft | null }> {
+	await dropOldDrafts();
 	let tab: string | null = null;
 	try {
 		tab = sessionStorage.getItem("vexyl.tab");
@@ -204,6 +205,20 @@ export async function orphanOf(doc: string, except: string): Promise<Draft | nul
 		}
 	}
 	return null;
+}
+
+/** How long an unsaved draft nobody's come back to is kept. */
+const draftsLast = 30 * 24 * 60 * 60 * 1000;
+
+export const isExpired = (d: { updated: number }, now: number): boolean => now - d.updated > draftsLast;
+
+async function dropOldDrafts(): Promise<void> {
+	const now = Date.now();
+	for (const d of await allDrafts()) {
+		if (isExpired(d, now) && !(await isHeld(d.tab))) {
+			await dropDraft(d.tab);
+		}
+	}
 }
 
 /** Tells other tabs what this one has open, and hears the same from them. */

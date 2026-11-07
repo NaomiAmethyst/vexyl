@@ -71,7 +71,7 @@ test("a problem appears in Source, on objects in Form, and pauses only the SVG",
 	await p.locator(".crumbs .back", { hasText: "Structure" }).click();
 	await p.locator('.row.bad[data-path="0"]').waitFor();
 	await p.locator('.row.bad[data-path="0"]').click();
-	await p.locator(".panel .nx-callout.danger", { hasText: "whit" }).waitFor();
+	await p.locator(".panel .nx-error, .panel .nx-callout.danger", { hasText: "whit" }).waitFor();
 	// Putting it right brings everything back.
 	await p.getByRole("radio", { name: "Source" }).click();
 	await p.waitForSelector(".cm-selected-line");
