@@ -110,6 +110,13 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .color-chip { display: inline-flex; align-items: center; gap: 2px; border: none; font: inherit; font-size: 0.71875rem; cursor: pointer; }
 .chip-x { font: inherit; background: none; border: none; color: inherit; cursor: pointer; padding: 0 0 0 4px; line-height: 1; font-size: 0.875rem; }
 .chip-x:disabled { opacity: 0.5; cursor: default; }
+.chip-name { display: inline-flex; align-items: center; gap: 6px; font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
+.color-chip[draggable] { cursor: grab; }
+.chip-open { outline: 1px solid var(--accent); }
+.chip-over { box-shadow: -3px 0 0 var(--accent); }
+.chip-editor { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.new-color { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex-basis: 100%; }
+.new-color .nx-input { width: 140px; }
 .steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; counter-reset: step; }
 .step { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
 .record { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -120,6 +127,8 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .panel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .term-source { border-top: 1px solid var(--line); padding-top: 12px; }
 .term-source pre { margin: 10px 0 0; padding: 12px; border-radius: 10px; background: var(--well); font-family: var(--font-mono); font-size: 0.78125rem; line-height: 1.6; color: var(--ink2); overflow-x: auto; }
+.term-source-edit { margin-top: 10px; }
+.term-source-edit textarea { box-sizing: border-box; width: 100%; resize: vertical; white-space: pre; overflow-x: auto; line-height: 1.5; }
 .add-term { position: relative; align-self: flex-start; margin-left: 12px; }
 .add-menu { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 5; width: min(420px, 78vw); max-height: 380px; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding: 14px; background: var(--raised); border: 1px solid var(--line2); border-radius: var(--radius-menu); box-shadow: var(--shadow-menu); }
 .add-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }

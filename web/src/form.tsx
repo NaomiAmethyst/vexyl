@@ -2,11 +2,11 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { useEffect, useRef, useState } from "preact/hooks";
-import { decodePathName } from "vexyl/paths";
+import { decodePathName, encodePathName } from "vexyl/paths";
 import { FileLink, safeColor, Seg, useApp } from "./common.js";
 import type { ONode, Op, OVal } from "./protocol.js";
 import { app, findPath } from "./store.js";
-import { addable, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
+import { addable, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
 const numberText = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
 const vNum = (raw: string): OVal => ({ v: Number(raw), raw });
@@ -48,7 +48,7 @@ function Input(props: { id?: string; label: string; value: string; number?: bool
 		<div class="field">
 			{props.hideLabel === true ? null : <label class="nx-label" for={id}>{props.label}</label>}
 			<Tag id={id} class={`nx-input ${props.wide === true ? "wide" : props.number === true ? "short" : "medium"} ${props.mono === true || props.number === true ? "mono" : ""}`} value={text} readOnly={props.readonly === true}
-				aria-label={props.hideLabel === true ? props.label : undefined} placeholder={props.placeholder} inputMode={props.number === true ? "decimal" : undefined} aria-invalid={bad ? "true" : undefined} spellcheck={false}
+				aria-label={props.hideLabel === true ? props.label : undefined} placeholder={props.placeholder ?? exampleFor(props.label, props.number === true)} inputMode={props.number === true ? "decimal" : undefined} aria-invalid={bad ? "true" : undefined} spellcheck={false}
 				onInput={(e) => {
 					const v = (e.currentTarget as HTMLInputElement).value;
 					setDraft(v);
@@ -68,14 +68,53 @@ function Input(props: { id?: string; label: string; value: string; number?: bool
 	);
 }
 
-function ColorSelect(props: { id: string; label: string; value: string; names: readonly string[]; colors: ReadonlyMap<string, string>; onPick: (v: string) => void; allowNone?: string; addOnly?: boolean; hideLabel?: boolean }): preact.JSX.Element {
+const newColorChoice = "\0new";
+
+/** Names a brand new color and gives it a value, right where it's wanted. */
+function NewColor(props: { names: readonly string[]; onAdd: (name: string, hex: string) => void; onCancel: () => void }): preact.JSX.Element {
+	const [name, setName] = useState("");
+	const [hex, setHex] = useState("#888888");
+	const box = useRef<HTMLInputElement>(null);
+	useEffect(() => { box.current?.focus(); }, []);
+	const wanted = name.trim();
+	const problem = wanted === "" ? null : nameProblem("color", wanted, props.names);
+	const add = (): void => {
+		if (wanted !== "" && problem === null) {
+			props.onAdd(wanted, hex);
+		}
+	};
+	return (
+		<div class="new-color" role="group" aria-label="A new color">
+			<input ref={box} class="nx-input" aria-label="New color's name" placeholder="e.g. sky-blue" spellcheck={false} value={name} aria-invalid={problem !== null ? "true" : undefined} onInput={(e) => { setName((e.currentTarget as HTMLInputElement).value); }} onKeyDown={(e) => {
+				if (e.key === "Enter") {
+					add();
+				} else if (e.key === "Escape") {
+					props.onCancel();
+				}
+			}} />
+			<input type="color" class="color-well" aria-label="New color's value" value={hex} onInput={(e) => { setHex((e.currentTarget as HTMLInputElement).value); }} />
+			<button type="button" class="nx-btn small" disabled={wanted === "" || problem !== null} onClick={add}>Add this color</button>
+			<button type="button" class="nx-ghost small" onClick={props.onCancel}>Cancel</button>
+			{problem !== null ? <span class="nx-error" role="alert">{problem}</span> : null}
+		</div>
+	);
+}
+
+function ColorSelect(props: { id: string; label: string; value: string; names: readonly string[]; colors: ReadonlyMap<string, string>; onPick: (v: string) => void; onNew?: (name: string, hex: string) => void; allowNone?: string; addOnly?: boolean; hideLabel?: boolean }): preact.JSX.Element {
+	const [creating, setCreating] = useState(false);
 	const all = props.value !== "" && !props.names.includes(props.value) && props.value !== "none" ? [props.value, ...props.names] : props.names;
 	return (
+		<>
 		<span class="color-select">
 			{props.addOnly === true ? null : <span class="swatch" aria-hidden="true" style={{ background: props.colors.get(props.value) ?? "transparent" }} />}
 			<select id={props.id} class="nx-input select" aria-label={props.hideLabel === true ? props.label : undefined} value={props.addOnly === true ? "" : props.value}
 				onChange={(e) => {
 					const v = (e.currentTarget as HTMLSelectElement).value;
+					if (v === newColorChoice) {
+						(e.currentTarget as HTMLSelectElement).value = props.addOnly === true ? "" : props.value;
+						setCreating(true);
+						return;
+					}
 					props.onPick(v);
 					if (props.addOnly === true) {
 						(e.currentTarget as HTMLSelectElement).value = "";
@@ -85,8 +124,14 @@ function ColorSelect(props: { id: string; label: string; value: string; names: r
 				{props.allowNone !== undefined ? <option value="">{props.allowNone}</option> : null}
 				{all.map((n) => <option key={n} value={n}>{n}</option>)}
 				<option value="none">none, a gap</option>
+				{props.onNew !== undefined ? <option value={newColorChoice}>A new color…</option> : null}
 			</select>
 		</span>
+		{creating && props.onNew !== undefined ? <NewColor names={props.names} onCancel={() => { setCreating(false); }} onAdd={(name, hex) => {
+			setCreating(false);
+			props.onNew!(name, hex);
+		}} /> : null}
+		</>
 	);
 }
 
@@ -127,7 +172,7 @@ function Nums(props: { node: ONode; f: Field & { k: "nums" } }): preact.JSX.Elem
 	if (f.count === undefined) {
 		const text = (c?.args ?? []).map(shown).join(" ");
 		return (
-			<Input id={id} label={f.label} value={text} mono wide {...(f.note !== undefined ? { note: f.note } : {})} onChange={(t) => {
+			<Input id={id} label={f.label} value={text} mono wide placeholder={exampleFor(f.label, true, true)!} {...(f.note !== undefined ? { note: f.note } : {})} onChange={(t) => {
 				const words = t.trim().split(/\s+/).filter((w) => w !== "");
 				if (words.length === 0) {
 					edit({ op: "dropChild", at: node.at, name: f.child });
@@ -394,7 +439,122 @@ function Points(props: { node: ONode; f: Field & { k: "points" } }): preact.JSX.
 	);
 }
 
+/** The colors a term uses: click one to change it, or drag it to move it. */
+function ColorChips(props: { node: ONode; from: number; ctx: Ctx; id: string; label: string }): preact.JSX.Element {
+	const { node, from, ctx, id } = props;
+	const list = node.args.slice(from);
+	const [open, setOpen] = useState<number | null>(null);
+	const [dragged, setDragged] = useState<number | null>(null);
+	const [over, setOver] = useState<number | null>(null);
+	const openHere = open !== null && open < list.length ? open : null;
+	const setList = (next: readonly OVal[], ...more: Op[]): void => {
+		edit({ op: "entries", at: node.at, args: [...node.args.slice(0, from), ...next] }, ...more);
+	};
+	const move = (a: number, b: number): void => {
+		if (a !== b && b >= 0 && b < list.length) {
+			const next = [...list];
+			next.splice(b, 0, ...next.splice(a, 1));
+			setList(next);
+			if (openHere !== null) {
+				setOpen(openHere === a ? b : openHere > a && openHere <= b ? openHere - 1 : openHere < a && openHere >= b ? openHere + 1 : openHere);
+			}
+		}
+	};
+	const current = openHere !== null ? String(list[openHere]?.v) : "";
+	return (
+		<>
+			<div class="chips">
+				{list.map((c, i) => (
+					<span key={i} class={`nx-chip on color-chip${openHere === i ? " chip-open" : ""}${over === i && dragged !== null && dragged !== i ? " chip-over" : ""}`} draggable data-chip={i}
+						onDragStart={(e) => {
+							e.dataTransfer?.setData("text/plain", String(c.v));
+							if (e.dataTransfer !== null) {
+								e.dataTransfer.effectAllowed = "move";
+							}
+							setDragged(i);
+						}}
+						onDragOver={(e) => {
+							if (dragged !== null) {
+								e.preventDefault();
+								setOver(i);
+							}
+						}}
+						onDragLeave={() => { setOver((o) => (o === i ? null : o)); }}
+						onDrop={(e) => {
+							e.preventDefault();
+							if (dragged !== null) {
+								move(dragged, i);
+							}
+							setDragged(null);
+							setOver(null);
+						}}
+						onDragEnd={() => {
+							setDragged(null);
+							setOver(null);
+						}}>
+						<button type="button" class="chip-name" aria-expanded={openHere === i ? "true" : "false"} aria-label={`${String(c.v)}, color ${i + 1} of ${list.length}`} onClick={() => { setOpen(openHere === i ? null : i); }}>
+							<span class="dot" aria-hidden="true" style={{ background: ctx.colors.get(String(c.v)) ?? "transparent" }} />{String(c.v)}
+						</button>
+						<button type="button" class="chip-x" aria-label={`Remove ${String(c.v)}, color ${i + 1}`} disabled={list.length === 1} onClick={() => {
+							const next = [...list];
+							next.splice(i, 1);
+							setList(next);
+							setOpen(null);
+						}}>×</button>
+					</span>
+				))}
+				<ColorSelect id={`${id}-add`} label="Add a color" hideLabel value="" addOnly names={ctx.names} colors={ctx.colors} onPick={(v) => {
+					if (v !== "") {
+						setList([...list, vStr(v)]);
+					}
+				}} {...newColorProps(ctx, node, (name, add) => { setList([...list, vStr(name)], add); })} />
+			</div>
+			{openHere !== null ? (
+				<div class="chip-editor" role="group" aria-label={`Color ${openHere + 1}`}>
+					<ColorSelect key={openHere} id={`${id}-chip`} label={`Color ${openHere + 1}`} hideLabel value={current} names={ctx.names} colors={ctx.colors} onPick={(v) => {
+						const next = [...list];
+						next[openHere] = vStr(v);
+						setList(next);
+					}} {...newColorProps(ctx, node, (name, add) => {
+						const next = [...list];
+						next[openHere] = vStr(name);
+						setList(next, add);
+					})} />
+					<PaletteLink name={current} ctx={ctx} />
+					<span class="panel-actions">
+						<button type="button" class="nx-ghost small" disabled={openHere === 0} onClick={() => { move(openHere, openHere - 1); }}>Move earlier</button>
+						<button type="button" class="nx-ghost small" disabled={openHere === list.length - 1} onClick={() => { move(openHere, openHere + 1); }}>Move later</button>
+					</span>
+				</div>
+			) : null}
+		</>
+	);
+}
+
+/** Goes to a color's own entry, to change the color itself. */
+function PaletteLink(props: { name: string; ctx: Ctx }): preact.JSX.Element | null {
+	if (!props.ctx.names.includes(props.name)) {
+		return null;
+	}
+	return <button type="button" class="nx-link self-start" onClick={() => { app.select(`palette/${encodePathName(props.name)}`); }}>Edit this color</button>;
+}
+
+/** Lets a color be made where it's wanted. Within the palette it goes ahead of what uses it. */
+function newColorProps(ctx: Ctx, node: ONode, use: (name: string, add: Op) => void): { onNew?: (name: string, hex: string) => void } {
+	const palette = ctx.paletteAt;
+	if (palette === null) {
+		return {};
+	}
+	const inPalette = node.at.length === 2 && node.at[0] === palette[0];
+	return {
+		onNew: (name, hex) => {
+			use(name, { op: "add", at: palette, text: `${kdlName(name)} "${hex}"`, ...(inPalette ? { index: node.at[1]! } : {}) });
+		},
+	};
+}
+
 interface Ctx {
+	paletteAt: number[] | null;
 	names: readonly string[];
 	colors: ReadonlyMap<string, string>;
 	defines: readonly string[];
@@ -413,31 +573,19 @@ function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Eleme
 						const args = [...node.args];
 						args[f.i] = vStr(v);
 						edit({ op: "entries", at: node.at, args });
-					}} />
+					}} {...newColorProps(ctx, node, (name, add) => {
+						const args = [...node.args];
+						args[f.i] = vStr(name);
+						edit({ op: "entries", at: node.at, args }, add);
+					})} />
+					<PaletteLink name={value} ctx={ctx} />
 				</Row>
 			);
 		}
 		case "colorArgs": {
-			const list = node.args.slice(f.from);
 			return (
-				<Row label={f.label} id={`${id}-add`} note={f.note}>
-					<div class="chips">
-						{list.map((c, i) => (
-							<span class="nx-chip on color-chip" key={i}>
-								<span class="dot" aria-hidden="true" style={{ background: ctx.colors.get(String(c.v)) ?? "transparent" }} />{String(c.v)}
-								<button type="button" class="chip-x" aria-label={`Remove ${String(c.v)}, color ${i + 1}`} disabled={list.length === 1} onClick={() => {
-									const args = [...node.args];
-									args.splice(f.from + i, 1);
-									edit({ op: "entries", at: node.at, args });
-								}}>×</button>
-							</span>
-						))}
-						<ColorSelect id={`${id}-add`} label="Add a color" hideLabel value="" addOnly names={ctx.names} colors={ctx.colors} onPick={(v) => {
-							if (v !== "") {
-								edit({ op: "entries", at: node.at, args: [...node.args, vStr(v)] });
-							}
-						}} />
-					</div>
+				<Row label={f.label} id={`${id}-add`} note={f.note ?? "Click a color to change it. Drag one to move it."}>
+					<ColorChips node={node} from={f.from} ctx={ctx} id={id} label={f.label} />
 				</Row>
 			);
 		}
@@ -723,17 +871,28 @@ export function groupsOf(nodes: readonly ONode[]): { label: string; rows: RowDef
 
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** The path of a term just added, whose name is there to be chosen. */
+let namingNext: string | null = null;
+
 /** Where a new term goes, by what it is. */
 function addTerm(key: string, nodes: readonly ONode[], into: ONode | null): void {
 	const { names } = paletteOf(nodes);
-	const text = skeletonFor(key, names);
 	if (key === "color" || key === "gradient") {
 		const palette = nodes.find((n) => n.name === "palette");
+		const name = freshName(key, names)!;
 		if (palette !== undefined) {
-			edit({ op: "add", at: palette.at, text });
+			namingNext = `palette/${name}`;
+			void app.changeAndFollow([{ op: "add", at: palette.at, text: skeletonFor(key, names, name) }], { path: namingNext });
 		}
 		return;
 	}
+	if (key === "variant" || key === "fold" || key === "define") {
+		const name = freshName(key, takenNames(key, nodes))!;
+		namingNext = `${key}/${name}`;
+		void app.changeAndFollow([{ op: "add", at: null, text: skeletonFor(key, names, name) }], { path: namingNext });
+		return;
+	}
+	const text = skeletonFor(key, names);
 	if (into !== null && (layerTerms[key] !== undefined || key.startsWith("charge:"))) {
 		edit({ op: "add", at: into.at, text });
 		return;
@@ -772,7 +931,7 @@ function AddTerm(props: { nodes: readonly ONode[]; into: ONode | null; label?: s
 						<div key={g.group}>
 							<span class="nx-label">{g.group}</span>
 							<div class="add-items">
-								{g.items.map(([key, label]) => (
+								{g.items.filter(([key]) => !onlyOnce.has(key) || !props.nodes.some((n) => n.name === key)).map(([key, label]) => (
 									<button key={key} type="button" class="nx-chip add-item" onClick={() => {
 										addTerm(key, props.nodes, props.into);
 										setOpen(false);
@@ -888,13 +1047,12 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const toSource = (): void => {
 		app.setMode("source");
 	};
-	const ctx: Ctx = { names: pal.names, colors: pal.colors, defines, toSource };
+	const ctx: Ctx = { paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, toSource };
 	const hidden = onlyInSource(node, [...fields, ...extra], inPalette);
 	const title = inPalette ? decodePathName(node.path!.slice(8)) : isPalette ? "Colors" : node.name === "variant" || node.name === "fold" || node.name === "define" ? capitalize(String(node.args[0]?.v ?? labelFor(node))) : labelFor(node);
 	const desc = inPalette ? (node.args[0]?.v === "gradient" ? "A gradient between other colors, which can be used wherever a color is." : "Pantone, CMYK and other references travel with the color, and are never drawn from.") : isPalette ? "The flag's palette. Pantone, CMYK and other references travel with each color." : node.name === "charge" ? `${shapes[String(node.args[0]?.v)]?.label ?? "A shape"}, placed at a position.` : term?.desc ?? "";
 	const noun = inPalette ? "color" : ["meta", "palette"].includes(node.name) ? "block" : node.name === "variant" ? "variant" : node.name === "fold" ? "fold" : "term";
 	const text = app.state.text.slice(node.start, node.end);
-	const capped = text.length > 4000 ? text.slice(0, 4000) + "\n…" : text;
 	const holder = term?.layers === true && node.name !== "reverse" && node.name !== "variant" && node.name !== "define";
 	const ownField = node.name === "canton" || node.name === "panel" ? node.kids.find((k) => k.path !== undefined && fieldIsOwn(node, k)) : undefined;
 	const childRows: RowDef[] = [];
@@ -919,9 +1077,10 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 				{desc !== "" ? <p class="panel-desc">{desc}</p> : null}
 			</div>
 			{problems.length > 0 ? <p class="nx-callout danger"><span>{problems.join(" ")}</span></p> : null}
-			{isPalette ? <Palette node={node} ctx={ctx} /> : null}
+			{isPalette ? <Palette node={node} nodes={nodes} ctx={ctx} /> : null}
 			{node.name === "charge" ? <ChargeShape node={node} /> : null}
-			{inPalette ? <ColorName node={node} /> : null}
+			{inPalette ? <NameField key={node.at.join(".")} node={node} kind="color" nodes={nodes} /> : null}
+			{node.name === "variant" || node.name === "fold" || node.name === "define" ? <NameField key={node.at.join(".")} node={node} kind={node.name} nodes={nodes} /> : null}
 			{ownField !== undefined ? (
 				<FieldView f={{ k: "colorArg", label: "Field", i: 0 }} node={ownField} ctx={ctx} />
 			) : null}
@@ -963,7 +1122,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 			</div>
 			<details class="term-source" open={showSource} onToggle={(e) => { setShowSource((e.currentTarget as HTMLDetailsElement).open); }}>
 				<summary>Source for this {noun}</summary>
-				<pre tabIndex={0} aria-label={`Source for this ${noun}`}>{capped}</pre>
+				<TermSource key={node.at.join(".")} node={node} text={text} noun={noun} />
 				<button type="button" class="back link" onClick={toSource}>See it in the whole file</button>
 			</details>
 		</>
@@ -1007,7 +1166,7 @@ function ChargeShape(props: { node: ONode }): preact.JSX.Element {
 	);
 }
 
-function Palette(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
+function Palette(props: { node: ONode; nodes: readonly ONode[]; ctx: Ctx }): preact.JSX.Element {
 	const { node, ctx } = props;
 	return (
 		<div class="field">
@@ -1019,23 +1178,86 @@ function Palette(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
 						{k.name}{"  "}<span class="mono">{k.args[0]?.v === "gradient" ? "gradient" : String(k.args[0]?.v ?? "")}</span>
 					</button>
 				))}
-				<button type="button" class="nx-ghost small" onClick={() => { edit({ op: "add", at: node.at, text: skeletonFor("color", []) }); }}>Add a color</button>
-				<button type="button" class="nx-ghost small" onClick={() => { edit({ op: "add", at: node.at, text: skeletonFor("gradient", ctx.names) }); }}>Add a gradient</button>
+				<button type="button" class="nx-ghost small" onClick={() => { addTerm("color", props.nodes, null); }}>Add a color</button>
+				<button type="button" class="nx-ghost small" onClick={() => { addTerm("gradient", props.nodes, null); }}>Add a gradient</button>
 			</div>
 		</div>
 	);
 }
 
-function ColorName(props: { node: ONode }): preact.JSX.Element {
-	const { node } = props;
+/** A term's name, which is only changed to one it can have. */
+function NameField(props: { node: ONode; kind: NameKind; nodes: readonly ONode[] }): preact.JSX.Element {
+	const { node, kind, nodes } = props;
+	const current = kind === "color" ? node.name : String(node.args[0]?.v);
+	const [draft, setDraft] = useState<string | null>(null);
+	const box = useRef<HTMLInputElement>(null);
+	useEffect(() => {
+		if (namingNext !== null && namingNext === node.path) {
+			namingNext = null;
+			box.current?.focus({ preventScroll: true });
+			box.current?.select();
+		}
+	}, [node.path]);
+	const wanted = (draft ?? current).trim();
+	const problem = wanted === current ? null : nameProblem(kind, wanted, takenNames(kind, nodes));
+	const id = fieldId(`${kind}-name`, node.at);
+	const commit = (): void => {
+		if (draft === null || problem !== null) {
+			return;
+		}
+		setDraft(null);
+		if (wanted !== current) {
+			const op: Op = kind === "color" ? { op: "renameColor", from: current, to: wanted } : { op: "renameTerm", kind, from: current, to: wanted };
+			void app.changeAndFollow([op], { at: node.at });
+		}
+	};
 	return (
-		<Input id={fieldId("color-name", node.at)} label="Name" value={node.name} note="Renaming it changes it everywhere the flag uses it." onChange={(t) => {
-			if (t !== "" && t !== node.name) {
-				void app.edit([{ op: "renameColor", from: node.name, to: t }]).then(() => {
-					app.select(`palette/${t.replaceAll("%", "%25").replaceAll("/", "%2F")}`, false);
-				});
-			}
-		}} />
+		<div class="field">
+			<label class="nx-label" for={id}>Name</label>
+			<input ref={box} id={id} class="nx-input medium" spellcheck={false} value={draft ?? current} aria-invalid={problem !== null ? "true" : undefined} onInput={(e) => { setDraft((e.currentTarget as HTMLInputElement).value); }} onBlur={commit} onKeyDown={(e) => {
+				if (e.key === "Enter") {
+					commit();
+				} else if (e.key === "Escape") {
+					setDraft(null);
+				}
+			}} />
+			{problem !== null ? <span class="nx-error" role="alert">{problem}</span> : null}
+			{kind === "color" || kind === "define" ? <span class="nx-note">Renaming it changes it everywhere the flag uses it.</span> : null}
+		</div>
+	);
+}
+
+/** A term's own text, to change right here. Past this, the whole file is the better place. */
+const longestTermSource = 64 * 1024;
+
+function TermSource(props: { node: ONode; text: string; noun: string }): preact.JSX.Element {
+	const { node, text, noun } = props;
+	const [draft, setDraft] = useState<string | null>(null);
+	const [error, setError] = useState<string | null>(null);
+	useEffect(() => {
+		setDraft(null);
+		setError(null);
+	}, [text]);
+	if (text.length > longestTermSource) {
+		return <pre tabIndex={0} aria-label={`Source for this ${noun}`}>{text.slice(0, 4000) + "\n…"}</pre>;
+	}
+	const shown = draft ?? text;
+	return (
+		<div class="stack-tight term-source-edit">
+			<textarea class="nx-input wide mono" spellcheck={false} aria-label={`Source for this ${noun}`} rows={Math.min(shown.split("\n").length + 1, 18)} value={shown} aria-invalid={error !== null ? "true" : undefined} onInput={(e) => {
+				setDraft((e.currentTarget as HTMLTextAreaElement).value);
+				setError(null);
+			}} />
+			{error !== null ? <span class="nx-error" role="alert">{error}</span> : null}
+			{draft !== null && draft !== text ? (
+				<div class="panel-actions">
+					<button type="button" class="nx-btn small" onClick={() => {
+						void app.changeAndFollow([{ op: "replaceText", start: node.start, end: node.end, was: text, to: draft }], { at: node.at }).then((e) => { setError(e ?? null); });
+					}}>Apply</button>
+					<button type="button" class="nx-ghost small" onClick={() => { setDraft(null); setError(null); }}>Discard</button>
+				</div>
+			) : null}
+		</div>
 	);
 }
 

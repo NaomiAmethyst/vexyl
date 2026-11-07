@@ -448,12 +448,10 @@ export function OpenPage(): preact.JSX.Element {
 		<main class="page-center">
 			<section class="raised wide" aria-labelledby="open-h">
 				<OpenPanel {...(hasDoc ? { onCancel: (): void => { app.go("work"); } } : {})} />
-				{!hasDoc ? (
-					<div class="start-new">
-						<span class="nx-muted">Or start from nothing.</span>
-						<button type="button" class="nx-ghost" onClick={() => { void app.openLocal(newFlag, "new", "new-flag.kdl"); }}>Start a new flag</button>
-					</div>
-				) : null}
+				<div class="start-new">
+					<span class="nx-muted">Or start from nothing.</span>
+					<button type="button" class="nx-ghost" onClick={() => { void app.openLocal(newFlag, "new", "new-flag.kdl"); }}>Start a new flag</button>
+				</div>
 			</section>
 		</main>
 	);

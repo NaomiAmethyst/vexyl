@@ -233,7 +233,7 @@ function isInline(kids: Document): boolean {
 	if (first === undefined) {
 		return false;
 	}
-	return !(first.leading ?? "").includes("\n");
+	return ![first.leading, kids.trailing, ...kids.nodes.map((n) => n.trailing)].some((t) => t?.includes("\n"));
 }
 
 /** Whether a node's own text already ends in what separates it from the next. */
@@ -325,6 +325,11 @@ function removeFrom(list: Document, index: number): void {
 			list.trailing = leading + (list.trailing ?? "");
 		}
 	}
+	// The line break after a block's opening brace belongs to its first child.
+	const next = list.nodes[index];
+	if (index === 0 && next !== undefined && leading.includes("\n") && !(next.leading ?? "").includes("\n")) {
+		next.leading = "\n" + (next.leading ?? "");
+	}
 }
 
 function colorSpots(n: Node): Entry[] {
@@ -366,6 +371,61 @@ function renameColor(doc: Document, from: string, to: string): void {
 		}
 	};
 	visit(doc.nodes, false);
+}
+
+/** Renames a variant, a fold or a definition, and, for a definition, everything that uses it. */
+function renameTerm(doc: Document, kind: string, from: string, to: string): void {
+	for (const n of doc.nodes) {
+		const name = n.getArgumentEntries()[0];
+		if (n.getName() === kind && name?.value.value === from) {
+			name.value = new Value(to);
+		}
+	}
+	if (kind !== "define") {
+		return;
+	}
+	const visit = (list: Node[], asShape: boolean): void => {
+		for (const n of list) {
+			const name = n.getName();
+			if (name === "meta" || name === "palette") {
+				continue;
+			}
+			if (asShape && name === from) {
+				n.setName(to);
+			}
+			const first = n.getArgumentEntries()[0];
+			if ((name === "use" || name === "charge") && first?.value.value === from) {
+				first.value = new Value(to);
+			}
+			visit(n.children?.nodes ?? [], name === "clip" || name === "cut");
+		}
+	};
+	visit(doc.nodes, false);
+}
+
+/** Puts new text in place of one term's, as long as it's still one term and the file can still be read. */
+function replaceText(text: string, op: Extract<Op, { op: "replaceText" }>): { text?: string; error?: string } {
+	if (text.slice(op.start, op.end) !== op.was) {
+		return { error: "That part of the file has changed, so look it over and try again." };
+	}
+	const to = op.to.trim();
+	const unreadable = "That can't be read as KDL yet. Check its braces and quotes.";
+	let count: number;
+	try {
+		count = (parseKdl(to) as Document).nodes.length;
+	} catch {
+		return { error: unreadable };
+	}
+	if (count !== 1) {
+		return { error: count === 0 ? "To take this out, use Remove." : "This holds one term. Add others from the form, or in the whole file." };
+	}
+	const out = text.slice(0, op.start) + to + text.slice(op.end);
+	try {
+		parseKdl(out);
+	} catch {
+		return { error: unreadable };
+	}
+	return { text: out };
 }
 
 function apply(doc: Document, op: Op): void {
@@ -461,6 +521,11 @@ function apply(doc: Document, op: Op): void {
 		case "renameColor":
 			renameColor(doc, op.from, op.to);
 			return;
+		case "renameTerm":
+			renameTerm(doc, op.kind, op.from, op.to);
+			return;
+		case "replaceText":
+			throw new Error("that change can't be made with others");
 	}
 }
 
@@ -471,6 +536,9 @@ export function applyOps(text: string, ops: Op[]): { text?: string; error?: stri
 		doc = parseKdl(text);
 	} catch {
 		return { error: "The file can't be read as KDL just now, so fix it in Source first." };
+	}
+	if (ops.length === 1 && ops[0]!.op === "replaceText") {
+		return replaceText(text, ops[0]!);
 	}
 	try {
 		for (const op of ops) {

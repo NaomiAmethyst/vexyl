@@ -311,20 +311,20 @@ export const parts: Readonly<Record<string, Term>> = {
 		],
 	},
 	variant: {
-		label: "Variant", desc: "A named form of the flag, such as a vertical or banner one.", kind: "part", layers: true, skeleton: "variant vertical {\n  from transpose\n  upright\n}",
+		label: "Variant", desc: "A named form of the flag, such as a vertical or banner one.", kind: "part", layers: true, skeleton: "variant {name} {\n  from transpose\n  upright\n}",
 		fields: [
-			{ k: "choice", label: "Turns by", child: "from", none: "none", options: [["none", "None"], ["rotate", "Rotate"], ["transpose", "Transpose"]] },
+			{ k: "choice", label: "Turns by", child: "from", none: "none", options: [["none", "None"], ["rotate", "Quarter turn"], ["half-turn", "Half turn"], ["transpose", "Diagonal"], ["invert", "Upside down"]] },
 			{ k: "flag", label: "Keep charges upright", child: "upright" },
 			{ k: "num", label: "Ratio", child: "ratio", note: "Its proportion by the flag's adapt rules, as fly divided by hoist." },
 			{ k: "props", label: "Its own proportion", child: "proportion", props: [["hoist", "Hoist"], ["fly", "Fly"]], note: "A form that's fixed rather than adapted. It needs its own layers." },
 		],
 	},
 	fold: {
-		label: "Fold", desc: "A named way to fold the flag, for storage or ceremony.", kind: "part", skeleton: 'fold half {\n  description "In half lengthwise"\n  over along=fly at=1 move=bottom\n}',
+		label: "Fold", desc: "A named way to fold the flag, for storage or ceremony.", kind: "part", skeleton: 'fold {name} {\n  description "In half lengthwise"\n  over along=fly at=1 move=bottom\n}',
 		fields: [textField("Description", "description", true), sources, { k: "steps" }],
 	},
 	define: {
-		label: "Definition", desc: "Something named for reuse, so that it's still all in one file.", kind: "part", layers: true, skeleton: "define badge {\n  charge disc {a} {\n    radius 1\n  }\n}",
+		label: "Definition", desc: "Something named for reuse, so that it's still all in one file.", kind: "part", layers: true, skeleton: "define {name} {\n  charge disc {a} {\n    radius 1\n  }\n}",
 		fields: [{ k: "propNum", label: "Its own hoist", prop: "hoist" }, { k: "propNum", label: "Its own fly", prop: "fly" }],
 	},
 };
@@ -373,12 +373,79 @@ export const addable: readonly { group: string; items: readonly (readonly [strin
 	{ group: "Flag", items: [["outline", "Outline"], ["border", "Border"], ["define", "Definition"], ["reverse", "Reverse"], ["adapt", "Adapt"], ["variant", "Variant"], ["fold", "Fold"], ["color", "Color"], ["gradient", "Gradient"]] },
 ];
 
+/** What the flag can only have one of, so isn't offered again. */
+export const onlyOnce: ReadonlySet<string> = new Set(["outline", "border", "reverse", "adapt"]);
+
+export type NameKind = "variant" | "fold" | "define" | "color";
+
+const firstNames: Readonly<Record<string, string>> = { variant: "vertical", fold: "half", define: "badge", color: "new-color", gradient: "new-gradient" };
+
+/** The names a kind of term already uses. */
+export function takenNames(kind: NameKind, nodes: readonly { name: string; args: readonly { v: unknown }[]; kids: readonly { name: string }[] }[]): string[] {
+	if (kind === "color") {
+		return nodes.find((n) => n.name === "palette")?.kids.map((k) => k.name) ?? [];
+	}
+	return nodes.filter((n) => n.name === kind).map((n) => String(n.args[0]?.v));
+}
+
+/** The name a new term starts with, if it's the kind that has one, unused so far. */
+export function freshName(key: string, taken: readonly string[]): string | undefined {
+	const first = Object.hasOwn(firstNames, key) ? firstNames[key] : undefined;
+	if (first === undefined) {
+		return undefined;
+	}
+	let name = first;
+	for (let i = 2; taken.includes(name); i++) {
+		name = `${first}-${i}`;
+	}
+	return name;
+}
+
+/** Why a term can't have a name, if it can't. */
+export function nameProblem(kind: NameKind, name: string, taken: readonly string[]): string | null {
+	if (name === "") {
+		return "It needs a name.";
+	}
+	if (taken.includes(name)) {
+		return `There's already ${kind === "define" ? "a definition" : `a ${kind}`} called "${name}".`;
+	}
+	if (kind === "color" && name === "none") {
+		return `"none" means leaving a gap, so a color can't use it.`;
+	}
+	if (kind === "define" && (Object.hasOwn(shapes, name) || ["svg", "pile", "pall"].includes(name))) {
+		return `"${name}" is the name of a shape, so a definition can't use it.`;
+	}
+	return null;
+}
+
+/** What a box wants, as an example of how it's written. */
+const examples: Readonly<Record<string, string>> = {
+	Opacity: "0.5", Rotate: "45", Angle: "30", Count: "3", Rows: "2", Columns: "3", Points: "5", From: "0", To: "180", Hoist: "20", Fly: "30", Radius: "4", Inner: "3", Offset: "1.5",
+	C: "100", M: "90", Y: "0", K: "0", Lowest: "1", Highest: "2",
+	Name: "Flag of Somewhere", Description: "In half lengthwise", Version: "1.0", Date: "1912-07-04", Until: "1959-07-04", Series: "flag-of-somewhere",
+	Notes: "Anything a reader should know", Law: "Flag Act 1912", Restriction: "Not for commercial use", Sources: "https://example.org/flag-act", Designers: "Their full name", Encoders: "Their full name", Authors: "Their full name",
+	"Design rights": "CC0-1.0", License: "CC-BY-SA-4.0", "Render license": "CC0-1.0", URL: "https://example.org/flag.svg", Part: "The emblem",
+	"On screen": "#c8102e", Pantone: "186 C", NCS: "S 1080-R", RAL: "3020", Munsell: "5R 4/14", Thread: "Madeira 1147", Dyes: "Madder", System: "HKS", Value: "13 K",
+	"Path data": "M0 0H10V10H0Z", Box: "0 0 10 10", Through: "0 0 10 10", "Part that moves": "bottom",
+};
+const manyExamples: Readonly<Record<string, string>> = { Ratio: "1 2 1", Grow: "1 0 1", Stops: "0 0.5 1", "Crossing point": "10 15" };
+
+/** The example a box shows while it's empty. Any other number is written the same way. */
+export function exampleFor(label: string, number: boolean, many = false): string | undefined {
+	const name = label.replace(/, \d+$/, "");
+	const example = (many ? manyExamples[name] : undefined) ?? (Object.hasOwn(examples, name) ? examples[name] : undefined) ?? (many ? "1 2 1" : number ? "2" : undefined);
+	return example === undefined ? undefined : `e.g. ${example}`;
+}
+
+/** A name as KDL writes it. */
+export const kdlName = (s: string): string => (/^[A-Za-z_][\w-]*$/.test(s) && !["true", "false", "null", "inf", "nan"].includes(s) ? s : JSON.stringify(s));
+
 /** A new term, ready to read, using colors the palette already has. */
-export function skeletonFor(key: string, colors: readonly string[]): string {
-	const name = (s: string): string => (/^[A-Za-z_][\w-]*$/.test(s) && !["true", "false", "null", "inf", "nan"].includes(s) ? s : JSON.stringify(s));
-	const a = name(colors[0] ?? "none");
-	const b = name(colors[1] ?? colors[0] ?? "none");
-	const fill = (t: string): string => t.replaceAll("{a}", a).replaceAll("{b}", b);
+export function skeletonFor(key: string, colors: readonly string[], chosen?: string): string {
+	const a = kdlName(colors[0] ?? "none");
+	const b = kdlName(colors[1] ?? colors[0] ?? "none");
+	const given = chosen ?? firstNames[key] ?? "";
+	const fill = (t: string): string => t.replaceAll("{a}", a).replaceAll("{b}", b).replaceAll("{name}", given);
 	if (key.startsWith("charge:")) {
 		const shape = key.slice(7);
 		const s = shapes[shape]!;
@@ -386,10 +453,10 @@ export function skeletonFor(key: string, colors: readonly string[]): string {
 		return shape === "svg" ? `charge svg {\n${inner}\n}` : `charge ${shape} ${a} {\n${inner}\n}`;
 	}
 	if (key === "color") {
-		return `new-color "#888888"`;
+		return `${given} "#888888"`;
 	}
 	if (key === "gradient") {
-		return `new-gradient gradient ${a} ${b}`;
+		return `${given} gradient ${a} ${b}`;
 	}
 	const t = layers[key] ?? parts[key];
 	return fill(t?.skeleton ?? key);

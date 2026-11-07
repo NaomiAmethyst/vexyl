@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-import { useEffect, useLayoutEffect, useRef } from "preact/hooks";
+import { useState, useEffect, useLayoutEffect, useRef } from "preact/hooks";
 import { parentPath } from "vexyl/paths";
 import { refLabel, refText } from "./address.js";
 import { download, FileLink, fileStem, licenseName, Logo, Seg, Spinner, useApp, useAck } from "./common.js";
@@ -9,7 +9,7 @@ import { engine } from "./engine.js";
 import { Form } from "./form.js";
 import type { PickNode } from "./protocol.js";
 import { refreshSource, SourceEditor, syncSource } from "./source.js";
-import { app, findPath, galleryOf, optionsFor, type FormImage, type GalleryItem } from "./store.js";
+import { app, findPath, galleryOf, newFlag, optionsFor, type FormImage, type GalleryItem } from "./store.js";
 
 const svgNs = "http://www.w3.org/2000/svg";
 const tagAttr = "data-vexyl-layer";
@@ -141,14 +141,24 @@ function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean }): p
 			}
 		}
 	}, [image.pick]);
+	// What's chosen only shows for a moment, which is all a tap gets. After that it takes hovering.
+	const [flash, setFlash] = useState<string | null>(null);
+	useEffect(() => {
+		setFlash(s.selected);
+		if (s.selected === null) {
+			return undefined;
+		}
+		const timer = setTimeout(() => { setFlash(null); }, 1200);
+		return () => { clearTimeout(timer); };
+	}, [s.selected]);
 	useEffect(() => {
 		const root = pickRoot.current;
 		if (root === null || hoverLayer.current === null || selectLayer.current === null) {
 			return;
 		}
-		drawOutlines(selectLayer.current, root, s.selected, "selected");
-		drawOutlines(hoverLayer.current, root, s.hover !== s.selected ? s.hover : null, "hover");
-	}, [image.pick, s.selected, s.hover]);
+		drawOutlines(selectLayer.current, root, flash, "selected");
+		drawOutlines(hoverLayer.current, root, s.hover !== flash ? s.hover : null, "hover");
+	}, [image.pick, flash, s.hover]);
 	/** What's under a point, deepest first, each with the layers that hold it. */
 	const stackAt = (x: number, y: number): string[] => {
 		const out: string[] = [];
@@ -404,6 +414,7 @@ export function Header(): preact.JSX.Element {
 					<span class="status-dot" aria-hidden="true" />{problems > 0 ? `${problems} ${problems === 1 ? "problem" : "problems"}` : "Valid"}
 				</span>
 			) : null}
+			<button type="button" class="nx-ghost" onClick={() => { void app.openLocal(newFlag, "new", "new-flag.kdl"); }}>New flag</button>
 			<a class="nx-ghost" href={app.href("open")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("open"); } }}>Open a flag</a>
 			<a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>
 			<a class="nx-ghost" href={app.href("share")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("share"); } }}>Share</a>

@@ -240,3 +240,57 @@ test("a hexadecimal number before a semicolon keeps both, despite how the parser
 	assert.equal(at.props[1][1].raw, "0x0A");
 	assert.equal(applyOps(text, [{ op: "entries", at: at.at, props: [["hoist", n("7")]] }]).text, "charge disc a { at fly=1 hoist=7; }\n");
 });
+
+test("taking out a block's first child keeps the block on its lines", () => {
+	const head = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\nfield a\n';
+	const at = [5];
+	let text = `${head}variant d {\n  from transpose\n  upright\n}\n`;
+	text = applyOps(text, [{ op: "dropChild", at, name: "from" }]).text;
+	assert.ok(text.endsWith("variant d {\n  upright\n}\n"), text);
+	text = applyOps(text, [{ op: "child", at, name: "from", args: [s("invert")] }]).text;
+	assert.ok(text.endsWith("variant d {\n  upright\n  from invert\n}\n"), text);
+	text = applyOps(text, [{ op: "dropChild", at, name: "upright" }]).text;
+	assert.ok(text.endsWith("variant d {\n  from invert\n}\n"), text);
+	assert.deepEqual(lib.validate(text), []);
+	const inline = applyOps(`${head}variant d { from invert; upright; }\n`, [{ op: "dropChild", at, name: "from" }]).text;
+	assert.ok(inline.endsWith("variant d { upright; }\n"), inline);
+});
+
+test("a block a past edit left misshapen is no longer taken for a one-liner", () => {
+	const head = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\nfield a\n';
+	const out = applyOps(`${head}variant d {  upright\n}\n`, [{ op: "child", at: [5], name: "from", args: [s("invert")] }]).text;
+	assert.ok(!out.includes(";"), out);
+	assert.deepEqual(lib.validate(out), []);
+});
+
+test("renaming a variant or a fold changes only it", () => {
+	const text = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\nfield a\n// its own comment\nvariant old {\n  from invert\n}\nvariant other\nfold old {\n  over along=fly at=5 move=bottom\n}\n';
+	const out = applyOps(text, [{ op: "renameTerm", kind: "variant", from: "old", to: "has space" }]).text;
+	assert.ok(out.includes('// its own comment\nvariant "has space" {\n  from invert') && out.includes("fold old {"), out);
+	assert.deepEqual(lib.validate(out), []);
+});
+
+test("renaming a definition changes everything that uses it, and nothing else", () => {
+	const text = 'vexyl 1\nmeta {\n  name "badge"\n}\npalette {\n  badge "#112233"\n}\nproportion hoist=10 fly=20\ndefine badge {\n  path "M0 0H1V1Z" box="0 0 1 1"\n}\ndefine scene {\n  charge badge badge {\n    fly 1\n    hoist 1\n    at center\n  }\n}\nfield badge {\n  clip {\n    badge {\n      fly 5\n      hoist 5\n      at center\n    }\n  }\n}\nuse scene\nvariant badge {\n  charge badge badge {\n    fly 2\n    hoist 2\n    at center\n  }\n}\n';
+	assert.deepEqual(lib.validate(text), []);
+	const out = applyOps(text, [{ op: "renameTerm", kind: "define", from: "badge", to: "mark" }]).text;
+	assert.deepEqual(lib.validate(out), []);
+	assert.ok(out.includes('define mark {') && out.includes("charge mark badge") && out.includes("clip {\n    mark {"), out);
+	assert.ok(out.includes('name "badge"') && out.includes('badge "#112233"') && out.includes("field badge") && out.includes("variant badge"), out);
+	const scene = applyOps(text, [{ op: "renameTerm", kind: "define", from: "scene", to: "view" }]).text;
+	assert.ok(scene.includes("use view") && scene.includes("define view"), scene);
+});
+
+test("a term's source can be replaced, if it's still one term that can be read", () => {
+	const text = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\nfield a\n// kept\nvariant v {\n  from rotate\n}\n';
+	const node = outline(text).find((x) => x.name === "variant");
+	const was = text.slice(node.start, node.end);
+	const op = (to, w = was) => [{ op: "replaceText", start: node.start, end: node.end, was: w, to }];
+	const out = applyOps(text, op("variant distress {\n  from invert\n}\n")).text;
+	assert.ok(out.endsWith('// kept\nvariant distress {\n  from invert\n}\n'), out);
+	assert.deepEqual(lib.validate(out), []);
+	assert.match(applyOps(text, op("variant v {")).error, /KDL/);
+	assert.match(applyOps(text, op("")).error, /Remove/);
+	assert.match(applyOps(text, op("variant v\nvariant w")).error, /one term/);
+	assert.match(applyOps(text, op("variant w", "variant x")).error, /changed/);
+});

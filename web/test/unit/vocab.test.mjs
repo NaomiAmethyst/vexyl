@@ -108,3 +108,65 @@ test("across real flags, the only things the form leaves to the source are the k
 	const other = [...left.keys()].filter((k) => !allowed.test(k));
 	assert.deepEqual(other, [], JSON.stringify([...left.entries()]));
 });
+
+test("adding any named term again gives it an unused name, so the file stays valid", () => {
+	let text = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\nfield a\n';
+	for (const key of ["variant", "fold", "define", "color", "gradient"]) {
+		for (let i = 0; i < 3; i++) {
+			const nodes = outline(text);
+			const kind = key === "gradient" ? "color" : key;
+			const name = v.freshName(key, v.takenNames(kind, nodes));
+			const at = kind === "color" ? nodes.find((n) => n.name === "palette").at : null;
+			text = applyOps(text, [{ op: "add", at, text: v.skeletonFor(key, ["a", "b"], name) }]).text;
+			assert.deepEqual(lib.validate(text), [], text);
+			assert.ok(v.takenNames(kind, outline(text)).includes(name));
+		}
+	}
+	assert.ok(text.includes("variant vertical-3 {") && text.includes("fold half-2 {") && text.includes("define badge-3 {") && text.includes("new-color-2 "));
+});
+
+test("a name is refused exactly when the format would refuse it", () => {
+	const head = (extra) => `vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\n${extra}`;
+	assert.equal(v.nameProblem("variant", "b", ["a"]), null);
+	assert.match(v.nameProblem("variant", "a", ["a"]), /already a variant/);
+	assert.match(v.nameProblem("fold", "", []), /needs a name/);
+	assert.match(v.nameProblem("color", "none", []), /gap/);
+	assert.ok(lib.validate(head("field a\nvariant a\nvariant a\n")).length > 0);
+	for (const name of [...column("`shape`"), "svg"]) {
+		assert.ok(v.nameProblem("define", name, []) !== null, name);
+		assert.ok(lib.validate(head(`define ${name} {\n  field a\n}\nfield a\n`)).length > 0, name);
+	}
+	assert.equal(v.nameProblem("define", "badge", []), null);
+});
+
+test("what a flag can only have one of is marked so", () => {
+	for (const key of v.onlyOnce) {
+		const text = v.skeletonFor(key, ["a"]);
+		const doc = `vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\n`;
+		const once = applyOps(`${doc}field a\n`, [{ op: "add", at: null, text }]).text;
+		assert.deepEqual(lib.validate(once), [], key);
+		assert.ok(lib.validate(applyOps(once, [{ op: "add", at: null, text }]).text).length > 0, key);
+	}
+});
+
+test("every box for words shows an example of how they're written", () => {
+	const visit = (fields) => {
+		for (const f of fields) {
+			if (f.k === "text" || f.k === "texts" || f.k === "argText") {
+				assert.ok(v.exampleFor(f.label, false) !== undefined, f.label);
+			}
+			if (f.k === "records") {
+				assert.ok(v.exampleFor(f.arg, false) !== undefined, f.arg);
+				visit(f.fields);
+			}
+			if (f.k === "nums" && f.count === undefined) {
+				assert.match(v.exampleFor(f.label, true, true), /^e\.g\. [\d. ]+$/, f.label);
+			}
+		}
+	};
+	for (const t of [...Object.values(v.layers), ...Object.values(v.parts), ...Object.values(v.shapes)]) {
+		visit(t.fields);
+	}
+	visit(v.colorFields);
+	visit(v.gradientFields);
+});

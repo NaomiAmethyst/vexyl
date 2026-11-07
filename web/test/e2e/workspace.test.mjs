@@ -114,7 +114,7 @@ test("each panel has its source collapsed, with a link to its lines in the whole
 	const details = p.locator(".term-source");
 	assert.equal(await details.getAttribute("open"), null);
 	await details.locator("summary").click();
-	assert.ok((await details.locator("pre").textContent()).startsWith("bars red white"));
+	assert.ok((await details.locator("textarea").inputValue()).startsWith("bars red white"));
 	await details.getByRole("button", { name: "See it in the whole file" }).click();
 	await p.waitForSelector(".cm-selected-line");
 	await context.close();
@@ -288,6 +288,159 @@ test("a variant's own outline and border are said to be in the source", async ()
 	await row(p, "variant/v").click();
 	await p.locator(".source-only").getByText("outline, border").waitFor();
 	await context.close();
+});
+
+test("a new variant gets a name of its own, ready to change", async () => {
+	const { p, context, errors } = await page("reviewed/japan.kdl");
+	const addVariant = async () => {
+		await p.getByRole("button", { name: "Add a term" }).click();
+		await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	};
+	await addVariant();
+	const name = p.getByLabel("Name", { exact: true });
+	await name.waitFor();
+	await p.waitForFunction(() => document.activeElement?.id?.includes("variant-name"));
+	assert.equal(await name.inputValue(), "vertical");
+	await p.keyboard.type("distress");
+	await p.keyboard.press("Enter");
+	await p.locator(".panel-head h2", { hasText: "Distress" }).waitFor();
+	await p.locator(".thumb[data-form=\"variant:distress\"]").waitFor();
+
+	await p.getByRole("button", { name: /Structure/ }).click();
+	await addVariant();
+	await p.waitForFunction(() => document.querySelector("[id*=variant-name]")?.value === "vertical");
+	await p.keyboard.type("distress");
+	await p.getByRole("alert").filter({ hasText: "already a variant" }).waitFor();
+	await p.keyboard.press("Enter");
+	assert.ok(!(await savedText(p)).includes("variant distress {\n  from transpose\n  upright\n}\nvariant distress"), "it's refused");
+	await p.keyboard.press("Escape");
+	await p.locator(".status", { hasText: "Valid" }).waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a variant can be turned upside down or all the way around, and keeps its lines", async () => {
+	const { p, context, errors } = await page("reviewed/japan.kdl");
+	await p.getByRole("button", { name: "Add a term" }).click();
+	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	const turn = (name) => p.getByRole("radio", { name, exact: true }).click();
+	await turn("None");
+	await p.waitForFunction(() => !document.querySelector("textarea[aria-label='Source for this variant']")?.value.includes("from"));
+	await turn("Half turn");
+	await turn("Upside down");
+	await p.getByRole("radiogroup", { name: "Keep charges upright" }).getByRole("radio", { name: "No" }).click();
+	await p.waitForFunction(() => !document.querySelector("textarea[aria-label='Source for this variant']")?.value.includes("upright"));
+	await p.locator(".status", { hasText: "Valid" }).waitFor();
+	const out = await savedText(p);
+	assert.ok(out.includes("variant vertical {\n  from invert\n}"), out);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a term's source can be edited in its panel", async () => {
+	const { p, context, errors } = await page("reviewed/japan.kdl");
+	await p.getByRole("button", { name: "Add a term" }).click();
+	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	await p.getByRole("radiogroup", { name: "Turns by" }).waitFor();
+	await p.locator(".term-source summary").click();
+	const source = p.getByLabel("Source for this variant");
+	await source.fill("variant distress {");
+	await p.getByRole("button", { name: "Apply" }).click();
+	await p.getByRole("alert").filter({ hasText: "can't be read as KDL" }).waitFor();
+	await source.fill("variant distress {\n  from invert\n}");
+	await p.getByRole("button", { name: "Apply" }).click();
+	await p.locator(".panel-head h2", { hasText: "Distress" }).waitFor();
+	assert.equal(await p.getByRole("radio", { name: "Upside down" }).getAttribute("aria-checked"), "true");
+	assert.ok((await savedText(p)).includes("variant distress {\n  from invert\n}"));
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a color chip can be changed, moved, or made from nothing", async () => {
+	const { p, context, errors } = await page("reviewed/italy.kdl");
+	await p.locator(".row", { hasText: "Bars" }).first().click();
+	const chips = () => p.locator(".color-chip .chip-name").allTextContents();
+	const before = await chips();
+	assert.equal(before.length, 3);
+
+	await p.locator(".chip-name").nth(0).click();
+	await p.getByRole("button", { name: "Move later" }).click();
+	await p.waitForFunction((first) => document.querySelectorAll(".chip-name")[1]?.textContent === first, before[0]);
+	await p.getByRole("button", { name: "Move earlier" }).click();
+	await p.waitForFunction((first) => document.querySelectorAll(".chip-name")[0]?.textContent === first, before[0]);
+
+	await p.locator('[data-chip="2"]').dragTo(p.locator('[data-chip="0"]'));
+	await p.waitForFunction((last) => document.querySelectorAll(".chip-name")[0]?.textContent === last, before[2]);
+
+	if (await p.locator(".chip-name").nth(1).getAttribute("aria-expanded") !== "true") {
+		await p.locator(".chip-name").nth(1).click();
+	}
+	await p.locator(".chip-editor select").selectOption(before[2]);
+	await p.waitForFunction((v) => document.querySelectorAll(".chip-name")[1]?.textContent === v, before[2]);
+
+	await p.locator(".chips select").first().selectOption({ label: "A new color…" });
+	await p.getByLabel("New color's name").fill(before[0]);
+	await p.getByRole("alert").filter({ hasText: "already a color" }).waitFor();
+	await p.getByLabel("New color's name").fill("sky blue");
+	await p.getByRole("button", { name: "Add this color" }).click();
+	await p.waitForFunction(() => [...document.querySelectorAll(".chip-name")].some((c) => c.textContent === "sky blue"));
+	await p.locator(".status", { hasText: "Valid" }).waitFor();
+	const out = await savedText(p);
+	assert.ok(out.includes('"sky blue" "#888888"'), out);
+
+	await p.getByRole("button", { name: "Edit this color" }).click();
+	await p.locator(".panel-head h2", { hasText: before[2] }).waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("what's chosen is only highlighted for a moment, and when hovered", async () => {
+	const { p, context } = await page("reviewed/italy.kdl");
+	await row(p, "0").click();
+	await p.locator(".panel-head h2", { hasText: "Bars" }).waitFor();
+	await p.mouse.move(1, 1);
+	await p.waitForFunction(() => document.querySelectorAll(".outline-selected-inner > *, .outline-hover-inner > *").length === 0, null, { timeout: 5000 });
+	const box = await p.locator(".stage").boundingBox();
+	await p.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+	await p.waitForFunction(() => document.querySelectorAll(".outline-hover-inner > *").length > 0);
+	await context.close();
+});
+
+test("an empty box shows how what it wants is written", async () => {
+	const { p, context } = await page("reviewed/italy.kdl");
+	await row(p, "0").click();
+	assert.equal(await p.getByLabel("Ratio", { exact: true }).getAttribute("placeholder"), "e.g. 1 2 1");
+	assert.equal(await p.getByLabel("Rotate", { exact: true }).getAttribute("placeholder"), "e.g. 45");
+	await context.close();
+});
+
+test("a new variant is what the big view shows", async () => {
+	const { p, context } = await page("reviewed/italy.kdl");
+	await p.getByRole("button", { name: "Add a term" }).click();
+	await p.locator(".add-item", { hasText: /^Variant$/ }).click();
+	await p.waitForFunction(() => document.querySelector(".nx-muted")?.textContent?.includes("variant"));
+	await context.close();
+});
+
+test("what a flag can only have one of isn't offered twice, and a new flag can be started at any time", async () => {
+	const { p, context } = await page("reviewed/japan.kdl");
+	const add = p.getByRole("button", { name: "Add a term" });
+	await add.click();
+	await p.locator(".add-item", { hasText: /^Adapt$/ }).click();
+	await p.locator(".status", { hasText: "Valid" }).waitFor();
+	await p.waitForFunction(() => document.querySelector(".row[data-path='adapt']") !== null);
+	await add.click();
+	assert.equal(await p.locator(".add-item", { hasText: /^Adapt$/ }).count(), 0);
+	await p.keyboard.press("Escape");
+	await p.getByRole("link", { name: "Open a flag" }).click();
+	await p.getByRole("button", { name: "Start a new flag" }).waitFor();
+	await context.close();
+	const fresh = await page("reviewed/japan.kdl");
+	await fresh.p.getByRole("button", { name: "New flag" }).click();
+	await fresh.p.locator(".row", { hasText: "Field" }).first().waitFor();
+	assert.ok((await savedText(fresh.p)).includes('name "New flag"'));
+	await fresh.p.locator(".status", { hasText: "Valid" }).waitFor();
+	await fresh.context.close();
 });
 
 test("add a term offers a skeleton that's valid, for every kind it offers", async () => {

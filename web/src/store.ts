@@ -2,6 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import type { Options, Problem, Span } from "vexyl";
+import { decodePathName } from "vexyl/paths";
 import { openHref, readAddress, refLabel, refText, type Ref } from "./address.js";
 import { claimTab, dropDraft, durable, loadDraft, orphanOf, saveDraft, TabPresence, type Draft } from "./drafts.js";
 import { engine } from "./engine.js";
@@ -76,12 +77,11 @@ meta {
   name "New flag"
 }
 palette {
-  red "#c8102e"
   white "#ffffff"
 }
 proportion hoist=2 fly=3
 
-bars red white red
+field white
 `;
 
 const ratios: readonly [string, string, number][] = [["ratio:1:1", "1:1", 1], ["ratio:2:3", "2:3", 1.5], ["ratio:1:2", "1:2", 2]];
@@ -182,6 +182,7 @@ export class App {
 	private renderSeq = 0;
 	private docSeq = 0;
 	private editing: Promise<void> = Promise.resolve();
+	private following: { from: string | null; to: { path: string } | { at: readonly number[] } } | null = null;
 
 	subscribe(fn: () => void): () => void {
 		this.listeners.add(fn);
@@ -444,6 +445,9 @@ export class App {
 					lastValid: analysis.valid ? analysis : this.state.lastValid,
 				});
 				document.title = `${this.displayName()} · vexyl`;
+				if (analysis.readable) {
+					this.follow(analysis.nodes);
+				}
 				if (analysis.valid) {
 					void this.renderForms();
 				}
@@ -614,21 +618,74 @@ export class App {
 
 	/** Changes the document through its format-preserving model, one change at a time. */
 	edit(ops: Op[]): Promise<void> {
-		this.editing = this.editing.then(async () => {
+		return this.change(ops).then((error) => {
+			if (error !== undefined) {
+				this.set({ notice: error });
+			}
+		});
+	}
+
+	/** Makes a change, and says why not if it can't be made. */
+	change(ops: Op[]): Promise<string | undefined> {
+		const run = this.editing.then(async () => {
 			const before = this.state.text;
 			const done = await engine.ask({ kind: "edit", text: before, ops });
 			if (done.text === undefined) {
-				this.set({ notice: done.error ?? "That change couldn't be made." });
-				return;
+				return done.error ?? "That change couldn't be made.";
 			}
 			if (done.text === before) {
-				return;
+				return undefined;
 			}
 			const [start, endA, endB] = firstDifference(before, done.text);
 			this.bridge?.replace(start, endA, done.text.slice(start, endB));
 			this.setText(done.text);
+			return undefined;
 		});
-		return this.editing;
+		this.editing = run.then(() => undefined);
+		return run;
+	}
+
+	/** Makes a change, then moves the panel and the big view to what it made, once that's been read. */
+	async changeAndFollow(ops: Op[], to: { path: string } | { at: readonly number[] }): Promise<string | undefined> {
+		const from = this.state.selected;
+		const before = this.state.text;
+		const error = await this.change(ops);
+		if (error === undefined && this.state.text !== before) {
+			this.following = { from, to };
+		}
+		return error;
+	}
+
+	private follow(nodes: readonly ONode[]): void {
+		const f = this.following;
+		this.following = null;
+		if (f === null || this.state.selected !== f.from) {
+			return;
+		}
+		let path: string | undefined;
+		if ("path" in f.to) {
+			path = f.to.path;
+		} else {
+			let list = nodes;
+			let node: ONode | undefined;
+			for (const i of f.to.at) {
+				node = list[i];
+				list = node?.kids ?? [];
+			}
+			path = node?.path;
+		}
+		if (path === undefined) {
+			return;
+		}
+		const formOf = (p: string | null): string | null => {
+			const m = p === null ? null : /^(variant|fold)\/([^/]*)$/.exec(p);
+			return m === null ? null : `${m[1]}:${decodePathName(m[2]!)}`;
+		};
+		const was = formOf(f.from);
+		const now = formOf(path);
+		// Something just added is what's wanted in the big view, as is something renamed that's there.
+		const showIt = now !== null && ("path" in f.to || this.state.form === was);
+		this.set({ selected: path, ...(showIt ? { form: now } : {}) });
 	}
 
 	/** The document as it should be written out, with its own line endings. */
