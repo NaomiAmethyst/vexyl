@@ -3,7 +3,7 @@
 
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
-import { axe, launch, mockWorld, openUrl, readFlag, ready, serve, startFlag, subpath, watch } from "./helpers.mjs";
+import { axe, fromTopbar, launch, mockWorld, openUrl, readFlag, ready, serve, startFlag, subpath, watch } from "./helpers.mjs";
 
 let srv;
 let browser;
@@ -34,8 +34,8 @@ const screens = {
 	"open-gist": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Gist" }).click(); await p.getByLabel("Gist link or ID").waitFor(); },
 	"open-computer": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "This computer" }).click(); await p.getByText("Drop a .kdl file here").waitFor(); },
 	"open-link": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Link" }).click(); await p.getByLabel("Link to a KDL file").waitFor(); },
-	share: async (p) => { await p.goto(openUrl(srv.base, "reviewed/japan.kdl")); await ready(p); await p.getByRole("link", { name: "Share" }).click(); await p.getByLabel("Link to share").waitFor(); },
-	compare: async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await p.getByRole("link", { name: "Compare" }).click(); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); },
+	share: async (p) => { await p.goto(openUrl(srv.base, "reviewed/japan.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
+	compare: async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); },
 	"compare-source": async (p) => { await screens.compare(p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 };
 
@@ -52,7 +52,16 @@ const basicScreens = {
 	"basic-details": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Details" }).click(); await p.getByLabel("Name").waitFor(); for (const part of await p.locator("details.details-part summary").all()) { await part.click(); } },
 	"basic-source": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Source" }).click(); await p.locator(".cm-line").first().waitFor(); },
 	"basic-also": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.locator(".also li").first().waitFor(); await p.getByText("This flag is written from a law.").waitFor(); },
-	"basic-download": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Download", exact: true }).click(); await p.locator(".download-items").waitFor(); await p.mouse.move(0, 0); },
+	"basic-download": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Download", exact: true }).click(); await p.locator(".menu-items").waitFor(); await p.mouse.move(0, 0); },
+	"basic-edit-colors": async (p) => { await basicScreens["basic-stripes"](p); await p.getByRole("button", { name: "Edit colors" }).click(); await p.getByRole("button", { name: "Change red" }).click(); await p.getByLabel("Color of red").waitFor(); },
+	"basic-replace-color": async (p) => { await basicScreens["basic-stripes"](p); await p.getByRole("button", { name: "Edit colors" }).click(); await p.getByRole("button", { name: "Remove red" }).click(); await p.getByText("Replace it with:").waitFor(); },
+};
+
+/** Screens that only a narrow screen has, in each editor. */
+const narrowScreens = {
+	"menu-narrow": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menu", { name: "Menu" }).waitFor(); },
+	"basic-menu-narrow": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "stripes-block"); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menuitemradio", { name: "Advanced" }).waitFor(); },
+	"palette-replace": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.locator('.row[data-path="palette"]').click(); await p.locator('.color-chip[data-path="palette/red"]').click(); await p.getByRole("button", { name: "Remove", exact: true }).click(); await p.getByText("Replace it with:").waitFor(); },
 };
 
 const themes = [
@@ -91,6 +100,18 @@ for (const theme of themes) {
 			await p.close();
 		}
 		await basic.close();
+		for (const [name, go] of Object.entries(narrowScreens)) {
+			const narrow = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
+			await mockWorld(narrow, { basic: name.startsWith("basic") });
+			const p = await narrow.newPage();
+			await go(p);
+			await p.waitForTimeout(350);
+			const violations = await axe(p);
+			if (violations.length > 0) {
+				found[name] = violations;
+			}
+			await narrow.close();
+		}
 		assert.deepEqual(found, {}, JSON.stringify(found, null, 1));
 	});
 }
@@ -133,6 +154,17 @@ test("nothing scrolls sideways at phone width, on any screen", async () => {
 		await p.close();
 	}
 	await basic.close();
+	for (const [name, go] of Object.entries(narrowScreens)) {
+		const narrow = await browser.newContext({ viewport: { width: 360, height: 780 }, colorScheme: "dark", hasTouch: true, isMobile: true });
+		await mockWorld(narrow, { basic: name.startsWith("basic") });
+		const p = await narrow.newPage();
+		await go(p);
+		const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+		if (over > 0) {
+			found[name] = over;
+		}
+		await narrow.close();
+	}
 	assert.deepEqual(found, {});
 });
 

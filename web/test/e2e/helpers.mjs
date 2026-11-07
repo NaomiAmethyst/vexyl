@@ -186,11 +186,32 @@ export async function ready(page) {
 	await page.waitForFunction(() => document.querySelector(".stage-image")?.complete !== false, null, { timeout: 60000 });
 }
 
-/** The file as it would be saved, by saving it. */
+/** Opens the Download menu, giving one of its choices. */
+export async function downloadChoice(page, name) {
+	await page.getByRole("button", { name: "Download", exact: true }).click();
+	const choice = page.getByRole("menu", { name: "What to download" }).getByRole("menuitem", { name, exact: true });
+	await choice.waitFor();
+	return choice;
+}
+
+/** The file as it would be saved, by saving it, in either editor. */
 export async function savedText(page) {
-	const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download KDL" }).first().click()]);
+	const choice = await downloadChoice(page, /^(KDL file|The flag's file, to keep working on)$/);
+	const [file] = await Promise.all([page.waitForEvent("download"), choice.click()]);
 	const path = await file.path();
 	return readFileSync(path, "utf8");
+}
+
+/** Goes to another view or editor from the top bar, through its menu where the screen's too narrow for a row of buttons. */
+export async function fromTopbar(page, name) {
+	const editor = name === "Basic" || name === "Advanced";
+	const menu = page.getByRole("button", { name: "Menu", exact: true });
+	if (await menu.isVisible()) {
+		await menu.click();
+		await page.getByRole("menu", { name: "Menu" }).getByRole(editor ? "menuitemradio" : "menuitem", { name, exact: true }).click();
+	} else {
+		await page.locator(".topbar").getByRole(editor ? "radio" : name === "New flag" ? "button" : "link", { name, exact: true }).click();
+	}
 }
 
 /** Starts a new flag from the start screen, as a blank one unless told otherwise. */

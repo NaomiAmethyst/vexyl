@@ -306,3 +306,128 @@ test("a hexadecimal number before a semicolon doesn't swallow what follows it", 
 		assert.equal(applyOps(safe, [{ op: "add", at: null, text: "z" }]).error, undefined, safe);
 	}
 });
+
+const everywhere = `vexyl 1
+meta {
+  name "red" // not a color here
+}
+palette {
+  red "#c8102e" // the one going
+  white "#ffffff"
+  blue "#002868"
+  spare "#123456"
+  dawn gradient red white
+  dusk gradient white blue
+}
+proportion hoist=10 fly=20
+border red 0.2
+define badge {
+  charge disc red {
+    radius 1
+  }
+}
+// The stripes.
+bars red white blue {
+  ratio 1 2 1
+}
+canton {
+  fly 8
+  hoist 5
+  field red
+  charge star white {
+    radius 1
+    fimbriate red 0.1
+  }
+}
+cross dawn { fly 5 2 13; hoist 4 2 4; }
+use badge
+reverse {
+  field white
+  saltire red { width 1; }
+}
+variant vertical {
+  from transpose
+  border red 0.1
+  field red
+}
+`;
+
+test("removing a color in use puts another everywhere it was, and changes nothing else", () => {
+	assert.deepEqual(lib.validate(everywhere), []);
+	const { text } = applyOps(everywhere, [{ op: "removeColor", name: "red", to: "blue" }]);
+	assert.equal(text, `vexyl 1
+meta {
+  name "red" // not a color here
+}
+palette {
+  white "#ffffff"
+  blue "#002868"
+  spare "#123456"
+  dawn gradient blue white
+  dusk gradient white blue
+}
+proportion hoist=10 fly=20
+border blue 0.2
+define badge {
+  charge disc blue {
+    radius 1
+  }
+}
+// The stripes.
+bars blue white blue {
+  ratio 1 2 1
+}
+canton {
+  fly 8
+  hoist 5
+  field blue
+  charge star white {
+    radius 1
+    fimbriate blue 0.1
+  }
+}
+cross dawn { fly 5 2 13; hoist 4 2 4; }
+use badge
+reverse {
+  field white
+  saltire blue { width 1; }
+}
+variant vertical {
+  from transpose
+  border blue 0.1
+  field blue
+}
+`);
+	assert.deepEqual(lib.validate(text), []);
+});
+
+test("removing a color nothing uses takes out only its line", () => {
+	for (const name of ["spare", "dusk"]) {
+		const line = everywhere.split("\n").find((l) => l.trimStart().startsWith(`${name} `));
+		const { text } = applyOps(everywhere, [{ op: "removeColor", name }]);
+		assert.equal(text, everywhere.replace(`${line}\n`, ""), name);
+		assert.deepEqual(lib.validate(text), [], name);
+	}
+});
+
+test("a color can only be removed for one that can take its place everywhere", () => {
+	const cases = [
+		[{ name: "red" }, /still used/],
+		[{ name: "white" }, /still used/],
+		[{ name: "red", to: "dawn" }, /made from red/],
+		[{ name: "blue", to: "dawn" }, /only a solid color/],
+		[{ name: "red", to: "red" }, /no other color/],
+		[{ name: "red", to: "pink" }, /no other color/],
+		[{ name: "pink", to: "red" }, /no color called pink/],
+	];
+	for (const [op, error] of cases) {
+		const done = applyOps(everywhere, [{ op: "removeColor", ...op }]);
+		assert.equal(done.text, undefined, JSON.stringify(op));
+		assert.match(done.error, error, JSON.stringify(op));
+	}
+	// Where a gradient can be, one can take a solid color's place.
+	const text = everywhere.replace("dusk gradient white blue", "dusk gradient white spare").replace("bars red white blue", "bars red white spare");
+	const { text: out } = applyOps(text, [{ op: "removeColor", name: "blue", to: "dawn" }]);
+	assert.ok(!out.includes("blue"), out);
+	assert.deepEqual(lib.validate(out), []);
+});

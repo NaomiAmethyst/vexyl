@@ -8,6 +8,7 @@
 import { format, getLocation, Identifier, InvalidKdlError, Node as NodeClass, parse as parseKdl, Value, type Document, type Entry, type Node } from "@bgotink/kdl";
 import { hasMisreadHex, withoutMisreadHex } from "vexyl/hex";
 import { encodePathName } from "vexyl/paths";
+import { colorArgs } from "./colors.js";
 import { factorText } from "./exact.js";
 import { exactGrids, rescale } from "./rescale.js";
 import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
@@ -337,43 +338,79 @@ function removeFrom(list: Document, index: number): void {
 
 function colorSpots(n: Node): Entry[] {
 	const args = n.getArgumentEntries();
-	switch (n.getName()) {
-		case "field": case "band": case "cross": case "saltire": case "pile": case "pall": case "fimbriate": case "border":
-			return args.slice(0, 1);
-		case "bars": case "chevrons": case "quarters": case "checks": case "rays":
-			return args;
-		case "charge":
-			return args.slice(1, 2);
-		default:
-			return [];
-	}
+	return colorArgs(n.getName(), args.length).map((i) => args[i]!);
 }
 
-function renameColor(doc: Document, from: string, to: string): void {
+/** Every value in the file that names a color, with the term it's in: a gradient's colors, and every color spot outside the palette. */
+function colorRefs(doc: Document): { node: Node; entry: Entry; inPalette: boolean }[] {
+	const out: { node: Node; entry: Entry; inPalette: boolean }[] = [];
 	const visit = (list: Node[], inPalette: boolean): void => {
 		for (const n of list) {
 			if (inPalette) {
-				if (n.getName() === from) {
-					n.setName(to);
-				}
 				if (n.getArgument(0) === "gradient") {
-					for (const e of n.getArgumentEntries().slice(1)) {
-						if (e.value.value === from) {
-							e.value = new Value(to);
-						}
-					}
+					out.push(...n.getArgumentEntries().slice(1).map((entry) => ({ node: n, entry, inPalette })));
 				}
 				continue;
 			}
-			for (const e of colorSpots(n)) {
-				if (e.value.value === from) {
-					e.value = new Value(to);
-				}
-			}
+			out.push(...colorSpots(n).map((entry) => ({ node: n, entry, inPalette })));
 			visit(n.children?.nodes ?? [], n.getName() === "palette");
 		}
 	};
 	visit(doc.nodes, false);
+	return out;
+}
+
+/** Points everything that uses one color at another. */
+function pointColor(doc: Document, from: string, to: string): void {
+	for (const { entry } of colorRefs(doc)) {
+		if (entry.value.value === from) {
+			entry.value = new Value(to);
+		}
+	}
+}
+
+function renameColor(doc: Document, from: string, to: string): void {
+	for (const p of doc.nodes.filter((n) => n.getName() === "palette")) {
+		for (const n of p.children?.nodes ?? []) {
+			if (n.getName() === from) {
+				n.setName(to);
+			}
+		}
+	}
+	pointColor(doc, from, to);
+}
+
+/**
+ * Takes a color out of the palette. Whatever uses it uses `to` instead, as one change, and without a `to`
+ * nothing may use it. A gradient can only take its place where a gradient can be, and not if it's made from it.
+ */
+function removeColor(doc: Document, name: string, to: string | undefined): void {
+	const list = doc.nodes.find((n) => n.getName() === "palette")?.children ?? null;
+	const index = list?.nodes.findIndex((n) => n.getName() === name) ?? -1;
+	if (list === null || index < 0) {
+		throw new Error(`There's no color called ${name} in the palette.`);
+	}
+	const users = colorRefs(doc).filter(({ entry }) => entry.value.value === name);
+	if (to === undefined) {
+		if (users.length > 0) {
+			throw new Error(`${name} is still used, so something else has to take its place.`);
+		}
+	} else {
+		const into = list.nodes.find((n) => n.getName() === to);
+		if (to === name || into === undefined) {
+			throw new Error(`There's no other color called ${to} in the palette to use instead.`);
+		}
+		if (into.getArgument(0) === "gradient") {
+			if (into.getArgumentEntries().slice(1).some((e) => e.value.value === name)) {
+				throw new Error(`${to} is made from ${name}, so it can't take its place.`);
+			}
+			if (users.some(({ node, inPalette }) => inPalette || (node.getName() === "charge" && node.getArgument(0) === "svg"))) {
+				throw new Error(`${name} is used where only a solid color can be, so a gradient can't take its place.`);
+			}
+		}
+		pointColor(doc, name, to);
+	}
+	removeFrom(list, index);
 }
 
 /** Renames a variant, a fold or a definition, and, for a definition, everything that uses it. */
@@ -523,6 +560,9 @@ function apply(doc: Document, op: Op): void {
 		}
 		case "renameColor":
 			renameColor(doc, op.from, op.to);
+			return;
+		case "removeColor":
+			removeColor(doc, op.name, op.to);
 			return;
 		case "renameTerm":
 			renameTerm(doc, op.kind, op.from, op.to);

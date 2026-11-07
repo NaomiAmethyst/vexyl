@@ -4,6 +4,8 @@
 // What Basic calls things. Advanced keeps the format's own words, from vocab.ts, and these never
 // appear there.
 
+import { listText, type ColorUse } from "./colors.js";
+
 export const plainLayers: Readonly<Record<string, string>> = {
 	field: "Background", bars: "Stripes", band: "Single stripe", cross: "Cross", saltire: "Diagonal cross", quarters: "Quarters", checks: "Checkerboard",
 	chevrons: "Chevrons", rays: "Rays", pile: "Edge triangle", pall: "Y shape", charge: "Symbol", canton: "Corner block", panel: "Edge block",
@@ -48,3 +50,28 @@ export const addGroups: readonly AddGroup[] = [
 /** The word for a side of the flag, or of a block on it. */
 export const sideNames: readonly (readonly [string, string])[] = [["hoist", "Left"], ["top", "Top"], ["fly", "Right"], ["bottom", "Bottom"]];
 export const cornerNames: readonly (readonly [string, string])[] = [["upper-hoist", "Top left"], ["upper-fly", "Top right"], ["lower-hoist", "Bottom left"], ["lower-fly", "Bottom right"]];
+
+const holdsOwnField = new Set(["canton", "panel"]);
+
+/** What uses a color, in plain words, like "the stripes and the star", each said once. */
+export function usedByText(uses: readonly ColorUse[]): string {
+	const said = uses.map(({ node, holders }) => {
+		const top = holders[0];
+		if (top?.name === "palette") {
+			return `the gradient ${node.name}`;
+		}
+		const parent = holders.at(-1);
+		const parentName = parent === undefined ? "" : plainName(parent).toLowerCase();
+		const thing = node.name === "fimbriate" ? `the edging of the ${parentName}`
+			: node.name === "border" ? "the border"
+			: node.name === "field" && parent !== undefined && holdsOwnField.has(parent.name) && parent.kids.find((k) => k.path !== undefined) === node ? `the ${parentName}`
+			: `the ${plainName(node).toLowerCase()}`;
+		switch (top?.name) {
+			case "variant": return `${thing} in the other form ${String(top.args[0]?.v)}`;
+			case "reverse": return `${thing} on the back`;
+			case "define": return `${thing} in the reusable part ${String(top.args[0]?.v)}`;
+			default: return thing;
+		}
+	});
+	return listText([...new Set(said)]);
+}

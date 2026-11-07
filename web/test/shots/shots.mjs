@@ -8,7 +8,7 @@
 
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { launch, mockWorld, openUrl, ready, serve } from "../e2e/helpers.mjs";
+import { launch, mockWorld, openUrl, ready, serve, fromTopbar } from "../e2e/helpers.mjs";
 
 const out = process.argv[2];
 mkdirSync(out, { recursive: true });
@@ -44,20 +44,20 @@ const screens = {
 	"open-computer": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "This computer" }).click(); await p.getByText("Drop a .kdl file here").waitFor(); },
 	"open-paste": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Paste" }).click(); await p.getByLabel("KDL").waitFor(); },
 	"open-link": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Link" }).click(); await p.getByLabel("Link to a KDL file").waitFor(); },
-	"share-github": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.getByRole("link", { name: "Share" }).click(); await p.getByLabel("Link to share").waitFor(); },
+	"share-github": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
 	"share-edited": async (p) => {
 		await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p);
 		await p.locator('.row[data-path="proportion"]').click(); await p.getByRole("radio", { name: "Change the shape" }).click(); await p.getByLabel("Fly").fill("25");
-		await p.getByRole("link", { name: "Share" }).click();
+		await fromTopbar(p, "Share");
 		await p.waitForFunction(() => document.querySelector('[aria-label="Link to share"]')?.value.includes("#v1."));
 	},
 	"share-large": async (p) => {
 		await p.goto(openUrl(srv.base, "flags/brazil/flag-john-v-of-portugal-with-order-of-christ.kdl")); await ready(p);
 		await p.locator('.row[data-path="proportion"]').click(); await p.getByRole("radio", { name: "Change the shape" }).click(); await p.getByLabel("Fly").fill("31"); await p.locator(".dirty").waitFor({ timeout: 30000 });
-		await p.getByRole("link", { name: "Share" }).click();
+		await fromTopbar(p, "Share");
 		await p.getByText("This file is too large").waitFor({ timeout: 60000 });
 	},
-	"compare-side": async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await p.getByRole("link", { name: "Compare" }).click(); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); await p.waitForTimeout(300); },
+	"compare-side": async (p) => { await p.goto(openUrl(srv.base, "reviewed/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); await p.waitForTimeout(300); },
 	"compare-slider": async (p) => { await screens["compare-side"](p); await p.getByRole("radio", { name: "Slider" }).click(); await p.waitForTimeout(300); },
 	"compare-differences": async (p) => { await screens["compare-side"](p); await p.getByRole("radio", { name: "Differences" }).click(); await p.waitForFunction(() => document.querySelector("[data-percent]")?.getAttribute("data-percent") !== ""); },
 	"compare-source": async (p) => { await screens["compare-side"](p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },

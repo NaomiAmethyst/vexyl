@@ -8,6 +8,7 @@ import { engine } from "./engine.js";
 import { TermArt } from "./termart.js";
 import { flyPerHoist, matching, shapeText } from "./exact.js";
 import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
+import { colorUses, listText, replacementsFor, type ColorUse } from "./colors.js";
 import { app, findPath } from "./store.js";
 import { addable, describeTerm, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
@@ -1185,6 +1186,8 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const siblings = canMove ? siblingsOf(node, nodes) : [];
 	const place = siblings.indexOf(node);
 	const removable = !["vexyl", "meta", "palette", "proportion"].includes(node.name);
+	const [replacing, setReplacing] = useState<string | null>(null);
+	const uses = inPalette && replacing === node.name ? colorUses(nodes, node.name) : [];
 	return (
 		<>
 			<nav aria-label="Where you are" class="crumbs">
@@ -1232,11 +1235,17 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 			<div class="panel-actions">
 				{canMove ? <button type="button" class="nx-ghost small" disabled={place <= 0} onClick={() => { moveAmongLayers(node, siblings, -1); }}>Move down a layer</button> : null}
 				{canMove ? <button type="button" class="nx-ghost small" disabled={place < 0 || place >= siblings.length - 1} onClick={() => { moveAmongLayers(node, siblings, 1); }}>Move up a layer</button> : null}
-				{removable ? <button type="button" class="nx-ghost small danger" onClick={() => {
+				{removable ? <button type="button" class="nx-ghost small danger" aria-expanded={inPalette ? (uses.length > 0 ? "true" : "false") : undefined} onClick={() => {
+					// A color something uses can't just go, or the file would name a color it doesn't have.
+					if (inPalette && colorUses(nodes, node.name).length > 0) {
+						setReplacing(replacing === node.name ? null : node.name);
+						return;
+					}
 					edit({ op: "remove", at: node.at });
 					app.select(null, false);
 				}}>Remove</button> : null}
 			</div>
+			{uses.length > 0 ? <ReplaceColor name={node.name} uses={uses} nodes={nodes} ctx={ctx} onCancel={() => { setReplacing(null); }} /> : null}
 			<details class="term-source" open={showSource} onToggle={(e) => { setShowSource((e.currentTarget as HTMLDetailsElement).open); }}>
 				<summary>Source for this {noun}</summary>
 				<TermSource key={node.at.join(".")} node={node} text={text} noun={noun} />
@@ -1466,6 +1475,44 @@ function ChargeShape(props: { node: ONode }): preact.JSX.Element {
 				))}
 			</div>
 		</Row>
+	);
+}
+
+/** What uses a color, in the format's own words. */
+function useText(u: ColorUse): string {
+	const top = u.holders[0];
+	if (top?.name === "palette") {
+		return `gradient ${u.node.name}`;
+	}
+	const parent = u.holders.at(-1);
+	const thing = u.node.name === "fimbriate" || (u.node.name === "field" && parent !== undefined && fieldIsOwn(parent, u.node)) ? `${u.node.name === "fimbriate" ? "fimbriation" : "field"} of ${labelFor(parent!).toLowerCase()}` : labelFor(u.node).toLowerCase();
+	switch (top?.name) {
+		case "variant": return `${thing} in variant ${String(top.args[0]?.v)}`;
+		case "reverse": return `${thing} in the reverse`;
+		case "define": return `${thing} in definition ${String(top.args[0]?.v)}`;
+		default: return thing;
+	}
+}
+
+/** Asks which color is to take the place of one that's used, and then makes the change, which is one thing to undo. */
+function ReplaceColor(props: { name: string; uses: readonly ColorUse[]; nodes: readonly ONode[]; ctx: Ctx; onCancel: () => void }): preact.JSX.Element {
+	const { name, uses, nodes, ctx } = props;
+	const others = replacementsFor(nodes, name);
+	const box = useRef<HTMLDivElement>(null);
+	useEffect(() => { box.current?.scrollIntoView({ block: "nearest" }); }, []);
+	return (
+		<div ref={box} class="nx-callout warn replace-color" role="group" aria-label={`Replace ${name}`}>
+			<span>{name} is used by {listText([...new Set(uses.map(useText))], 6)}. {others.length > 0 ? "Replace it with:" : "No other color in the palette can take its place, so add one first."}</span>
+			<span class="color-select">
+				{others.map((n) => (
+					<button key={n} type="button" class="color-named" data-color={n} aria-label={`Replace it with ${n}`} onClick={() => {
+						edit({ op: "removeColor", name, to: n });
+						app.select(null, false);
+					}}><span class="color-dot" aria-hidden="true" style={{ background: ctx.colors.get(n) ?? "transparent" }} />{n}</button>
+				))}
+			</span>
+			<button type="button" class="nx-ghost small self-start" onClick={props.onCancel}>Cancel</button>
+		</div>
 	);
 }
 

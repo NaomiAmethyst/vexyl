@@ -4,14 +4,14 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "preact/hooks";
 import { parentPath } from "vexyl/paths";
 import { refLabel, refText } from "./address.js";
-import { download, FileLink, fileStem, licenseName, Logo, Seg, Spinner, useApp, useAck } from "./common.js";
+import { download, FileLink, fileStem, licenseName, Logo, MenuButton, Seg, Spinner, useApp, useAck } from "./common.js";
 import { engine } from "./engine.js";
 import { BasicEditor } from "./basic.js";
 import { Form } from "./form.js";
 import { Handles } from "./handles.js";
 import type { PickNode } from "./protocol.js";
 import { refreshSource, SourceEditor, syncSource } from "./source.js";
-import { app, findPath, galleryOf, optionsFor, type FormImage, type GalleryItem, type Level } from "./store.js";
+import { app, findPath, galleryOf, optionsFor, type FormImage, type GalleryItem, type Level, type View } from "./store.js";
 
 const svgNs = "http://www.w3.org/2000/svg";
 const tagAttr = "data-vexyl-layer";
@@ -395,32 +395,34 @@ function About(): preact.JSX.Element {
 	);
 }
 
-/** Basic's one download button, which asks which of the two is wanted. */
-function DownloadMenu(props: { picture: () => Promise<void>; file: () => void; paused: boolean }): preact.JSX.Element {
-	const [open, setOpen] = useState(false);
-	const box = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		if (!open) {
-			return undefined;
-		}
-		const away = (e: Event): void => {
-			if (!box.current?.contains(e.target as globalThis.Node)) {
-				setOpen(false);
-			}
-		};
-		document.addEventListener("pointerdown", away);
-		return () => { document.removeEventListener("pointerdown", away); };
-	}, [open]);
+/** A menu's choice, as a row. */
+function MenuItem(props: { onPick: () => void; disabled?: boolean; title?: string; children: preact.ComponentChildren }): preact.JSX.Element {
 	return (
-		<div class="download-menu" ref={box} onKeyDown={(e) => { if (e.key === "Escape") { setOpen(false); } }}>
-			<button type="button" class="nx-btn" aria-expanded={open ? "true" : "false"} onClick={() => { setOpen(!open); }}>Download</button>
-			{open ? (
-				<div class="download-items" role="group" aria-label="What to download">
-					<button type="button" class="nx-ghost" disabled={props.paused} onClick={() => { setOpen(false); void props.picture(); }}>A picture of the flag</button>
-					<button type="button" class="nx-ghost" onClick={() => { setOpen(false); props.file(); }}>The flag's file, to keep working on</button>
-				</div>
-			) : null}
-		</div>
+		<button type="button" role="menuitem" tabIndex={-1} class="row compact menu-item" aria-disabled={props.disabled === true ? "true" : undefined} title={props.title} onClick={() => {
+			if (props.disabled !== true) {
+				props.onPick();
+			}
+		}}>{props.children}</button>
+	);
+}
+
+/** A menu's choice that goes to another view, as a real link. */
+function MenuLink(props: { view: View; close: () => void; children: preact.ComponentChildren }): preact.JSX.Element {
+	return <a role="menuitem" tabIndex={-1} class="row compact menu-item" href={app.href(props.view)} onClick={(e) => { if (plain(e)) { e.preventDefault(); props.close(); app.go(props.view); } }}>{props.children}</a>;
+}
+
+/** The one download button, which asks which of the two is wanted, in each editor's own words. */
+function DownloadMenu(props: { basic: boolean; picture: () => Promise<void>; file: () => void; paused: boolean; pausedNote?: string }): preact.JSX.Element {
+	const { basic } = props;
+	return (
+		<MenuButton label="Download" menuLabel="What to download" buttonClass="nx-btn">
+			{(close) => (
+				<>
+					<MenuItem disabled={props.paused} {...(props.pausedNote !== undefined ? { title: props.pausedNote } : {})} onPick={() => { close(); void props.picture(); }}>{basic ? "A picture of the flag" : "SVG image"}</MenuItem>
+					<MenuItem onPick={() => { close(); props.file(); }}>{basic ? "The flag's file, to keep working on" : "KDL file"}</MenuItem>
+				</>
+			)}
+		</MenuButton>
 	);
 }
 
@@ -440,37 +442,49 @@ export function Header(): preact.JSX.Element {
 			setAck(result.refused ?? "That can't be drawn.");
 		}
 	};
+	const downloadKdl = (): void => {
+		download(`${stem}.kdl`, app.exportText(), "text/plain");
+		app.markSaved();
+		setAck(basic ? "Downloaded the flag's file." : "Downloaded the KDL.");
+	};
 	return (
 		<header class={`topbar${basic ? " basic" : ""}`}>
 			<Logo />
-			<span class={basic ? "nx-muted flag-title" : "file-name"}>{basic ? app.displayName() : s.source?.label ?? ""}{app.dirty ? <span class="dirty"> · edited</span> : null}</span>
+			<span class={`topbar-name ${basic ? "nx-muted flag-title" : "file-name"}`}><span class="topbar-name-text">{basic ? app.displayName() : s.source?.label ?? ""}</span>{app.dirty ? <span class="dirty"> · edited</span> : null}</span>
 			<span class="grow" />
 			<span class="visually-hidden" role="status">{ack}</span>
-			{ack !== "" ? <span class="nx-note" aria-hidden="true">{ack}</span> : null}
+			{ack !== "" ? <span class="nx-note topbar-ack" aria-hidden="true">{ack}</span> : null}
 			{s.analysis !== null && (!basic || problems > 0) ? (
 				<span class={`status ${problems > 0 ? "bad" : "good"}`}>
 					<span class="status-dot" aria-hidden="true" />{problems > 0 ? `${problems} ${problems === 1 ? "problem" : "problems"}` : "Valid"}
 				</span>
 			) : null}
-			<Seg label="Editor" value={s.level} options={[["basic", "Basic"], ["advanced", "Advanced"]]} onPick={(v) => { app.setLevel(v as Level); }} />
-			<button type="button" class="nx-ghost" onClick={() => { app.go("new"); }}>New flag</button>
-			<a class="nx-ghost" href={app.href("open")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("open"); } }}>Open a flag</a>
-			{basic ? null : <a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>}
-			<a class="nx-ghost" href={app.href("share")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("share"); } }}>Share</a>
-			{basic ? <DownloadMenu picture={downloadSvg} paused={paused || s.analysis === null} file={() => {
-				download(`${stem}.kdl`, app.exportText(), "text/plain");
-				app.markSaved();
-				setAck("Downloaded the flag's file.");
-			}} /> : (
-				<>
-					<button type="button" class="nx-ghost" onClick={() => {
-						download(`${stem}.kdl`, app.exportText(), "text/plain");
-						app.markSaved();
-						setAck("Downloaded the KDL.");
-					}}>Download KDL</button>
-					<button type="button" class="nx-btn" disabled={paused || s.analysis === null} title={paused ? "Paused until the file is valid again" : undefined} onClick={() => { void downloadSvg(); }}>Download SVG</button>
-				</>
-			)}
+			<div class="topbar-wide">
+				<Seg label="Editor" value={s.level} options={[["basic", "Basic"], ["advanced", "Advanced"]]} onPick={(v) => { app.setLevel(v as Level); }} />
+				<button type="button" class="nx-ghost" onClick={() => { app.go("new"); }}>New flag</button>
+				<a class="nx-ghost" href={app.href("open")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("open"); } }}>Open a flag</a>
+				{basic ? null : <a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>}
+				<a class="nx-ghost" href={app.href("share")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("share"); } }}>Share</a>
+			</div>
+			<DownloadMenu basic={basic} picture={downloadSvg} file={downloadKdl} paused={paused || s.analysis === null} {...(paused ? { pausedNote: "Paused until the file is valid again" } : {})} />
+			<MenuButton class="topbar-narrow" label="Menu" menuLabel="Menu" buttonClass="nx-ghost">
+				{(close) => (
+					<>
+						<MenuItem onPick={() => { close(); app.go("new"); }}>New flag</MenuItem>
+						<MenuLink view="open" close={close}>Open a flag</MenuLink>
+						<MenuLink view="share" close={close}>Share</MenuLink>
+						{basic ? null : <MenuLink view="compare" close={close}>Compare</MenuLink>}
+						<div role="separator" class="menu-rule" />
+						<div role="group" aria-label="Editor" class="menu-group">
+							{([["basic", "Basic"], ["advanced", "Advanced"]] as const).map(([value, label]) => (
+								<button key={value} type="button" role="menuitemradio" tabIndex={-1} class="row compact menu-item" aria-checked={s.level === value ? "true" : "false"} onClick={() => { close(); app.setLevel(value); }}>
+									<span class="menu-check" aria-hidden="true">{s.level === value ? "✓" : ""}</span>{label}
+								</button>
+							))}
+						</div>
+					</>
+				)}
+			</MenuButton>
 		</header>
 	);
 }
@@ -555,7 +569,7 @@ export function Workspace(): preact.JSX.Element {
 								}} />
 							) : <Seg label="Edit as" value={s.mode} options={[["form", "Form"], ["source", "Source"]]} onPick={(v) => { app.setMode(v as "form" | "source"); }} />}
 							<span class="grow" />
-							{s.mode === "source" || !basic ? <span class="nx-note">{s.mode === "source" ? "Escape, then Tab, leaves the editor" : "Renders as you type"}</span> : null}
+							{s.mode === "source" || !basic ? <span class="nx-note editor-hint">{s.mode === "source" ? "Escape, then Tab, leaves the editor" : "Renders as you type"}</span> : null}
 						</div>
 						<div class="editor-body">
 							{s.mode === "form" ? (basic ? <BasicEditor /> : <Form />) : null}

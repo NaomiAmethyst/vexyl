@@ -2,7 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import type { ComponentChildren } from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { linkable } from "./address.js";
 import { app, type App, type State } from "./store.js";
 
@@ -23,7 +23,7 @@ export function useApp(): [State, App] {
 }
 
 export function Logo(): preact.JSX.Element {
-	return <a class="brand" href="?" onClick={(e) => { e.preventDefault(); app.go(app.state.source === null ? "open" : "work"); }}><img src="favicon.svg" alt="" />vexyl</a>;
+	return <a class="brand" href="?" onClick={(e) => { e.preventDefault(); app.go(app.state.source === null ? "open" : "work"); }}><img src="favicon.svg" alt="" /><span class="brand-name">vexyl</span></a>;
 }
 
 /** A row of choices, moving by arrow keys as a radio group does. */
@@ -76,6 +76,95 @@ export function Tabs(props: { label: string; value: string; options: readonly (r
 				<button key={value} id={`${props.id}-tab-${value}`} type="button" role="tab" class={props.value === value ? "active" : ""} aria-selected={props.value === value ? "true" : "false"} aria-controls={`${props.id}-panel`}
 					tabIndex={props.value === value ? 0 : -1} onClick={() => { props.onPick(value); }} onKeyDown={(e) => { keys(e, i); }}>{label}</button>
 			))}
+		</div>
+	);
+}
+
+const menuItems = '[role="menuitem"], [role="menuitemradio"]';
+
+/**
+ * A button that opens a short menu. Arrow keys move through it, and Home and End go to its ends. Escape, a
+ * click anywhere else or a choice closes it, and the focus goes back to the button. Each item is given
+ * `close`, and has the role of a menu item, with a tabIndex of -1.
+ */
+export function MenuButton(props: { label: string; menuLabel: string; buttonClass: string; class?: string; children: (close: () => void) => ComponentChildren }): preact.JSX.Element {
+	const [open, setOpen] = useState(false);
+	const box = useRef<HTMLDivElement>(null);
+	const button = useRef<HTMLButtonElement>(null);
+	const from = useRef<"first" | "last">("first");
+	const id = useId();
+	const items = (): HTMLElement[] => [...(box.current?.querySelectorAll<HTMLElement>(menuItems) ?? [])];
+	const focusItem = (): void => {
+		const list = items();
+		(from.current === "last" ? list.at(-1) : list[0])?.focus();
+	};
+	const close = (): void => {
+		setOpen(false);
+		button.current?.focus();
+	};
+	useLayoutEffect(() => {
+		if (!open) {
+			return undefined;
+		}
+		focusItem();
+		const away = (e: Event): void => {
+			if (!box.current?.contains(e.target as globalThis.Node)) {
+				setOpen(false);
+				// Whatever was clicked can take the focus, and if it doesn't, the button has it back.
+				setTimeout(() => {
+					if (document.activeElement === null || document.activeElement === document.body) {
+						button.current?.focus({ preventScroll: true });
+					}
+				}, 0);
+			}
+		};
+		document.addEventListener("pointerdown", away);
+		return () => { document.removeEventListener("pointerdown", away); };
+	}, [open]);
+	const openAt = (end: "first" | "last"): void => {
+		from.current = end;
+		if (open) {
+			focusItem();
+		} else {
+			setOpen(true);
+		}
+	};
+	const keys = (e: KeyboardEvent): void => {
+		const list = items();
+		const i = list.indexOf(document.activeElement as HTMLElement);
+		const n = list.length;
+		const next = e.key === "ArrowDown" ? (i + 1) % n : e.key === "ArrowUp" ? (i + n - 1) % n : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : -1;
+		if (next >= 0 && n > 0) {
+			e.preventDefault();
+			list[next]!.focus();
+		} else if (e.key === "Escape") {
+			e.preventDefault();
+			e.stopPropagation();
+			close();
+		} else if (e.key === "Tab") {
+			// The focus goes on to what's next, and the menu closes behind it.
+			setOpen(false);
+		}
+	};
+	return (
+		<div class={`menu-box${props.class !== undefined ? ` ${props.class}` : ""}`} ref={box}>
+			<button ref={button} type="button" class={props.buttonClass} aria-haspopup="menu" aria-expanded={open ? "true" : "false"} aria-controls={open ? id : undefined}
+				onClick={() => {
+					if (open) {
+						setOpen(false);
+					} else {
+						openAt("first");
+					}
+				}}
+				onKeyDown={(e) => {
+					if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+						e.preventDefault();
+						openAt(e.key === "ArrowUp" ? "last" : "first");
+					} else if (e.key === "Escape" && open) {
+						setOpen(false);
+					}
+				}}>{props.label}</button>
+			{open ? <div id={id} class="menu-items" role="menu" aria-label={props.menuLabel} onKeyDown={keys}>{props.children(close)}</div> : null}
 		</div>
 	);
 }

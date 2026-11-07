@@ -10,7 +10,8 @@ import { Seg, useApp } from "./common.js";
 import { addOps, blockColorOp, colorOp, newColorOp, pointsOps, repeatOps, sizeOps, sizeShare, stripesOps, turnOps, whereText, placeOps, widthsOnGrid } from "./flagdrag.js";
 import { blockRegion, colorsOf, findLayer, hasControls, kid, numOf, ownField, prop, readBars, readCharge, readFlag, regionOf, vNum, vStr, type AlsoItem, type BarsView, type ChargeView, type Item, type Region } from "./flagview.js";
 import { write } from "./exact.js";
-import { addGroups, cornerNames, plainName, sideNames } from "./plain.js";
+import { colorUses, replacementsFor, unusedColors } from "./colors.js";
+import { addGroups, cornerNames, plainName, sideNames, usedByText } from "./plain.js";
 import type { ONode, Op } from "./protocol.js";
 import { exactly, onGrid, readAmount, readTurn, shareText, snapFraction, turnFraction, turnPeriod, turnsFor, turnText, type Snapped } from "./snap.js";
 import { app, type Gesture } from "./store.js";
@@ -46,14 +47,64 @@ function useLive(): { value: number | null; slide: (v: number, ops: Op[]) => voi
 	};
 }
 
-/** Colors as round swatches, with a way to make a new one. */
-function Swatches(props: { label: string; value: string; nodes: readonly ONode[]; small?: boolean; onPick: (color: string, ...more: Op[]) => void }): preact.JSX.Element {
-	const { nodes, value } = props;
+/** What's being done to the palette, shared by each row of swatches in one set of controls. */
+interface ColorEdit {
+	on: boolean;
+	/** The color whose value is being changed. */
+	changing: string | null;
+	/** A color in use that's being removed, which needs another in its place. */
+	replacing: string | null;
+	set(patch: Partial<Omit<ColorEdit, "set">>): void;
+}
+
+function useColorEdit(): ColorEdit {
+	const [state, setState] = useState({ on: false, changing: null as string | null, replacing: null as string | null });
+	return { ...state, set: (patch) => { setState((was) => ({ ...was, ...patch })); } };
+}
+
+/** Takes a color out at once if nothing uses it, and otherwise asks what's to take its place. */
+function removeColor(edit: ColorEdit, nodes: readonly ONode[], name: string): void {
+	if (colorUses(nodes, name).length === 0) {
+		edit.set({ changing: null, replacing: null });
+		void app.edit([{ op: "removeColor", name }]);
+	} else {
+		edit.set({ changing: null, replacing: name });
+	}
+}
+
+/** The palette's colors, each to change or remove. */
+function PaletteSwatches(props: { edit: ColorEdit; nodes: readonly ONode[]; small?: boolean }): preact.JSX.Element {
+	const { edit, nodes } = props;
+	const colors = colorsOf(nodes);
+	const names = nodes.find((n) => n.name === "palette")?.kids.map((k) => k.name) ?? [];
+	return (
+		<>
+			{names.map((name) => (
+				<span key={name} class="swatch-edit">
+					<button type="button" class={`swatch-pick${props.small === true ? " small" : ""}${edit.changing === name ? " on" : ""}`} data-color={name} aria-label={`Change ${name}`} aria-pressed={edit.changing === name ? "true" : "false"} title={`Change ${name}`} style={{ background: colors.get(name) ?? "transparent" }} onClick={() => { edit.set({ changing: edit.changing === name ? null : name, replacing: null }); }} />
+					<button type="button" class="swatch-x" aria-label={`Remove ${name}`} title={`Remove ${name}`} onClick={() => { removeColor(edit, nodes, name); }}><span aria-hidden="true">×</span></button>
+				</span>
+			))}
+		</>
+	);
+}
+
+/** Colors as round swatches, with a way to make a new one. While colors are being edited, a row of its own has each to change or remove. */
+function Swatches(props: { label: string; value: string; nodes: readonly ONode[]; small?: boolean; edit?: ColorEdit; onPick: (color: string, ...more: Op[]) => void }): preact.JSX.Element {
+	const { nodes, value, edit } = props;
 	const [adding, setAdding] = useState(false);
 	const [hex, setHex] = useState("#3a7bd5");
 	const colors = colorsOf(nodes);
 	const names = nodes.find((n) => n.name === "palette")?.kids.map((k) => k.name) ?? [];
 	const all = value !== "" && !names.includes(value) ? [value, ...names] : names;
+	if (edit?.on === true && props.small !== true) {
+		return (
+			<div class="swatches" role="group" aria-label={`${props.label}: the colors to edit`}>
+				<PaletteSwatches edit={edit} nodes={nodes} />
+				<EditColorsButton edit={edit} />
+			</div>
+		);
+	}
 	return (
 		<div class="swatches" role="group" aria-label={props.label}>
 			{all.map((name) => (
@@ -73,15 +124,88 @@ function Swatches(props: { label: string; value: string; nodes: readonly ONode[]
 				</span>
 			) : props.small === true ? <button type="button" class="row-act new-small" aria-label={`New color for ${props.label.toLowerCase()}`} title="New color" onClick={() => { setAdding(true); }}>+</button>
 				: <button type="button" class="nx-ghost small" onClick={() => { setAdding(true); }}>New color</button>}
+			{edit !== undefined && props.small !== true && !adding ? <EditColorsButton edit={edit} /> : null}
+		</div>
+	);
+}
+
+function EditColorsButton(props: { edit: ColorEdit }): preact.JSX.Element {
+	const { edit } = props;
+	return <button type="button" class="nx-ghost small" aria-pressed={edit.on ? "true" : "false"} onClick={() => { edit.set({ on: !edit.on, changing: null, replacing: null }); }}>{edit.on ? "Done editing colors" : "Edit colors"}</button>;
+}
+
+/** A palette color's value, changed by seeing it, as one thing to undo however long it's dragged around. */
+function ChangeColor(props: { entry: ONode }): preact.JSX.Element {
+	const { entry } = props;
+	const live = useLive();
+	const [shown, setShown] = useState<string | null>(null);
+	const hex = shown ?? String(entry.args[0]?.v ?? "");
+	useEffect(() => {
+		if (live.value === null) {
+			setShown(null);
+		}
+	}, [live.value]);
+	if (entry.args[0]?.v === "gradient") {
+		return <p class="nx-note">{entry.name} is a gradient between other colors. Change it by changing them, or in Advanced.</p>;
+	}
+	return (
+		<div class="change-color">
+			<input type="color" class="color-well" id={`b-color-${entry.at.join("-")}`} aria-label={`Color of ${entry.name}`} value={/^#[0-9a-fA-F]{6}$/.test(hex) ? hex.toLowerCase() : "#000000"} onInput={(e) => {
+				const v = (e.currentTarget as HTMLInputElement).value;
+				setShown(v);
+				live.slide(1, [{ op: "entries", at: entry.at, args: [vStr(v)] }]);
+			}} onChange={live.release} />
+			<label class="share-value" for={`b-color-${entry.at.join("-")}`}>{entry.name} {hex}</label>
+		</div>
+	);
+}
+
+/** What's below the swatches while colors are being edited: changing one, replacing one, and tidying up. */
+function ColorTools(props: { edit: ColorEdit; nodes: readonly ONode[]; palette?: boolean }): preact.JSX.Element | null {
+	const { edit, nodes } = props;
+	if (!edit.on) {
+		return null;
+	}
+	const colors = colorsOf(nodes);
+	const palette = nodes.find((n) => n.name === "palette")?.kids ?? [];
+	const changing = palette.find((k) => k.name === edit.changing);
+	const replacing = edit.replacing !== null && palette.some((k) => k.name === edit.replacing) ? edit.replacing : null;
+	const unused = unusedColors(nodes);
+	const others = replacing === null ? [] : replacementsFor(nodes, replacing);
+	return (
+		<div class="color-tools">
+			{props.palette === true ? <div class="swatches" role="group" aria-label="The colors to edit"><PaletteSwatches edit={edit} nodes={nodes} small /></div> : null}
+			{replacing !== null ? (
+				<div class="replace-color" role="group" aria-label={`Replace ${replacing}`}>
+					<p class="plain">Used by {usedByText(colorUses(nodes, replacing))}. {others.length > 0 ? "Replace it with:" : "There's no other color that can take its place, so add one first."}</p>
+					<div class="swatches">
+						{others.map((name) => (
+							<button key={name} type="button" class="swatch-pick small" data-color={name} aria-label={`Replace it with ${name}`} title={name} style={{ background: colors.get(name) ?? "transparent" }} onClick={() => {
+								edit.set({ replacing: null });
+								void app.edit([{ op: "removeColor", name: replacing, to: name }]);
+							}} />
+						))}
+						<button type="button" class="nx-ghost small" onClick={() => { edit.set({ replacing: null }); }}>Cancel</button>
+					</div>
+				</div>
+			) : changing !== undefined ? <ChangeColor key={changing.name} entry={changing} /> : <p class="nx-note">Choose a color to change it, or × to remove it.</p>}
+			<div class="panel-actions">
+				<button type="button" class="nx-ghost small" disabled={unused.length === 0} onClick={() => {
+					edit.set({ changing: null, replacing: null });
+					void app.edit(unused.map((name) => ({ op: "removeColor", name })));
+				}}>{unused.length === 0 ? "No unused colors" : `Remove unused colors (${unused.length})`}</button>
+			</div>
 		</div>
 	);
 }
 
 function ColorRow(props: { label: string; value: string; nodes: readonly ONode[]; onPick: (color: string, ...more: Op[]) => void }): preact.JSX.Element {
+	const edit = useColorEdit();
 	return (
 		<div class="field">
 			<span class="nx-label">{props.label}</span>
-			<Swatches label={props.label} value={props.value} nodes={props.nodes} onPick={props.onPick} />
+			<Swatches label={props.label} value={props.value} nodes={props.nodes} edit={edit} onPick={props.onPick} />
+			<ColorTools edit={edit} nodes={props.nodes} />
 		</div>
 	);
 }
@@ -339,6 +463,7 @@ function BarsControls(props: { b: BarsView; r: Region; nodes: readonly ONode[] }
 		const colors = b.colors.filter((_, j) => j !== i);
 		edit(...stripesOps(b, colors, hasRatio ? b.widths.filter((_, j) => j !== i) : null));
 	};
+	const colorEdit = useColorEdit();
 	return (
 		<>
 			<Direction node={b.node} along={b.along} />
@@ -348,7 +473,7 @@ function BarsControls(props: { b: BarsView; r: Region; nodes: readonly ONode[] }
 					{b.colors.map((o, i) => (
 						<div class="stripe-row" key={i}>
 							<span class="stripe-name">Stripe {i + 1}, {shareText(shares[i]!)}</span>
-							<Swatches label={`Stripe ${i + 1}`} value={String(o.v)} nodes={nodes} small onPick={(color, ...more) => { setColor(i, color, more); }} />
+							<Swatches label={`Stripe ${i + 1}`} value={String(o.v)} nodes={nodes} small edit={colorEdit} onPick={(color, ...more) => { setColor(i, color, more); }} />
 							{!fixed && b.colors.length > 1 ? <button type="button" class="row-act" aria-label={`Remove stripe ${i + 1}`} title="Remove this stripe" onClick={() => { removeStripe(i); }}>×</button> : null}
 						</div>
 					))}
@@ -356,7 +481,9 @@ function BarsControls(props: { b: BarsView; r: Region; nodes: readonly ONode[] }
 				<div class="panel-actions">
 					{!fixed ? <button type="button" class="nx-ghost small" onClick={addStripe}>Add a stripe</button> : null}
 					<button type="button" class="nx-ghost small" disabled={!hasRatio} onClick={() => { edit({ op: "dropChild", at: b.node.at, name: "ratio" }); }}>Make them equal</button>
+					<EditColorsButton edit={colorEdit} />
 				</div>
+				<ColorTools edit={colorEdit} nodes={nodes} palette />
 			</div>
 			{b.along === "fly" || b.along === "hoist" ? <p class="nx-note">Drag the lines between stripes on the flag. They snap to simple fractions, and Alt places them freely.</p> : null}
 		</>
@@ -366,6 +493,7 @@ function BarsControls(props: { b: BarsView; r: Region; nodes: readonly ONode[] }
 /** Several colors, one to a row, for things that divide the flag. */
 function ColorList(props: { node: ONode; labels?: readonly string[]; nodes: readonly ONode[] }): preact.JSX.Element {
 	const { node, labels, nodes } = props;
+	const colorEdit = useColorEdit();
 	return (
 		<div class="field">
 			<span class="nx-label">Colors</span>
@@ -373,10 +501,12 @@ function ColorList(props: { node: ONode; labels?: readonly string[]; nodes: read
 				{node.args.map((o, i) => (
 					<div class="stripe-row" key={i}>
 						<span class="stripe-name">{labels?.[i] ?? `Color ${i + 1}`}</span>
-						<Swatches label={labels?.[i] ?? `Color ${i + 1}`} value={String(o.v)} nodes={nodes} small onPick={(color, ...more) => { edit(colorOp(node, i, color), ...more); }} />
+						<Swatches label={labels?.[i] ?? `Color ${i + 1}`} value={String(o.v)} nodes={nodes} small edit={colorEdit} onPick={(color, ...more) => { edit(colorOp(node, i, color), ...more); }} />
 					</div>
 				))}
 			</div>
+			<div class="panel-actions"><EditColorsButton edit={colorEdit} /></div>
+			<ColorTools edit={colorEdit} nodes={nodes} palette />
 		</div>
 	);
 }

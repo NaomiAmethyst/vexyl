@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
-import { launch, mockWorld, openUrl, ready, repo, savedText, serve, watch } from "./helpers.mjs";
+import { downloadChoice, launch, mockWorld, openUrl, ready, repo, savedText, serve, watch } from "./helpers.mjs";
 
 let srv;
 let browser;
@@ -64,8 +64,9 @@ test("a problem appears in Source, on objects in Form, and pauses only the SVG",
 	assert.equal(await p.locator(".stage-image").getAttribute("src"), good, "the last good render stays");
 	assert.ok(await p.locator(".stage.dimmed").count() === 1, "and it's dimmed");
 	await p.getByText("Last good render. It stays here until the file is valid again.").waitFor();
-	assert.equal(await p.getByRole("button", { name: "Download SVG" }).isDisabled(), true);
-	assert.equal(await p.getByRole("button", { name: "Download KDL" }).isDisabled(), false);
+	assert.equal(await (await downloadChoice(p, "SVG image")).isDisabled(), true);
+	assert.equal(await p.getByRole("menuitem", { name: "KDL file" }).isDisabled(), false);
+	await p.keyboard.press("Escape");
 	assert.ok((await savedText(p)).includes("bars red whit"), "and the file can still be saved");
 	await p.getByRole("radio", { name: "Form" }).click();
 	await p.locator(".crumbs .back", { hasText: "Structure" }).click();
@@ -82,7 +83,8 @@ test("a problem appears in Source, on objects in Form, and pauses only the SVG",
 	await p.keyboard.type("e");
 	await p.locator(".status", { hasText: "Valid" }).waitFor();
 	await p.waitForFunction(() => document.querySelector(".stage.dimmed") === null);
-	assert.equal(await p.getByRole("button", { name: "Download SVG" }).isDisabled(), false);
+	assert.equal(await (await downloadChoice(p, "SVG image")).isDisabled(), false);
+	await p.keyboard.press("Escape");
 	assert.deepEqual(errors, []);
 	await context.close();
 });
@@ -110,7 +112,8 @@ test("every invalid file in the suite still opens, marked", async () => {
 	for (const name of chosen) {
 		await paste(p, invalid(name));
 		await p.locator(".status.bad").waitFor();
-		assert.ok(await p.getByRole("button", { name: "Download SVG" }).isDisabled(), name);
+		assert.ok(await (await downloadChoice(p, "SVG image")).isDisabled(), name);
+		await p.keyboard.press("Escape");
 		await p.getByRole("radio", { name: "Source" }).click();
 		await p.locator(".cm-problem").first().waitFor();
 	}

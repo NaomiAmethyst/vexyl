@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { after, before, test } from "node:test";
-import { launch, mockWorld, openUrl, readFlag, ready, savedText, serve, startFlag, watch } from "./helpers.mjs";
+import { downloadChoice, fromTopbar, launch, mockWorld, openUrl, readFlag, ready, savedText, serve, startFlag, watch } from "./helpers.mjs";
 
 let srv;
 let browser;
@@ -188,7 +188,8 @@ test("a large artwork flag opens, draws, and selects its artwork as a whole", as
 		return n;
 	});
 	assert.ok(colored > 5000, `only ${colored} pixels have any color`);
-	const [file] = await Promise.all([p.waitForEvent("download"), p.getByRole("button", { name: "Download SVG" }).click()]);
+	const svg = await downloadChoice(p, "SVG image");
+	const [file] = await Promise.all([p.waitForEvent("download"), svg.click()]);
 	assert.ok(readFileSync(await file.path(), "utf8").includes('viewBox="0 0 84675766 '), "what's downloaded is on the file's own grid");
 	const rows = await p.locator(".row-group").nth(1).locator(".row").allTextContents();
 	assert.ok(rows.some((r) => r.includes("Inline artwork")), rows.join("|"));
@@ -713,5 +714,174 @@ test("a CRLF file stays CRLF", async () => {
 	await p.getByLabel("Fly").fill("3");
 	await p.locator(".dirty").waitFor();
 	assert.equal(await savedText(p), body.replace("fly=2", "fly=3"));
+	await context.close();
+});
+
+const focused = (p) => p.evaluate(() => document.activeElement?.textContent ?? "");
+
+/** The file as it's saved, once it's what's wanted, or as it is after a while. */
+async function savedUntil(p, wanted) {
+	const until = Date.now() + 15000;
+	for (;;) {
+		const text = await savedText(p);
+		if (wanted(text) || Date.now() > until) {
+			return text;
+		}
+		await p.waitForTimeout(100);
+	}
+}
+
+test("on a narrow screen the top bar's other buttons are in a menu, which works from the keyboard", async () => {
+	const { p, context, errors } = await page("reviewed/united-states.kdl", { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	for (const name of ["New flag", "Open a flag", "Share", "Compare"]) {
+		assert.equal(await p.locator(".topbar").getByRole(name === "New flag" ? "button" : "link", { name, exact: true }).count(), 0, name);
+	}
+	assert.equal(await p.locator(".topbar").getByRole("radiogroup", { name: "Editor" }).count(), 0);
+	const menu = p.getByRole("button", { name: "Menu", exact: true });
+	const top = await menu.boundingBox();
+	for (const other of [p.locator(".brand"), p.locator(".topbar .file-name"), p.locator(".topbar .status"), p.getByRole("button", { name: "Download", exact: true })]) {
+		const box = await other.boundingBox();
+		assert.ok(Math.abs(box.y + box.height / 2 - (top.y + top.height / 2)) < 4, "it's all one row");
+	}
+	// It's reached by Tab, like anything else.
+	await p.locator("body").focus();
+	for (let i = 0; i < 10 && (await p.evaluate(() => document.activeElement?.getAttribute("aria-haspopup") !== "menu" || document.activeElement.textContent !== "Menu")); i++) {
+		await p.keyboard.press("Tab");
+	}
+	assert.equal(await focused(p), "Menu");
+	assert.equal(await menu.getAttribute("aria-expanded"), "false");
+	await p.keyboard.press("Enter");
+	assert.equal(await menu.getAttribute("aria-expanded"), "true");
+	const items = p.getByRole("menu", { name: "Menu" }).locator('[role^="menuitem"]');
+	assert.deepEqual(await items.allTextContents(), ["New flag", "Open a flag", "Share", "Compare", "Basic", "✓Advanced"]);
+	assert.equal(await focused(p), "New flag");
+	await p.keyboard.press("ArrowDown");
+	assert.equal(await focused(p), "Open a flag");
+	await p.keyboard.press("End");
+	assert.equal(await focused(p), "✓Advanced");
+	await p.keyboard.press("ArrowDown");
+	assert.equal(await focused(p), "New flag", "it goes round");
+	await p.keyboard.press("ArrowUp");
+	assert.equal(await focused(p), "✓Advanced");
+	await p.keyboard.press("Home");
+	assert.equal(await focused(p), "New flag");
+	await p.keyboard.press("Escape");
+	assert.equal(await menu.getAttribute("aria-expanded"), "false");
+	assert.equal(await focused(p), "Menu", "the focus goes back to the button");
+	// Up opens it at its end, and Enter picks what's focused.
+	await p.keyboard.press("ArrowUp");
+	assert.equal(await focused(p), "✓Advanced");
+	await p.keyboard.press("ArrowUp");
+	await p.keyboard.press("ArrowUp");
+	assert.equal(await focused(p), "Compare");
+	await p.keyboard.press("Enter");
+	await p.locator(".compare").waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("the narrow screen's menu works by pointer, and closes when anywhere else is clicked", async () => {
+	const { p, context, errors } = await page("reviewed/united-states.kdl", { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	const menu = p.getByRole("button", { name: "Menu", exact: true });
+	await menu.click();
+	await p.getByRole("menu", { name: "Menu" }).waitFor();
+	await p.locator(".flag-name").click();
+	assert.equal(await p.getByRole("menu").count(), 0);
+	assert.equal(await menu.getAttribute("aria-expanded"), "false");
+	assert.equal(await focused(p), "Menu", "the focus goes back to the button");
+	// It switches editors, and Basic has the same menu, without Compare.
+	await menu.click();
+	await p.getByRole("menuitemradio", { name: "Basic" }).click();
+	await p.getByRole("button", { name: "Add to the flag" }).waitFor();
+	await menu.click();
+	assert.deepEqual(await p.getByRole("menu", { name: "Menu" }).locator('[role^="menuitem"]').allTextContents(), ["New flag", "Open a flag", "Share", "✓Basic", "Advanced"]);
+	assert.equal(await p.getByRole("menuitemradio", { name: "Basic" }).getAttribute("aria-checked"), "true");
+	await p.getByRole("menuitem", { name: "Share" }).click();
+	await p.getByLabel("Link to share").waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("the editor's switch never wraps at phone width, and its hint goes below it", async () => {
+	const { p, context } = await page(undefined, { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	await p.goto(`${srv.base}?view=new`);
+	await startFlag(p, "stripes-block");
+	const oneLine = async (label, count) => {
+		const boxes = await Promise.all((await p.getByRole("radiogroup", { name: label }).getByRole("radio").all()).map((r) => r.boundingBox()));
+		assert.equal(boxes.length, count, label);
+		assert.ok(boxes.every((b) => Math.abs(b.y - boxes[0].y) < 1 && b.height < 40), `${label}: ${JSON.stringify(boxes)}`);
+		return boxes[0];
+	};
+	await oneLine("Edit as", 2);
+	await p.getByRole("radio", { name: "Source" }).click();
+	const seg = await oneLine("Edit as", 2);
+	const hint = await p.getByText("Escape, then Tab, leaves the editor").boundingBox();
+	assert.ok(hint.y > seg.y + seg.height - 1, "the hint is on a line of its own");
+	await fromTopbar(p, "Basic");
+	await p.getByRole("radiogroup", { name: "What to work on" }).waitFor();
+	for (const tab of ["Design", "Details", "Source"]) {
+		await p.getByRole("radio", { name: tab }).click();
+		const first = await oneLine("What to work on", 3);
+		if (tab === "Source") {
+			const below = await p.getByText("Escape, then Tab, leaves the editor").boundingBox();
+			assert.ok(below.y > first.y + first.height - 1, "the hint is on a line of its own");
+		}
+	}
+	assert.equal(await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+	await context.close();
+});
+
+test("Advanced has one Download, for an SVG image or the KDL file, and the file is saved by it", async () => {
+	const { p, context, errors } = await page("reviewed/japan.kdl");
+	assert.equal(await p.locator(".topbar").getByRole("button", { name: /^Download/ }).count(), 1);
+	const kdl = await downloadChoice(p, "KDL file");
+	assert.deepEqual(await p.getByRole("menu", { name: "What to download" }).getByRole("menuitem").allTextContents(), ["SVG image", "KDL file"]);
+	await p.keyboard.press("Escape");
+	assert.equal(await focused(p), "Download");
+	assert.equal(await kdl.count(), 0);
+	await p.locator('.row[data-path="0"]').click();
+	await p.locator(".color-swatch[data-color='red']").click();
+	await p.locator(".dirty").waitFor();
+	const [file] = await Promise.all([p.waitForEvent("download"), (await downloadChoice(p, "KDL file")).click()]);
+	assert.equal(file.suggestedFilename(), "japan.kdl");
+	await p.waitForFunction(() => document.querySelector(".dirty") === null);
+	await p.getByText("Downloaded the KDL.").first().waitFor();
+	const [svg] = await Promise.all([p.waitForEvent("download"), (await downloadChoice(p, "SVG image")).click()]);
+	assert.equal(svg.suggestedFilename(), "japan.svg");
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("removing a color something uses asks what's to take its place, and that's one thing to undo", async () => {
+	const { p, context, errors } = await page("reviewed/united-states.kdl");
+	const before = await savedText(p);
+	await row(p, "palette").click();
+	// One that nothing uses goes at once, as before.
+	await p.getByRole("button", { name: "Add a color" }).click();
+	await p.locator(".panel-head h2", { hasText: "color" }).waitFor();
+	const made = await panelTitle(p);
+	await p.getByRole("button", { name: "Remove", exact: true }).click();
+	await row(p, "palette").waitFor();
+	assert.ok(!(await savedText(p)).includes(`${made} "`), "the new color's gone");
+	await row(p, "palette").click();
+	await p.locator('.color-chip[data-path="palette/red"]').click();
+	const remove = p.getByRole("button", { name: "Remove", exact: true });
+	await remove.click();
+	assert.equal(await remove.getAttribute("aria-expanded"), "true");
+	const ask = p.getByRole("group", { name: "Replace red" });
+	assert.match(await ask.textContent(), /^red is used by bars\. Replace it with:/);
+	assert.deepEqual(await ask.locator(".color-named").allTextContents(), ["white", "blue"]);
+	await ask.getByRole("button", { name: "Cancel" }).click();
+	assert.equal(await ask.count(), 0);
+	assert.equal(await savedText(p), before, "nothing changed until a color was chosen");
+	await remove.click();
+	await ask.getByRole("button", { name: "Replace it with white" }).click();
+	await row(p, "palette").waitFor();
+	assert.equal(await savedText(p), before.replace(/\n {2}red "#b31942" \{\n[^}]*\n {2}\}\n/, "\n").replace("bars red white {", "bars white white {"));
+	await p.locator(".status", { hasText: "Valid" }).waitFor();
+	await p.locator(".flag-name").click();
+	await p.keyboard.press("Control+z");
+	assert.equal(await savedUntil(p, (t) => t === before), before, "one undo puts it all back");
+	assert.deepEqual(errors, []);
 	await context.close();
 });

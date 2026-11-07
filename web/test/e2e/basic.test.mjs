@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { after, before, test } from "node:test";
-import { launch, mockWorld, ready, savedText, serve, startFlag, watch } from "./helpers.mjs";
+import { downloadChoice, launch, mockWorld, ready, savedText, serve, startFlag, watch } from "./helpers.mjs";
 
 let srv;
 let browser;
@@ -52,8 +52,8 @@ async function opened(text, opts, valid = true) {
 async function basicText(p, wanted = () => true) {
 	const until = Date.now() + 15000;
 	for (;;) {
-		await p.getByRole("button", { name: "Download", exact: true }).click();
-		const [file] = await Promise.all([p.waitForEvent("download"), p.getByRole("button", { name: "The flag's file, to keep working on" }).click()]);
+		const choice = await downloadChoice(p, "The flag's file, to keep working on");
+		const [file] = await Promise.all([p.waitForEvent("download"), choice.click()]);
 		const text = readFileSync(await file.path(), "utf8");
 		if (wanted(text) || Date.now() > until) {
 			return text;
@@ -558,5 +558,80 @@ test("the panel's slider is immediate, and a slide is one thing to undo", async 
 	await p.locator("h1").click();
 	await p.keyboard.press("Control+z");
 	assert.equal(await basicText(p, (t) => t === before), before);
+	await context.close();
+});
+
+test("Basic has one Download, for a picture or the file, from the pointer or the keyboard", async () => {
+	const { p, context, errors } = await started("symbol");
+	assert.equal(await p.locator(".topbar").getByRole("button", { name: /^Download/ }).count(), 1);
+	const download = p.getByRole("button", { name: "Download", exact: true });
+	await download.focus();
+	await p.keyboard.press("ArrowDown");
+	const menu = p.getByRole("menu", { name: "What to download" });
+	assert.deepEqual(await menu.getByRole("menuitem").allTextContents(), ["A picture of the flag", "The flag's file, to keep working on"]);
+	assert.equal(await p.evaluate(() => document.activeElement?.textContent), "A picture of the flag");
+	const [picture] = await Promise.all([p.waitForEvent("download"), p.keyboard.press("Enter")]);
+	assert.equal(picture.suggestedFilename(), "new-flag.svg");
+	assert.equal(await menu.count(), 0);
+	assert.equal(await p.evaluate(() => document.activeElement?.textContent), "Download");
+	await row(p, "Circle").click();
+	await p.locator(".swatch-pick[data-color='red']").first().click();
+	await p.locator(".dirty").waitFor();
+	const [file] = await Promise.all([p.waitForEvent("download"), (await downloadChoice(p, "The flag's file, to keep working on")).click()]);
+	assert.equal(file.suggestedFilename(), "new-flag.kdl");
+	await p.waitForFunction(() => document.querySelector(".dirty") === null);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a color nothing uses is removed at once, and the unused ones can be tidied away", async () => {
+	const { p, context, errors } = await started("stripes-block");
+	await row(p, "Stripes").click();
+	await p.getByRole("button", { name: "Edit colors" }).click();
+	await p.getByRole("button", { name: "Remove gold" }).click();
+	const once = await basicText(p, (t) => !t.includes("gold"));
+	assert.ok(!once.includes("gold") && once.includes('green "#2f7d5b"'), once);
+	assert.equal(await p.getByText("Replace it with:").count(), 0);
+	await p.getByRole("button", { name: "Remove unused colors (1)" }).click();
+	const tidy = await basicText(p, (t) => !t.includes("green"));
+	assert.ok(tidy.includes('palette {\n  navy "#27306b"\n  white "#f6f3ea"\n  red "#c43d3d"\n}'), tidy);
+	await p.getByRole("button", { name: "No unused colors" }).waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a color in use is replaced everywhere, as one thing to undo", async () => {
+	const { p, context, errors } = await opened(`${head}bars a b\ncharge star a {\n  radius 10\n}\n`);
+	const before = await basicText(p);
+	await row(p, "Stripes").click();
+	await p.getByRole("button", { name: "Edit colors" }).click();
+	await p.getByRole("button", { name: "Remove a" }).click();
+	const ask = p.getByRole("group", { name: "Replace a" });
+	assert.match(await ask.textContent(), /^Used by the stripes and the star\. Replace it with:/);
+	await ask.getByRole("button", { name: "Cancel" }).click();
+	assert.equal(await ask.count(), 0);
+	await p.getByRole("button", { name: "Remove a" }).click();
+	await ask.getByRole("button", { name: "Replace it with b" }).click();
+	const after = await basicText(p, (t) => t !== before);
+	assert.equal(after, before.replace('  a "#112233"\n', "").replace("bars a b", "bars b b").replace("charge star a", "charge star b"));
+	await p.locator("h1").click();
+	await p.keyboard.press("Control+z");
+	assert.equal(await basicText(p, (t) => t === before), before, "one undo puts it all back");
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a swatch's color can be changed, and says its value", async () => {
+	const { p, context, errors } = await started("stripes-block");
+	await row(p, "Stripes").click();
+	await p.getByRole("button", { name: "Edit colors" }).click();
+	await p.getByRole("button", { name: "Change red" }).click();
+	const well = p.getByLabel("Color of red");
+	assert.equal(await well.inputValue(), "#c43d3d");
+	await p.getByText("red #c43d3d").waitFor();
+	await well.fill("#11aa44");
+	assert.ok((await basicText(p, (t) => t.includes('red "#11aa44"'))).includes('red "#11aa44"'));
+	await p.getByText("red #11aa44").waitFor();
+	assert.deepEqual(errors, []);
 	await context.close();
 });

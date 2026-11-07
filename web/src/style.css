@@ -31,6 +31,34 @@ body { overflow-x: hidden; }
 body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--fill-rgb), calc(var(--glow) * 0.6)), rgba(var(--fill-rgb), 0)); background-repeat: no-repeat; }
 
 .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+/* On a wide screen, what's in the menu on a narrow one is a row of buttons. */
+.topbar-wide { display: contents; }
+.topbar-narrow { display: none; }
+@media (max-width: 64rem) {
+  .topbar { flex-wrap: nowrap; gap: 8px 12px; }
+  .topbar-wide { display: none; }
+  .topbar-narrow { display: block; }
+  .topbar .brand, .topbar .status, .topbar .menu-box { flex: none; }
+  .topbar-name { flex: 1 1 0; min-width: 3em; display: flex; white-space: nowrap; }
+  .topbar-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .grow { display: none; }
+  .topbar-ack { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+/* On the smallest phones the logo stands for the name, which is still its link's name, and the buttons are closer. */
+@media (max-width: 24rem) {
+  header.topbar { gap: 6px; }
+  .topbar .brand-name { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .topbar .menu-box > .nx-btn, .topbar .menu-box > .nx-ghost { padding-left: 12px; padding-right: 12px; }
+}
+.menu-box { position: relative; }
+.menu-items { position: absolute; right: 0; top: calc(100% + 6px); z-index: 5; display: flex; flex-direction: column; gap: 2px; width: max-content; min-width: 180px; max-width: min(80vw, 300px); padding: 6px; box-sizing: border-box; border: 1px solid var(--line2); border-radius: 12px; background: var(--raised); box-shadow: var(--shadow-card, none); }
+.menu-item { font-size: 0.8125rem; white-space: normal; }
+.menu-item:focus { background: rgba(var(--ink-rgb), 0.08); color: var(--ink); }
+.menu-item[aria-disabled="true"] { opacity: 0.5; cursor: default; }
+.menu-item[aria-disabled="true"]:hover { background: transparent; }
+.menu-check { width: 1em; flex: none; color: var(--accent); }
+.menu-rule { height: 1px; margin: 4px 6px; background: var(--line); }
+.menu-group { display: flex; flex-direction: column; gap: 2px; }
 .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.9375rem; }
 .brand:hover { color: var(--ink); }
 .brand img { height: 16px; display: block; }
@@ -53,7 +81,11 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .dialog-title { margin: 0; font-size: 1.375rem; font-weight: 500; letter-spacing: -0.012em; }
 
 .editor { padding: 0; gap: 0; overflow: hidden; }
-.editor-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+/* The switch never wraps or shrinks. Where the hint doesn't fit beside it, it goes on a line of its own. */
+.editor-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.editor-bar .nx-seg { flex: none; flex-wrap: nowrap; max-width: none; }
+.editor-bar .nx-seg button { white-space: nowrap; }
+.editor-hint { white-space: nowrap; }
 .editor-body { height: 640px; display: flex; flex-direction: column; min-height: 0; }
 .source-host { height: 100%; min-height: 0; }
 /* Beside each other, each column reaches the bottom of the screen, and whatever's spare goes to the
@@ -314,7 +346,8 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .changes .strong { color: var(--ink); }
 
 @media (max-width: 40rem) {
-  .topbar { padding: 12px 16px; }
+  .topbar { padding: 12px 16px; gap: 8px; }
+  .editor-hint { flex-basis: 100%; white-space: normal; }
   .work, .compare { padding: 12px 16px 16px; }
   .notices { padding: 12px 16px 0; }
   .page-center { padding: 16px; }
@@ -362,6 +395,13 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .swatch-pick.on { box-shadow: 0 0 0 2px var(--raised), 0 0 0 4px var(--accent); }
 .swatch-pick.gap { background: linear-gradient(135deg, transparent 46%, var(--muted) 46%, var(--muted) 54%, transparent 54%); }
 .new-swatch { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.swatch-edit { display: inline-flex; align-items: center; gap: 2px; flex: none; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
+.swatch-x { width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: none; color: var(--ink2); font: inherit; font-size: 0.9375rem; line-height: 1; cursor: pointer; }
+.swatch-x:hover { background: rgba(var(--danger-rgb), 0.16); color: var(--danger); }
+.color-tools { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.replace-color { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.replace-color .swatches { gap: 8px; }
+.change-color { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .slide-row { display: flex; align-items: center; gap: 10px; }
 .slide-row input[type="range"], .basic-controls input[type="range"] { flex: 1 1 auto; min-width: 0; height: 28px; margin: 0; accent-color: var(--fill); }
 .share-box { width: 84px; box-sizing: border-box; flex: none; }
@@ -390,8 +430,6 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .details-part summary, .details-color summary { cursor: pointer; color: var(--ink2); }
 .details-part > .nx-note { margin: 8px 0 12px; }
 .details-color > .stack { margin-top: 10px; }
-.download-menu { position: relative; }
-.download-items { position: absolute; right: 0; top: calc(100% + 6px); z-index: 5; display: flex; flex-direction: column; gap: 4px; width: max-content; max-width: min(80vw, 280px); padding: 8px; border: 1px solid var(--line2); border-radius: 12px; background: var(--raised); box-shadow: var(--shadow-card, none); }
 
 .handles { position: absolute; inset: 0; pointer-events: none; }
 .grab-zone { position: absolute; pointer-events: auto; touch-action: none; cursor: move; }
@@ -425,8 +463,6 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .start-more a, .start-more .nx-link { font: inherit; color: var(--link); text-decoration: underline; text-underline-offset: 2px; padding: 0; }
 
 @media (max-width: 40rem) {
-  .topbar.basic .flag-title { flex: 1 1 55%; }
-  .topbar.basic .grow { display: none; }
   .work.basic > .column:first-child { flex-basis: 100%; max-width: none; }
   .work.basic > .column:last-child { order: -1; flex-basis: 100%; }
   .start { padding: 24px 16px; }

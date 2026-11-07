@@ -64,6 +64,8 @@ export type Op =
 	| { op: "add"; at: number[] | null; text: string; index?: number }
 	| { op: "move"; at: number[]; delta: number }
 	| { op: "renameColor"; from: string; to: string }
+	/** Takes a color out of the palette, with another to use wherever it was, or none if nothing uses it. */
+	| { op: "removeColor"; name: string; to?: string }
 	| { op: "renameTerm"; kind: "variant" | "fold" | "define"; from: string; to: string }
 	| { op: "rescale"; hoist: string }
 	| { op: "replaceText"; start: number; end: number; was: string; to: string };
