@@ -635,3 +635,215 @@ test("a swatch's color can be changed, and says its value", async () => {
 	assert.deepEqual(errors, []);
 	await context.close();
 });
+
+/** Whether a button says it can't do anything now, while it can still have the focus. */
+const off = async (button) => (await button.getAttribute("aria-disabled")) === "true";
+const until = (p, button, state) => p.waitForFunction(([b, s]) => (b.getAttribute("aria-disabled") === "true") === s, [button, state]);
+
+test("Undo and Redo buttons go through the same history as Ctrl+Z, and say when there's nothing to do", async () => {
+	const { p, context, errors } = await started("symbol");
+	const undo = p.getByRole("button", { name: "Undo", exact: true });
+	const redo = p.getByRole("button", { name: "Redo", exact: true });
+	assert.equal(await undo.count(), 1);
+	assert.ok(await off(undo) && await off(redo), "a new flag has nothing to undo");
+	const before = await basicText(p);
+	await dragFlag(p, [0.5, 0.5], [0.25, 0.25]);
+	await basicText(p, (t) => t.includes("at fly=22.5 hoist=15"));
+	await until(p, await undo.elementHandle(), false);
+	assert.ok(await off(redo));
+	await undo.click();
+	assert.equal(await basicText(p, (t) => t === before), before, "one press undoes the whole drag");
+	await until(p, await undo.elementHandle(), true);
+	await until(p, await redo.elementHandle(), false);
+	await redo.click();
+	assert.ok((await basicText(p, (t) => t.includes("at fly=22.5 hoist=15"))).includes("at fly=22.5 hoist=15"));
+	await until(p, await redo.elementHandle(), true);
+	// The keys and the buttons are one history.
+	await p.locator("h1").click();
+	await p.keyboard.press("Control+z");
+	assert.equal(await basicText(p, (t) => t === before), before);
+	await redo.click();
+	assert.ok((await basicText(p, (t) => t.includes("at fly=22.5 hoist=15"))).includes("at fly=22.5 hoist=15"));
+	// From the keyboard, and a button with nothing left to do keeps the focus.
+	await undo.focus();
+	await p.keyboard.press("Enter");
+	await until(p, await undo.elementHandle(), true);
+	assert.equal(await p.evaluate(() => document.activeElement?.getAttribute("aria-label")), "Undo");
+	await p.keyboard.press("Enter");
+	await p.waitForTimeout(300);
+	assert.equal(await basicText(p, (t) => t === before), before, "it does nothing when there's nothing to do");
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a fraction being typed is what Undo undoes, once it's taken", async () => {
+	const { p, context } = await started("symbol");
+	await row(p, "Circle").click();
+	await p.getByRole("group", { name: "Color" }).getByRole("button", { name: "red" }).click();
+	const red = await basicText(p, (t) => t.includes("charge disc red"));
+	await p.getByLabel("Size", { exact: true }).nth(1).fill("1/3");
+	await p.getByRole("button", { name: "Undo", exact: true }).click();
+	await p.waitForTimeout(400);
+	assert.equal(await basicText(p, (t) => t === red), red, "the size is undone, and the color stays");
+	await p.getByRole("button", { name: "Redo", exact: true }).click();
+	assert.ok((await basicText(p, (t) => t.includes("radius 20"))).includes("radius 20"), "it was taken before it was undone");
+	await context.close();
+});
+
+test("at phone width, Undo and Redo are at the bottom of the screen, not in the top bar", async () => {
+	const { p, context, errors } = await started("stripes-block", { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	const undo = p.getByRole("button", { name: "Undo", exact: true });
+	const redo = p.getByRole("button", { name: "Redo", exact: true });
+	assert.equal(await p.locator(".topbar").getByRole("button", { name: /Undo|Redo/ }).count(), 0);
+	const bar = await p.getByRole("region", { name: "Undo and redo" }).boundingBox();
+	assert.ok(bar.y + bar.height <= 844 - 12 && bar.y > 844 - 100, JSON.stringify(bar));
+	assert.ok(bar.height >= 44, "big enough for a thumb");
+	assert.ok(await off(undo) && await off(redo));
+	const before = await basicText(p);
+	await row(p, "Corner block").tap();
+	await p.getByRole("group", { name: "Color" }).getByRole("button", { name: "red" }).tap();
+	const red = await basicText(p, (t) => t !== before);
+	await until(p, await undo.elementHandle(), false);
+	await undo.tap();
+	assert.equal(await basicText(p, (t) => t === before), before);
+	await until(p, await redo.elementHandle(), false);
+	await redo.tap();
+	assert.equal(await basicText(p, (t) => t === red), red);
+	assert.equal(await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+const stacked = `// A comment about the whole thing.
+vexyl 1
+meta {
+    name   "Spaced  out"   // with its own comment
+}
+palette {
+  a "#112233" ;  b "#ddeeff"
+}
+proportion hoist=60 fly=90
+
+/* before the field */
+field a
+bars a b { ratio 1 2; along hoist; }
+
+charge star b {
+      radius 10
+}
+canton {
+  fly 30
+  hoist 30
+  field b
+  charge disc a { radius 2; }
+  charge disc b { radius 1; }
+}
+`;
+
+test("Bring forward and Send back move a thing among what's beside it, and nothing else in the file changes", async () => {
+	const { p, context, errors } = await opened(stacked);
+	const labels = () => p.locator(".layer-row .row-label").allTextContents();
+	assert.deepEqual(await labels(), ["Background", "Stripes", "Star", "Corner block", "Circle", "Circle"]);
+	await p.getByText("Each thing is drawn over the ones above it here.").waitFor();
+	const forward = p.getByRole("button", { name: "Bring forward" });
+	const back = p.getByRole("button", { name: "Send back" });
+	await row(p, "Stripes").click();
+	assert.ok(!(await off(forward)) && !(await off(back)));
+	await forward.click();
+	const moved = await basicText(p, (t) => t !== stacked);
+	// The two change places, and the spacing between stays where it was.
+	assert.equal(moved, stacked.replace("bars a b { ratio 1 2; along hoist; }\n\ncharge star b {\n      radius 10\n}\n", "\ncharge star b {\n      radius 10\n}\nbars a b { ratio 1 2; along hoist; }\n"));
+	await p.waitForFunction(() => [...document.querySelectorAll(".layer-row .row-label")].map((e) => e.textContent).join() === "Background,Star,Stripes,Corner block,Circle,Circle");
+	await row(p, "Stripes").and(p.locator(".on")).waitFor();
+	await p.locator(".basic-controls h2", { hasText: "Stripes" }).waitFor();
+	// Back again is the file as it was, byte for byte.
+	await back.click();
+	assert.equal(await basicText(p, (t) => t === stacked), stacked);
+	await row(p, "Stripes").and(p.locator(".on")).waitFor();
+	// Each move is one thing to undo.
+	await forward.click();
+	await basicText(p, (t) => t === moved);
+	await p.getByRole("button", { name: "Undo", exact: true }).click();
+	assert.equal(await basicText(p, (t) => t === stacked), stacked);
+	// At the ends, and inside a block, among what's in it.
+	await row(p, "Background").click();
+	await p.locator(".basic-controls h2", { hasText: "Background" }).waitFor();
+	assert.ok(await off(back) && !(await off(forward)));
+	await row(p, "Corner block").click();
+	await p.locator(".basic-controls h2", { hasText: "Corner block" }).waitFor();
+	assert.ok(await off(forward) && !(await off(back)));
+	// It can still be pressed, as it can still have the focus.
+	await forward.click({ force: true });
+	await p.waitForTimeout(300);
+	assert.equal(await basicText(p), stacked, "a button at its end does nothing");
+	await p.locator('.layer-row[data-path="3.1"]').click();
+	assert.ok(await off(back) && !(await off(forward)), "a block's own color isn't something to go under");
+	await forward.click();
+	assert.equal(await basicText(p, (t) => t !== stacked), stacked.replace("  charge disc a { radius 2; }\n  charge disc b { radius 1; }\n", "  charge disc b { radius 1; }\n  charge disc a { radius 2; }\n"));
+	await p.locator('.layer-row.on[data-path="3.2"]').waitFor();
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("the strip of other forms shows one in the big view, with no handles, and a way back", async () => {
+	const { p, context, errors } = await opened(`${head}field a\ncharge disc b {\n  radius 6\n}\nvariant vertical {\n  from transpose\n  upright\n}\n`);
+	const strip = p.getByRole("group", { name: "Other forms" });
+	assert.deepEqual(await strip.locator(".thumb").evaluateAll((all) => all.map((t) => t.getAttribute("data-form"))), ["flag", "reverse", "variant:vertical", "ratio:1:1", "ratio:1:2"]);
+	assert.deepEqual(await strip.locator(".thumb-label").allTextContents(), ["The flag", "The back", "Vertical", "1:1", "1:2"]);
+	await strip.locator('.thumb[data-form="reverse"] img').waitFor();
+	await strip.locator('.thumb[data-form="flag"][aria-pressed="true"]').waitFor();
+	await row(p, "Circle").click();
+	await p.locator(".handle-box").waitFor();
+	await strip.locator('.thumb[data-form="variant:vertical"]').click();
+	await p.getByText("This is the other form vertical.").waitFor();
+	await p.locator('.stage-image[alt*="vertical variant"]').waitFor();
+	assert.equal(await p.locator(".handles").count(), 0, "a variant can't be dragged here");
+	await strip.locator('.thumb[data-form="reverse"]').click();
+	await p.getByText("This is the back of the flag.").waitFor();
+	assert.equal(await p.locator(".handles").count(), 0);
+	// The panel still works, and the big view keeps showing the back.
+	await p.getByRole("group", { name: "Color" }).getByRole("button", { name: "a" }).click();
+	assert.ok((await basicText(p, (t) => t.includes("charge disc a"))).includes("charge disc a"));
+	await strip.locator('.thumb[data-form="reverse"][aria-pressed="true"]').waitFor();
+	assert.equal(await p.locator(".handles").count(), 0);
+	await p.getByRole("button", { name: "Show the flag itself" }).click();
+	await p.locator(".handle-box").waitFor();
+	assert.equal(await p.getByText("This is the back of the flag.").count(), 0);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("in Basic a second click on what's selected keeps it, and its handles; in Advanced it steps out", async () => {
+	const { p, context, errors } = await opened(`${head}field a\ncanton {\n  fly 45\n  hoist 30\n  field b\n  charge disc a {\n    radius 6\n    at fly=22.5 hoist=15\n  }\n}\n`);
+	const box = await stageBox(p);
+	await p.mouse.click(...at(box, 0.25, 0.25));
+	await row(p, "Circle").and(p.locator(".on")).waitFor();
+	await p.locator(".handle-box").waitFor();
+	// The second lands on its handle, which is over it.
+	await p.mouse.click(...at(box, 0.25, 0.25));
+	await p.waitForTimeout(300);
+	await row(p, "Circle").and(p.locator(".on")).waitFor();
+	assert.equal(await p.locator(".handle-box").count(), 1);
+	await p.mouse.click(...at(box, 0.25, 0.25));
+	await p.waitForTimeout(300);
+	await row(p, "Circle").and(p.locator(".on")).waitFor();
+	// Something else is still a click away.
+	await p.mouse.click(...at(box, 0.42, 0.1));
+	await row(p, "Corner block").and(p.locator(".on")).waitFor();
+	await p.mouse.click(...at(box, 0.42, 0.1));
+	await p.waitForTimeout(300);
+	await row(p, "Corner block").and(p.locator(".on")).waitFor();
+	await p.mouse.click(...at(box, 0.8, 0.8));
+	await row(p, "Background").and(p.locator(".on")).waitFor();
+	await p.getByRole("radio", { name: "Advanced" }).click();
+	await p.locator(".panel-head h2").waitFor();
+	const title = () => p.locator(".panel-head h2").textContent();
+	const adv = await stageBox(p);
+	await p.mouse.click(...at(adv, 0.25, 0.25));
+	await p.waitForFunction(() => document.querySelector(".panel-head h2")?.textContent === "Disc");
+	await p.mouse.click(...at(adv, 0.25, 0.25));
+	await p.waitForFunction(() => document.querySelector(".panel-head h2")?.textContent === "Canton");
+	assert.equal(await title(), "Canton");
+	assert.deepEqual(errors, []);
+	await context.close();
+});

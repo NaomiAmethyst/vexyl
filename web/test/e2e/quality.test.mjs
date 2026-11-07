@@ -52,8 +52,11 @@ const basicScreens = {
 	"basic-details": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Details" }).click(); await p.getByLabel("Name").waitFor(); for (const part of await p.locator("details.details-part summary").all()) { await part.click(); } },
 	"basic-source": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Source" }).click(); await p.locator(".cm-line").first().waitFor(); },
 	"basic-also": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.locator(".also li").first().waitFor(); await p.getByText("This flag is written from a law.").waitFor(); },
-	"basic-download": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Download", exact: true }).click(); await p.locator(".menu-items").waitFor(); await p.mouse.move(0, 0); },
+	"basic-download": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Download", exact: true }).click(); await p.locator(".menu-items").waitFor(); },
 	"basic-edit-colors": async (p) => { await basicScreens["basic-stripes"](p); await p.getByRole("button", { name: "Edit colors" }).click(); await p.getByRole("button", { name: "Change red" }).click(); await p.getByLabel("Color of red").waitFor(); },
+	"basic-undo": async (p) => { await basicScreens["basic-block"](p); await p.getByRole("group", { name: "Color" }).getByRole("button", { name: "red" }).click(); await p.waitForFunction(() => document.querySelector('.undo-redo.in-bar [aria-label="Undo"]')?.getAttribute("aria-disabled") === null); },
+	"basic-order": async (p) => { await basicScreens["basic-block"](p); await p.getByRole("button", { name: "Send back" }).click(); await p.waitForFunction(() => document.querySelector(".layer-row.on .row-label")?.textContent === "Corner block" && document.querySelector(".layer-row .row-label")?.textContent === "Corner block"); },
+	"basic-other-form": async (p) => { await basicScreens["basic-block"](p); await p.locator('.form-strip .thumb[data-form="reverse"] img').waitFor(); await p.locator('.form-strip .thumb[data-form="reverse"]').click(); await p.getByText("This is the back of the flag.").waitFor(); },
 	"basic-replace-color": async (p) => { await basicScreens["basic-stripes"](p); await p.getByRole("button", { name: "Edit colors" }).click(); await p.getByRole("button", { name: "Remove red" }).click(); await p.getByText("Replace it with:").waitFor(); },
 };
 
@@ -61,6 +64,9 @@ const basicScreens = {
 const narrowScreens = {
 	"menu-narrow": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menu", { name: "Menu" }).waitFor(); },
 	"basic-menu-narrow": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "stripes-block"); await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("menuitemradio", { name: "Advanced" }).waitFor(); },
+	"undo-narrow": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.getByRole("button", { name: "Remove Canton" }).tap(); await p.waitForFunction(() => document.querySelector('.undo-redo.floating [aria-label="Undo"]')?.getAttribute("aria-disabled") === null); },
+	"basic-undo-narrow": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "stripes-block"); await p.locator(".layer-row").nth(1).tap(); await p.getByRole("group", { name: "Color" }).getByRole("button", { name: "red" }).tap(); await p.waitForFunction(() => document.querySelector('.undo-redo.floating [aria-label="Undo"]')?.getAttribute("aria-disabled") === null); },
+	"basic-other-form-narrow": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "stripes-block"); await p.locator('.form-strip .thumb[data-form="reverse"] img').waitFor(); await p.locator('.form-strip .thumb[data-form="reverse"]').tap(); await p.getByText("This is the back of the flag.").waitFor(); },
 	"palette-replace": async (p) => { await p.goto(openUrl(srv.base, "flags/country/united-states.kdl")); await ready(p); await p.locator('.row[data-path="palette"]').click(); await p.locator('.color-chip[data-path="palette/red"]').click(); await p.getByRole("button", { name: "Remove", exact: true }).click(); await p.getByText("Replace it with:").waitFor(); },
 };
 
@@ -115,6 +121,36 @@ for (const theme of themes) {
 		assert.deepEqual(found, {}, JSON.stringify(found, null, 1));
 	});
 }
+
+/** The contrast of two computed colors, as WCAG works it out. */
+function contrast(a, b) {
+	const rgb = (c) => {
+		const srgb = /color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/.exec(c);
+		return srgb !== null ? srgb.slice(1, 4).map((x) => Number(x) * 255) : /rgba?\((\d+), (\d+), (\d+)/.exec(c).slice(1, 4).map(Number);
+	};
+	const lum = (c) => rgb(c).map((x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }).reduce((s, x, i) => s + x * [0.2126, 0.7152, 0.0722][i], 0);
+	const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+	return (hi + 0.05) / (lo + 0.05);
+}
+
+test("a filled button's label keeps its contrast while it's hovered, in every theme", async () => {
+	for (const theme of themes) {
+		const context = await browser.newContext({ colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}), reducedMotion: "reduce" });
+		await mockWorld(context);
+		const p = await context.newPage();
+		await p.goto(openUrl(srv.base, "flags/country/japan.kdl"));
+		await ready(p);
+		const button = p.getByRole("button", { name: "Download", exact: true });
+		const colors = () => button.evaluate((e) => [getComputedStyle(e).color, getComputedStyle(e).backgroundColor]);
+		const [ink, fill] = await colors();
+		await button.hover();
+		const [hoverInk, hoverFill] = await colors();
+		assert.notEqual(hoverFill, fill, `${theme.name}: hovering shows`);
+		assert.ok(contrast(ink, fill) >= 4.5, `${theme.name}: ${contrast(ink, fill)}`);
+		assert.ok(contrast(hoverInk, hoverFill) >= 4.5, `${theme.name}, hovered: ${hoverFill} is ${contrast(hoverInk, hoverFill)}`);
+		await context.close();
+	}
+});
 
 test("the page follows the device's color scheme and contrast, with the system's own values", async () => {
 	for (const [scheme, contrast, bg] of [["dark", undefined, "rgb(9, 8, 12)"], ["light", undefined, "rgb(246, 244, 250)"], ["dark", "more", "rgb(0, 0, 0)"], ["light", "more", "rgb(255, 255, 255)"]]) {

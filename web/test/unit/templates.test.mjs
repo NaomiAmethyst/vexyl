@@ -6,7 +6,7 @@ import { test } from "node:test";
 import { load, loadLibrary } from "./load.mjs";
 
 const t = await load("templates");
-const { addGroups, plainLayers, plainShapes } = await load("plain");
+const { addGroups, plainFormLabel, plainFormText, plainLayers, plainShapes } = await load("plain");
 const { applyOps, outline } = await load("document");
 const { addOps } = await load("flagdrag");
 const lib = await loadLibrary();
@@ -99,4 +99,17 @@ test("every plain name in the table is plain", () => {
 	}
 	assert.equal(plainShapes.disc, "Circle");
 	assert.equal(plainShapes.lozenge, "Diamond");
+});
+
+test("Basic names each of a flag's forms in its own words", () => {
+	for (const [id, label, short, sentence] of [
+		["flag", "Flag", "The flag", "the flag itself"],
+		["reverse", "Reverse", "The back", "the back of the flag"],
+		["variant:vertical", "Vertical", "Vertical", "the other form vertical"],
+		["ratio:1:1", "1:1", "1:1", "the flag at 1:1"],
+		["fold:triangle", "Triangle", "Triangle", "the flag folded: triangle"],
+	]) {
+		assert.equal(plainFormLabel({ id, label }), short, id);
+		assert.equal(plainFormText({ id, label }), sentence, id);
+	}
 });

@@ -201,7 +201,7 @@ select option:disabled {
 }
 
 .nx-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--fill) 88%, #fff);
+  background: color-mix(in srgb, var(--fill) 88%, #000);
   color: #fff;
 }
 

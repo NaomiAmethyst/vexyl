@@ -9,6 +9,7 @@ import { TermArt } from "./termart.js";
 import { flyPerHoist, matching, shapeText } from "./exact.js";
 import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 import { colorUses, listText, replacementsFor, type ColorUse } from "./colors.js";
+import { layerSiblings, moveOps } from "./flagdrag.js";
 import { app, findPath } from "./store.js";
 import { addable, describeTerm, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
@@ -1263,30 +1264,11 @@ function siblingsOf(node: ONode, nodes: readonly ONode[]): ONode[] {
 	return list.filter((n) => n.path !== undefined && layerTerms[n.name] !== undefined);
 }
 
-/** The layers a row can move among, which leaves out a panel's own field, as it has no row. */
-function rowSiblings(node: ONode, nodes: readonly ONode[]): ONode[] {
-	let parent: ONode | undefined;
-	let list = nodes;
-	for (const i of node.at.slice(0, -1)) {
-		parent = list[i];
-		list = parent?.kids ?? [];
-	}
-	return list.filter((n) => n.path !== undefined && layerTerms[n.name] !== undefined && !(parent !== undefined && fieldIsOwn(parent, n)));
-}
-
-/** Moves a layer to another's place among its siblings, stepping past each one between. */
+/** Moves a layer to another's place among its siblings. */
 function moveLayer(node: ONode, siblings: readonly ONode[], to: number): void {
-	const from = siblings.indexOf(node);
-	if (from < 0 || to < 0 || to >= siblings.length || from === to) {
+	const ops = moveOps(node, siblings, to);
+	if (ops.length === 0) {
 		return;
-	}
-	const ops: Op[] = [];
-	const at = [...node.at];
-	const step = to > from ? 1 : -1;
-	for (let i = from + step; i !== to + step; i += step) {
-		const other = siblings[i]!.at.at(-1)!;
-		ops.push({ op: "move", at: [...at], delta: other - at.at(-1)! });
-		at[at.length - 1] = other;
 	}
 	edit(...ops);
 	app.hover(null);
@@ -1314,7 +1296,7 @@ function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hove
 	if (layer === undefined) {
 		return button;
 	}
-	const siblings = rowSiblings(layer, nodes);
+	const siblings = layerSiblings(layer, nodes);
 	const place = siblings.indexOf(layer);
 	return (
 		<div class={`row-wrap${over ? " row-over" : ""}`} draggable data-row={r.path}

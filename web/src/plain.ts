@@ -75,3 +75,20 @@ export function usedByText(uses: readonly ColorUse[]): string {
 	});
 	return listText([...new Set(said)]);
 }
+
+/** A form of the flag, as Basic's strip of them names it, from its item in the gallery. */
+export function plainFormLabel(item: { id: string; label: string }): string {
+	return item.id === "flag" ? "The flag" : item.id === "reverse" ? "The back" : item.label;
+}
+
+/** The same form, in a sentence, as in "This is the back of the flag." */
+export function plainFormText(item: { id: string; label: string }): string {
+	const name = item.label.toLowerCase();
+	switch (item.id.split(":")[0]) {
+		case "flag": return "the flag itself";
+		case "reverse": return "the back of the flag";
+		case "variant": return `the other form ${name}`;
+		case "fold": return `the flag folded: ${name}`;
+		default: return `the flag at ${name}`;
+	}
+}

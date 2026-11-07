@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { BasicDetails } from "./basicdetails.js";
 import { Seg, useApp } from "./common.js";
-import { addOps, blockColorOp, colorOp, newColorOp, pointsOps, repeatOps, sizeOps, sizeShare, stripesOps, turnOps, whereText, placeOps, widthsOnGrid } from "./flagdrag.js";
+import { addOps, blockColorOp, colorOp, layerSiblings, moveOps, newColorOp, pointsOps, repeatOps, sizeOps, sizeShare, stripesOps, turnOps, whereText, placeOps, widthsOnGrid } from "./flagdrag.js";
 import { blockRegion, colorsOf, findLayer, hasControls, kid, numOf, ownField, prop, readBars, readCharge, readFlag, regionOf, vNum, vStr, type AlsoItem, type BarsView, type ChargeView, type Item, type Region } from "./flagview.js";
 import { write } from "./exact.js";
 import { colorUses, replacementsFor, unusedColors } from "./colors.js";
@@ -668,6 +668,33 @@ function AlsoList(props: { also: readonly AlsoItem[] }): preact.JSX.Element | nu
 	);
 }
 
+/** Bring forward and Send back, among what's beside it, as Advanced's rows move. What moved stays selected. */
+function LayerOrder(props: { item: Item; nodes: readonly ONode[] }): preact.JSX.Element {
+	const { item, nodes } = props;
+	const siblings = layerSiblings(item.node, nodes);
+	const place = siblings.indexOf(item.node);
+	const move = (to: number): void => {
+		const other = siblings[to];
+		if (place < 0 || other === undefined) {
+			return;
+		}
+		app.hover(null);
+		void app.changeAndFollow(moveOps(item.node, siblings, to), { at: [...item.node.at.slice(0, -1), other.at.at(-1)!] }).then((error) => {
+			if (error !== undefined) {
+				app.set({ notice: error });
+			}
+		});
+	};
+	const last = place < 0 || place >= siblings.length - 1;
+	const first = place <= 0;
+	return (
+		<>
+			<button type="button" class="nx-ghost small" aria-disabled={last ? "true" : undefined} title={last ? "It's already over everything beside it" : undefined} onClick={() => { if (!last) { move(place + 1); } }}>Bring forward</button>
+			<button type="button" class="nx-ghost small" aria-disabled={first ? "true" : undefined} title={first ? "It's already under everything beside it" : undefined} onClick={() => { if (!first) { move(place - 1); } }}>Send back</button>
+		</>
+	);
+}
+
 /** Basic's panel, for whichever of its tabs isn't Source. */
 export function BasicEditor(): preact.JSX.Element {
 	const [s] = useApp();
@@ -695,6 +722,7 @@ export function BasicEditor(): preact.JSX.Element {
 			<div class="row-group">
 				<span class="nx-label row-group-label">On this flag</span>
 				{items.length === 0 ? <p class="nx-empty pad-row">Nothing yet.</p> : null}
+				{items.length > 1 ? <p class="nx-note pad-row">Each thing is drawn over the ones above it here.</p> : null}
 				{items.map((i) => (
 					<button key={i.path} type="button" class={`row layer-row depth-${Math.min(i.depth, 3)}${s.selected === i.path ? " on" : ""}${s.hover === i.path ? " hover" : ""}`} aria-pressed={s.selected === i.path ? "true" : "false"} data-path={i.path}
 						onClick={() => { setAdding(false); app.select(i.path, false); }} onMouseEnter={() => { app.hover(i.path); }} onMouseLeave={() => { app.hover(null); }} onFocus={() => { app.hover(i.path); }} onBlur={() => { app.hover(null); }}>
@@ -711,6 +739,7 @@ export function BasicEditor(): preact.JSX.Element {
 					<h2>{selected.label}</h2>
 					<Controls key={selected.path} item={selected} nodes={nodes} />
 					<div class="panel-actions">
+						<LayerOrder item={selected} nodes={nodes} />
 						<button type="button" class="nx-ghost small" onClick={() => {
 							edit({ op: "remove", at: selected.node.at });
 							app.select(null, false);

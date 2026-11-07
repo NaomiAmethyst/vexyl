@@ -474,3 +474,28 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 @keyframes float-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .floating-flag { animation: none; } }
 .folder-group { display: block; padding: 10px 10px 4px; }
+
+/* A button that can't do anything now, but stays where the keyboard can reach it, and says why. */
+.nx-ghost[aria-disabled="true"] { opacity: 0.5; cursor: default; }
+.nx-ghost[aria-disabled="true"]:hover { background: transparent; color: var(--ink2); }
+
+/* Undo and Redo: beside Basic's tabs on a wide screen, and at the bottom, where a thumb is, on a narrow one. */
+.undo-redo { display: flex; gap: 6px; flex: none; }
+/* Beside the tabs, there's only room for their arrows, which still have their names. */
+.undo-redo.in-bar .nx-ghost { width: 32px; height: 32px; padding: 0; justify-content: center; font-size: 0.9375rem; }
+.undo-redo.in-bar .undo-word { display: none; }
+.undo-redo.floating { display: none; }
+@media (max-width: 64rem) {
+  .undo-redo.in-bar { display: none; }
+  .undo-redo.floating { display: flex; position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 20; padding: 5px; border: 1px solid var(--line2); border-radius: 999px; background: var(--raised); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+  .undo-redo.floating .nx-ghost { min-height: 44px; padding: 0 16px; border-color: transparent; font-size: 0.8125rem; }
+  /* So that the end of the page can still be scrolled out from under it. */
+  .work { padding-bottom: 88px; }
+}
+
+/* Basic's strip of the flag's other forms, under the big view. */
+.form-strip { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.thumbs.strip { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+.thumbs.strip .thumb { width: 74px; min-width: 0; flex: none; gap: 4px; }
+.thumbs.strip .thumb-box { height: 42px; }
+.form-note { flex: 1 1 100%; }

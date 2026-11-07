@@ -213,3 +213,54 @@ test("colors of counted stripes are written out when one changes", () => {
 test("a very big ratio or a value with an exponent still works", () => {
 	assert.ok(drag(flag("bars a b {\n  ratio 1e3 3e3\n}"), "0", "line-0", { x: 0, y: 20.1 }).text.includes("ratio 20 40"));
 });
+
+const layered = flag("border a 1\nfield a\nbars a b\ncharge disc b {\n  radius 3\n}\ncanton {\n  fly 30\n  hoist 30\n  field b\n  charge star a {\n    radius 2\n  }\n  charge disc a {\n    radius 1\n  }\n}");
+
+test("a layer moves among the layers beside it, and nothing that isn't one", () => {
+	const nodes = outline(layered);
+	const among = (path) => d.layerSiblings(v.findLayer(nodes, path), nodes).map((n) => n.path);
+	assert.deepEqual(among("1"), ["0", "1", "2", "3"], "the border isn't a layer");
+	assert.deepEqual(among("3.1"), ["3.1", "3.2"], "a block's own color isn't one either");
+	assert.deepEqual(among("3"), among("0"));
+});
+
+test("moving a layer forward or back swaps it with the next one, and leaves the rest as it was", () => {
+	const block = (first, second) => `canton {\n  fly 30\n  hoist 30\n  field b\n${first}${second}}`;
+	const star = "  charge star a {\n    radius 2\n  }\n";
+	const disc = "  charge disc a {\n    radius 1\n  }\n";
+	const cases = [
+		// What moves, to which place among its siblings, and the layers as they then are.
+		["1", 2, `border a 1\nfield a\ncharge disc b {\n  radius 3\n}\nbars a b\n${block(star, disc)}`],
+		["2", 1, `border a 1\nfield a\ncharge disc b {\n  radius 3\n}\nbars a b\n${block(star, disc)}`],
+		["3", 2, `border a 1\nfield a\nbars a b\n${block(star, disc)}\ncharge disc b {\n  radius 3\n}`],
+		["3.1", 1, `border a 1\nfield a\nbars a b\ncharge disc b {\n  radius 3\n}\n${block(disc, star)}`],
+		["3.2", 0, `border a 1\nfield a\nbars a b\ncharge disc b {\n  radius 3\n}\n${block(disc, star)}`],
+	];
+	for (const [path, to, body] of cases) {
+		const nodes = outline(layered);
+		const node = v.findLayer(nodes, path);
+		const out = applyOps(layered, d.moveOps(node, d.layerSiblings(node, nodes), to));
+		assert.equal(out.text, flag(body), `${path} to ${to}`);
+		assert.deepEqual(lib.validate(out.text), []);
+	}
+});
+
+test("a layer at either end, or moved nowhere, has nothing to do", () => {
+	const nodes = outline(layered);
+	const first = v.findLayer(nodes, "0");
+	const last = v.findLayer(nodes, "3");
+	const siblings = d.layerSiblings(first, nodes);
+	assert.deepEqual(d.moveOps(first, siblings, -1), []);
+	assert.deepEqual(d.moveOps(last, siblings, 4), []);
+	assert.deepEqual(d.moveOps(first, siblings, 0), []);
+	assert.deepEqual(d.moveOps(v.findLayer(nodes, "3.1"), siblings, 1), [], "it isn't among those");
+});
+
+test("a layer moved past several steps by each of them, as one change", () => {
+	const nodes = outline(layered);
+	const first = v.findLayer(nodes, "0");
+	const ops = d.moveOps(first, d.layerSiblings(first, nodes), 3);
+	assert.equal(ops.length, 3);
+	const moved = outline(applyOps(layered, ops).text);
+	assert.deepEqual(moved.filter((n) => n.path !== undefined && /^\d+$/.test(n.path)).map((n) => n.name), ["bars", "charge", "canton", "field"]);
+});

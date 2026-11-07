@@ -65,6 +65,9 @@ export interface State {
 	analyzed: string;
 	/** Whether something's being dragged, which draws no selection and can't be undone halfway. */
 	gesturing: boolean;
+	/** Whether Source's history has anything to undo, or to redo, which is the one history both editors share. */
+	canUndo: boolean;
+	canRedo: boolean;
 	/** Whether the note about a flag with a law has been dismissed, for this flag. */
 	lawNoteDismissed: boolean;
 	/** The last time the document was readable, and valid, for when it isn't now. */
@@ -88,7 +91,7 @@ export interface State {
 
 function initial(): State {
 	return {
-		view: "work", level: savedLevel(), basicTab: "design", analyzed: "", gesturing: false, lawNoteDismissed: false, mode: "form", loading: null, loadError: null, gistFiles: null, text: "", base: "", eol: "\n", mixedEol: false, source: null,
+		view: "work", level: savedLevel(), basicTab: "design", analyzed: "", gesturing: false, canUndo: false, canRedo: false, lawNoteDismissed: false, mode: "form", loading: null, loadError: null, gistFiles: null, text: "", base: "", eol: "\n", mixedEol: false, source: null,
 		analysis: null, lastReadable: null, lastValid: null, selected: null, hover: null, sourceJump: 0, form: "flag", padded: {}, foldStep: {},
 		images: new Map(), busy: false, tier: null, orphan: null, sameInOtherTab: { tabs: 0, dirty: false }, saved: true, notice: null, storageNote: false,
 	};
@@ -502,14 +505,12 @@ export class App {
 		const { form, padded, foldStep } = this.state;
 		await this.renderOne(form, padded[form] === true, foldStep[form], seq, true);
 		clearTimeout(this.thumbTimer);
-		if (this.state.level === "basic") {
-			// Basic has no gallery, and a drag shouldn't wait for one.
-			return;
-		}
+		// Basic's strip waits until things are still, since a drag shouldn't wait for it.
+		const wait = this.state.level === "basic" ? 700 : this.state.text.length > 256 * 1024 ? 900 : 60;
 		this.thumbTimer = setTimeout(() => {
 			void (async (): Promise<void> => {
 				for (const item of galleryOf(this.state.lastValid?.model ?? null)) {
-					if (seq !== this.renderSeq) {
+					if (seq !== this.renderSeq || this.state.gesturing) {
 						return;
 					}
 					if (item.id !== form) {
@@ -517,7 +518,7 @@ export class App {
 					}
 				}
 			})();
-		}, this.state.text.length > 256 * 1024 ? 900 : 60);
+		}, wait);
 	}
 
 	private async renderOne(id: string, padded: boolean, step: number | undefined, seq: number, pick: boolean): Promise<void> {
@@ -680,6 +681,11 @@ export class App {
 		});
 		this.editing = run.then(() => undefined);
 		return run;
+	}
+
+	/** Waits for every change asked for so far, such as one a box makes as it loses the focus, to be made. */
+	settled(): Promise<void> {
+		return this.editing;
 	}
 
 	/** Starts a drag. However many edits it sends, it's one thing to undo, and the last one always arrives. */

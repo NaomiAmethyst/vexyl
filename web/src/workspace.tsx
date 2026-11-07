@@ -10,7 +10,8 @@ import { BasicEditor } from "./basic.js";
 import { Form } from "./form.js";
 import { Handles } from "./handles.js";
 import type { PickNode } from "./protocol.js";
-import { refreshSource, SourceEditor, syncSource } from "./source.js";
+import { redoInSource, refreshSource, SourceEditor, syncSource, undoInSource } from "./source.js";
+import { plainFormLabel, plainFormText } from "./plain.js";
 import { app, findPath, galleryOf, optionsFor, type FormImage, type GalleryItem, type Level, type View } from "./store.js";
 
 const svgNs = "http://www.w3.org/2000/svg";
@@ -200,6 +201,11 @@ function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean; hand
 		if (stack.length === 0) {
 			return;
 		}
+		if (app.state.level === "basic") {
+			// In Basic, a click is always on the deepest thing, so clicking what's selected again keeps its handles.
+			app.select(stack[0]!);
+			return;
+		}
 		const current = app.state.selected;
 		const i = current === null ? -1 : stack.indexOf(current);
 		// The deepest first, and again steps out, to what's beneath once nothing holds it, and round again.
@@ -245,6 +251,31 @@ function labelOf(id: string, items: readonly GalleryItem[], padded: boolean): st
 		return `Folded: ${id.slice(5)}`;
 	}
 	return (items.find((i) => i.id === id)?.label ?? "") + (padded ? ", padded" : "");
+}
+
+/** Basic's small row of the flag's other forms, from the same pictures as Advanced's gallery. */
+function FormStrip(props: { items: readonly GalleryItem[] }): preact.JSX.Element | null {
+	const [s] = useApp();
+	if (props.items.length < 2) {
+		return null;
+	}
+	return (
+		<div class="form-strip" role="group" aria-labelledby="form-strip-title">
+			<span class="nx-label" id="form-strip-title">Other forms</span>
+			<div class="thumbs strip">
+				{props.items.map((t) => {
+					const image = s.images.get(t.id);
+					const refused = image?.refused !== undefined && s.padded[t.id] !== true;
+					return (
+						<button key={t.id} type="button" class={`thumb${s.form === t.id ? " on" : ""}`} aria-pressed={s.form === t.id ? "true" : "false"} data-form={t.id} onClick={() => { app.showForm(t.id); }}>
+							<span class="check thumb-box">{image?.url ? <img src={image.url} alt="" class={refused ? "faint" : ""} /> : <span class="bone bone-thumb" aria-hidden="true" />}</span>
+							<span class="thumb-label">{plainFormLabel(t)}</span>
+						</button>
+					);
+				})}
+			</div>
+		</div>
+	);
 }
 
 /** Where the columns stack, so that the big view can scroll out of sight. */
@@ -306,7 +337,8 @@ function BigView(): preact.JSX.Element {
 	const folds = (model?.["fold"] ?? {}) as Record<string, { steps?: unknown[] }>;
 	const steps = isFold ? (folds[s.form.slice(5)]?.steps?.length ?? 1) : 0;
 	const step = s.foldStep[s.form] ?? steps;
-	const hint = basic && !invalid ? "Click anything on the flag to change it. Drag it to move or resize it." : invalid ? "Last good render. It stays here until the file is valid again." : refused ? "" : isFold ? "Parts can be selected on the flat flag." : padded ? "Padding keeps the true shape, and the rest is transparent." : "Click any part of the flag to edit it. Click again to step out to what holds it.";
+	const elsewhere = basic && s.form !== "flag";
+	const hint = elsewhere ? "" : basic && !invalid ? "Click anything on the flag to change it. Drag it to move or resize it." : invalid ? "Last good render. It stays here until the file is valid again." : refused ? "" : isFold ? "Parts can be selected on the flat flag." : padded ? "Padding keeps the true shape, and the rest is transparent." : "Click any part of the flag to edit it. Click again to step out to what holds it.";
 	const alt = `${name}, ${labelOf(s.form, items, padded).toLowerCase()}, as drawn from its file`;
 	const refusalText = image?.refused !== undefined && model !== null && !Object.hasOwn(model, "adapt") ? `${name} doesn't say how it adapts to other proportions, so it won't be stretched to fit.` : `${image?.refused ?? ""} It won't be stretched to fit.`;
 	return (
@@ -332,8 +364,15 @@ function BigView(): preact.JSX.Element {
 						<span class="fold-step-label">{step === steps ? "Finished" : `Step ${step} of ${steps}`}</span>
 					</label>
 				) : null}
-				<span class="nx-note">{hint}</span>
+				{hint !== "" ? <span class="nx-note">{hint}</span> : null}
+				{elsewhere ? (
+					<p class="nx-callout form-note">
+						<span>This is {plainFormText(items.find((i) => i.id === s.form) ?? { id: s.form, label: "" })}. It changes along with the flag, but only the flag itself has handles to drag.</span>
+						<button type="button" class="nx-ghost small" onClick={() => { app.showForm("flag"); }}>Show the flag itself</button>
+					</p>
+				) : null}
 			</div>
+			{basic ? <FormStrip items={items} /> : null}
 		</section>
 	);
 }
@@ -578,6 +617,32 @@ function Notices(): preact.JSX.Element | null {
 	return list.length > 0 ? <section class="notices" aria-label="Notices">{list}</section> : null;
 }
 
+/**
+ * Undo and Redo, through the one history that Ctrl+Z goes through, whichever editor made the change.
+ * They stay where the keyboard can reach them even when there's nothing to do, and say so.
+ */
+function UndoRedo(props: { where: "in-bar" | "floating" }): preact.JSX.Element {
+	const [s] = useApp();
+	const step = (redo: boolean): void => {
+		// A box that was being typed in makes its change as it loses the focus, and that's what's undone.
+		void app.settled().then(() => {
+			if (!app.state.gesturing) {
+				void (redo ? redoInSource() : undoInSource());
+			}
+		});
+	};
+	const noUndo = !s.canUndo || s.gesturing;
+	const noRedo = !s.canRedo || s.gesturing;
+	// The one at the bottom of a narrow screen is outside the page's main part, so it's a landmark of its own.
+	const Box = props.where === "floating" ? "section" : "div";
+	return (
+		<Box class={`undo-redo ${props.where}`} role={props.where === "floating" ? undefined : "group"} aria-label="Undo and redo">
+			<button type="button" class="nx-ghost small" aria-label="Undo" aria-disabled={noUndo ? "true" : undefined} aria-keyshortcuts="Control+Z" title={noUndo ? "Nothing to undo" : "Undo (Ctrl+Z)"} onClick={() => { step(false); }}><span aria-hidden="true">↶</span><span class="undo-word" aria-hidden="true">Undo</span></button>
+			<button type="button" class="nx-ghost small" aria-label="Redo" aria-disabled={noRedo ? "true" : undefined} aria-keyshortcuts="Control+Shift+Z" title={noRedo ? "Nothing to redo" : "Redo (Ctrl+Shift+Z)"} onClick={() => { step(true); }}><span aria-hidden="true">↷</span><span class="undo-word" aria-hidden="true">Redo</span></button>
+		</Box>
+	);
+}
+
 export function Workspace(): preact.JSX.Element {
 	const [s] = useApp();
 	// Keep Source's marks in step with everything else.
@@ -614,6 +679,7 @@ export function Workspace(): preact.JSX.Element {
 								}} />
 							) : <Seg label="Edit as" value={s.mode} options={[["form", "Form"], ["source", "Source"]]} onPick={(v) => { app.setMode(v as "form" | "source"); }} />}
 							<span class="grow" />
+							{basic ? <UndoRedo where="in-bar" /> : null}
 							{s.mode === "source" || !basic ? <span class="nx-note editor-hint">{s.mode === "source" ? "Escape, then Tab, leaves the editor" : "Renders as you type"}</span> : null}
 						</div>
 						<div class="editor-body">
@@ -630,6 +696,7 @@ export function Workspace(): preact.JSX.Element {
 				</div>
 			</main>
 			<FloatingFlag />
+			<UndoRedo where="floating" />
 		</>
 	);
 }

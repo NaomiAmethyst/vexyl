@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, undo } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands";
 import { HighlightStyle, StreamLanguage, syntaxHighlighting, type StringStream } from "@codemirror/language";
 import { highlightSelectionMatches, search, searchKeymap } from "@codemirror/search";
 import { EditorState, StateEffect, StateField, type Range } from "@codemirror/state";
@@ -229,6 +229,15 @@ export function redoInSource(): boolean {
 	return view !== null && redo(view);
 }
 
+/** Tells the page whether there's anything to undo or redo, whenever that changes. */
+function tellHistory(state: EditorState | null): void {
+	const canUndo = state !== null && undoDepth(state) > 0;
+	const canRedo = state !== null && redoDepth(state) > 0;
+	if (canUndo !== app.state.canUndo || canRedo !== app.state.canRedo) {
+		app.set({ canUndo, canRedo });
+	}
+}
+
 export function SourceEditor(props: { hidden: boolean }): preact.JSX.Element {
 	const host = useRef<HTMLDivElement>(null);
 	useEffect(() => {
@@ -245,12 +254,14 @@ export function SourceEditor(props: { hidden: boolean }): preact.JSX.Element {
 					if (u.selectionSet && u.view.hasFocus) {
 						app.selectAtLine(u.state.doc.lineAt(u.state.selection.main.head).number);
 					}
+					tellHistory(u.state);
 				}),
 		];
 		// In a shadow root, CodeMirror's styles are constructed style sheets, which the Content Security
 		// Policy allows. Elsewhere it would add a <style> element, which it doesn't.
 		const shadow = host.current!.shadowRoot ?? host.current!.attachShadow({ mode: "open" });
 		view = new EditorView({ state: EditorState.create({ doc: app.state.text, extensions }), parent: shadow, root: shadow });
+		tellHistory(view.state);
 		app.bridge = {
 			replace(from, to, insert, apart): void {
 				if (view === null) {
@@ -265,6 +276,7 @@ export function SourceEditor(props: { hidden: boolean }): preact.JSX.Element {
 					quiet = true;
 					view.setState(EditorState.create({ doc: text, extensions }));
 					quiet = false;
+					tellHistory(view.state);
 				}
 			},
 			scrollToLine(line): void {
@@ -279,6 +291,7 @@ export function SourceEditor(props: { hidden: boolean }): preact.JSX.Element {
 			view?.destroy();
 			view = null;
 			app.bridge = null;
+			tellHistory(null);
 		};
 	}, []);
 	return <div class="source-host" hidden={props.hidden} ref={host} />;

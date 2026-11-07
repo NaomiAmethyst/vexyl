@@ -907,3 +907,32 @@ test("removing a color something uses asks what's to take its place, and that's 
 	assert.deepEqual(errors, []);
 	await context.close();
 });
+
+test("Advanced has Undo and Redo buttons on a narrow screen only, in the same history as Ctrl+Z", async () => {
+	const wide = await page("flags/country/united-states.kdl");
+	assert.equal(await wide.p.getByRole("button", { name: /^(Undo|Redo)$/ }).count(), 0, "on a wide screen, Advanced has only the keys");
+	await wide.context.close();
+	const { p, context, errors } = await page("flags/country/united-states.kdl", { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	const undo = p.getByRole("button", { name: "Undo", exact: true });
+	const redo = p.getByRole("button", { name: "Redo", exact: true });
+	const off = (b) => b.getAttribute("aria-disabled").then((v) => v === "true");
+	assert.equal(await p.locator(".topbar").getByRole("button", { name: /Undo|Redo/ }).count(), 0);
+	const bar = await p.getByRole("region", { name: "Undo and redo" }).boundingBox();
+	assert.ok(bar.y + bar.height <= 844 - 12 && bar.y > 844 - 100, JSON.stringify(bar));
+	assert.ok(await off(undo) && await off(redo));
+	const before = await savedText(p);
+	await p.getByRole("button", { name: "Remove Canton" }).tap();
+	await p.waitForFunction(() => !document.querySelector('.row[data-path="1.1"]'));
+	await p.waitForFunction(() => document.querySelector('.undo-redo.floating [aria-label="Undo"]')?.getAttribute("aria-disabled") === null);
+	await undo.tap();
+	await row(p, "1.1").waitFor();
+	assert.equal(await savedText(p), before);
+	await p.waitForFunction(() => document.querySelector('.undo-redo.floating [aria-label="Redo"]')?.getAttribute("aria-disabled") === null);
+	assert.ok(await off(undo));
+	await redo.tap();
+	await p.waitForFunction(() => !document.querySelector('.row[data-path="1.1"]'));
+	await p.waitForFunction(() => document.querySelector('.undo-redo.floating [aria-label="Redo"]')?.getAttribute("aria-disabled") === "true");
+	assert.equal(await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+	assert.deepEqual(errors, []);
+	await context.close();
+});

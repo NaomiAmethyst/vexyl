@@ -10,7 +10,7 @@ import { barLines, barsAreStraight, blockRegion, boxTurns, chargeReach, colorsOf
 import type { ONode, Op, OVal } from "./protocol.js";
 import { complement, exactly, exactOf, gridText, onGrid, shareText, snap, snapFraction, type Snapped } from "./snap.js";
 import { addedText, colorName, contrasting } from "./templates.js";
-import { kdlName } from "./vocab.js";
+import { kdlName, layers } from "./vocab.js";
 
 /** A point in the flag's grid units. */
 export interface Point {
@@ -512,4 +512,33 @@ export function addOps(key: string, nodes: readonly ONode[], selected: ONode | n
 	}
 	const index = layerIndex(key, nodes);
 	return { ops: [{ op: "add", at: null, text, index }], at: [index] };
+}
+
+/** The layers something can move among, beside it in what holds it. A block's own color isn't one, as it's part of the block. */
+export function layerSiblings(node: ONode, nodes: readonly ONode[]): ONode[] {
+	let parent: ONode | undefined;
+	let list = nodes;
+	for (const i of node.at.slice(0, -1)) {
+		parent = list[i];
+		list = parent?.kids ?? [];
+	}
+	const own = parent !== undefined && (parent.name === "canton" || parent.name === "panel") ? ownField(parent) : undefined;
+	return list.filter((n) => n.path !== undefined && layers[n.name] !== undefined && n !== own);
+}
+
+/** Moves a layer to another's place among its siblings, stepping past each one between. Later is drawn over. */
+export function moveOps(node: ONode, siblings: readonly ONode[], to: number): Op[] {
+	const from = siblings.indexOf(node);
+	if (from < 0 || to < 0 || to >= siblings.length || from === to) {
+		return [];
+	}
+	const ops: Op[] = [];
+	const at = [...node.at];
+	const step = to > from ? 1 : -1;
+	for (let i = from + step; i !== to + step; i += step) {
+		const other = siblings[i]!.at.at(-1)!;
+		ops.push({ op: "move", at: [...at], delta: other - at.at(-1)! });
+		at[at.length - 1] = other;
+	}
+	return ops;
 }
