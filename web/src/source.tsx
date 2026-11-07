@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-import { defaultKeymap, history, historyKeymap, indentWithTab, redo, undo } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, undo } from "@codemirror/commands";
 import { HighlightStyle, StreamLanguage, syntaxHighlighting, type StringStream } from "@codemirror/language";
 import { highlightSelectionMatches, search, searchKeymap } from "@codemirror/search";
 import { EditorState, StateEffect, StateField, type Range } from "@codemirror/state";
@@ -252,12 +252,12 @@ export function SourceEditor(props: { hidden: boolean }): preact.JSX.Element {
 		const shadow = host.current!.shadowRoot ?? host.current!.attachShadow({ mode: "open" });
 		view = new EditorView({ state: EditorState.create({ doc: app.state.text, extensions }), parent: shadow, root: shadow });
 		app.bridge = {
-			replace(from, to, insert): void {
+			replace(from, to, insert, apart): void {
 				if (view === null) {
 					return;
 				}
 				quiet = true;
-				view.dispatch({ changes: { from, to, insert } });
+				view.dispatch({ changes: { from, to, insert }, ...(apart === true ? { annotations: isolateHistory.of("full") } : {}) });
 				quiet = false;
 			},
 			setDoc(text): void {

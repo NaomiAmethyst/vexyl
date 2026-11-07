@@ -22,7 +22,7 @@ const shown = (o: OVal | undefined): string => (o === undefined || o.v === null 
 const child = (n: ONode, name: string, nth = 0): ONode | undefined => n.kids.filter((k) => k.name === name)[nth];
 const children = (n: ONode, name: string): ONode[] => n.kids.filter((k) => k.name === name);
 const prop = (n: ONode | undefined, name: string): OVal | undefined => n?.props.find(([k]) => k === name)?.[1];
-const paletteOf = (nodes: readonly ONode[]): { names: string[]; colors: Map<string, string> } => {
+export const paletteOf = (nodes: readonly ONode[]): { names: string[]; colors: Map<string, string> } => {
 	const p = nodes.find((n) => n.name === "palette");
 	const colors = new Map<string, string>();
 	const names: string[] = [];
@@ -45,7 +45,7 @@ function fieldId(label: string, at: readonly number[], extra = ""): string {
 }
 
 /** A text box that keeps what's being typed even while the file catches up, and says when it can't use it. */
-function Input(props: { id?: string; label: string; value: string; number?: boolean; mono?: boolean; onChange: (text: string) => void; wide?: boolean; hideLabel?: boolean; note?: string; readonly?: boolean; long?: boolean; placeholder?: string }): preact.JSX.Element {
+export function Input(props: { id?: string; label: string; value: string; number?: boolean; mono?: boolean; onChange: (text: string) => void; wide?: boolean; hideLabel?: boolean; note?: string; readonly?: boolean; long?: boolean; placeholder?: string }): preact.JSX.Element {
 	const [draft, setDraft] = useState<string | null>(null);
 	const text = draft ?? props.value;
 	const bad = props.number === true && text !== "" && !numberText.test(tidyNumber(text)) && !typingNumber.test(text);
@@ -596,7 +596,7 @@ function newColorProps(ctx: Ctx, node: ONode, use: (name: string, add: Op) => vo
 	};
 }
 
-interface Ctx {
+export interface Ctx {
 	nodes: readonly ONode[];
 	paletteAt: number[] | null;
 	names: readonly string[];
@@ -630,7 +630,7 @@ function shownFields(node: ONode, fields: readonly Field[]): Field[] {
 	return showing.filter((f, i) => f.k !== "heading" || (showing[i + 1] !== undefined && showing[i + 1]!.k !== "heading"));
 }
 
-function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Element {
+export function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JSX.Element {
 	const { f, node, ctx } = props;
 	const id = fieldId("label" in f ? f.label : f.k, node.at);
 	switch (f.k) {

@@ -3,7 +3,7 @@
 
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
-import { axe, launch, mockWorld, openUrl, readFlag, ready, serve, subpath, watch } from "./helpers.mjs";
+import { axe, launch, mockWorld, openUrl, readFlag, ready, serve, startFlag, subpath, watch } from "./helpers.mjs";
 
 let srv;
 let browser;
@@ -39,6 +39,22 @@ const screens = {
 	"compare-source": async (p) => { await screens.compare(p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 };
 
+/** Basic's screens, for someone new here, which is what these tests' pages are. */
+const basicScreens = {
+	"basic-start": async (p) => { await p.goto(`${srv.base}?view=new`); await p.locator(".start-tile").first().waitFor(); },
+	"basic-design": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "stripes-block"); await p.locator(".layer-row").first().waitFor(); },
+	"basic-add": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Add to the flag" }).click(); await p.locator(".pic-menu").waitFor(); },
+	"basic-stripes": async (p) => { await basicScreens["basic-design"](p); await p.locator(".layer-row").first().click(); await p.locator(".stripe-row").first().waitFor(); await p.waitForTimeout(1300); },
+	"basic-block": async (p) => { await basicScreens["basic-design"](p); await p.locator(".layer-row").nth(1).click(); await p.locator(".handle-dot").waitFor(); await p.waitForTimeout(1300); },
+	"basic-symbol": async (p) => { await p.goto(`${srv.base}?view=new`); await startFlag(p, "symbol"); await p.getByRole("button", { name: "Add to the flag" }).click(); await p.locator('[data-add="charge:star"]').click(); await p.locator(".layer-row", { hasText: "Star" }).waitFor(); await p.locator(".layer-row", { hasText: "Star" }).click(); await p.locator(".handle-box").waitFor(); await p.waitForTimeout(1300); },
+	"basic-new-color": async (p) => { await basicScreens["basic-symbol"](p); await p.getByRole("button", { name: "New color" }).click(); await p.getByRole("button", { name: "Add this color" }).waitFor(); },
+	"basic-ring": async (p) => { await basicScreens["basic-symbol"](p); await p.getByRole("radio", { name: "Ring" }).click(); await p.getByLabel("How many in the ring").waitFor(); },
+	"basic-details": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Details" }).click(); await p.getByLabel("Name").waitFor(); for (const part of await p.locator("details.details-part summary").all()) { await part.click(); } },
+	"basic-source": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("radio", { name: "Source" }).click(); await p.locator(".cm-line").first().waitFor(); },
+	"basic-also": async (p) => { await p.goto(openUrl(srv.base, "reviewed/united-states.kdl")); await ready(p); await p.locator(".also li").first().waitFor(); await p.getByText("This flag is written from a law.").waitFor(); },
+	"basic-download": async (p) => { await basicScreens["basic-design"](p); await p.getByRole("button", { name: "Download", exact: true }).click(); await p.locator(".download-items").waitFor(); await p.mouse.move(0, 0); },
+};
+
 const themes = [
 	{ name: "dark", colorScheme: "dark" },
 	{ name: "light", colorScheme: "light" },
@@ -61,8 +77,21 @@ for (const theme of themes) {
 			}
 			await p.close();
 		}
-		assert.deepEqual(found, {}, JSON.stringify(found, null, 1));
 		await context.close();
+		const basic = await browser.newContext({ viewport: { width: 1440, height: 1100 }, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
+		await mockWorld(basic, { basic: true });
+		for (const [name, go] of Object.entries(basicScreens)) {
+			const p = await basic.newPage();
+			await go(p);
+			await p.waitForTimeout(350);
+			const violations = await axe(p);
+			if (violations.length > 0) {
+				found[name] = violations;
+			}
+			await p.close();
+		}
+		await basic.close();
+		assert.deepEqual(found, {}, JSON.stringify(found, null, 1));
 	});
 }
 
@@ -91,8 +120,20 @@ test("nothing scrolls sideways at phone width, on any screen", async () => {
 		}
 		await p.close();
 	}
-	assert.deepEqual(found, {});
 	await context.close();
+	const basic = await browser.newContext({ viewport: { width: 360, height: 780 }, colorScheme: "dark", hasTouch: true, isMobile: true });
+	await mockWorld(basic, { basic: true });
+	for (const [name, go] of Object.entries(basicScreens)) {
+		const p = await basic.newPage();
+		await go(p);
+		const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+		if (over > 0) {
+			found[name] = over;
+		}
+		await p.close();
+	}
+	await basic.close();
+	assert.deepEqual(found, {});
 });
 
 test("the Content Security Policy is enforced, and nothing breaks it", async () => {
@@ -110,6 +151,20 @@ test("the Content Security Policy is enforced, and nothing breaks it", async () 
 		found.push(...(await p.evaluate(() => globalThis.__violations)));
 		await p.close();
 	}
+	const basicWorld = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
+	await mockWorld(basicWorld, { basic: true });
+	for (const go of Object.values(basicScreens)) {
+		const p = await basicWorld.newPage();
+		await p.addInitScript(() => {
+			globalThis.__violations = [];
+			document.addEventListener("securitypolicyviolation", (e) => { globalThis.__violations.push(`${e.violatedDirective} ${e.blockedURI}`); });
+		});
+		await go(p);
+		await p.waitForTimeout(100);
+		found.push(...(await p.evaluate(() => globalThis.__violations)));
+		await p.close();
+	}
+	await basicWorld.close();
 	assert.deepEqual(found, []);
 	const p = await context.newPage();
 	await p.goto(`${srv.base}?view=open`);
@@ -257,5 +312,33 @@ test("with reduced motion, nothing animates", async () => {
 	await ready(p);
 	await p.locator('.row[data-path="0"]').click();
 	assert.equal(await p.locator(".form-page.panel").evaluate((e) => getComputedStyle(e).animationName), "none");
+	await context.close();
+});
+
+test("Basic can be worked from the keyboard alone", async () => {
+	const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, acceptDownloads: true });
+	await mockWorld(context, { basic: true });
+	const p = await context.newPage();
+	const errors = watch(p);
+	await p.goto(`${srv.base}?view=new`);
+	await p.locator(".start-tile").first().waitFor();
+	assert.ok(await tabTo(p, () => document.activeElement?.getAttribute("data-layout") === "symbol"));
+	await p.keyboard.press("Enter");
+	await ready(p);
+	// Across the panel to what's on the flag, into its handles, and arrows move it.
+	assert.ok(await tabTo(p, () => document.activeElement?.classList.contains("layer-row") && document.activeElement?.textContent.includes("Circle")));
+	await p.keyboard.press("Enter");
+	await p.locator(".handle-box").waitFor();
+	assert.ok(await tabTo(p, () => document.activeElement?.classList.contains("handle-box"), 120));
+	assert.equal(await p.evaluate(() => getComputedStyle(document.activeElement).outlineStyle), "solid", "focus shows");
+	await p.keyboard.press("ArrowRight");
+	await p.locator(".readout", { hasText: "across" }).waitFor();
+	await p.waitForFunction(() => document.querySelector(".layer-row")?.textContent.length > 0);
+	// A corner handle, by the keyboard too.
+	await p.keyboard.press("Tab");
+	assert.equal(await p.evaluate(() => document.activeElement?.classList.contains("handle-dot")), true);
+	await p.keyboard.press("ArrowDown");
+	await p.locator(".readout", { hasText: "of the height" }).waitFor();
+	assert.deepEqual(errors, []);
 	await context.close();
 });

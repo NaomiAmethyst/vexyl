@@ -6,10 +6,12 @@ import { parentPath } from "vexyl/paths";
 import { refLabel, refText } from "./address.js";
 import { download, FileLink, fileStem, licenseName, Logo, Seg, Spinner, useApp, useAck } from "./common.js";
 import { engine } from "./engine.js";
+import { BasicEditor } from "./basic.js";
 import { Form } from "./form.js";
+import { Handles } from "./handles.js";
 import type { PickNode } from "./protocol.js";
 import { refreshSource, SourceEditor, syncSource } from "./source.js";
-import { app, findPath, galleryOf, newFlag, optionsFor, type FormImage, type GalleryItem } from "./store.js";
+import { app, findPath, galleryOf, optionsFor, type FormImage, type GalleryItem, type Level } from "./store.js";
 
 const svgNs = "http://www.w3.org/2000/svg";
 const tagAttr = "data-vexyl-layer";
@@ -111,7 +113,7 @@ function drawOutlines(layer: SVGGElement, root: SVGSVGElement, path: string | nu
 }
 
 /** The flag, and over it, what can't be seen but knows what's under a click. */
-function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean }): preact.JSX.Element {
+function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean; handles: boolean }): preact.JSX.Element {
 	const { image, alt } = props;
 	const [s] = useApp();
 	const pickHost = useRef<HTMLDivElement>(null);
@@ -156,9 +158,10 @@ function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean }): p
 		if (root === null || hoverLayer.current === null || selectLayer.current === null) {
 			return;
 		}
-		drawOutlines(selectLayer.current, root, flash, "selected");
-		drawOutlines(hoverLayer.current, root, s.hover !== flash ? s.hover : null, "hover");
-	}, [image.pick, flash, s.hover]);
+		// While something's being dragged, these would be of where it was.
+		drawOutlines(selectLayer.current, root, s.gesturing ? null : flash, "selected");
+		drawOutlines(hoverLayer.current, root, s.gesturing || s.hover === flash ? null : s.hover, "hover");
+	}, [image.pick, flash, s.hover, s.gesturing]);
 	/** What's under a point, deepest first, each with the layers that hold it. */
 	const stackAt = (x: number, y: number): string[] => {
 		const out: string[] = [];
@@ -204,6 +207,9 @@ function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean }): p
 	};
 	const move = (e: MouseEvent): void => {
 		pointerAt.current = { x: e.clientX, y: e.clientY };
+		if (s.gesturing) {
+			return;
+		}
 		const stack = normalize(stackAt(e.clientX, e.clientY));
 		app.hover(stack[0] ?? null);
 	};
@@ -220,6 +226,7 @@ function FlagStage(props: { image: FormImage; alt: string; dimmed: boolean }): p
 				<g ref={selectLayer} />
 				<g ref={hoverLayer} />
 			</svg>
+			{props.handles && image.pick !== undefined ? <Handles image={image} nodes={s.analysis?.nodes ?? []} stackAt={(x, y) => normalize(stackAt(x, y))} /> : null}
 		</div>
 	);
 }
@@ -245,6 +252,7 @@ function BigView(): preact.JSX.Element {
 	const model = s.lastValid?.model ?? null;
 	const items = galleryOf(model);
 	const name = app.displayName();
+	const basic = s.level === "basic";
 	const image = s.images.get(s.form);
 	const invalid = s.analysis !== null && !s.analysis.valid;
 	const isFold = s.form.startsWith("fold:");
@@ -253,15 +261,15 @@ function BigView(): preact.JSX.Element {
 	const folds = (model?.["fold"] ?? {}) as Record<string, { steps?: unknown[] }>;
 	const steps = isFold ? (folds[s.form.slice(5)]?.steps?.length ?? 1) : 0;
 	const step = s.foldStep[s.form] ?? steps;
-	const hint = invalid ? "Last good render. It stays here until the file is valid again." : refused ? "" : isFold ? "Parts can be selected on the flat flag." : padded ? "Padding keeps the true shape, and the rest is transparent." : "Click any part of the flag to edit it. Click again to step out to what holds it.";
+	const hint = basic && !invalid ? "Click anything on the flag to change it. Drag it to move or resize it." : invalid ? "Last good render. It stays here until the file is valid again." : refused ? "" : isFold ? "Parts can be selected on the flat flag." : padded ? "Padding keeps the true shape, and the rest is transparent." : "Click any part of the flag to edit it. Click again to step out to what holds it.";
 	const alt = `${name}, ${labelOf(s.form, items, padded).toLowerCase()}, as drawn from its file`;
 	const refusalText = image?.refused !== undefined && model !== null && !Object.hasOwn(model, "adapt") ? `${name} doesn't say how it adapts to other proportions, so it won't be stretched to fit.` : `${image?.refused ?? ""} It won't be stretched to fit.`;
 	return (
 		<section class="card big-view" aria-label="Big view" style={image !== undefined && image.width > 0 && image.height > 0 ? { "--flag-ratio": String(image.width / image.height) } : undefined}>
 			<div class="title-row">
 				<h1 class="flag-name">{name}</h1>
-				<span class="nx-muted">{labelOf(s.form, items, padded)}</span>
-				{s.busy ? <Spinner label="Drawing" /> : null}
+				{basic ? null : <span class="nx-muted">{labelOf(s.form, items, padded)}</span>}
+				{s.busy && !s.gesturing ? <Spinner label="Drawing" /> : null}
 			</div>
 			<div class="check stage-box">
 				{image === undefined ? <span class="bone bone-flag" aria-hidden="true" /> : refused ? (
@@ -269,7 +277,7 @@ function BigView(): preact.JSX.Element {
 						<p class="nx-callout warn"><span>{refusalText}</span></p>
 						{image?.url ? <button type="button" class="nx-ghost" onClick={() => { app.padForm(s.form); }}>Pad with transparency</button> : null}
 					</div>
-				) : <FlagStage image={image} alt={alt} dimmed={invalid} />}
+				) : <FlagStage image={image} alt={alt} dimmed={invalid} handles={basic && !invalid && s.form === "flag" && s.mode === "form" && s.basicTab === "design"} />}
 			</div>
 			<div class="under-stage">
 				{isFold && steps > 1 ? (
@@ -387,11 +395,41 @@ function About(): preact.JSX.Element {
 	);
 }
 
+/** Basic's one download button, which asks which of the two is wanted. */
+function DownloadMenu(props: { picture: () => Promise<void>; file: () => void; paused: boolean }): preact.JSX.Element {
+	const [open, setOpen] = useState(false);
+	const box = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (!open) {
+			return undefined;
+		}
+		const away = (e: Event): void => {
+			if (!box.current?.contains(e.target as globalThis.Node)) {
+				setOpen(false);
+			}
+		};
+		document.addEventListener("pointerdown", away);
+		return () => { document.removeEventListener("pointerdown", away); };
+	}, [open]);
+	return (
+		<div class="download-menu" ref={box} onKeyDown={(e) => { if (e.key === "Escape") { setOpen(false); } }}>
+			<button type="button" class="nx-btn" aria-expanded={open ? "true" : "false"} onClick={() => { setOpen(!open); }}>Download</button>
+			{open ? (
+				<div class="download-items" role="group" aria-label="What to download">
+					<button type="button" class="nx-ghost" disabled={props.paused} onClick={() => { setOpen(false); void props.picture(); }}>A picture of the flag</button>
+					<button type="button" class="nx-ghost" onClick={() => { setOpen(false); props.file(); }}>The flag's file, to keep working on</button>
+				</div>
+			) : null}
+		</div>
+	);
+}
+
 export function Header(): preact.JSX.Element {
 	const [s] = useApp();
 	const problems = s.analysis?.problems.length ?? 0;
 	const paused = s.analysis !== null && !s.analysis.valid;
 	const [ack, setAck] = useAck();
+	const basic = s.level === "basic";
 	const stem = fileStem(s.source?.ref !== undefined ? refLabel(s.source.ref).replace(/\.kdl$/, "") : app.displayName());
 	const downloadSvg = async (): Promise<void> => {
 		const result = await engine.ask({ kind: "render", slot: "main", options: optionsFor(s.form, s.padded[s.form] === true, s.foldStep[s.form]), exact: true });
@@ -403,27 +441,36 @@ export function Header(): preact.JSX.Element {
 		}
 	};
 	return (
-		<header class="topbar">
+		<header class={`topbar${basic ? " basic" : ""}`}>
 			<Logo />
-			<span class="file-name">{s.source?.label ?? ""}{app.dirty ? <span class="dirty"> · edited</span> : null}</span>
+			<span class={basic ? "nx-muted flag-title" : "file-name"}>{basic ? app.displayName() : s.source?.label ?? ""}{app.dirty ? <span class="dirty"> · edited</span> : null}</span>
 			<span class="grow" />
 			<span class="visually-hidden" role="status">{ack}</span>
 			{ack !== "" ? <span class="nx-note" aria-hidden="true">{ack}</span> : null}
-			{s.analysis !== null ? (
+			{s.analysis !== null && (!basic || problems > 0) ? (
 				<span class={`status ${problems > 0 ? "bad" : "good"}`}>
 					<span class="status-dot" aria-hidden="true" />{problems > 0 ? `${problems} ${problems === 1 ? "problem" : "problems"}` : "Valid"}
 				</span>
 			) : null}
-			<button type="button" class="nx-ghost" onClick={() => { void app.openLocal(newFlag, "new", "new-flag.kdl"); }}>New flag</button>
+			<Seg label="Editor" value={s.level} options={[["basic", "Basic"], ["advanced", "Advanced"]]} onPick={(v) => { app.setLevel(v as Level); }} />
+			<button type="button" class="nx-ghost" onClick={() => { app.go("new"); }}>New flag</button>
 			<a class="nx-ghost" href={app.href("open")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("open"); } }}>Open a flag</a>
-			<a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>
+			{basic ? null : <a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>}
 			<a class="nx-ghost" href={app.href("share")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("share"); } }}>Share</a>
-			<button type="button" class="nx-ghost" onClick={() => {
+			{basic ? <DownloadMenu picture={downloadSvg} paused={paused || s.analysis === null} file={() => {
 				download(`${stem}.kdl`, app.exportText(), "text/plain");
 				app.markSaved();
-				setAck("Downloaded the KDL.");
-			}}>Download KDL</button>
-			<button type="button" class="nx-btn" disabled={paused || s.analysis === null} title={paused ? "Paused until the file is valid again" : undefined} onClick={() => { void downloadSvg(); }}>Download SVG</button>
+				setAck("Downloaded the flag's file.");
+			}} /> : (
+				<>
+					<button type="button" class="nx-ghost" onClick={() => {
+						download(`${stem}.kdl`, app.exportText(), "text/plain");
+						app.markSaved();
+						setAck("Downloaded the KDL.");
+					}}>Download KDL</button>
+					<button type="button" class="nx-btn" disabled={paused || s.analysis === null} title={paused ? "Paused until the file is valid again" : undefined} onClick={() => { void downloadSvg(); }}>Download SVG</button>
+				</>
+			)}
 		</header>
 	);
 }
@@ -446,6 +493,15 @@ function Notices(): preact.JSX.Element | null {
 	if (also.tabs > 0) {
 		list.push(<p class="nx-callout notice" key="tabs"><span>This flag is also open in another tab{also.dirty ? ", with changes" : ""}. Each tab keeps its own draft, so neither overwrites the other.</span></p>);
 	}
+	if (s.level === "basic" && !s.lawNoteDismissed && (s.analysis?.nodes ?? []).find((n) => n.name === "meta")?.kids.some((k) => k.name === "law") === true) {
+		list.push(
+			<p class="nx-callout notice" key="law">
+				<span>This flag is written from a law. Advanced has its exact numbers and its own words, if that's what you're after.</span>
+				<button type="button" class="nx-ghost small" onClick={() => { app.setLevel("advanced"); }}>Switch to Advanced</button>
+				<button type="button" class="nx-link quiet" onClick={() => { app.set({ lawNoteDismissed: true }); }}>Dismiss</button>
+			</p>,
+		);
+	}
 	if (s.mixedEol) {
 		list.push(<p class="nx-callout notice warn" key="eol"><span>This file mixes line endings. They're shown as one kind here, and it's written back with LF.</span></p>);
 	}
@@ -460,7 +516,7 @@ function Notices(): preact.JSX.Element | null {
 			</p>,
 		);
 	}
-	return list.length > 0 ? <div class="notices">{list}</div> : null;
+	return list.length > 0 ? <section class="notices" aria-label="Notices">{list}</section> : null;
 }
 
 export function Workspace(): preact.JSX.Element {
@@ -477,30 +533,41 @@ export function Workspace(): preact.JSX.Element {
 		};
 		syncSource(s.analysis?.problems ?? [], span(s.selected), span(s.hover));
 	}, [s.analysis, s.selected, s.hover, s.lastReadable]);
-	useEffect(refreshSource, [s.mode]);
+	useEffect(refreshSource, [s.mode, s.level]);
+	const basic = s.level === "basic";
+	// Both editors keep the one Source, in the same place, so that switching doesn't lose what can be undone.
 	return (
 		<>
 			<Header />
 			<Notices />
-			<main class="work">
+			<main class={`work${basic ? " basic" : ""}`}>
 				<div class="column">
 					<section class="card editor" aria-label="Editor">
 						<div class="editor-bar">
-							<Seg label="Edit as" value={s.mode} options={[["form", "Form"], ["source", "Source"]]} onPick={(v) => { app.setMode(v as "form" | "source"); }} />
+							{basic ? (
+								<Seg label="What to work on" value={s.mode === "source" ? "source" : s.basicTab} options={[["design", "Design"], ["details", "Details"], ["source", "Source"]]} onPick={(v) => {
+									if (v === "source") {
+										app.setMode("source");
+									} else {
+										app.set({ basicTab: v as "design" | "details" });
+										app.setMode("form");
+									}
+								}} />
+							) : <Seg label="Edit as" value={s.mode} options={[["form", "Form"], ["source", "Source"]]} onPick={(v) => { app.setMode(v as "form" | "source"); }} />}
 							<span class="grow" />
-							<span class="nx-note">{s.mode === "source" ? "Escape, then Tab, leaves the editor" : "Renders as you type"}</span>
+							{s.mode === "source" || !basic ? <span class="nx-note">{s.mode === "source" ? "Escape, then Tab, leaves the editor" : "Renders as you type"}</span> : null}
 						</div>
 						<div class="editor-body">
-							{s.mode === "form" ? <Form /> : null}
+							{s.mode === "form" ? (basic ? <BasicEditor /> : <Form />) : null}
 							<SourceEditor hidden={s.mode !== "source"} />
 						</div>
 					</section>
-					<About />
+					{basic ? null : <About />}
 				</div>
 				<div class="column">
 					<BigView />
 					<SmallSizes />
-					<Gallery />
+					{basic ? null : <Gallery />}
 				</div>
 			</main>
 		</>

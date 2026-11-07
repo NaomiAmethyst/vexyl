@@ -179,7 +179,7 @@ export interface Address {
 	ref: Ref | null;
 	badRef: string | null;
 	link: string | null;
-	view: "work" | "open" | "compare" | "share";
+	view: "work" | "open" | "compare" | "share" | "new";
 	with: Ref | null;
 }
 
@@ -193,7 +193,7 @@ export function readAddress(search: string, hash: string): Address {
 		ref,
 		badRef: open !== null && ref === null ? open : null,
 		link: hash.startsWith("#v") ? hash.slice(1) : null,
-		view: view === "open" || view === "compare" || view === "share" ? view : "work",
+		view: view === "open" || view === "compare" || view === "share" || view === "new" ? view : "work",
 		with: withText === null ? null : parseRef(withText),
 	};
 }

@@ -123,3 +123,6 @@ export function matching(value: string, from: string, to: string): string | null
 export function factorText(factor: Fraction): string {
 	return factor.d === 1n ? String(factor.n) : `${factor.n}/${factor.d}`;
 }
+
+export const plus = (a: Fraction, b: Fraction): Fraction => fraction(a.n * b.d + b.n * a.d, a.d * b.d);
+export const minus = (a: Fraction, b: Fraction): Fraction => fraction(a.n * b.d - b.n * a.d, a.d * b.d);

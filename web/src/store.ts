@@ -9,7 +9,20 @@ import { engine } from "./engine.js";
 import type { Analysis, ONode, Op, PickNode, RenderResult } from "./protocol.js";
 import { evidenceTiers, fetchRef, type GistFile } from "./remote.js";
 
-export type View = "work" | "open" | "compare" | "share";
+export type View = "work" | "open" | "compare" | "share" | "new";
+
+/** Which editor a person works in. It's theirs, not the flag's. */
+export type Level = "basic" | "advanced";
+
+const levelKey = "vexyl.editor";
+
+function savedLevel(): Level {
+	try {
+		return globalThis.localStorage.getItem(levelKey) === "advanced" ? "advanced" : "basic";
+	} catch {
+		return "basic";
+	}
+}
 
 export interface Source {
 	kind: "github" | "gist" | "url" | "file" | "paste" | "link" | "new";
@@ -35,6 +48,9 @@ export interface GalleryItem {
 
 export interface State {
 	view: View;
+	level: Level;
+	/** Which of Basic's tabs is showing, when it isn't Source. */
+	basicTab: "design" | "details";
 	mode: "form" | "source";
 	loading: string | null;
 	loadError: string | null;
@@ -45,6 +61,12 @@ export interface State {
 	mixedEol: boolean;
 	source: Source | null;
 	analysis: Analysis | null;
+	/** The text the analysis is of, which lags behind while it's being changed. */
+	analyzed: string;
+	/** Whether something's being dragged, which draws no selection and can't be undone halfway. */
+	gesturing: boolean;
+	/** Whether the note about a flag with a law has been dismissed, for this flag. */
+	lawNoteDismissed: boolean;
 	/** The last time the document was readable, and valid, for when it isn't now. */
 	lastReadable: Analysis | null;
 	lastValid: Analysis | null;
@@ -66,24 +88,11 @@ export interface State {
 
 function initial(): State {
 	return {
-		view: "work", mode: "form", loading: null, loadError: null, gistFiles: null, text: "", base: "", eol: "\n", mixedEol: false, source: null,
+		view: "work", level: savedLevel(), basicTab: "design", analyzed: "", gesturing: false, lawNoteDismissed: false, mode: "form", loading: null, loadError: null, gistFiles: null, text: "", base: "", eol: "\n", mixedEol: false, source: null,
 		analysis: null, lastReadable: null, lastValid: null, selected: null, hover: null, sourceJump: 0, form: "flag", padded: {}, foldStep: {},
 		images: new Map(), busy: false, tier: null, orphan: null, sameInOtherTab: { tabs: 0, dirty: false }, saved: true, notice: null, storageNote: false,
 	};
 }
-
-export const newFlag = `vexyl 1
-meta {
-  name "New flag"
-}
-palette {
-  black "#000000"
-  white "#ffffff"
-}
-proportion hoist=2 fly=3
-
-field white
-`;
 
 const ratios: readonly [string, string, number][] = [["ratio:1:1", "1:1", 1], ["ratio:2:3", "2:3", 1.5], ["ratio:1:2", "1:2", 2]];
 
@@ -162,8 +171,21 @@ function firstDifference(a: string, b: string): [number, number, number] {
 	return [start, endA, endB];
 }
 
+/** One drag's worth of edits, sent as fast as they can be taken, however many come along. */
+export interface Gesture {
+	push(ops: Op[]): void;
+	/** Ends it, as one thing to undo. */
+	finish(): Promise<void>;
+	/** Ends it, as though it never was. */
+	cancel(): Promise<void>;
+}
+
+/** The least time between one drag's edits. Each one still waits for the one before. */
+const gestureGap = 60;
+
 export interface EditorBridge {
-	replace(from: number, to: number, insert: string): void;
+	/** With `apart`, it's its own step to undo, whatever came just before it. */
+	replace(from: number, to: number, insert: string, apart?: boolean): void;
 	setDoc(text: string): void;
 	scrollToLine(line: number): void;
 }
@@ -184,6 +206,8 @@ export class App {
 	private docSeq = 0;
 	private editing: Promise<void> = Promise.resolve();
 	private following: { from: string | null; to: { path: string } | { at: readonly number[] } } | null = null;
+	/** The text from before a drag started, while one's going on. Source only hears about it at the end. */
+	private gestureBase: string | null = null;
 
 	subscribe(fn: () => void): () => void {
 		this.listeners.add(fn);
@@ -333,6 +357,7 @@ export class App {
 		history.pushState(null, "", "?");
 		this.adopt(text, { kind, label }, `local:${crypto.randomUUID?.() ?? Date.now()}`, {});
 		this.set({ view: "work" });
+		scrollTo(0, 0);
 	}
 
 	private adopt(text: string, source: Source, key: string, how: { draft?: Draft; base?: string; eol?: string }): void {
@@ -351,7 +376,7 @@ export class App {
 		this.set({
 			loading: null, loadError: null, gistFiles: null, text: shown, base: how.draft !== undefined ? how.draft.base : base, eol,
 			mixedEol: breaks.length > 0 && crlf > 0 && !allCrlf,
-			source, analysis: null, lastReadable: null, lastValid: null, selected: null, hover: null, form: "flag", padded: {}, foldStep: {}, images: new Map(),
+			source, analysis: null, analyzed: "", lawNoteDismissed: false, lastReadable: null, lastValid: null, selected: null, hover: null, form: "flag", padded: {}, foldStep: {}, images: new Map(),
 			saved: shown === (how.draft?.base ?? base), orphan: null,
 		});
 		this.bridge?.setDoc(shown);
@@ -442,6 +467,7 @@ export class App {
 			if (seq === this.docSeq && text === this.state.text) {
 				this.set({
 					analysis,
+					analyzed: text,
 					lastReadable: analysis.readable ? analysis : this.state.lastReadable,
 					lastValid: analysis.valid ? analysis : this.state.lastValid,
 				});
@@ -476,6 +502,10 @@ export class App {
 		const { form, padded, foldStep } = this.state;
 		await this.renderOne(form, padded[form] === true, foldStep[form], seq, true);
 		clearTimeout(this.thumbTimer);
+		if (this.state.level === "basic") {
+			// Basic has no gallery, and a drag shouldn't wait for one.
+			return;
+		}
 		this.thumbTimer = setTimeout(() => {
 			void (async (): Promise<void> => {
 				for (const item of galleryOf(this.state.lastValid?.model ?? null)) {
@@ -638,12 +668,99 @@ export class App {
 				return undefined;
 			}
 			const [start, endA, endB] = firstDifference(before, done.text);
-			this.bridge?.replace(start, endA, done.text.slice(start, endB));
-			this.setText(done.text);
+			if (this.gestureBase === null) {
+				this.bridge?.replace(start, endA, done.text.slice(start, endB));
+				this.setText(done.text);
+			} else {
+				this.setText(done.text);
+				clearTimeout(this.analyzeTimer);
+				void this.analyzeNow();
+			}
 			return undefined;
 		});
 		this.editing = run.then(() => undefined);
 		return run;
+	}
+
+	/** Starts a drag. However many edits it sends, it's one thing to undo, and the last one always arrives. */
+	startGesture(): Gesture {
+		this.set({ gesturing: true, hover: null });
+		const opened = this.editing.then(() => {
+			this.gestureBase = this.state.text;
+		});
+		this.editing = opened;
+		let latest: Op[] | null = null;
+		let running: Promise<void> | null = null;
+		let last = 0;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const pump = (): void => {
+			clearTimeout(timer);
+			if (running !== null || latest === null) {
+				return;
+			}
+			const wait = gestureGap - (Date.now() - last);
+			if (wait > 0) {
+				timer = setTimeout(pump, wait);
+				return;
+			}
+			const ops = latest;
+			latest = null;
+			running = this.change(ops).then((error) => {
+				running = null;
+				last = Date.now();
+				if (error !== undefined) {
+					this.set({ notice: error });
+				}
+				pump();
+			});
+		};
+		const end = async (keep: boolean): Promise<void> => {
+			clearTimeout(timer);
+			last = 0;
+			if (!keep) {
+				latest = null;
+			}
+			while (running !== null || latest !== null) {
+				pump();
+				await running;
+			}
+			const closed = this.editing.then(() => {
+				const base = this.gestureBase;
+				this.gestureBase = null;
+				if (base === null) {
+					return;
+				}
+				if (!keep) {
+					this.setText(base);
+				} else if (base !== this.state.text) {
+					const [start, endA, endB] = firstDifference(base, this.state.text);
+					this.bridge?.replace(start, endA, this.state.text.slice(start, endB), true);
+				}
+			});
+			this.editing = closed;
+			await closed;
+			this.set({ gesturing: false });
+		};
+		return { push: (ops) => { latest = ops; pump(); }, finish: () => end(true), cancel: () => end(false) };
+	}
+
+	/** Switches editors, which only changes what's on screen, and remembers it for next time. */
+	setLevel(level: Level): void {
+		try {
+			globalThis.localStorage.setItem(levelKey, level);
+		} catch {
+			// It just won't be remembered.
+		}
+		this.set({ level, ...(level === "basic" ? { form: "flag" } : {}) });
+		if (this.state.analysis?.valid === true) {
+			void this.renderForms();
+		}
+	}
+
+	/** Goes straight to a part in Advanced. */
+	editInAdvanced(path: string | null): void {
+		this.setLevel("advanced");
+		this.set({ mode: "form", selected: path });
 	}
 
 	/** Makes a change, then moves the panel and the big view to what it made, once that's been read. */

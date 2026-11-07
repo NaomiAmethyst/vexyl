@@ -23,6 +23,10 @@ workers need an origin.
 - **One document.** Form and Source edit the same text. The form sends the worker changes to make through
   `@bgotink/kdl`'s format-preserving model (`src/document.ts`), which touches only what it's asked to, and
   `make check-web` tests that comments, order and spacing come through byte for byte.
+- **Two editors over one file.** Advanced is `src/form.tsx`, in the format's own words, for writing a flag from a law or a construction sheet.
+  Basic is `src/basic.tsx`, in plain names, with handles on the flag (`src/handles.tsx`), for making one without knowing the format. It works out what a
+  drag means in `src/snap.ts` and `src/flagdrag.ts` and reads the file through `src/flagview.ts`. It only edits what it's asked to, through the same model, and it lists
+  whatever it has no control for. Fractions and turns are only ever on screen: the file keeps plain numbers and degrees.
 - **Table-driven.** `src/vocab.ts` holds the format's terms as tables, and `src/form.tsx` draws the form from them. Anything
   in a file that isn't in a table is listed as being only in the source, and it's left alone.
 - **A flag is always an image.** What's shown is an `<img>` of the library's sanitized SVG, from a `blob:` URL, so it

@@ -6,6 +6,7 @@ import { Logo, useApp } from "./common.js";
 import { ComparePage } from "./compare.js";
 import { GistChoice, LoadProblem, OpenPage } from "./open.js";
 import { SharePage } from "./share.js";
+import { StartPage } from "./start.js";
 import { redoInSource, undoInSource } from "./source.js";
 import { app } from "./store.js";
 import { Workspace } from "./workspace.js";
@@ -30,6 +31,9 @@ function Root(): preact.JSX.Element {
 	if (s.view === "open") {
 		return <Plain><OpenPage /></Plain>;
 	}
+	if (s.view === "new") {
+		return <Plain><StartPage /></Plain>;
+	}
 	if (s.source === null) {
 		return <Plain><main class="page-center" aria-busy="true"><section class="raised narrow"><span class="spinner-row" role="status"><span class="spinner" aria-hidden="true" />{s.loading !== null ? `Opening ${s.loading}` : "Starting"}</span><span class="bone bone-flag" aria-hidden="true" /></section></main></Plain>;
 	}
@@ -49,6 +53,10 @@ addEventListener("keydown", (e: KeyboardEvent) => {
 	}
 	const target = e.target as HTMLElement;
 	if (target.closest("input, textarea, .source-host") !== null) {
+		return;
+	}
+	if (app.state.gesturing) {
+		e.preventDefault();
 		return;
 	}
 	e.preventDefault();

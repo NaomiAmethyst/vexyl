@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { after, before, test } from "node:test";
-import { launch, mockWorld, openUrl, readFlag, ready, savedText, serve, watch } from "./helpers.mjs";
+import { launch, mockWorld, openUrl, readFlag, ready, savedText, serve, startFlag, watch } from "./helpers.mjs";
 
 let srv;
 let browser;
@@ -500,7 +500,7 @@ test("a number can be typed one key at a time into any box, without losing its p
 	const { p, context, errors } = await page(undefined);
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("button", { name: "Start a new flag" }).click();
-	await ready(p);
+	await startFlag(p);
 	for (const name of ["Lozenge", "Star", "Rectangle", "Band", "Cross", "Canton", "Panel"]) {
 		await p.getByRole("button", { name: "Add a term" }).click();
 		await p.locator(`.add-item[data-label='${name}']`).first().click();
@@ -535,15 +535,15 @@ test("a position given on one axis stays centered on the other, and .5 can be ty
 	const { p, context } = await page(undefined);
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("button", { name: "Start a new flag" }).click();
-	await ready(p);
+	await startFlag(p);
 	await p.getByRole("button", { name: "Add a term" }).click();
 	await p.locator(".add-item[data-label='Lozenge']").click();
 	await p.locator(".row-wrap .row", { hasText: "Lozenge" }).click();
 	const from = p.getByLabel("From the hoist edge");
-	assert.equal(await p.getByLabel("From the top").getAttribute("placeholder"), "Center, 1");
+	assert.equal(await p.getByLabel("From the top").getAttribute("placeholder"), "Center, 30");
 	await from.click();
 	await p.keyboard.type(".5", { delay: 40 });
-	await p.waitForFunction(() => document.querySelector("textarea[aria-label^='Source']")?.value.includes("at fly=0.5 hoist=1"));
+	await p.waitForFunction(() => document.querySelector("textarea[aria-label^='Source']")?.value.includes("at fly=0.5 hoist=30"));
 	await from.fill("");
 	await p.waitForFunction(() => !document.querySelector("textarea[aria-label^='Source']")?.value.includes("at fly"));
 	await context.close();
@@ -644,6 +644,7 @@ test("what a flag can only have one of isn't offered twice, and a new flag can b
 	await context.close();
 	const fresh = await page("reviewed/japan.kdl");
 	await fresh.p.getByRole("button", { name: "New flag" }).click();
+	await startFlag(fresh.p);
 	await fresh.p.locator(".row", { hasText: "Field" }).first().waitFor();
 	assert.ok((await savedText(fresh.p)).includes('name "New flag"'));
 	await fresh.p.locator(".status", { hasText: "Valid" }).waitFor();

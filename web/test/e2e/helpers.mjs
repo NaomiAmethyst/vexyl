@@ -85,8 +85,20 @@ const cors = { "access-control-allow-origin": "*", "access-control-expose-header
 /**
  * Answers everything that would go to GitHub from a checkout of the flags, as GitHub does. It
  * records what was asked, and fails anything else, so that a test sees any other request.
+ *
+ * It also opens everything in Advanced, as most of these tests want, unless `basic` is given, which
+ * leaves the choice to the page, as for someone who's new here.
  */
 export async function mockWorld(context, opts = {}) {
+	if (opts.basic !== true) {
+		await context.addInitScript(() => {
+			try {
+				localStorage.setItem("vexyl.editor", "advanced");
+			} catch {
+				// A page without an origin has nowhere to keep it.
+			}
+		});
+	}
 	const log = { requests: [], foreign: [], writes: [] };
 	const root = opts.root ?? flagsDir;
 	await context.route(/^https?:\/\/(?!127\.0\.0\.1)/, async (route) => {
@@ -169,7 +181,7 @@ export const openUrl = (base, path) => `${base}?open=github:NaomiAmethyst/vexyl-
 
 /** Waits until the flag has been read and drawn. */
 export async function ready(page) {
-	await page.locator(".status").waitFor({ timeout: 60000 });
+	await page.locator(".status, .work.basic .stage-image").first().waitFor({ timeout: 60000 });
 	await page.locator(".stage-image, .refusal").first().waitFor({ timeout: 60000 });
 	await page.waitForFunction(() => document.querySelector(".stage-image")?.complete !== false, null, { timeout: 60000 });
 }
@@ -179,6 +191,16 @@ export async function savedText(page) {
 	const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download KDL" }).first().click()]);
 	const path = await file.path();
 	return readFileSync(path, "utf8");
+}
+
+/** Starts a new flag from the start screen, as a blank one unless told otherwise. */
+export async function startFlag(page, layout = "blank", shape) {
+	await page.locator(".start-tile").first().waitFor();
+	if (shape !== undefined) {
+		await page.getByRole("radio", { name: shape, exact: true }).click();
+	}
+	await page.locator(`.start-tile[data-layout="${layout}"]`).click();
+	await ready(page);
 }
 
 export const axeSource = () => readFileSync(join(web, "node_modules/axe-core/axe.min.js"), "utf8");

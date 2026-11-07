@@ -6,7 +6,7 @@ import { defaultRepo, gistRef, openHref, parseRef, refFromLink, type Ref } from 
 import { Spinner, Tabs, useApp } from "./common.js";
 import { engine } from "./engine.js";
 import { evidenceTiers, fetchRef, fetchText, githubTree, maxDownload, RemoteError, type GistFile, type Tree } from "./remote.js";
-import { app, newFlag } from "./store.js";
+import { app } from "./store.js";
 import { plain } from "./workspace.js";
 
 export interface PickResult {
@@ -450,7 +450,7 @@ export function OpenPage(): preact.JSX.Element {
 				<OpenPanel {...(hasDoc ? { onCancel: (): void => { app.go("work"); } } : {})} />
 				<div class="start-new">
 					<span class="nx-muted">Or start from nothing.</span>
-					<button type="button" class="nx-ghost" onClick={() => { void app.openLocal(newFlag, "new", "new-flag.kdl"); }}>Start a new flag</button>
+					<button type="button" class="nx-ghost" onClick={() => { app.go("new"); }}>Start a new flag</button>
 				</div>
 			</section>
 		</main>
