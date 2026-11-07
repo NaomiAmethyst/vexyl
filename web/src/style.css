@@ -467,3 +467,9 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
   .work.basic > .column:last-child { order: -1; flex-basis: 100%; }
   .start { padding: 24px 16px; }
 }
+
+/* The small copy of the flag that follows a narrow screen's scrolling. */
+.floating-flag { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 20; padding: 6px; border: 1px solid var(--line2); border-radius: 12px; background: var(--raised); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); cursor: pointer; animation: float-in 0.18s ease; }
+.floating-flag img { display: block; width: auto; height: auto; max-width: 112px; max-height: 76px; border-radius: 4px; }
+@keyframes float-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .floating-flag { animation: none; } }

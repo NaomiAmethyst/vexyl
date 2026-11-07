@@ -247,6 +247,51 @@ function labelOf(id: string, items: readonly GalleryItem[], padded: boolean): st
 	return (items.find((i) => i.id === id)?.label ?? "") + (padded ? ", padded" : "");
 }
 
+/** Where the columns stack, so that the big view can scroll out of sight. */
+const stacked = "(max-width: 1099px)";
+
+/**
+ * A small copy of the flag in a corner, while the big one is scrolled out of sight on a narrow
+ * screen, so a change can still be seen as it's made. Tapping it goes back to the big one.
+ */
+function FloatingFlag(): preact.JSX.Element | null {
+	const [s] = useApp();
+	const [away, setAway] = useState(false);
+	// The big view can come and go, as a file loads or the view changes, so this follows whichever there is.
+	const big = document.querySelector(".big-view");
+	useEffect(() => {
+		if (big === null || typeof IntersectionObserver === "undefined") {
+			setAway(false);
+			return undefined;
+		}
+		const narrow = matchMedia(stacked);
+		let seen = true;
+		const update = (): void => { setAway(!seen && narrow.matches); };
+		const watch = new IntersectionObserver((entries) => {
+			seen = entries.some((e) => e.isIntersecting);
+			update();
+		});
+		watch.observe(big);
+		narrow.addEventListener("change", update);
+		return () => {
+			watch.disconnect();
+			narrow.removeEventListener("change", update);
+		};
+	}, [big]);
+	const image = s.images.get(s.form);
+	if (!away || image === undefined || image.url === "" || image.refused !== undefined) {
+		return null;
+	}
+	return (
+		<button type="button" class="floating-flag" aria-label="Back to the flag" onClick={() => {
+			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+			document.querySelector(".big-view")?.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+		}}>
+			<img src={image.url} alt="" draggable={false} />
+		</button>
+	);
+}
+
 function BigView(): preact.JSX.Element {
 	const [s] = useApp();
 	const model = s.lastValid?.model ?? null;
@@ -584,6 +629,7 @@ export function Workspace(): preact.JSX.Element {
 					{basic ? null : <Gallery />}
 				</div>
 			</main>
+			<FloatingFlag />
 		</>
 	);
 }

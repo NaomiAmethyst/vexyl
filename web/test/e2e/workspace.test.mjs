@@ -630,6 +630,28 @@ test("a long palette names each color", async () => {
 	await context.close();
 });
 
+test("on a phone, a small flag follows while the big one is out of sight, and goes back to it", async () => {
+	const { p, context } = await page("reviewed/japan.kdl", { viewport: { width: 390, height: 844 } });
+	// The form comes first on a phone, so the big flag starts below it.
+	const small = p.getByRole("button", { name: "Back to the flag" });
+	await small.waitFor();
+	assert.equal(await small.locator("img").getAttribute("src"), await p.locator(".stage-image").getAttribute("src"));
+	await small.click();
+	await p.waitForFunction(() => { const r = document.querySelector(".big-view").getBoundingClientRect(); return Math.abs(r.top) < 2; });
+	await p.waitForFunction(() => document.querySelector(".floating-flag") === null);
+	await p.evaluate(() => { window.scrollTo(0, 0); });
+	await small.waitFor();
+	await context.close();
+});
+
+test("on a wide screen, nothing floats", async () => {
+	const { p, context } = await page("reviewed/japan.kdl", { viewport: { width: 1440, height: 600 } });
+	await p.evaluate(() => { window.scrollTo(0, document.body.scrollHeight); });
+	await p.waitForTimeout(300);
+	assert.equal(await p.locator(".floating-flag").count(), 0);
+	await context.close();
+});
+
 test("what a flag can only have one of isn't offered twice, and a new flag can be started at any time", async () => {
 	const { p, context } = await page("reviewed/japan.kdl");
 	const add = p.getByRole("button", { name: "Add a term" });
