@@ -277,6 +277,19 @@ test("anything the form can't edit says so, offers the source, and is left alone
 	await context.close();
 });
 
+test("a variant's own outline and border are said to be in the source", async () => {
+	const body = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=10 fly=20\nfield a\nvariant v {\n  outline pennant\n  border a 1\n}\n';
+	const { p, context } = await page(undefined);
+	await p.goto(`${srv.base}?view=open`);
+	await p.getByRole("tab", { name: "Paste" }).click();
+	await p.getByLabel("KDL").fill(body);
+	await p.getByRole("button", { name: "Open", exact: true }).click();
+	await ready(p);
+	await row(p, "variant/v").click();
+	await p.locator(".source-only").getByText("outline, border").waitFor();
+	await context.close();
+});
+
 test("add a term offers a skeleton that's valid, for every kind it offers", async () => {
 	const { p, context, errors } = await page("reviewed/japan.kdl");
 	const add = p.getByRole("button", { name: "Add a term" });

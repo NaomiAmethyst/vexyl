@@ -564,7 +564,7 @@ function onlyInSource(node: ONode, fields: readonly Field[], inPalette: boolean)
 		if (handled.has(k.name)) {
 			continue;
 		}
-		if (layerKids && k.path !== undefined) {
+		if (layerKids && k.path !== undefined && layerTerms[k.name] !== undefined) {
 			continue;
 		}
 		out.push(k.name);

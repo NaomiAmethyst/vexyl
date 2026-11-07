@@ -85,7 +85,7 @@ test("across real flags, the only things the form leaves to the source are the k
 				looked++;
 				const handled = v.handledChildren([...fields, ...extra]);
 				for (const k of n.kids) {
-					if (!handled.has(k.name) && !(term?.layers === true && k.path !== undefined)) {
+					if (!handled.has(k.name) && !(term?.layers === true && k.path !== undefined && v.layers[k.name] !== undefined)) {
 						const key = `${n.name} > ${k.name}`;
 						left.set(key, (left.get(key) ?? 0) + 1);
 					}
@@ -104,7 +104,7 @@ test("across real flags, the only things the form leaves to the source are the k
 	}
 	assert.ok(looked > 1000, String(looked));
 	// What a definition holds is itself left to the source if it's one shape rather than layers.
-	const allowed = /^(define > .*|outline > (polygon|path)|[a-z]+ > (clip|cut))$/;
+	const allowed = /^(define > .*|outline > (polygon|path)|variant > (outline|border)|[a-z]+ > (clip|cut))$/;
 	const other = [...left.keys()].filter((k) => !allowed.test(k));
 	assert.deepEqual(other, [], JSON.stringify([...left.entries()]));
 });
