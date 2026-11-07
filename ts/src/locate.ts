@@ -2,6 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { getLocation, InvalidKdlError, parse as parseKdl, type Node } from "@bgotink/kdl";
+import { withoutMisreadHex } from "./hex.js";
 import { encodePathName } from "./paths.js";
 
 /** Where something in a document is. Lines and columns are counted as a problem's are. */
@@ -27,7 +28,7 @@ export function locate(text: string): Span[] {
 	const source = text.replace(/\r\n?/g, "\n");
 	let nodes: Node[];
 	try {
-		nodes = parseKdl(source, { storeLocations: true }).nodes;
+		nodes = parseKdl(withoutMisreadHex(source), { storeLocations: true }).nodes;
 	} catch (e) {
 		if (e instanceof InvalidKdlError) {
 			return [];

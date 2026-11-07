@@ -96,6 +96,7 @@ const shared = {
 	define: { "process.env.NODE_ENV": '"production"' },
 	alias: {
 		"vexyl/paths": resolve(here, "../ts/src/paths.ts"),
+		"vexyl/hex": resolve(here, "../ts/src/hex.ts"),
 		vexyl: resolve(here, "../ts/src/index.ts"),
 		"@bgotink/kdl": resolve(here, "node_modules/@bgotink/kdl/index.js"),
 		fflate: resolve(here, "node_modules/fflate/esm/browser.js"),

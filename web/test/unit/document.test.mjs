@@ -294,3 +294,15 @@ test("a term's source can be replaced, if it's still one term that can be read",
 	assert.match(applyOps(text, op("variant v\nvariant w")).error, /one term/);
 	assert.match(applyOps(text, op("variant w", "variant x")).error, /changed/);
 });
+
+test("a hexadecimal number before a semicolon doesn't swallow what follows it", () => {
+	const text = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n}\nproportion hoist=0x14 fly=30\nfield a\ncharge disc a { radius 2; at fly=5 hoist=0x0A; rotate 5; }\n';
+	assert.deepEqual(lib.validate(text), []);
+	const charge = outline(text).find((x) => x.name === "charge");
+	assert.deepEqual(charge.kids.map((k) => k.name), ["radius", "at", "rotate"]);
+	assert.equal(text.slice(charge.start, charge.end), "charge disc a { radius 2; at fly=5 hoist=0x0A; rotate 5; }");
+	assert.match(applyOps(text, [{ op: "remove", at: [5] }]).error, /hexadecimal/);
+	for (const safe of ['field a // 0x0A; b\n', 'bars "0x0A; b" a\n', 'x #"0x0A; b"#\n', 'x /* 0x0A; b */ 1\n', 'x """\n 0x0A; b\n """\n', 'x a0x0A; y\n']) {
+		assert.equal(applyOps(safe, [{ op: "add", at: null, text: "z" }]).error, undefined, safe);
+	}
+});

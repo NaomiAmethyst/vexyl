@@ -2,6 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { getLocation, InvalidKdlError, parse as parseKdl, type Document, type Node } from "@bgotink/kdl";
+import { withoutMisreadHex } from "./hex.js";
 import { foldFacets, foldShape } from "./fold.js";
 import { boundary, offsetPolygon } from "./geometry.js";
 import { addSize, inLimits, layersHeight, layersSize, maxCopies, maxSize, waves } from "./limits.js";
@@ -200,7 +201,7 @@ export function read(text: string, name?: string): { flag?: Flag; problems: Prob
 	const source = text.replace(/\r\n?/g, "\n");
 	let doc: Document;
 	try {
-		doc = parseKdl(source, { storeLocations: true });
+		doc = parseKdl(withoutMisreadHex(source), { storeLocations: true });
 	} catch (e) {
 		if (e instanceof InvalidKdlError) {
 			return { problems: syntaxProblems(e, source, name) };

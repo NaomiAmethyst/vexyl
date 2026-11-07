@@ -19,6 +19,7 @@
     "paths": {
       "vexyl": ["../ts/src/index.ts"],
       "vexyl/paths": ["../ts/src/paths.ts"],
+      "vexyl/hex": ["../ts/src/hex.ts"],
       "@bgotink/kdl": ["node_modules/@bgotink/kdl/index.d.ts"],
       "fflate": ["node_modules/fflate/lib/index.d.ts"]
     }

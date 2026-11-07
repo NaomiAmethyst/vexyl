@@ -1,5 +1,9 @@
 [
  {
+  "name": "a hexadecimal number right before a semicolon",
+  "file": "accepted/a-hexadecimal-number-right-before-a-semicolon.kdl"
+ },
+ {
   "name": "paints exactly the limit",
   "file": "accepted/paints-exactly-the-limit.kdl"
  },

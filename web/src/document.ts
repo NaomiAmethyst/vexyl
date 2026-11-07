@@ -6,6 +6,7 @@
 // back out exactly as it went in.
 
 import { format, getLocation, Identifier, InvalidKdlError, Node as NodeClass, parse as parseKdl, Value, type Document, type Entry, type Node } from "@bgotink/kdl";
+import { hasMisreadHex, withoutMisreadHex } from "vexyl/hex";
 import { encodePathName } from "vexyl/paths";
 import { factorText } from "./exact.js";
 import { exactGrids, rescale } from "./rescale.js";
@@ -53,7 +54,7 @@ function lineOf(starts: number[], offset: number): number {
 export function outline(source: string): ONode[] | null {
 	let doc: Document;
 	try {
-		doc = parseKdl(source, { storeLocations: true });
+		doc = parseKdl(withoutMisreadHex(source), { storeLocations: true });
 	} catch (e) {
 		if (e instanceof InvalidKdlError) {
 			return null;
@@ -537,7 +538,7 @@ function apply(doc: Document, op: Op): void {
 /** Says what restating a flag on a grid with this hoist would do, changing nothing. */
 export function rescalePreview(text: string, hoist: string): RescalePreview {
 	try {
-		const doc = parseKdl(text) as Document;
+		const doc = parseKdl(withoutMisreadHex(text)) as Document;
 		const { factor, rounded, values } = rescale(doc, hoist, true);
 		return { factor: factorText(factor), changed: values.length, rounded, exact: rounded.length > 0 ? exactGrids(doc) : [], comments: /(^|\s)\/[/*]/m.test(text) };
 	} catch (e) {
@@ -547,6 +548,9 @@ export function rescalePreview(text: string, hoist: string): RescalePreview {
 
 /** Makes changes to a document, giving the new text. Everything it doesn't touch stays byte for byte. */
 export function applyOps(text: string, ops: Op[]): { text?: string; error?: string } {
+	if (hasMisreadHex(text)) {
+		return { error: "A hexadecimal number right before a semicolon on the same line stops the form changing this file. Put what follows on its own line in Source." };
+	}
 	let doc: Document;
 	try {
 		doc = parseKdl(text);

@@ -21,6 +21,7 @@ export async function load(name) {
 		mainFields: ["module", "main"],
 		alias: {
 			"vexyl/paths": resolve(web, "../ts/src/paths.ts"),
+			"vexyl/hex": resolve(web, "../ts/src/hex.ts"),
 			vexyl: resolve(web, "../ts/src/index.ts"),
 			"@bgotink/kdl": resolve(web, "node_modules/@bgotink/kdl/index.js"),
 			fflate: resolve(web, "node_modules/fflate/esm/browser.js"),

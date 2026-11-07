@@ -625,6 +625,7 @@ func TestCMYKIsNumbers(t *testing.T) {
 // acceptedDocuments have to be valid, and are too big or too odd to be worth drawing. Many
 // sit exactly at a limit, with their neighbors over it in TestRejected.
 var acceptedDocuments = []invalidCase{
+	{name: "a hexadecimal number right before a semicolon", src: header + "charge disc a { radius 2; at fly=5 hoist=0x0A; rotate 5; }\n"},
 	{name: "paints exactly the limit", src: header + strings.Repeat("checks a b { rows 100; columns 100; }\n", 20)},
 	{name: "paints exactly the limit with star points", src: header + "charge star a { radius 1; points 10000; repeat grid rows=5 columns=4; }\n"},
 	{name: "paints exactly the limit with path data", src: header + strings.Repeat(pathCopies(127), 10)},
