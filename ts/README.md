@@ -20,6 +20,16 @@ const data = model(flag);                   // plain data, in the suite's canoni
 `flag` is typed, and its layers say what they are in a `layer` field. Rendering never changes it, so
 one flag can render with many options. A flag that can't be drawn as asked throws a `RenderError`.
 
+Beyond the SDK, `constructionSvg` draws a flag's construction sheet, with its sizes worked out
+exactly from the numbers the file writes, and lists whatever it doesn't measure:
+
+```ts
+import { constructionSvg } from "@naomiamethyst/vexyl";
+
+const sheet = constructionSvg(flag, { units: "hoist", theme: "paper", paper: "a4" });
+const forMaking = constructionSvg(flag, { units: "mm", hoistMm: 1500, path: "flags/country/chile.kdl" });
+```
+
 ## Command
 
 ```sh

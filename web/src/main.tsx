@@ -4,6 +4,7 @@
 import { render } from "preact";
 import { Logo, useApp } from "./common.js";
 import { ComparePage } from "./compare.js";
+import { ConstructionPage } from "./construction.js";
 import { GistChoice, LoadProblem, OpenPage } from "./open.js";
 import { SharePage } from "./share.js";
 import { StartPage } from "./start.js";
@@ -42,6 +43,9 @@ function Root(): preact.JSX.Element {
 	}
 	if (s.view === "compare") {
 		return <ComparePage />;
+	}
+	if (s.view === "construction") {
+		return <ConstructionPage />;
 	}
 	return <Workspace />;
 }

@@ -1,0 +1,53 @@
+// From the law: "Azure a Fess Or issuing from the dexter a Pile Sable" (Schedule, Part I).
+// It gives no sizes. Written here as the blazon reads: field, fess, pile.
+// From elsewhere: 1:2 and three equal stripes are FOTW's account of the Album des
+// Pavillons. The depth of 2.6 is the Album's corrected figure (about 2.6:3.4 along the fly),
+// a near match for an equilateral triangle's 2.598. Pantone is the government form and
+// Strachan's "Flying the Pride", both as FOTW reports them; hex and CMYK are the Album
+// des Pavillons 2023, as FOTW reports it.
+vexyl 1
+meta {
+  name "The Bahamas"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://www.crwflags.com/fotw/flags/bs_leg.html"
+  source "https://www.crwflags.com/fotw/flags/bs.html"
+  note "The Act and its 1991 Regulations were read as published in the Statute Law of The Bahamas, Original Service 2001. The Act's Schedule, Part I, gives the design as a blazon only, and neither gives a proportion, sizes or shades."
+  note "Sources conflict on the triangle. The Album des Pavillons has it reach 2.6 of the 6 units of length, near equilateral, while FOTW reports \"Flying the Pride\" as giving 40% of the length, or 2.4."
+  note "FOTW reports PMS 3145, 123 and Standard Black as adopted by the government in 2006, per \"Flying the Pride\" and a government form. Neither was read directly. The hex values are the Album des Pavillons 2023, as reported by FOTW."
+  law "Flags and Coat of Arms (Regulation) Act, Chapter 32, 1973, Schedule, Part I" {
+    source "https://laws.bahamas.gov.bs/cms/images/LEGISLATION/PRINCIPAL/1973/1973-0020/1973-0020_1.pdf"
+  }
+  law "Flags and Coat of Arms Regulations, 1991 (S.I. 89/1991)" {
+    source "https://laws.bahamas.gov.bs/cms/images/LEGISLATION/SUBORDINATE/1991/1991-0089/1991-0089_1.pdf"
+  }
+  restriction "Act, sections 3 and 4: it's an offence to mutilate, deface or insult the National Flag, and without the Minister's written permission no one may apply it, or any part of its design, to goods, or use it in connection with a business in a way calculated to suggest official authorization." {
+    source "https://laws.bahamas.gov.bs/cms/images/LEGISLATION/PRINCIPAL/1973/1973-0020/1973-0020_1.pdf"
+  }
+  restriction "Regulations 3 to 5, 9 and 10: it's flown only between sunrise and sunset unless the Minister permits otherwise, and is lit at night; it's more prominent than other flags flown with it, and no foreign flag is flown without it except at a foreign mission; a worn flag is disposed of privately by burning; it's flown at half-mast when the Cabinet Office advises." {
+    source "https://laws.bahamas.gov.bs/cms/images/LEGISLATION/SUBORDINATE/1991/1991-0089/1991-0089_1.pdf"
+  }
+}
+palette {
+  aquamarine "#00778b" {
+    pantone "3145"
+    cmyk 84 33 34 15
+  }
+  gold "#ffc72c" {
+    pantone "123"
+    cmyk 0 24 86 0
+  }
+  black "#000000" {
+    pantone "Standard Black"
+  }
+}
+proportion hoist=3 fly=6
+
+field aquamarine
+band gold {
+  width 1
+}
+pile black {
+  depth 2.6
+}

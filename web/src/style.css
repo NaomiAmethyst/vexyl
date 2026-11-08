@@ -499,3 +499,29 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .thumbs.strip .thumb { width: 74px; min-width: 0; flex: none; gap: 4px; }
 .thumbs.strip .thumb-box { height: 42px; }
 .form-note { flex: 1 1 100%; }
+
+/* The Construction view: its options beside the sheet, which stacks under them on a narrow screen. */
+.construction { flex: 1 1 auto; display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 32px; max-width: 1360px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+.sheet-layout { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.sheet-options { flex: 1 1 260px; max-width: 340px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.sheet-options .card-head { margin: 0; font-size: inherit; font-weight: 500; }
+.sheet-options .nx-note { margin: 0; }
+.sheet-options .hoist-mm { width: 140px; }
+.nx-seg.wrap { flex-wrap: wrap; }
+.sheet-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sheet-view { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.sheet-frame { width: 100%; border-radius: 6px; overflow: hidden; border: 1px solid var(--line2); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; }
+.sheet-frame img { width: 100%; height: 100%; display: block; }
+.sheet-bone { width: 100%; height: 100%; }
+@media (max-width: 700px) {
+  .construction { padding: 12px 16px 24px; }
+  .sheet-options { max-width: none; }
+  .sheet-view { order: -1; }
+}
+
+/* Printing from the Construction view prints the sheet alone, on paper its own size, which the view sets. */
+@media print {
+  body:has(.print-sheet) * { visibility: hidden; }
+  body:has(.print-sheet) { background: none; }
+  body:has(.print-sheet) .print-sheet { visibility: visible; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; object-fit: contain; }
+}

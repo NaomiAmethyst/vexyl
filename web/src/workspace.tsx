@@ -422,6 +422,16 @@ function Gallery(): preact.JSX.Element {
 					</div>
 				</div>
 			))}
+			<div class="gallery-group">
+				<span class="nx-label">Construction</span>
+				<div class="thumbs">
+					<a class="thumb" href={app.href("construction")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("construction"); } }}>
+						<span class="check thumb-box">{s.images.get("flag")?.url ? <img src={s.images.get("flag")!.url} alt="" /> : <span class="bone bone-thumb" aria-hidden="true" />}</span>
+						<span class="thumb-label">Sheet</span>
+						<span class="thumb-sub">Sizes marked</span>
+					</a>
+				</div>
+			</div>
 		</section>
 	);
 }

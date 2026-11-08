@@ -8,8 +8,9 @@ import { claimTab, dropDraft, durable, loadDraft, orphanOf, saveDraft, TabPresen
 import { engine } from "./engine.js";
 import type { Analysis, ONode, Op, PickNode, RenderResult } from "./protocol.js";
 import { evidenceTiers, fetchRef, type GistFile } from "./remote.js";
+import { savedSheet, saveSheet, type SheetPrefs } from "./sheet.js";
 
-export type View = "work" | "open" | "compare" | "share" | "new";
+export type View = "work" | "open" | "compare" | "share" | "new" | "construction";
 
 /** Which editor a person works in. It's theirs, not the flag's. */
 export type Level = "basic" | "advanced";
@@ -87,13 +88,15 @@ export interface State {
 	saved: boolean;
 	notice: string | null;
 	storageNote: boolean;
+	/** How construction sheets are drawn. */
+	sheet: SheetPrefs;
 }
 
 function initial(): State {
 	return {
 		view: "work", level: savedLevel(), basicTab: "design", analyzed: "", gesturing: false, canUndo: false, canRedo: false, lawNoteDismissed: false, mode: "form", loading: null, loadError: null, gistFiles: null, text: "", base: "", eol: "\n", mixedEol: false, source: null,
 		analysis: null, lastReadable: null, lastValid: null, selected: null, hover: null, sourceJump: 0, form: "flag", padded: {}, foldStep: {},
-		images: new Map(), busy: false, tier: null, orphan: null, sameInOtherTab: { tabs: 0, dirty: false }, saved: true, notice: null, storageNote: false,
+		images: new Map(), busy: false, tier: null, orphan: null, sameInOtherTab: { tabs: 0, dirty: false }, saved: true, notice: null, storageNote: false, sheet: savedSheet(),
 	};
 }
 
@@ -761,6 +764,13 @@ export class App {
 		if (this.state.analysis?.valid === true) {
 			void this.renderForms();
 		}
+	}
+
+	/** Changes how construction sheets are drawn, and remembers it for next time. */
+	setSheet(patch: Partial<SheetPrefs>): void {
+		const sheet = { ...this.state.sheet, ...patch };
+		saveSheet(sheet);
+		this.set({ sheet });
 	}
 
 	/** Goes straight to a part in Advanced. */

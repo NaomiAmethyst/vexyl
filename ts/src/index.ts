@@ -13,6 +13,8 @@ import { ParseError, type Flag, type Problem } from "./types.js";
 export { formatVersion } from "./parse.js";
 export { model, type Plain } from "./model.js";
 export { svg, svgTree, treeToSvg } from "./svg.js";
+// Beyond the SDK: a flag's construction sheet, with its sizes marked.
+export { constructionSvg, type ConstructionOptions } from "./construction.js";
 export { layerAt, locate, type Span } from "./locate.js";
 export { decodePathName, encodePathName, parentPath, tagAttribute } from "./paths.js";
 export { shareDecode, shareEncode, shareDictionary, shareMaxBytes, ShareError } from "./share.js";

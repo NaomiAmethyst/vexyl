@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-import { model, RenderError, shareDecode, shareEncode, svg, svgTree, tagAttribute, validate, locate, parse, type Flag, type SvgElement } from "vexyl";
+import { constructionSvg, model, RenderError, shareDecode, shareEncode, svg, svgTree, tagAttribute, validate, locate, parse, type Flag, type SvgElement } from "vexyl";
 import { applyOps, outline, rescalePreview } from "./document.js";
 import { largestGrid, scaleFlag } from "./grid.js";
-import type { Analysis, PickNode, Request, RenderResult } from "./protocol.js";
+import type { Analysis, PickNode, Request, RenderResult, SheetResult } from "./protocol.js";
 
 /** Each document being looked at, by slot, with its last valid flag. */
 const flags = new Map<string, Flag>();
@@ -96,12 +96,32 @@ function render(slot: string, options: Parameters<typeof svg>[1], pick: boolean 
 	}
 }
 
+/** A construction sheet, always of the flag as the file has it, whatever its grid. */
+function construction(slot: string, options: Parameters<typeof constructionSvg>[1]): SheetResult {
+	const flag = exact.get(slot);
+	if (flag === undefined) {
+		return { refused: "There's nothing valid to draw yet." };
+	}
+	try {
+		const text = constructionSvg(flag, options);
+		const m = /width="([0-9.]+)mm" height="([0-9.]+)mm"/.exec(text);
+		return { svg: text, widthMm: Number(m?.[1] ?? 0), heightMm: Number(m?.[2] ?? 0) };
+	} catch (e) {
+		if (e instanceof RenderError || e instanceof RangeError) {
+			return { refused: e.message };
+		}
+		throw e;
+	}
+}
+
 function handle(req: Request): unknown {
 	switch (req.kind) {
 		case "analyze":
 			return analyze(req.slot, req.text);
 		case "render":
 			return render(req.slot, req.options, req.pick, req.exact);
+		case "construction":
+			return construction(req.slot, req.options);
 		case "edit":
 			return applyOps(req.text, req.ops);
 		case "rescalePreview":

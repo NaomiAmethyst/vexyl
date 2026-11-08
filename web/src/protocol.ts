@@ -4,7 +4,7 @@
 // What the page and its worker say to each other. Every document is read in the worker, so a large
 // one can't stall the page, and what comes back is plain data.
 
-import type { Options, Problem, Span } from "vexyl";
+import type { ConstructionOptions, Options, Problem, Span } from "vexyl";
 
 export interface OVal {
 	v: string | number | boolean | null;
@@ -56,6 +56,14 @@ export interface RenderResult {
 	height?: number;
 }
 
+/** A construction sheet, with its size on paper. */
+export interface SheetResult {
+	svg?: string;
+	refused?: string;
+	widthMm?: number;
+	heightMm?: number;
+}
+
 export type Op =
 	| { op: "entries"; at: number[]; args?: OVal[]; props?: [string, OVal | null][] }
 	| { op: "child"; at: number[]; name: string; args?: OVal[]; props?: [string, OVal | null][]; nth?: number }
@@ -86,6 +94,7 @@ export interface RescalePreview {
 export type Request =
 	| { kind: "analyze"; slot: string; text: string }
 	| { kind: "render"; slot: string; options: Options; pick?: boolean; exact?: boolean }
+	| { kind: "construction"; slot: string; options: ConstructionOptions }
 	| { kind: "edit"; text: string; ops: Op[] }
 	| { kind: "rescalePreview"; text: string; hoist: string }
 	| { kind: "shareEncode"; text: string }
@@ -95,6 +104,8 @@ export type Reply<K extends Request["kind"]> = K extends "analyze"
 	? Analysis
 	: K extends "render"
 		? RenderResult
+		: K extends "construction"
+			? SheetResult
 		: K extends "edit"
 			? { text?: string; error?: string }
 			: K extends "rescalePreview"

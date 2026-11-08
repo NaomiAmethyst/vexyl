@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Jamaica: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Jamaica</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">1:2 · grid 6 × 12</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="112" y="271.220472" width="686.519685" height="343.259843" viewBox="0 0 12 6" overflow="hidden">
+  <title>Jamaica</title>
+  <clipPath id="vx-8bd269be1f0a4785-cs-f-flag1">
+    <polygon points="0,0 12,0 12,6 0,6"/>
+  </clipPath>
+  <g clip-path="url(#vx-8bd269be1f0a4785-cs-f-flag1)">
+    <polygon points="6,3 0,0 12,0" fill="#00774b"/>
+    <polygon points="6,3 12,0 12,6" fill="#000000"/>
+    <polygon points="6,3 12,6 0,6" fill="#00774b"/>
+    <polygon points="6,3 0,6 0,0" fill="#000000"/>
+    <polygon points="0,0 0,0.559017 10.881966,6 12,6 12,5.440983 1.118034,0" fill="#ffb300"/>
+    <polygon points="0,6 0,5.440983 10.881966,0 12,0 12,0.559017 1.118034,6" fill="#ffb300"/>
+  </g>
+</svg>
+<rect x="112" y="271.220472" width="686.519685" height="343.259843" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 266.220472V239.220472M798.519685 266.220472V239.220472M107 271.220472H80M107 614.480315H80" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="455.259843" y="237.220472" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">12</text>
+<text x="78" y="442.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 442.850394)">6</text>
+<path d="M674.008287 520.243268L648.423209 571.413425M669.536151 518.0072L678.480423 522.479336M643.951073 569.177357L652.895345 573.649492" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M674.008287 520.243268L648.423209 571.413425M669.536151 518.0072L678.480423 522.479336M643.951073 569.177357L652.895345 573.649492" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M112 245.220472H798.519685M112 239.220472V251.220472M798.519685 239.220472V251.220472M86 271.220472V614.480315M80 271.220472H92M80 614.480315H92" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="636.539927" y="576.779988" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="642.139927" y="587.279988" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">1</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="13" fill="#00774b"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Green</text>
+<text x="913.722485" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#00774b</text>
+<text x="868.519685" y="191" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 355 U</text>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 88 27 82 15</text>
+<text x="868.519685" y="229" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">British Admiralty Bunting</text>
+<text x="878.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pattern Emerald T817</text>
+<text x="868.519685" y="267" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Album des Pavillons 2023</text>
+<text x="878.519685" y="286" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 3415 C</text>
+<circle cx="845.519685" cy="316" r="13" fill="#000000"/>
+<text x="868.519685" y="317" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Black</text>
+<text x="912.139085" y="317" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#000000</text>
+<circle cx="845.519685" cy="354" r="13" fill="#ffb300"/>
+<text x="868.519685" y="355" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
+<text x="904.849985" y="355" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffb300</text>
+<text x="868.519685" y="374" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 109 U</text>
+<text x="868.519685" y="393" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 34 93 0</text>
+<text x="868.519685" y="412" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Album des Pavillons 2023</text>
+<text x="878.519685" y="431" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 1235 C</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">ts/test/testdata/construction/jamaica.kdl · Vexyl 1</text>
+</svg>

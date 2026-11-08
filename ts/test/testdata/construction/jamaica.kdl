@@ -1,0 +1,42 @@
+// No law read. The government's pages give: 2 x 1, a gold saltire, green at top and bottom,
+// black at the hoist and fly, and each arm "one-sixth of the length of the fly".
+// Here that's taken as 1/6 of the free edge, the flag's height, so 1 on a 6 by 12 grid.
+vexyl 1
+meta {
+  name "Jamaica"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://jis.gov.jm/information/symbols/jamaica-national-flag/"
+  source "https://opm.gov.jm/1-devon-rd/national-symbols-emblems/"
+  source "https://nlj.gov.jm/jamaican-national-symbols/"
+  source "https://www.crwflags.com/fotw/flags/jm.html"
+  note "No law defining the flag was found. Everything here comes from government pages, and none is a law. The Admiralty Pattern 2 x 1 is from the National Library."
+  note "Read as the flag's full length, 'one-sixth of the length of the fly' would make the arms twice as wide. FOTW's Heimer reads the fly's length as the free edge, and FOTW's Weidner-Kim shows that this gives each color about a third of the area. That reading is not stated by any government page."
+  note "The Office of the Prime Minister gives emerald T817 British Admiralty Bunting Pattern, Pantone 109 U and 355 U with their formulas, and 100 percent black, but no screen values. The hex and CMYK are the Album des Pavillons 2023 as FOTW reports it, belonging to its own Pantone 1235 C and 3415 C, recorded as references."
+  restriction "The Office of the Prime Minister reports that section 12(1) of the Trade Marks Act makes marks containing the flag unregistrable, and that use of its image needs that office's authorization." {
+    source "https://opm.gov.jm/1-devon-rd/national-symbols-emblems/"
+  }
+}
+palette {
+  green "#00774b" {
+    pantone "355 U"
+    cmyk 88 27 82 15
+    reference "British Admiralty Bunting Pattern" "Emerald T817"
+    reference "Album des Pavillons 2023 Pantone" "3415 C"
+  }
+  black "#000000"
+  gold "#ffb300" {
+    pantone "109 U"
+    cmyk 0 34 93 0
+    reference "Album des Pavillons 2023 Pantone" "1235 C"
+  }
+}
+proportion hoist=6 fly=12
+
+quarters green black green black {
+  diagonal
+}
+saltire gold {
+  width 1
+}

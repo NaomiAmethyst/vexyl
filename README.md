@@ -129,6 +129,11 @@ lives in `go/testdata/golden`; after an intended change, rewrite it by running
 [vexyl.amethyst.name](https://vexyl.amethyst.name/). `make web` builds it
 into `web/dist`, and `make check-web` tests it. Both need Node, so `make check` leaves them out.
 
+Its Construction view draws a flag's construction sheet: the flag on its grid with its sizes marked,
+as the drawings attached to flag laws are, in grid units, parts of the hoist or millimetres. It
+downloads as SVG and prints on A4, Letter or paper the size of the drawing. `make check-construction`
+draws one for every flag in a vexyl-flags checkout beside this one, and counts labels that collide.
+
 ## License
 
 Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>.

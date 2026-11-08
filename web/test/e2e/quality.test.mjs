@@ -36,6 +36,7 @@ const screens = {
 	"open-link": async (p) => { await p.goto(`${srv.base}?view=open`); await p.getByRole("tab", { name: "Link" }).click(); await p.getByLabel("Link to a KDL file").waitFor(); },
 	share: async (p) => { await p.goto(openUrl(srv.base, "flags/country/japan.kdl")); await ready(p); await fromTopbar(p, "Share"); await p.getByLabel("Link to share").waitFor(); },
 	compare: async (p) => { await p.goto(openUrl(srv.base, "flags/historical/azerbaijan-1991.kdl")); await ready(p); await fromTopbar(p, "Compare"); await p.locator(".pick-box", { hasText: "Azerbaijan 2018" }).waitFor(); await p.locator("table.changes").waitFor(); },
+	construction: async (p) => { await p.goto(openUrl(srv.base, "flags/country/chile.kdl")); await ready(p); await p.getByRole("link", { name: /^Sheet/ }).click(); await p.locator(".print-sheet").waitFor(); await p.getByRole("radiogroup", { name: "Sizes in" }).getByRole("radio", { name: "mm" }).click(); await p.getByLabel("Hoist, in millimetres").waitFor(); },
 	"compare-source": async (p) => { await screens.compare(p); await p.getByRole("radiogroup", { name: "View" }).getByRole("radio", { name: "Source" }).click(); await p.locator(".side-diff-row.changed").first().waitFor(); },
 };
 

@@ -10,7 +10,7 @@ NPM     ?= npm
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check check-ts check-rescale conformance conformance-ts conformance-fixtures conformance-prove fuzz install uninstall clean web check-web
+.PHONY: all test check check-ts check-rescale conformance conformance-ts conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
 
 all: vexyl
 
@@ -63,6 +63,12 @@ check-web: web/node_modules
 	cd web && $(NPM) run build
 	cd web && $(NPM) test
 	cd web && $(NPM) run e2e
+
+# Draws a construction sheet for every flag in a vexyl-flags checkout beside this one, and counts
+# labels that overlap or leave the sheet. It takes a minute or two, so CI leaves it out.
+check-construction: ts/node_modules
+	cd ts && $(NPM) run build
+	node ts/test/construction-corpus.mjs
 
 # Rescales every flag on other grids and compares the pictures, which needs what conformance needs.
 check-rescale: web/node_modules

@@ -1,0 +1,36 @@
+// From the law: Annex 2's drawing divides each side of the square 6 7 6 7 6, so the grid
+// is 32. The cross's arms are 7 long past the 6-wide center and equal, each 1/6 longer
+// than wide (Article 1). So each runs 3 + 7 = 10 from the center.
+vexyl 1
+meta {
+  name "Switzerland"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://www.fedlex.admin.ch/filestore/fedlex.data.admin.ch/eli/cc/2015/613/20250701/de/pdf-a/fedlex-data-admin-ch-eli-cc-2015-613-20250701-de-pdf-a.pdf"
+  source "https://backend.vtg.admin.ch/fileservice/sdweb-docs-prod-vtgch-files/files/2024/04/17/64b00c1c-1b32-493b-9f0b-942fd5277401.pdf"
+  source "https://www.crwflags.com/fotw/flags/ch.html"
+  note "The square, the cross and all red values are from the law, whose annexes make the drawing binding. White has no value in the law, as the army's flag regulation also says."
+  note "The law lists several scales for one red without assigning them to media. #ff0000 and Pantone 485 aren't the same color, and the hex is what's drawn here."
+  note "The Maritime Navigation Act, the Aviation Act and the Military Act keep their own rules under Article 3, so the 2:3 civil ensign isn't this flag."
+  law "Federal Act on the Protection of the Swiss Coat of Arms and Other Public Signs, SR 232.21, of 21 June 2013, Articles 1 and 3 and Annex 2" {
+    source "https://www.fedlex.admin.ch/filestore/fedlex.data.admin.ch/eli/cc/2015/613/20250701/de/pdf-a/fedlex-data-admin-ch-eli-cc-2015-613-20250701-de-pdf-a.pdf"
+  }
+}
+palette {
+  red "#ff0000" {
+    pantone "485 C"
+    ral "3020"
+    ncs "S 1085-Y90R"
+    cmyk 0 100 100 0
+    reference "Scotchcal" "100-13"
+  }
+  white "#ffffff"
+}
+proportion hoist=32 fly=32
+
+field red
+charge plus white {
+  radius 10
+  width 6
+}

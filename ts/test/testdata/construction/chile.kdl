@@ -1,0 +1,48 @@
+// From the law: the hoist is 2/3 of the fly, so 4 by 6. Two equal bars. The blue square is
+// the third of the fly next to the hoist, so 2 by 2, the width of a bar. The star's
+// diameter is half the square's side, so radius 0.5, in the middle of the square.
+vexyl 1
+meta {
+  name "Chile"
+  encoder "Naomi Persephone Amethyst"
+  license "CC-BY-SA-4.0"
+  render-license "CC0-1.0"
+  source "https://nuevo.leychile.cl/servicios/Navegar/get_norma_json?idNorma=23382"
+  source "https://nuevo.leychile.cl/servicios/Navegar/get_norma_json?idNorma=18035"
+  source "https://www.crwflags.com/fotw/flags/cl.html"
+  note "The laws fix all of the geometry. They name the colors azul turqui, white and red with no shade, so the hex, Pantone and CMYK values are the Album des Pavillons 2023's, as reported by FOTW."
+  note "The law gives the star a diameter. This file reads that as the circle through its points, with the star's center in the middle of the square."
+  note "Decree 1534, Article 3, says a flag hung vertically keeps the blue square at the top and the viewer's left. It doesn't say whether the star is turned, so the vertical variant turns it with the flag."
+  law "Law No. 2597 of 11 January 1912, fixing the colors of the flag of the Republic of Chile and of the Presidential Sash, Article 1" {
+    source "https://nuevo.leychile.cl/servicios/Navegar/get_norma_json?idNorma=23382"
+  }
+  law "Supreme Decree No. 1534 of 18 October 1967, determining the national emblems and regulating their use, Articles 1 and 3" {
+    source "https://nuevo.leychile.cl/servicios/Navegar/get_norma_json?idNorma=18035"
+  }
+}
+palette {
+  white "#ffffff"
+  red "#da291c" {
+    pantone "485 C"
+    cmyk 6 94 96 0
+  }
+  blue "#0033a0" {
+    pantone "286 C"
+    cmyk 100 83 2 0
+    reference "Law No. 2597" "azul turqui"
+  }
+}
+proportion hoist=4 fly=6
+
+bars white red
+canton {
+  fly 2
+  hoist 2
+  field blue
+  charge star white {
+    radius 0.5
+  }
+}
+variant vertical {
+  from transpose
+}

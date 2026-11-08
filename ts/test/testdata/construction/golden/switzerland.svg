@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Switzerland: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Switzerland</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">1:1 · grid 32 × 32</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="192.409449" y="180" width="525.700787" height="525.700787" viewBox="0 0 32 32" overflow="hidden">
+  <title>Switzerland</title>
+  <clipPath id="vx-858aefc138ec983f-cs-f-flag1">
+    <polygon points="0,0 32,0 32,32 0,32"/>
+  </clipPath>
+  <g clip-path="url(#vx-858aefc138ec983f-cs-f-flag1)">
+    <polygon points="0,0 32,0 32,32 0,32" fill="#ff0000"/>
+    <polygon points="13,6 19,6 19,13 26,13 26,19 19,19 19,26 13,26 13,19 6,19 6,13 13,13" fill="#ffffff"/>
+  </g>
+</svg>
+<rect x="192.409449" y="180" width="525.700787" height="525.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M192.409449 175V122M455.259843 175V148M718.110236 175V122M187.409449 180H134.409449M187.409449 442.850394H160.409449M187.409449 705.700787H134.409449" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="323.834646" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">16</text>
+<text x="455.259843" y="120" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">32</text>
+<text x="158.409449" y="311.425197" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 158.409449 311.425197)">16</text>
+<text x="132.409449" y="442.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 132.409449 442.850394)">32</text>
+<path d="M455.259843 180V434.850394M192.409449 442.850394H447.259843M449.259843 442.850394H461.259843M455.259843 436.850394V448.850394" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M455.259843 180V434.850394M192.409449 442.850394H447.259843" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M449.259843 442.850394H461.259843M455.259843 436.850394V448.850394" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M192.409449 154H455.259843M192.409449 148V160M455.259843 148V160M192.409449 128H718.110236M192.409449 122V134M718.110236 122V134M166.409449 180V442.850394M160.409449 180H172.409449M160.409449 442.850394H172.409449M140.409449 180V705.700787M134.409449 180H146.409449M134.409449 705.700787H146.409449" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="402.859843" y="611.13189" width="104.8" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="455.259843" y="621.63189" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 10 · width 6</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="13" fill="#ff0000"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ff0000</text>
+<text x="868.519685" y="191" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 485 C</text>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">RAL 3020</text>
+<text x="868.519685" y="229" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">NCS S 1085-Y90R</text>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 100 100 0</text>
+<text x="868.519685" y="267" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Scotchcal 100-13</text>
+<circle cx="845.519685" cy="297" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="298" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="298" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<text x="832.519685" y="343" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAW</text>
+<text x="832.519685" y="373" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Federal Act on the Protection of the</text>
+<text x="832.519685" y="392" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Swiss Coat of Arms and Other Public</text>
+<text x="832.519685" y="411" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Signs, SR 232.21, of 21 June 2013,</text>
+<text x="832.519685" y="430" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Articles 1 and 3 and Annex 2</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The white plus’s center is marked +.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">ts/test/testdata/construction/switzerland.kdl · Vexyl 1</text>
+</svg>
