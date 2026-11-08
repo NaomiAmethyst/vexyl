@@ -789,6 +789,8 @@ test("on a narrow screen the top bar's other buttons are in a menu, which works 
 	assert.equal(await focused(p), "New flag");
 	await p.keyboard.press("Escape");
 	assert.equal(await menu.getAttribute("aria-expanded"), "false");
+	// The focus goes back once the menu has closed, which can be a moment after it's dismissed.
+	await p.waitForFunction(() => document.activeElement?.textContent === "Menu").catch(() => {});
 	assert.equal(await focused(p), "Menu", "the focus goes back to the button");
 	// Up opens it at its end, and Enter picks what's focused.
 	await p.keyboard.press("ArrowUp");
@@ -810,6 +812,8 @@ test("the narrow screen's menu works by pointer, and closes when anywhere else i
 	await p.locator(".flag-name").click();
 	assert.equal(await p.getByRole("menu").count(), 0);
 	assert.equal(await menu.getAttribute("aria-expanded"), "false");
+	// The focus goes back once the menu has closed, which can be a moment after it's dismissed.
+	await p.waitForFunction(() => document.activeElement?.textContent === "Menu").catch(() => {});
 	assert.equal(await focused(p), "Menu", "the focus goes back to the button");
 	// It switches editors, and Basic has the same menu, without Compare.
 	await menu.click();

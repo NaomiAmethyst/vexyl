@@ -1,0 +1,103 @@
+// Each kind of thing a tagged render marks, and a path for each kind of scope.
+vexyl 1
+meta {
+  name "Tags"
+}
+palette {
+  red "#c00000"
+  white "#ffffff"
+  blue "#0000c0"
+  green "#00a000"
+  "__proto__" "#808000"
+}
+proportion hoist=20 fly=40
+border green 0.5
+define "row of two" {
+  charge disc white {
+    radius 1
+    at fly=2 hoist=2
+  }
+  charge disc white {
+    radius 1
+    at fly=6 hoist=2
+  }
+}
+bars red white
+canton {
+  fly 16
+  hoist 10
+  field blue
+  charge star white {
+    radius 1
+    repeat grid rows=2 columns=3
+  }
+}
+group {
+  opacity 0.9
+  clip {
+    rect {
+      at fly=28 hoist=5
+      fly 8
+      hoist 8
+    }
+  }
+  charge disc "__proto__" {
+    radius 3
+    at fly=26 hoist=5
+  }
+  panel {
+    at fly=30 hoist=5
+    fly 2
+    hoist 6
+    field green
+  }
+}
+emblem {
+  at fly=8 hoist=15
+  rotate 45
+  charge rect blue {
+    fly 3
+    hoist 1
+  }
+  charge rect green {
+    fly 1
+    hoist 3
+    at fly=4 hoist=0
+  }
+}
+panel {
+  at fly=36 hoist=4
+  fly 6
+  hoist 6
+  use "row of two"
+}
+charge svg {
+  at fly=30 hoist=15
+  fly 6
+  hoist 6
+  markup #"""
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="5" fill="#123456"/></svg>
+    """#
+}
+reverse {
+  field green
+  charge disc red {
+    radius 2
+    at fly=10 hoist=10
+  }
+}
+variant vertical {
+  from transpose
+  upright
+}
+variant "a/b%c" {
+  proportion hoist=1 fly=1
+  border blue 0.05
+  field white
+  charge disc "__proto__" {
+    radius 0.25
+  }
+}
+fold half {
+  over along=fly at=10 move=bottom
+}

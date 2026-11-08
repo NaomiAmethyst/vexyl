@@ -319,6 +319,8 @@ test("a star's controls: spots, points, and how many", async () => {
 	await p.getByRole("radio", { name: "Grid" }).click();
 	let text = await basicText(p, (t) => t.includes("repeat grid"));
 	assert.ok(text.includes("repeat grid rows=3 columns=3") && !text.includes("at fly"), text);
+	// The single position's handles go once the grid is drawn, which can be a moment after its text.
+	await p.waitForFunction(() => document.querySelectorAll(".handle-dot").length === 0).catch(() => {});
 	assert.equal(await p.locator(".handle-dot").count(), 0, "a grid has no handles");
 	await p.getByLabel("Rows").fill("2");
 	await p.keyboard.press("Enter");

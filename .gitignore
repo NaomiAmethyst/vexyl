@@ -1,2 +1,4 @@
 /vexyl
 __pycache__/
+# A global rule ignoring ctags files must not hide the conformance suite's tags fixtures.
+!/conformance/tags/
