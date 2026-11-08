@@ -1,6 +1,7 @@
 # Vexyl SDK specification
 
-**Status:** draft 1. Nothing here is stable until the format is frozen.
+**Status:** version 1, frozen with the format. A change to what a library must do needs a new
+version.
 
 Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>. This
 specification is licensed under

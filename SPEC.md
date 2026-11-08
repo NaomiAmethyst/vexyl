@@ -1,6 +1,7 @@
 # Vexyl format specification
 
-**Status:** draft 1. Nothing here is stable yet.
+**Status:** version 1, frozen. A change to what a document means or how it renders needs a new
+format version.
 
 Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>. This
 specification is licensed under
