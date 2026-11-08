@@ -48,6 +48,26 @@
   "file": "accepted/an-end-known-only-to-the-year-of-its-beginning.kdl"
  },
  {
+  "name": "palette colors in capitals",
+  "file": "accepted/palette-colors-in-capitals.kdl"
+ },
+ {
+  "name": "whole numbers written as decimals",
+  "file": "accepted/whole-numbers-written-as-decimals.kdl"
+ },
+ {
+  "name": "nests exactly the limit in a variant",
+  "file": "accepted/nests-exactly-the-limit-in-a-variant.kdl"
+ },
+ {
+  "name": "nests exactly the limit in a reverse",
+  "file": "accepted/nests-exactly-the-limit-in-a-reverse.kdl"
+ },
+ {
+  "name": "a count as large as the colors",
+  "file": "accepted/a-count-as-large-as-the-colors.kdl"
+ },
+ {
   "name": "a number at each end of what's allowed",
   "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
  }

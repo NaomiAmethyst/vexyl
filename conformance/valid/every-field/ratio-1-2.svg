@@ -61,8 +61,8 @@
     <polygon points="40,0 40,7.388048 0,20 10.411341,0" fill="#ffcc00"/>
     <polygon points="40,20 0,20 0,20 40,7.388048" fill="#cc0000"/>
     <polygon points="0,0 40,0 40,20 0,20" fill="#cc0000"/>
-    <polygon points="0,0 0,0 40,0 40,20 40,20" fill="#cc0000"/>
-    <polygon points="0,0 40,20 0,20 0,0 0,0" fill="#ffcc00"/>
+    <polygon points="0,0 40,0 40,20 30,20" fill="#cc0000"/>
+    <polygon points="0,0 30,20 0,20 0,20" fill="#ffcc00"/>
     <polygon points="-22.36068,64.72136 1,18 1,18 24.36068,64.72136" fill="none" stroke="#ffcc00" stroke-width="0.1" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="-44.72136,-436.033256 1,9.75 1,10.25 -44.72136,456.033256" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="-44.72136,-436.033256 1,9.75 1,10.25 -44.72136,456.033256" fill="#ffcc00"/>

@@ -611,7 +611,8 @@ function Controls(props: { item: Item; nodes: readonly ONode[] }): preact.JSX.El
 		case "chevrons":
 			return <><ColorList node={n} nodes={nodes} /><FromSide node={n} /><ChildSize node={n} child="depth" label="How far in" size={r.wText} of="width" max={1} region={r.w} /></>;
 		case "rays":
-			return <><ColorList node={n} nodes={nodes} />{count("count", "How many rays", 2, 200)}</>;
+			// A count can't be fewer than the colors, or some would be left out.
+			return <><ColorList node={n} nodes={nodes} />{count("count", "How many rays", Math.max(2, n.args.length), 200)}</>;
 		case "pile":
 			return <>{colorHere}<FromSide node={n} />{kid(n, "tip") === undefined ? <ChildSize node={n} child="depth" label="How far in" size={r.wText} of="width" max={1} region={r.w} /> : null}</>;
 		case "pall":

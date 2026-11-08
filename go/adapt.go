@@ -31,7 +31,8 @@ func (f *Flag) withRatio(ratio float64) (*Flag, error) {
 	}
 	out := *f
 	base, onHoist := strings.CutPrefix(mode, "hoist-")
-	a := &adapter{axis: "fly", anchor: map[string]string{"extend": "start", "center": "center", "scale": "scale"}[base]}
+	a := &adapter{axis: "fly", anchor: map[string]string{"extend": "start", "center": "center", "scale": "scale"}[base],
+		fromBehind: f.seenFromBehind}
 	if onHoist {
 		a.axis = "hoist"
 		a.other = f.Fly
@@ -57,9 +58,53 @@ func (f *Flag) withRatio(ratio float64) (*Flag, error) {
 // adapter moves layers along one axis as their region changes size.
 type adapter struct {
 	axis, anchor string
+	// passed is an anchor that a container passed on to its layers, if one did.
+	passed string
+	// fromBehind says that the layers are a reverse's own, with the hoist on the right.
+	fromBehind bool
 	// other is the region's size across the axis, which stays the same.
 	other float64
 	err   error
+}
+
+// anchorOf finds a layer's anchor: its own, or one passed on to it, or the rule's. It
+// says whether the layer was given one, by itself or a container.
+func (a *adapter) anchorOf(e *Effects) (anchor string, given bool) {
+	anchor, given = e.Anchor, true
+	if anchor == "" {
+		anchor = a.passed
+	}
+	if anchor == "" {
+		anchor, given = a.anchor, false
+	}
+	if a.fromBehind && a.axis == "fly" {
+		// Seen from behind, the hoist is on the right, and start is still the hoist.
+		switch anchor {
+		case "start":
+			anchor = "end"
+		case "end":
+			anchor = "start"
+		}
+	}
+	return anchor, given
+}
+
+// passOn adapts a container's layers with its anchor, if it gives one.
+func (a *adapter) passOn(e *Effects, adapt func()) {
+	passed := a.passed
+	if e.Anchor != "" {
+		a.passed = e.Anchor
+	}
+	adapt()
+	a.passed = passed
+}
+
+// center is the region's center, for pinning what's there to an anchor.
+func (a *adapter) center(old float64) *Point {
+	if a.axis == "hoist" {
+		return &Point{a.other / 2, old / 2}
+	}
+	return &Point{old / 2, a.other / 2}
 }
 
 func (a *adapter) fail(format string, args ...any) {
@@ -107,11 +152,7 @@ func (a *adapter) point(p *Point, old, new float64, anchor string) *Point {
 func (a *adapter) shape(s Shape, old, new float64, anchor string, explicit bool) Shape {
 	k := new / old
 	if s.At == nil && explicit && anchor != "scale" && s.Kind != "polygon" {
-		c := Point{old / 2, a.other / 2}
-		if a.axis == "hoist" {
-			c = Point{a.other / 2, old / 2}
-		}
-		s.At = &c
+		s.At = a.center(old)
 	}
 	s.At = a.point(s.At, old, new, anchor)
 	if s.Ats != nil {
@@ -163,10 +204,7 @@ func (a *adapter) shape(s Shape, old, new float64, anchor string, explicit bool)
 }
 
 func (a *adapter) effects(e Effects, old, new float64) (Effects, string) {
-	anchor := e.Anchor
-	if anchor == "" {
-		anchor = a.anchor
-	}
+	anchor, _ := a.anchorOf(&e)
 	if e.Clip != nil {
 		s := a.shape(*e.Clip, old, new, anchor, false)
 		e.Clip = &s
@@ -193,23 +231,32 @@ func (a *adapter) parts(what string, parts []float64, old, new float64, anchor s
 	}
 	d := new - old
 	last := len(out) - 1
+	changed := []int{last}
 	switch anchor {
 	case "start":
 		out[last] += d
 	case "end":
 		out[0] += d
+		changed = []int{0}
 	case "center":
 		out[0] += d / 2
 		out[last] += d / 2
+		changed = []int{0, last}
 	default:
 		return parts
 	}
-	for _, p := range out {
-		if p < 0 {
-			a.fail("%s can't be cut to this proportion", what)
-		}
+	for _, i := range changed {
+		a.keep(what, out[i], old)
 	}
 	return out
+}
+
+// keep refuses a part that a change of size has brought to nothing, allowing for
+// floating-point error in what should be exactly zero.
+func (a *adapter) keep(what string, part, old float64) {
+	if part <= 1e-9*old {
+		a.fail("%s can't be cut to this proportion", what)
+	}
 }
 
 func (a *adapter) layer(l Layer, old, new float64) Layer {
@@ -236,8 +283,8 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 				c.Ratio = make([]float64, len(t.Ratio))
 				for i := range t.Ratio {
 					c.Ratio[i] = t.Ratio[i]*old/total + (new-old)*t.Grow[i]/weights
-					if c.Ratio[i] <= 0 {
-						a.fail("bars can't be cut to this proportion")
+					if t.Grow[i] > 0 {
+						a.keep("bars", c.Ratio[i], old)
 					}
 				}
 				return &c
@@ -314,7 +361,8 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 		c := *t
 		var anchor string
 		c.Effects, anchor = a.effects(t.Effects, old, new)
-		c.Shape = a.shape(t.Shape, old, new, anchor, t.Anchor != "")
+		_, given := a.anchorOf(&t.Effects)
+		c.Shape = a.shape(t.Shape, old, new, anchor, given)
 		if t.Repeat != nil && t.Repeat.Kind == "line" && anchor == "scale" {
 			r := *t.Repeat
 			if a.axis == "fly" {
@@ -329,12 +377,17 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 		c := *t
 		var anchor string
 		c.Effects, anchor = a.effects(t.Effects, old, new)
-		c.At = a.point(t.At, old, new, anchor)
+		c.At = t.At
+		if _, given := a.anchorOf(&t.Effects); c.At == nil && given && anchor != "scale" {
+			// One at the center that's given an anchor is pinned to it, as a charge is.
+			c.At = a.center(old)
+		}
+		c.At = a.point(c.At, old, new, anchor)
 		return &c
 	case *Group:
 		c := *t
 		c.Effects, _ = a.effects(t.Effects, old, new)
-		c.Layers = a.layers(t.Layers, old, new)
+		a.passOn(&t.Effects, func() { c.Layers = a.layers(t.Layers, old, new) })
 		return &c
 	case *Panel:
 		return a.panel(t, old, new)
@@ -343,7 +396,7 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 		c.Effects, _ = a.effects(t.Effects, old, new)
 		if t.design.Fly == 0 {
 			d := *t.design
-			d.Layers = a.layers(t.design.Layers, old, new)
+			a.passOn(&t.Effects, func() { d.Layers = a.layers(t.design.Layers, old, new) })
 			c.design = &d
 		}
 		return &c
@@ -358,11 +411,19 @@ func (a *adapter) panel(t *Panel, old, new float64) Layer {
 	c := *t
 	var anchor string
 	c.Effects, anchor = a.effects(t.Effects, old, new)
-	c.At = a.point(t.At, old, new, anchor)
+	c.At = t.At
+	if _, given := a.anchorOf(&t.Effects); t.Side == "" && t.Corner == "" && c.At == nil && given && anchor != "scale" {
+		// One at the center that's given an anchor is pinned to it, as a charge is.
+		c.At = a.center(old)
+	}
+	c.At = a.point(c.At, old, new, anchor)
 	runsAlong := (a.axis == "fly" && (t.Side == "top" || t.Side == "bottom")) ||
 		(a.axis == "hoist" && (t.Side == "hoist" || t.Side == "fly"))
-	outer := a.other
-	defer func() { a.other = outer }()
+	outer, passed := a.other, a.passed
+	defer func() { a.other, a.passed = outer, passed }()
+	if t.Anchor != "" {
+		a.passed = t.Anchor
+	}
 	if runsAlong {
 		a.other = t.Width
 		c.Layers = a.layers(t.Layers, old, new)
@@ -444,7 +505,7 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 	case "", "obverse":
 	case "reverse":
 		if f.Reverse != nil {
-			out.Layers = f.Reverse.Layers
+			out.Layers, out.seenFromBehind = f.Reverse.Layers, true
 		} else {
 			mirror = true
 		}
@@ -460,7 +521,7 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 		}
 		if len(variant.Layers) > 0 {
 			// Its own design has nothing to do with the flag's reverse, so it's mirrored.
-			out.Layers, out.Reverse = variant.Layers, nil
+			out.Layers, out.Reverse, out.seenFromBehind = variant.Layers, nil, false
 			mirror = opts.Side == "reverse"
 		}
 		if variant.Outline != nil {
@@ -487,6 +548,16 @@ func (f *Flag) resolve(opts Options) (flag *Flag, turn string, upright, mirror b
 	adapted, err := out.withRatio(ratio)
 	if err != nil {
 		return fail(err)
+	}
+	if opts.Fold != "" && out.Reverse != nil {
+		// A fold shows the back as well, which adapts as it's seen from behind.
+		back := out
+		back.Layers, back.seenFromBehind = out.Reverse.Layers, true
+		adaptedBack, err := back.withRatio(ratio)
+		if err != nil {
+			return fail(err)
+		}
+		adapted.Reverse = &Reverse{Layers: adaptedBack.Layers}
 	}
 	return adapted, turn, upright, mirror, 0, nil
 }

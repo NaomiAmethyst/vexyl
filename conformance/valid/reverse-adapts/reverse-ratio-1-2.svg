@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20" width="1200" height="600">
+  <title>Reverse Adapt Test</title>
+  <clipPath id="vx-42dd4902c94f6aa6-b1c1-flag1">
+    <polygon points="0,0 40,0 40,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-42dd4902c94f6aa6-b1c1-flag1)">
+    <polygon points="0,0 0,20 40,20 40,0" fill="#7b4fd6"/>
+    <polygon points="30,0 30,20 40,20 40,0" fill="#1b1035"/>
+    <circle cx="35" cy="5" r="2" fill="#f2c14e"/>
+    <g style="isolation:isolate">
+      <polygon points="5,13 5.449028,14.381966 6.902113,14.381966 5.726543,15.236068 6.175571,16.618034 5,15.763932 3.824429,16.618034 4.273457,15.236068 3.097887,14.381966 4.550972,14.381966" fill="#ffffff"/>
+    </g>
+  </g>
+</svg>

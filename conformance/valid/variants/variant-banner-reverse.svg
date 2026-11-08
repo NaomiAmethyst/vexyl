@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 30" width="400" height="600">
   <title>Variants Test</title>
-  <g transform="matrix(0 1 -1 0 20 0)">
+  <g transform="matrix(0 -1 1 0 0 30)">
     <clipPath id="vx-cb6d37f55be78485-4d93-flag1">
       <polygon points="0,0 30,0 24,10 30,20 0,20"/>
     </clipPath>

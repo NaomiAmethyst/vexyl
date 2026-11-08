@@ -1,0 +1,36 @@
+{
+ "adapt": {
+  "narrower": "extend",
+  "wider": "extend"
+ },
+ "layers": [
+  {
+   "along": "hoist",
+   "colors": [
+    "night",
+    "gold"
+   ],
+   "layer": "bars",
+   "ratio": [
+    0.3,
+    0.15
+   ]
+  }
+ ],
+ "meta": {
+  "name": "Cut To Nothing Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "vexyl": 1
+}

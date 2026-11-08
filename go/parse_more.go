@@ -269,13 +269,7 @@ func (p *parser) rays(n *kdl.Node) Layer {
 	if len(l.Colors) == 0 {
 		return l
 	}
-	if count > 0 {
-		cycle := l.Colors
-		l.Colors = make([]string, count)
-		for i := range l.Colors {
-			l.Colors[i] = cycle[i%len(cycle)]
-		}
-	}
+	l.Colors = p.cycle(n, l.Colors, count)
 	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
 	return l
 }
@@ -499,7 +493,8 @@ func (p *parser) reverse(n *kdl.Node, flag *Flag) {
 	p.noValues(n)
 	r := &Reverse{}
 	for _, c := range n.Children().Nodes {
-		if l := p.layer(c, 2); l != nil {
+		// It holds the flag's layers for that side, so they're at the top level.
+		if l := p.layer(c, 1); l != nil {
 			r.Layers = append(r.Layers, l)
 		}
 	}
@@ -573,7 +568,8 @@ func (p *parser) variant(n *kdl.Node, flag *Flag) {
 	for _, c := range n.Children().Nodes {
 		handler, isSetting := settings[c.Name()]
 		if !isSetting {
-			if l := p.layer(c, 2); l != nil {
+			// Its layers replace the flag's, so they're at the top level.
+			if l := p.layer(c, 1); l != nil {
 				v.Layers = append(v.Layers, l)
 			}
 			continue
@@ -737,6 +733,10 @@ func (p *parser) foldStep(n *kdl.Node) *FoldStep {
 	}
 	move := moveValue.String()
 	if through := n.Prop("through"); through.IsValid() {
+		if n.Prop("along").IsValid() || n.Prop("at").IsValid() {
+			p.errf(n, "a crease is `through=` or `along=` and `at=`, not both")
+			return nil
+		}
 		line := p.pointList(n, through, 4)
 		point := p.pointList(n, moveValue, 2)
 		if line == nil || point == nil {

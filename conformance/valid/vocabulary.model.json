@@ -284,6 +284,26 @@
    "shape": "star"
   },
   {
+   "at": [
+    {
+     "fly": 8,
+     "hoist": 10
+    }
+   ],
+   "color": "pink",
+   "layer": "charge",
+   "radius": 0.8,
+   "repeat": {
+    "count": 4,
+    "form": "arc",
+    "from": 300,
+    "radius": 2.5,
+    "to": 60,
+    "turn": true
+   },
+   "shape": "triangle"
+  },
+  {
    "color": "pink",
    "layer": "charge",
    "point": [

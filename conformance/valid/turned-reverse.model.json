@@ -1,0 +1,98 @@
+{
+ "layers": [
+  {
+   "color": "violet",
+   "layer": "field"
+  },
+  {
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "night",
+     "layer": "field"
+    }
+   ],
+   "side": "hoist",
+   "width": 6
+  },
+  {
+   "at": [
+    {
+     "fly": 3,
+     "hoist": 5
+    }
+   ],
+   "color": "white",
+   "inner": 2,
+   "layer": "charge",
+   "offset": 1,
+   "radius": 2.5,
+   "shape": "crescent"
+  },
+  {
+   "at": [
+    {
+     "fly": 14,
+     "hoist": 6
+    }
+   ],
+   "color": "gold",
+   "fimbriate": {
+    "color": "white",
+    "width": 0.5
+   },
+   "inner": 0.9549150281252631,
+   "layer": "charge",
+   "radius": 2.5,
+   "repeat": {
+    "count": 3,
+    "fly": 3,
+    "form": "line",
+    "hoist": 3
+   },
+   "shape": "star"
+  }
+ ],
+ "meta": {
+  "name": "Turned Reverse Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "variant": {
+  "crossbar": {
+   "from": "transpose"
+  },
+  "crossbar-upright": {
+   "from": "transpose",
+   "upright": true
+  },
+  "left": {
+   "from": "counter-rotate"
+  },
+  "other": {
+   "from": "anti-transpose",
+   "upright": true
+  },
+  "right": {
+   "from": "rotate",
+   "upright": true
+  }
+ },
+ "vexyl": 1
+}

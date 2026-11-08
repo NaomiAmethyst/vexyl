@@ -295,9 +295,9 @@ func axisSpan(r region, along string) float64 {
 // rayPolys returns one wedge per color, each with an angle under 180 degrees or
 // split so that it clips cleanly.
 func rayPolys(l *Rays, r region) [][]vec {
-	apex, from, sweep := rayFrame(l, r)
+	apex, from, sweep, walk := rayFrame(l, r)
 	if l.ByEdge {
-		return rayPolysByEdge(l, r, apex, from, sweep)
+		return rayPolysByEdge(l, r, apex, walk)
 	}
 	from += l.Rotate
 	total := 0.0
@@ -321,34 +321,7 @@ func rayPolys(l *Rays, r region) [][]vec {
 }
 
 // rayPolysByEdge shares the region's far edges out by length, going clockwise.
-func rayPolysByEdge(l *Rays, r region, apex vec, from, sweep float64) [][]vec {
-	// Walk the region's outline clockwise from the top of the hoist, starting at
-	// the first point the rays can see.
-	corners := r.corners()
-	var path []vec
-	switch {
-	case sweep == 360:
-		path = []vec{{apex.x, 0}, corners[1], corners[2], corners[3], corners[0], {apex.x, 0}}
-	case from == 90:
-		switch l.From {
-		case "top":
-			path = []vec{corners[1], corners[2], corners[3], corners[0]}
-		default:
-			path = []vec{corners[1], corners[2], corners[3]}
-		}
-	case from == 0 && sweep == 90:
-		path = []vec{corners[0], corners[1], corners[2]}
-	case from == 0:
-		path = []vec{corners[0], corners[1], corners[2], corners[3]}
-	case from == 180 && sweep == 90:
-		path = []vec{corners[2], corners[3], corners[0]}
-	case from == 180:
-		path = []vec{corners[2], corners[3], corners[0], corners[1]}
-	case from == 270:
-		path = []vec{corners[3], corners[0], corners[1]}
-	default:
-		path = []vec{corners[3], corners[0], corners[1], corners[2]}
-	}
+func rayPolysByEdge(l *Rays, r region, apex vec, path []vec) [][]vec {
 	length := 0.0
 	for i := 1; i < len(path); i++ {
 		length += math.Hypot(path[i].x-path[i-1].x, path[i].y-path[i-1].y)
@@ -357,6 +330,8 @@ func rayPolysByEdge(l *Rays, r region, apex vec, from, sweep float64) [][]vec {
 	for _, part := range l.Ratio {
 		total += part
 	}
+	// From outside the region, a wedge would cover what's between the point and the region.
+	outside := apex.x < 0 || apex.x > r.w || apex.y < 0 || apex.y > r.h
 	polys := make([][]vec, 0, len(l.Ratio))
 	leg, into := 0, 0.0
 	at := path[0]
@@ -382,35 +357,84 @@ func rayPolysByEdge(l *Rays, r region, apex vec, from, sweep float64) [][]vec {
 		if remaining == 0 {
 			poly = append(poly, at)
 		}
+		if outside {
+			poly = clipConvex(poly, r)
+		}
 		polys = append(polys, poly)
 	}
 	return polys
 }
 
-// rayFrame finds where rays start, and the angle they cover going clockwise from up.
-func rayFrame(l *Rays, r region) (apex vec, from, sweep float64) {
+// rayPoint is where rays start: a named point, or one given by position.
+func rayPoint(l *Rays, r region) vec {
 	if l.At != nil {
-		return vec{l.At.Fly, l.At.Hoist}, 0, 360
+		return vec{l.At.Fly, l.At.Hoist}
 	}
 	switch l.From {
 	case "upper-hoist":
-		return vec{0, 0}, 90, 90
+		return vec{0, 0}
 	case "lower-hoist":
-		return vec{0, r.h}, 0, 90
+		return vec{0, r.h}
 	case "upper-fly":
-		return vec{r.w, 0}, 180, 90
+		return vec{r.w, 0}
 	case "lower-fly":
-		return vec{r.w, r.h}, 270, 90
+		return vec{r.w, r.h}
 	case "hoist":
-		return vec{0, r.h / 2}, 0, 180
+		return vec{0, r.h / 2}
 	case "fly":
-		return vec{r.w, r.h / 2}, 180, 180
+		return vec{r.w, r.h / 2}
 	case "top":
-		return vec{r.w / 2, 0}, 90, 180
+		return vec{r.w / 2, 0}
 	case "bottom":
-		return vec{r.w / 2, r.h}, -90, 180
+		return vec{r.w / 2, r.h}
 	}
-	return r.center(), 0, 360
+	return r.center()
+}
+
+// rayFrame finds where rays start, the angle they cover going clockwise from up, and
+// the region's far edges, which are the ones the point is inside of, walked clockwise.
+func rayFrame(l *Rays, r region) (apex vec, from, sweep float64, walk []vec) {
+	apex = rayPoint(l, r)
+	corners := r.corners()
+	// Edge i runs clockwise from corner i: the top, the fly, the bottom and the hoist.
+	inward := [4]vec{{0, 1}, {-1, 0}, {0, -1}, {1, 0}}
+	var far [4]bool
+	first := -1
+	for i := range 4 {
+		far[i] = apex.sub(corners[i]).dot(inward[i]) > 0
+	}
+	for i := range 4 {
+		if far[i] && !far[(i+3)%4] {
+			first = i
+		}
+	}
+	if first < 0 {
+		// Every edge is far, so the point is inside, and the rays go all the way round from up.
+		top := vec{apex.x, 0}
+		return apex, 0, 360, []vec{top, corners[1], corners[2], corners[3], corners[0], top}
+	}
+	walk = []vec{corners[first]}
+	for i := first; far[i%4]; i++ {
+		walk = append(walk, corners[(i+1)%4])
+	}
+	from = bearing(walk[0].sub(apex))
+	sweep = math.Mod(bearing(walk[len(walk)-1].sub(apex))-from+360, 360)
+	return apex, from, sweep, walk
+}
+
+// bearing is a direction's angle clockwise from up, exactly for the four straight ones.
+func bearing(v vec) float64 {
+	switch {
+	case v.x == 0 && v.y < 0:
+		return 0
+	case v.y == 0 && v.x > 0:
+		return 90
+	case v.x == 0 && v.y > 0:
+		return 180
+	case v.y == 0 && v.x < 0:
+		return 270
+	}
+	return math.Mod(math.Atan2(v.x, -v.y)*180/math.Pi+360, 360)
 }
 
 // panelRect finds a panel's place in its parent, in the parent's coordinates.

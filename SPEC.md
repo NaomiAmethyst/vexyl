@@ -90,7 +90,8 @@ fold ...             optional and repeatable, §13
 ```
 
 The nodes marked required MUST be there, even in a flag with nothing else. `vexyl` takes a whole
-number, so `1.9` isn't version 1.
+number, so `1.9` isn't version 1. Here and wherever a whole number is needed, that's any number
+whose value is an integer, however it's written, so `vexyl 1.0` is version 1 and `count 3.0` is 3.
 
 A renderer MUST reject an unknown format version, unknown nodes and unknown
 properties, and any argument or property on a node that doesn't take one. Flags are exact
@@ -175,7 +176,8 @@ should see belongs in `note`, because parsers discard comments.
 ### 4.2 palette
 
 Each child names a color: `gold "#fcd116"`. Values MUST be `#rrggbb`, in sRGB, and
-that's what's drawn on screen.
+that's what's drawn on screen. The hex digits can be in either case, and mean the same, so
+`"#FCD116"` is that gold too.
 
 A color can also give its value in other systems, for print, cloth and manufacturing.
 All of them are optional:
@@ -243,9 +245,13 @@ What counts as the shape:
 - A bar is its own width and the part inside the region.
 - A quarter or a check is its own cell, and a wedge from `rays` is the part inside the region.
 - A chevron is the part inside the region, from its edge to its apex.
+- A `band`, `pile` or `pall` is the part inside the region, though its shape runs on past it.
 - A `cross` or `saltire` is the whole region, because its arms are one shape.
-- Each copy from a `repeat` is its own shape.
-- A border or fimbriation is the shape that it edges.
+- Each copy from a `repeat`, or from several `at`s, is its own shape.
+- A fimbriation is the shape that it edges, as that shape counts here, so a band's or chevron's is
+  the part of it inside the region.
+- A border is the flag's shape, its outline or its rectangle, whether the border is inside or
+  outside it.
 
 A gradient can't be the color of a `charge svg`, or a color in another gradient.
 
@@ -346,7 +352,8 @@ bars COLOR... { along AXIS; ratio N...; count N; rotate DEGREES }
 
 `along` defaults to `fly`, which gives horizontal bars. `ratio` defaults to equal
 widths, and its length MUST equal the number of bars. `count N` cycles through
-the colors until there are N bars. Widths are measured across the bars, not along
+the colors until there are N bars, and MUST NOT be fewer than the colors, so that none is dropped
+without a word. Widths are measured across the bars, not along
 the region's edge.
 
 ```
@@ -507,15 +514,50 @@ rays COLOR... { from POINT; count N; ratio N...; measure angle | edge; rotate DE
 
 `rays` divides its region into wedges from a point, going clockwise. `from` is
 `center` (default), a corner (`upper-hoist`, `upper-fly`, `lower-hoist`, `lower-fly`),
-the middle of an edge (`hoist`, `fly`, `top`, `bottom`), or `fly=A hoist=B`. A wedge
-starts at the first direction that can see the region's inside, so `lower-hoist` starts
-straight up and sweeps a quarter turn, `hoist` sweeps a half turn, and `center` a full
-one starting from up. `count N` cycles through the colors until there are N wedges.
+the middle of an edge (`hoist`, `fly`, `top`, `bottom`), or `fly=A hoist=B`. Each of
+these is only a point, and every point works the same way. The wedges cover the directions
+from it that can see the region's inside, starting at the first of them going clockwise, so
+`lower-hoist` starts straight up and sweeps a quarter turn, `hoist` sweeps a half turn, and
+`center` a full one starting from up. `count N` cycles through the colors until there are N
+wedges, and MUST NOT be fewer than the colors.
 
 `measure` says what `ratio` shares out: the angle (default), or the region's far edges
-by length, walking clockwise from the first wedge. Seychelles' rays are evenly spaced
-along its edges, for example, not by angle. `measure edge` follows the region's own edges, so it
-can't also have a `rotate`.
+by length, walking clockwise from the first wedge. The far edges are the ones that the point
+doesn't lie on, so a corner has two and the middle of an edge three. Seychelles' rays are evenly
+spaced along its edges, for example, not by angle. `measure edge` follows the region's own edges,
+so it can't also have a `rotate`.
+
+```
+function ray_frame(rays, region):
+    p = the point that rays.from names
+    edges = the region's top, fly, bottom and hoist edges, each running clockwise
+    far = [e for e in edges if p is strictly on the region's side of e's line]
+    if far holds all four edges:
+        walk = the region's outline, clockwise from (p.x, 0) all the way round to it
+        return p, 0, 360, walk
+    walk = the far edges joined end to end, clockwise, starting with the one after those that aren't far
+    start = bearing(first point of walk - p)
+    sweep = (bearing(last point of walk - p) - start) mod 360
+    return p, start, sweep, walk
+
+bearing(v) = atan2(v.x, -v.y)          // clockwise from up
+
+function ray_wedges(rays, region):
+    p, start, sweep, walk = ray_frame(rays, region)
+    s = [0] + running sums of rays.ratio[i] / sum(rays.ratio)
+    for i, color in rays.colors:
+        if rays.measure is edge:
+            wedge = polygon(p, then the walk from length(walk) * s[i] to length(walk) * s[i + 1])
+        else:
+            a0 = start + rays.rotate + sweep * s[i]
+            a1 = start + rays.rotate + sweep * s[i + 1]
+            wedge = the directions from p clockwise from a0 to a1
+        target.fill(color, wedge clipped to region)
+```
+
+A point outside the region works the same way. It sees the region across less than half a turn,
+its far edges are the ones facing away from it, and its wedges are the parts of the region that
+they cover. A point on the line of an edge, beyond the region, doesn't see that edge either.
 
 ### 7.10 pile, pall
 
@@ -530,7 +572,8 @@ Distances along it are from the top, or from the hoist for `top` and `bottom`.
 
 A `pile` is a triangle or trapezoid from that edge. `base` is the part of the edge it
 stands on, and defaults to all of it. It reaches in `depth` to a point midway along its
-base, cut to a width of `flat` if given, or to the point given by `tip`.
+base, cut to a width of `flat` if given, or to the point given by `tip`. Those are its two forms,
+so a `pile` MUST NOT have both `depth` and `tip`, and `flat` goes only with `depth`.
 
 A `pall` is a Y: two arms of `width` run from the edge's corners to a point `junction`
 in from the middle of the edge, then one stem of the same width runs on to the far
@@ -556,6 +599,15 @@ at its low point, and a wave at its middle going outward, from the hoist or the 
 grid units with mitered corners, in `COLOR` beneath the shape. For a cross or
 saltire, the expanded arms are one shape, so the edge never crosses the center. It edges a filled
 shape, so a shape with `hollow` or `lines` can't have it.
+
+The miters are limited as SVG's `stroke-miterlimit` of 10 limits them. A corner with an angle
+`A` whose miter would reach more than `10 * W` from it, where `W / sin(A / 2) > 10 * W`, is beveled
+instead, which is any corner sharper than about 11.5 degrees. A `hollow` outline and an inside
+border (§9) are joined the same way, with miters limited at 10 times their stroke's width. Renderers
+can stroke the shape at `2 * W` with `stroke-linejoin="miter"` and `stroke-miterlimit="10"`.
+
+A charge with several copies paints the fimbriation of all of them first, and then all their
+fills, so that no copy's edge lies over another copy. That holds under `upright` (§12) too.
 
 ## 8. Charges
 
@@ -684,7 +736,16 @@ for r in 1 .. R:
 
 **`repeat arc count=N radius=R from=A to=B turn=BOOL`** is a ring limited to the angles
 from `A` to `B`, in degrees clockwise from up, with copies at both ends and evenly
-between. It needs at least two copies.
+between. It goes clockwise from `A` to `B`, as a `ring`'s own `from` and `to` do, so `from=300
+to=60` runs over the top. It needs at least two copies, and `A` and `B` MUST NOT be the same place.
+
+```
+span = (B - A) mod 360          // at least 0 and under 360, and 0 is an error
+for i in 0 .. N-1:
+    a = A + span * i / (N - 1)
+    p = at + (R * sin(a), -R * cos(a))
+    paint charge at p, rotated by rotate + (turn ? a : 0)
+```
 
 **`repeat line count=N fly=A hoist=B`** places copies in a straight line, starting
 at the charge's position and stepping by `fly` and `hoist` each time. At least one
@@ -771,6 +832,9 @@ any other. Style properties and CSS function names are matched ignoring ASCII ca
 The root MUST be an `svg` element in the SVG namespace, with a `viewBox` or with
 numeric `width` and `height` (optionally in `px`). Those give it a viewBox of
 `0 0 width height`. All of those numbers use the grammar in §4, within the limits in §15.
+Artwork is always fitted as SVG's default `preserveAspectRatio` fits it, so the root MAY say
+`xMidYMid` or `xMidYMid meet`, with any ASCII whitespace around and between the words, and MUST
+NOT say anything else.
 
 Because documents are untrusted, inline SVG is checked against an allowlist:
 
@@ -886,7 +950,7 @@ or along its rectangle if it has no outline. `SIDE` is `inside` (default) or
 `outside`.
 
 An `inside` border lies within the shape, above every layer. Renderers can stroke
-the edge at `2 * W` and clip the stroke to the shape.
+the edge at `2 * W`, with the mitered joins of §7.12, and clip the stroke to the shape.
 
 An `outside` border MUST NOT go around a `path` outline, including one that comes together only in
 a variant, from the flag's border and the variant's outline or the other way around. It is added around the shape, as Nepal's constitution constructs
@@ -917,7 +981,7 @@ written, as seen by someone looking at that side, with no mirroring.
 
 A variant with its own layers has a different design, so a flag's `reverse` doesn't apply to it,
 and its reverse is the mirror image of those layers. A variant without its own layers has the
-flag's reverse.
+flag's reverse. §12 says how a turned variant's reverse is turned, and §11 how a reverse adapts.
 
 ## 11. Other proportions
 
@@ -956,7 +1020,14 @@ a `polygon` moves by each of its points.
 **Each layer has an anchor,** which is where it stays. The rule sets it: `start` for
 `extend` and `cut`, `center` for `center`, and `scale` for `scale`. A layer can override it
 with `anchor start`, `anchor center`, `anchor end` or `anchor scale`, as a charge held near
-the fly would need.
+the fly would need. A `group`, `panel` or `use` passes its own `anchor` on to the layers inside it
+that don't give one, and they pass it on in turn, so that a group anchored `end` keeps everything in
+it by the fly.
+
+A reverse's own layers (§10) are seen from behind, with the hoist on the right. For them, `start`
+is still the hoist side and `end` the fly side, as on the obverse, so the two sides of a flag adapt
+alike. In their own coordinates, that swaps `start` and `end` when the fly changes. Changing the
+hoist is the same on both sides.
 
 ```
 function move(x, old, new, anchor):
@@ -970,20 +1041,48 @@ function move(x, old, new, anchor):
 | Layer | What happens |
 |---|---|
 | `field`, `saltire`, `checks`; axes `bend` and `bend-sinister` | They follow the region, so nothing's needed |
-| `bars` across the axis, `cross` arms | The last part grows for `start`, the first for `end`, and the first and last equally for `center`. Under `scale`, the ratio holds. A part reaching zero is an error |
+| `bars` across the axis, `cross` arms | The last part grows for `start`, the first for `end`, and the first and last equally for `center`. Under `scale`, the ratio holds. A part reaching zero is an error, as below |
 | `bars` along the axis | Nothing's needed |
 | `band` across the axis | Stays put by its anchor. Its width only changes under `scale` |
 | `chevrons`, `pile`, `pall` | They stay on their edge. Depths only change under `scale`. Positions along an edge that's changing size move by the anchor |
 | `quarters`, `rays`, `charge`, `emblem` | Positions move by the anchor |
+| A charge's `repeat ring` or `repeat arc` | Its position moves by the anchor, and the copies keep their radius around it, so that the ring stays round under every rule, `scale` too |
+| A charge's `repeat line` | Its position moves by the anchor. The step only changes under `scale`, in proportion |
+| A charge's `repeat grid` | Its copies follow the region, since they're spread across it |
+| A charge's several `at`s | Each moves by the anchor |
 | `panel` | Stays on its edge or corner, keeping its size unless `scale`. One running along the axis grows, and its layers adapt with it |
 | `group`, `use` | Their layers adapt. A design with its own grid doesn't, because it fills its region |
 | `outline polygon` | Its points scale. Named outlines are recalculated for the new size |
 
-**A charge at the center stays at the center,** so a charge with no position follows it
-under every rule. Under `extend`, one anchored `start` keeps its place from the hoist.
+**What's at the center stays at the center,** so a charge or emblem with no position, or a panel
+placed by its size alone, follows the center under every rule. One with an anchor, its own or one
+passed on to it, is pinned to where the center was instead, and moves by that anchor like any
+position. So under `extend`, a charge anchored `start` keeps its place from the hoist.
 
 `bars` can take `grow N...`, which shares out the change between them by these weights
 instead. Canada's pale would stay its own width with `grow 1 0 1`.
+
+Floating-point arithmetic can leave a part that should be exactly zero a little either side of it,
+so a part that changes MUST stay longer than `1e-9` of the region's size along the axis:
+
+```
+function share_change(parts, grow, old, new, anchor):
+    total = sum(parts)
+    out = [p * old / total for p in parts]
+    d = new - old
+    if grow is given and sum(grow) > 0:
+        for i in parts: out[i] = out[i] + d * grow[i] / sum(grow)
+        changed = [i for i in parts if grow[i] > 0]
+    else:
+        case anchor:
+            start:  out[last] += d;                       changed = [last]
+            end:    out[first] += d;                      changed = [first]
+            center: out[first] += d / 2; out[last] += d / 2; changed = [first, last]
+            scale:  return parts
+    for i in changed:
+        if out[i] <= 1e-9 * old: error, since the design can't reach this proportion
+    return out
+```
 
 ### 11.1 Asking for a proportion
 
@@ -1069,6 +1168,30 @@ mirror:         (x, y) -> (F - x, y)
 `transpose`, `anti-transpose`, `rotate` and `counter-rotate` swap the flag's width and height.
 The others keep them.
 
+**The reverse of a turned variant** is the mirror image of its turned obverse, as someone behind it
+sees it. The turn comes first, and looking from behind then swaps left and right, so the hoist
+stays on the edge that the turn put it on. A transposed flag, hanging from a crossbar, has its
+hoist at the top on both sides. A reverse with its own design (§10) takes the place of the mirrored
+obverse:
+
+```
+back = the reverse's own layers, as seen from behind, or else mirror(obverse)
+reverse = mirror'(turn(mirror(back)))     // mirror' is across the turned flag's own width
+```
+
+That's the back turned by the turn's mirror image, which keeps the flag's outline and border with
+it as the obverse's turn does:
+
+| `from` | The back turns by |
+|---|---|
+| `none`, `mirror`, `half-turn`, `invert` | The same |
+| `transpose` | `anti-transpose` |
+| `anti-transpose` | `transpose` |
+| `rotate` | `counter-rotate` |
+| `counter-rotate` | `rotate` |
+
+With `upright`, each charge on the reverse is drawn the way it is on the back, the right way up.
+
 A variant with `upright` puts each charge back the right way up around its own position,
 leaving where it sits on the flag alone. A polygon doesn't have a position to turn around,
 so it turns with the flag. Each copy from a `repeat` or several `at`s is put back around its own
@@ -1112,7 +1235,8 @@ Each step folds everything on one side of a crease, all layers at once:
 A crease is written `along=fly at=H move=top|bottom`, `along=hoist at=F move=hoist|fly`, or
 for any line, `through="A B C D" move="E F"`, where the line runs through two points and the
 part holding a third moves. Positions are where the flag lies at that step, not where those
-points were on the flat flag.
+points were on the flat flag. A step is written one way or the other, so one with `through`
+MUST NOT also have `along` or `at`.
 
 Only flat folds are modeled. A step MUST have something on both sides of its crease.
 
@@ -1162,14 +1286,14 @@ collide, so a renderer SHOULD let whatever embeds it give the IDs a prefix of it
 So that a small document can't demand unbounded work, a renderer MUST enforce these, and reject a
 document when it's parsed, so that validating it says so too:
 
-- Layers nest up to 32 levels deep. That counts through `use`: a `use` is one level, and what it
-  names is nested within it.
+- Layers nest up to 32 levels deep. A top-level layer is at level 1, and so is a layer directly
+  inside `reverse { }` or a `variant`, since those hold a flag's layers rather than adding a level.
+  The count goes on through `use`: a `use` is one level, and what it names is nested within it.
 - A flag paints up to 200000 parts, as counted below.
-
-A renderer MUST also accept and MAY reject beyond these:
-
-- up to 10000 bars, star points, or copies from a single `repeat`
-- up to 10000 waves in a shaped edge, and up to 10000 pieces from a fold
+- Up to 10000 bars or wedges from a `count`, points of a star or sun, cells of `checks`, or copies
+  from a single `repeat`.
+- Up to 10000 waves in a shaped edge, and up to 10000 pieces from a fold. A fold's pieces are
+  counted on the flag's own shape, step by step, when the document is read.
 
 A number MUST be finite, with a magnitude that's zero or from 1e-12 to 1e12, so that nothing worked
 out from it can overflow. A renderer MUST reject any other.

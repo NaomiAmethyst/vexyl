@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
-"""Shows that the suite's checks of tags, locations, share links and a charge's cuts can fail.
+"""Shows that the suite's checks of tags, locations, share links, a charge's cuts, an arc's direction
+and a turned variant's reverse can fail.
 
     prove.py COMMAND...
 
@@ -44,6 +45,8 @@ MUTANTS = [
     ("share-accepts-anything", "share"),
     ("share-no-dictionary-read", "share"),
     ("cuts-once", "render", "repeated-cuts"),
+    ("arc-counterclockwise", "render", "vocabulary"),
+    ("reverse-turned-first", "render", "turned-reverse"),
 ]
 
 

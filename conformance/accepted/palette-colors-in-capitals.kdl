@@ -1,0 +1,5 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#ABCDEF"; b "#aBcDeF"; }
+proportion hoist=1 fly=1
+bars a b

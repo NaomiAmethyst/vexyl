@@ -164,10 +164,28 @@ test("a gradient spans a cross as one shape", () => {
 	contains(render(gradientHeader + "cross flow { fly 9 2 9; hoist 4 2 4; }"), `gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(20 10)"`);
 });
 
-test("a gradient is reused for a border and fimbriation", () => {
+test("a gradient spans the flag for its outside border, and is reused for fimbriation", () => {
 	const out = render(gradientHeader + "border flow 1 outside\ncharge disc a { radius 1; fimbriate flow 0.5; }");
-	assert.equal(out.split("<linearGradient").length - 1, 1);
+	contains(out, `gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(20 10)"`);
+	assert.equal(out.split("<linearGradient").length - 1, 2);
 	contains(out, 'stroke="url(#');
+});
+
+test("a gradient spans only what's inside the region", () => {
+	contains(render(gradientHeader + "pile flow { depth 5; }"), "translate(0 0) scale(5 10)");
+	contains(render(gradientHeader + "pall flow { width 2; }"), "translate(0 0) scale(20 10)");
+	contains(render(gradientHeader + "chevrons a { depth 5; fimbriate flow 1; }"), "translate(0 0) scale(5 10)");
+});
+
+test("an arc goes clockwise", () => {
+	const out = render(gradientHeader + "charge disc a { radius 1; repeat arc count=3 radius=3 from=300 to=60; }");
+	contains(out, `cx="10" cy="2"`);
+	assert.ok(!out.includes(`cx="10" cy="8"`));
+});
+
+test("a turned variant's reverse is its turned front, mirrored", () => {
+	const src = gradientHeader + "field a\nvariant v { from transpose; }\n";
+	contains(svg(parse(src), { variant: "v", side: "reverse" }), `transform="matrix(0 -1 -1 0 10 20) matrix(-1 0 0 1 20 0)"`);
 });
 
 test("a band's fimbriation doesn't run along the flag's edge", () => {

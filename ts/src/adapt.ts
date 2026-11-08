@@ -7,8 +7,11 @@ import type { Anchor, Effects, Flag, Layer, Options, PanelLayer, Point, Shape, T
 
 type AxisName = "fly" | "hoist";
 
-/** The flag at another proportion, as fly divided by hoist, following its adapt rules. */
-export function withRatio(f: Flag, ratio: number): Flag {
+/**
+ * The flag at another proportion, as fly divided by hoist, following its adapt rules. Its layers
+ * can be a reverse's own, seen from behind.
+ */
+export function withRatio(f: Flag, ratio: number, fromBehind = false): Flag {
 	const current = f.fly / f.hoist;
 	if (Math.abs(ratio - current) < 1e-9 * current) {
 		return f;
@@ -28,7 +31,7 @@ export function withRatio(f: Flag, ratio: number): Flag {
 	const onHoist = mode.startsWith("hoist-");
 	const base = onHoist ? mode.slice("hoist-".length) : mode;
 	const anchor: Anchor = base === "extend" ? "start" : base === "center" ? "center" : "scale";
-	const a = new Adapter(onHoist ? "hoist" : "fly", anchor, onHoist ? f.fly : f.hoist);
+	const a = new Adapter(onHoist ? "hoist" : "fly", anchor, onHoist ? f.fly : f.hoist, fromBehind);
 	if (onHoist) {
 		out.hoist = f.fly / ratio;
 		out.layers = a.layers(f.layers, f.hoist, out.hoist);
@@ -68,13 +71,55 @@ class Adapter {
 	error: string | undefined;
 	private readonly axis: AxisName;
 	private readonly anchor: Anchor;
+	/** An anchor that a container passed on to its layers, if one did. */
+	private passed: Anchor | undefined;
+	/** Says that the layers are a reverse's own, with the hoist on the right. */
+	private readonly fromBehind: boolean;
 	/** The region's size across the axis, which stays the same. */
 	private other: number;
 
-	constructor(axis: AxisName, anchor: Anchor, other: number) {
+	constructor(axis: AxisName, anchor: Anchor, other: number, fromBehind: boolean) {
 		this.axis = axis;
 		this.anchor = anchor;
 		this.other = other;
+		this.fromBehind = fromBehind;
+	}
+
+	/**
+	 * A layer's anchor: its own, or one passed on to it, or the rule's. It says whether the layer
+	 * was given one, by itself or a container.
+	 */
+	private anchorOf(e: Effects): { anchor: Anchor; given: boolean } {
+		let anchor = e.anchor ?? this.passed;
+		const given = anchor !== undefined;
+		anchor ??= this.anchor;
+		if (this.fromBehind && this.axis === "fly") {
+			// Seen from behind, the hoist is on the right, and start is still the hoist.
+			if (anchor === "start") {
+				anchor = "end";
+			} else if (anchor === "end") {
+				anchor = "start";
+			}
+		}
+		return { anchor, given };
+	}
+
+	/** Adapts a container's layers with its anchor, if it gives one. */
+	private passOn<T>(e: Effects, adapt: () => T): T {
+		const passed = this.passed;
+		if (e.anchor !== undefined) {
+			this.passed = e.anchor;
+		}
+		try {
+			return adapt();
+		} finally {
+			this.passed = passed;
+		}
+	}
+
+	/** The region's center, for pinning what's there to an anchor. */
+	private center(old: number): Point {
+		return this.axis === "hoist" ? { fly: this.other / 2, hoist: old / 2 } : { fly: old / 2, hoist: this.other / 2 };
 	}
 
 	private fail(message: string): void {
@@ -103,7 +148,7 @@ class Adapter {
 		const k = next / old;
 		const s = { ...input } as Shape;
 		if (s.at === undefined && explicit && anchor !== "scale" && s.kind !== "polygon") {
-			s.at = this.axis === "hoist" ? { fly: this.other / 2, hoist: old / 2 } : { fly: old / 2, hoist: this.other / 2 };
+			s.at = this.center(old);
 		}
 		if (s.at !== undefined) {
 			s.at = this.point(s.at, old, next, anchor);
@@ -151,7 +196,7 @@ class Adapter {
 	}
 
 	private effects<T extends Effects>(input: T, old: number, next: number): { copy: T; anchor: Anchor } {
-		const anchor = input.anchor ?? this.anchor;
+		const { anchor } = this.anchorOf(input);
 		const copy = { ...input };
 		if (input.clip !== undefined) {
 			copy.clip = this.shape(input.clip, old, next, anchor, false);
@@ -169,26 +214,37 @@ class Adapter {
 		const out = parts.map((p) => (p * old) / total);
 		const d = next - old;
 		const last = out.length - 1;
+		let changed = [last];
 		switch (anchor) {
 			case "start":
 				out[last]! += d;
 				break;
 			case "end":
 				out[0]! += d;
+				changed = [0];
 				break;
 			case "center":
 				out[0]! += d / 2;
 				out[last]! += d / 2;
+				changed = [0, last];
 				break;
 			default:
 				return parts;
 		}
-		for (const p of out) {
-			if (p < 0) {
-				this.fail(`${what} can't be cut to this proportion`);
-			}
+		for (const i of changed) {
+			this.keep(what, out[i]!, old);
 		}
 		return out;
+	}
+
+	/**
+	 * Refuses a part that a change of size has brought to nothing, allowing for floating-point
+	 * error in what should be exactly zero.
+	 */
+	private keep(what: string, part: number, old: number): void {
+		if (part <= 1e-9 * old) {
+			this.fail(`${what} can't be cut to this proportion`);
+		}
 	}
 
 	private layer(l: Layer, old: number, next: number): Layer {
@@ -213,8 +269,8 @@ class Adapter {
 					if (weights > 0) {
 						copy.ratio = l.ratio.map((part, i) => {
 							const size = (part * old) / total + ((next - old) * l.grow![i]!) / weights;
-							if (size <= 0) {
-								this.fail("bars can't be cut to this proportion");
+							if (l.grow![i]! > 0) {
+								this.keep("bars", size, old);
 							}
 							return size;
 						});
@@ -271,8 +327,7 @@ class Adapter {
 				}
 				return copy;
 			}
-			case "rays":
-			case "emblem": {
+			case "rays": {
 				const { copy, anchor } = this.effects(l, old, next);
 				const at = this.optionalPoint(l.at, old, next, anchor);
 				if (at !== undefined) {
@@ -280,9 +335,21 @@ class Adapter {
 				}
 				return copy;
 			}
+			case "emblem": {
+				const { copy, anchor } = this.effects(l, old, next);
+				let at = l.at;
+				if (at === undefined && this.anchorOf(l).given && anchor !== "scale") {
+					// One at the center that's given an anchor is pinned to it, as a charge is.
+					at = this.center(old);
+				}
+				if (at !== undefined) {
+					copy.at = this.point(at, old, next, anchor);
+				}
+				return copy;
+			}
 			case "charge": {
 				const { copy, anchor } = this.effects(l, old, next);
-				copy.shape = this.shape(l.shape, old, next, anchor, l.anchor !== undefined);
+				copy.shape = this.shape(l.shape, old, next, anchor, this.anchorOf(l).given);
 				if (l.repeat?.kind === "line" && anchor === "scale") {
 					copy.repeat = this.axis === "fly" ? { ...l.repeat, fly: l.repeat.fly * k } : { ...l.repeat, hoist: l.repeat.hoist * k };
 				}
@@ -290,7 +357,7 @@ class Adapter {
 			}
 			case "group": {
 				const { copy } = this.effects(l, old, next);
-				copy.layers = this.layers(l.layers, old, next);
+				copy.layers = this.passOn(l, () => this.layers(l.layers, old, next));
 				return copy;
 			}
 			case "panel":
@@ -298,7 +365,7 @@ class Adapter {
 			case "use": {
 				const { copy } = this.effects(l, old, next);
 				if (l.define.fly === undefined) {
-					copy.define = { ...l.define, layers: this.layers(l.define.layers, old, next) };
+					copy.define = { ...l.define, layers: this.passOn(l, () => this.layers(l.define.layers, old, next)) };
 				}
 				return copy;
 			}
@@ -312,12 +379,20 @@ class Adapter {
 	private panel(t: PanelLayer, old: number, next: number): Layer {
 		const k = next / old;
 		const { copy: c, anchor } = this.effects(t, old, next);
-		const at = this.optionalPoint(t.at, old, next, anchor);
+		let at = t.at;
+		if (t.side === undefined && t.corner === undefined && at === undefined && this.anchorOf(t).given && anchor !== "scale") {
+			// One at the center that's given an anchor is pinned to it, as a charge is.
+			at = this.center(old);
+		}
 		if (at !== undefined) {
-			c.at = at;
+			c.at = this.point(at, old, next, anchor);
 		}
 		const runsAlong = (this.axis === "fly" && (t.side === "top" || t.side === "bottom")) || (this.axis === "hoist" && (t.side === "hoist" || t.side === "fly"));
 		const outer = this.other;
+		const passed = this.passed;
+		if (t.anchor !== undefined) {
+			this.passed = t.anchor;
+		}
 		try {
 			if (runsAlong) {
 				this.other = t.width ?? 0;
@@ -345,6 +420,7 @@ class Adapter {
 			return c;
 		} finally {
 			this.other = outer;
+			this.passed = passed;
 		}
 	}
 }
@@ -387,6 +463,8 @@ export function resolve(f: Flag, opts: Options): Resolved {
 	let turn: Turn = "none";
 	let upright = false;
 	let mirror = false;
+	// Says that the layers are the reverse's own, as seen from behind.
+	let fromBehind = false;
 	let variant: Variant | undefined;
 	if (opts.variant !== undefined) {
 		variant = f.variants[opts.variant];
@@ -407,6 +485,7 @@ export function resolve(f: Flag, opts: Options): Resolved {
 		case "reverse":
 			if (f.reverse !== undefined) {
 				out.layers = f.reverse.layers;
+				fromBehind = true;
 			} else {
 				mirror = true;
 			}
@@ -428,6 +507,7 @@ export function resolve(f: Flag, opts: Options): Resolved {
 			// Its own design has nothing to do with the flag's reverse, so it's mirrored.
 			out.layers = variant.layers;
 			delete out.reverse;
+			fromBehind = false;
 			mirror = opts.side === "reverse";
 		}
 		if (variant.outline !== undefined) {
@@ -446,7 +526,7 @@ export function resolve(f: Flag, opts: Options): Resolved {
 	if (opts.fit === "pad") {
 		let adapted = out;
 		try {
-			adapted = withRatio(out, nearestRatio(out, ratio));
+			adapted = withRatio(out, nearestRatio(out, ratio), fromBehind);
 		} catch (e) {
 			// The rules allow that proportion, but this design can't reach it.
 			if (!(e instanceof RenderError)) {
@@ -455,7 +535,13 @@ export function resolve(f: Flag, opts: Options): Resolved {
 		}
 		return { flag: adapted, turn, upright, mirror, canvas: ratio };
 	}
-	return { flag: withRatio(out, ratio), turn, upright, mirror, canvas: 0 };
+	const adapted = withRatio(out, ratio, fromBehind);
+	if (opts.fold !== undefined && out.reverse !== undefined) {
+		// A fold shows the back as well, which adapts as it's seen from behind.
+		const back = withRatio({ ...out, layers: out.reverse.layers }, ratio, true);
+		return { flag: { ...adapted, reverse: { ...out.reverse, layers: back.layers } }, turn, upright, mirror, canvas: 0 };
+	}
+	return { flag: adapted, turn, upright, mirror, canvas: 0 };
 }
 
 /** The proportion closest to a target that the flag's rules allow. */

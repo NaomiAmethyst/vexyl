@@ -1,0 +1,47 @@
+// An invented flag exercising a reverse of its own at other proportions, where its hoist is on
+// the right.
+vexyl 1
+meta {
+  name "Reverse Adapt Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+}
+proportion hoist=20 fly=30
+
+bars night violet {
+  along hoist
+  ratio 1 2
+}
+charge disc gold {
+  radius 2
+  at fly=5 hoist=5
+}
+reverse {
+  bars violet night {
+    along hoist
+    ratio 2 1
+  }
+  charge disc gold {
+    radius 2
+    at fly=25 hoist=5
+  }
+  group {
+    anchor end
+    charge star white {
+      radius 2
+      at fly=5 hoist=15
+    }
+  }
+}
+adapt {
+  wider extend
+  narrower cut
+}
+variant crossbar {
+  from transpose
+  ratio 2
+}

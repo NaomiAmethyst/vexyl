@@ -348,9 +348,9 @@ export function axisSpan(r: Region, along: Axis): number {
 
 /** One wedge per color, each with an angle under 180 degrees or split so that it clips cleanly. */
 export function rayPolys(l: RaysLayer, r: Region): Vec[][] {
-	const { apex, from: start, sweep } = rayFrame(l, r);
+	const { apex, from: start, sweep, walk } = rayFrame(l, r);
 	if (l.measure === "edge") {
-		return rayPolysByEdge(l, r, apex, start, sweep);
+		return rayPolysByEdge(l, r, apex, walk);
 	}
 	const from = start + l.rotate;
 	const total = sum(l.ratio);
@@ -371,41 +371,21 @@ export function rayPolys(l: RaysLayer, r: Region): Vec[][] {
 }
 
 /** Shares the region's far edges out by length, going clockwise. */
-function rayPolysByEdge(l: RaysLayer, r: Region, apex: Vec, from: number, sweep: number): Vec[][] {
-	// Walk the region's outline clockwise from the top of the hoist, starting at the first point
-	// the rays can see.
-	const corners = regionCorners(r);
-	const [c0, c1, c2, c3] = corners;
-	let path: Vec[];
-	if (sweep === 360) {
-		path = [{ x: apex.x, y: 0 }, c1, c2, c3, c0, { x: apex.x, y: 0 }];
-	} else if (from === 90) {
-		path = l.from === "top" ? [c1, c2, c3, c0] : [c1, c2, c3];
-	} else if (from === 0 && sweep === 90) {
-		path = [c0, c1, c2];
-	} else if (from === 0) {
-		path = [c0, c1, c2, c3];
-	} else if (from === 180 && sweep === 90) {
-		path = [c2, c3, c0];
-	} else if (from === 180) {
-		path = [c2, c3, c0, c1];
-	} else if (from === 270) {
-		path = [c3, c0, c1];
-	} else {
-		path = [c3, c0, c1, c2];
-	}
+function rayPolysByEdge(l: RaysLayer, r: Region, apex: Vec, path: Vec[]): Vec[][] {
 	let length = 0;
 	for (let i = 1; i < path.length; i++) {
 		length += Math.hypot(path[i]!.x - path[i - 1]!.x, path[i]!.y - path[i - 1]!.y);
 	}
 	const total = sum(l.ratio);
+	// From outside the region, a wedge would cover what's between the point and the region.
+	const outside = apex.x < 0 || apex.x > r.w || apex.y < 0 || apex.y > r.h;
 	const polys: Vec[][] = [];
 	let leg = 0;
 	let into = 0;
 	let at = path[0]!;
 	for (const part of l.ratio) {
 		let remaining = (length * part) / total;
-		const poly: Vec[] = [apex, at];
+		let poly: Vec[] = [apex, at];
 		while (remaining > 1e-9 && leg < path.length - 1) {
 			const next = path[leg + 1]!;
 			const legLength = Math.hypot(next.x - path[leg]!.x, next.y - path[leg]!.y);
@@ -425,36 +405,86 @@ function rayPolysByEdge(l: RaysLayer, r: Region, apex: Vec, from: number, sweep:
 		if (remaining === 0) {
 			poly.push(at);
 		}
+		if (outside) {
+			poly = clipConvex(poly, r);
+		}
 		polys.push(poly);
 	}
 	return polys;
 }
 
-/** Finds where rays start, and the angle they cover going clockwise from up. */
-function rayFrame(l: RaysLayer, r: Region): { apex: Vec; from: number; sweep: number } {
+/** Where rays start: a named point, or one given by position. */
+function rayPoint(l: RaysLayer, r: Region): Vec {
 	if (l.at !== undefined) {
-		return { apex: { x: l.at.fly, y: l.at.hoist }, from: 0, sweep: 360 };
+		return { x: l.at.fly, y: l.at.hoist };
 	}
 	switch (l.from) {
 		case "upper-hoist":
-			return { apex: { x: 0, y: 0 }, from: 90, sweep: 90 };
+			return { x: 0, y: 0 };
 		case "lower-hoist":
-			return { apex: { x: 0, y: r.h }, from: 0, sweep: 90 };
+			return { x: 0, y: r.h };
 		case "upper-fly":
-			return { apex: { x: r.w, y: 0 }, from: 180, sweep: 90 };
+			return { x: r.w, y: 0 };
 		case "lower-fly":
-			return { apex: { x: r.w, y: r.h }, from: 270, sweep: 90 };
+			return { x: r.w, y: r.h };
 		case "hoist":
-			return { apex: { x: 0, y: r.h / 2 }, from: 0, sweep: 180 };
+			return { x: 0, y: r.h / 2 };
 		case "fly":
-			return { apex: { x: r.w, y: r.h / 2 }, from: 180, sweep: 180 };
+			return { x: r.w, y: r.h / 2 };
 		case "top":
-			return { apex: { x: r.w / 2, y: 0 }, from: 90, sweep: 180 };
+			return { x: r.w / 2, y: 0 };
 		case "bottom":
-			return { apex: { x: r.w / 2, y: r.h }, from: -90, sweep: 180 };
+			return { x: r.w / 2, y: r.h };
 		default:
-			return { apex: regionCenter(r), from: 0, sweep: 360 };
+			return regionCenter(r);
 	}
+}
+
+/**
+ * Finds where rays start, the angle they cover going clockwise from up, and the region's far
+ * edges, which are the ones the point is inside of, walked clockwise.
+ */
+export function rayFrame(l: RaysLayer, r: Region): { apex: Vec; from: number; sweep: number; walk: Vec[] } {
+	const apex = rayPoint(l, r);
+	const corners = regionCorners(r);
+	// Edge i runs clockwise from corner i: the top, the fly, the bottom and the hoist.
+	const inward: Vec[] = [{ x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }];
+	const far = corners.map((c, i) => (apex.x - c.x) * inward[i]!.x + (apex.y - c.y) * inward[i]!.y > 0);
+	let first = -1;
+	for (let i = 0; i < 4; i++) {
+		if (far[i] && !far[(i + 3) % 4]) {
+			first = i;
+		}
+	}
+	if (first < 0) {
+		// Every edge is far, so the point is inside, and the rays go all the way round from up.
+		const top = { x: apex.x, y: 0 };
+		return { apex, from: 0, sweep: 360, walk: [top, corners[1]!, corners[2]!, corners[3]!, corners[0]!, top] };
+	}
+	const walk = [corners[first]!];
+	for (let i = first; far[i % 4]; i++) {
+		walk.push(corners[(i + 1) % 4]!);
+	}
+	const from = bearing(sub(walk[0]!, apex));
+	const sweep = (bearing(sub(walk[walk.length - 1]!, apex)) - from + 360) % 360;
+	return { apex, from, sweep, walk };
+}
+
+/** A direction's angle clockwise from up, exactly for the four straight ones. */
+function bearing(v: Vec): number {
+	if (v.x === 0 && v.y < 0) {
+		return 0;
+	}
+	if (v.y === 0 && v.x > 0) {
+		return 90;
+	}
+	if (v.x === 0 && v.y > 0) {
+		return 180;
+	}
+	if (v.y === 0 && v.x < 0) {
+		return 270;
+	}
+	return ((Math.atan2(v.x, -v.y) * 180) / Math.PI + 360) % 360;
 }
 
 /** A panel's place in its parent, in the parent's coordinates: x, y, width and height. */

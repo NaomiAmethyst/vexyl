@@ -367,8 +367,28 @@ func TestGradientSpansCrossAsOneShape(t *testing.T) {
 
 func TestGradientFimbriationAndBorder(t *testing.T) {
 	out := svgOf(t, parse(t, gradientHeader+`border flow 1 outside`+"\n"+`charge disc a { radius 1; fimbriate flow 0.5; }`))
-	if strings.Count(out, "<linearGradient") != 1 || !strings.Contains(out, `stroke="url(#`) {
-		t.Errorf("gradient isn't reused for the border and fimbriation: %s", out)
+	// An outside border spans the flag it edges, not its own outer edge.
+	if !strings.Contains(out, `gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(20 10)"`) {
+		t.Errorf("border gradient isn't across the flag: %s", out)
+	}
+	if strings.Count(out, "<linearGradient") != 2 || !strings.Contains(out, `stroke="url(#`) {
+		t.Errorf("gradient isn't reused for the fimbriation: %s", out)
+	}
+}
+
+func TestGradientSpansWhatsInsideTheRegion(t *testing.T) {
+	for _, tt := range []struct{ name, src, want string }{
+		{"pile", `pile flow { depth 5; }`, `translate(0 0) scale(5 10)`},
+		{"pall", `pall flow { width 2; }`, `translate(0 0) scale(20 10)`},
+		{"band's fimbriation", `band a { along bend; width 2; fimbriate flow 1; }`, `gradientUnits="userSpaceOnUse"`},
+		{"chevron's fimbriation", `chevrons a { depth 5; fimbriate flow 1; }`, `translate(0 0) scale(5 10)`},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			out := svgOf(t, parse(t, gradientHeader+tt.src))
+			if !strings.Contains(out, tt.want) {
+				t.Errorf("gradient doesn't span the part inside the region: %s", out)
+			}
+		})
 	}
 }
 
@@ -664,6 +684,15 @@ func TestRejected(t *testing.T) {
 		{"until a year before the date's", "vexyl 1\nmeta { name \"T\"; date \"2000-06\"; until \"1999\"; }\n", "comes before"},
 		{"until a month before the date's", "vexyl 1\nmeta { name \"T\"; date \"2000-06-15\"; until \"2000-05\"; }\n", "comes before"},
 		{"not utf-8", header + "field \"\xff\"\n", "UTF-8"},
+		{"pile with a depth and a tip", header + `pile a { depth 3; tip 5 2; }`, "not both"},
+		{"pile with a tip and a flat", header + `pile a { tip 5 2; flat 1; }`, "goes with a `depth`"},
+		{"fold step through a line and along an axis", header + "field a\nfold f { over through=\"0 5 20 5\" move=\"0 10\" along=hoist at=3; }\n", "not both"},
+		{"fold step through a line and at a place", header + "field a\nfold f { over through=\"0 5 20 5\" move=\"0 10\" at=3; }\n", "not both"},
+		{"bars counting fewer than their colors", header + `bars a b a { count 2; }`, "leave some out"},
+		{"rays counting fewer than their colors", header + `rays a b a { count 2; }`, "leave some out"},
+		{"arc from and to the same place", header + `charge disc a { radius 1; repeat arc count=3 radius=2 from=10 to=370; }`, "same place"},
+		{"variant nested too deep", header + "field a\nvariant v {\n" + strings.Repeat("group {\n", 32) + "field a\n" + strings.Repeat("}\n", 33), "levels deep"},
+		{"reverse nested too deep", header + "field a\nreverse {\n" + strings.Repeat("group {\n", 32) + "field a\n" + strings.Repeat("}\n", 33), "levels deep"},
 		{"problem after crlf", "vexyl 1\r\nmeta { name \"T\"; }\r\npalette { a \"#112233\"; }\r\nproportion hoist=10 fly=20\r\nfield nope\r\n", "isn't in the palette"},
 		{"problem after cr", "vexyl 1\rmeta { name \"T\"; }\rpalette { a \"#112233\"; }\rproportion hoist=10 fly=20\rfield nope\r", "isn't in the palette"},
 	}
@@ -951,6 +980,120 @@ func TestChecksFlow(t *testing.T) {
 	}
 }
 
+func TestRaysFromAnyPoint(t *testing.T) {
+	r := region{w: 20, h: 10}
+	tests := []struct {
+		name        string
+		at          Point
+		from, sweep float64
+		walk        []vec
+	}{
+		{"inside", Point{5, 5}, 0, 360, []vec{{5, 0}, {20, 0}, {20, 10}, {0, 10}, {0, 0}, {5, 0}}},
+		{"a corner", Point{0, 0}, 90, 90, []vec{{20, 0}, {20, 10}, {0, 10}}},
+		{"another corner", Point{20, 10}, 270, 90, []vec{{0, 10}, {0, 0}, {20, 0}}},
+		{"an edge", Point{0, 3}, 0, 180, []vec{{0, 0}, {20, 0}, {20, 10}, {0, 10}}},
+		{"the bottom", Point{4, 10}, 270, 180, []vec{{0, 10}, {0, 0}, {20, 0}, {20, 10}}},
+		{"outside the hoist", Point{-10, 5}, 90 - math.Atan(0.5)*180/math.Pi, 2 * math.Atan(0.5) * 180 / math.Pi, []vec{{0, 0}, {20, 0}, {20, 10}, {0, 10}}},
+		{"beyond a corner", Point{-5, -5}, 90 + math.Atan(0.2)*180/math.Pi, 90 - (math.Atan(1.0/3)+math.Atan(0.2))*180/math.Pi, []vec{{20, 0}, {20, 10}, {0, 10}}},
+		{"on an edge's line beyond the region", Point{0, -5}, 90 + math.Atan(0.25)*180/math.Pi, 90 - math.Atan(0.25)*180/math.Pi, []vec{{20, 0}, {20, 10}, {0, 10}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			at := tt.at
+			_, from, sweep, walk := rayFrame(&Rays{At: &at}, r)
+			if math.Abs(from-tt.from) > 1e-9 || math.Abs(sweep-tt.sweep) > 1e-9 {
+				t.Errorf("from %v sweeping %v, want %v sweeping %v", from, sweep, tt.from, tt.sweep)
+			}
+			if !slices.EqualFunc(walk, tt.walk, near) {
+				t.Errorf("walk %v, want %v", walk, tt.walk)
+			}
+		})
+	}
+}
+
+func TestRaysFromACornerSeeOnlyTheInside(t *testing.T) {
+	f := parse(t, header+"rays a b { from fly=0 hoist=0; }\nrays a b { from fly=0 hoist=0; measure edge; }\n")
+	// Each wedge is an eighth of a turn, so the first ends on the bend's own line from the corner.
+	angle := rayPolys(f.Layers[0].(*Rays), region{w: 20, h: 10})
+	if !hasPoint(angle[0], vec{10, 10}) || !hasPoint(angle[1], vec{0, 10}) {
+		t.Errorf("by angle: %v", angle)
+	}
+	// The far edges are the fly and the bottom, 30 long, so they're shared at 15 along.
+	edge := rayPolys(f.Layers[1].(*Rays), region{w: 20, h: 10})
+	if !hasPoint(edge[0], vec{15, 10}) || !hasPoint(edge[1], vec{15, 10}) || hasPoint(edge[0], vec{0, 10}) {
+		t.Errorf("by edge: %v", edge)
+	}
+}
+
+func TestRaysFromOutsideStayInside(t *testing.T) {
+	f := parse(t, header+"rays a b { from fly=-10 hoist=5; measure edge; }\n")
+	for _, poly := range rayPolys(f.Layers[0].(*Rays), region{w: 20, h: 10}) {
+		for _, p := range poly {
+			if p.x < -1e-9 || p.y < -1e-9 || p.x > 20+1e-9 || p.y > 10+1e-9 {
+				t.Errorf("wedge %v reaches outside", poly)
+			}
+		}
+	}
+}
+
+func TestArcGoesClockwise(t *testing.T) {
+	out := render(t, header+`charge disc a { radius 1; repeat arc count=3 radius=3 from=300 to=60; }`, Options{})
+	// The middle copy is at the top, which the arc runs over.
+	if !strings.Contains(out, `cx="10" cy="2"`) || strings.Contains(out, `cx="10" cy="8"`) {
+		t.Errorf("arc: %s", out)
+	}
+}
+
+func TestPaletteHexIsLowercase(t *testing.T) {
+	m := parse(t, "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#ABCdef\"; }\nproportion hoist=1 fly=1\n").Model().(map[string]any)
+	if got := m["palette"].(map[string]any)["a"].(map[string]any)["color"]; got != "#abcdef" {
+		t.Errorf("palette color: %v", got)
+	}
+}
+
+// A turned variant's reverse is its front seen from behind, so a crossbar flag keeps its hoist
+// at the top on both sides.
+func TestTurnedReverseIsTheMirroredFront(t *testing.T) {
+	src := header + "field a\npanel { side hoist; width 2; field b; }\n" +
+		"variant transpose { from transpose; }\nvariant rotate { from rotate; }\n" +
+		"variant counter { from counter-rotate; }\nvariant anti { from anti-transpose; }\nvariant half { from half-turn; }\n"
+	for _, tt := range []struct{ variant, want string }{
+		{"transpose", "matrix(0 -1 -1 0 10 20) matrix(-1 0 0 1 20 0)"},
+		{"anti", "matrix(0 1 1 0 0 0) matrix(-1 0 0 1 20 0)"},
+		{"rotate", "matrix(0 -1 1 0 0 20) matrix(-1 0 0 1 20 0)"},
+		{"counter", "matrix(0 1 -1 0 10 0) matrix(-1 0 0 1 20 0)"},
+		{"half", "matrix(-1 0 0 -1 20 10) matrix(-1 0 0 1 20 0)"},
+	} {
+		out := render(t, src, Options{Variant: tt.variant, Side: "reverse"})
+		if !strings.Contains(out, `transform="`+tt.want+`"`) {
+			t.Errorf("%s: no %q in %s", tt.variant, tt.want, out)
+		}
+	}
+}
+
+// A reverse's own layers adapt with their hoist on the right.
+func TestReverseLayersAdaptFromTheirHoist(t *testing.T) {
+	src := adaptHeader + "field a\nreverse { field a; charge disc b { radius 1; at fly=18 hoist=5; }; }\nadapt { wider extend; }\n"
+	if out := render(t, src, Options{Side: "reverse", Ratio: Float(3)}); !strings.Contains(out, `cx="28" cy="5"`) {
+		t.Errorf("the reverse's charge didn't keep its place from the hoist: %s", out)
+	}
+	fold := src + "fold f { over along=hoist at=10 move=fly; }\n"
+	if out := render(t, fold, Options{Fold: "f", Ratio: Float(3)}); !strings.Contains(out, `cx="28" cy="5"`) {
+		t.Errorf("a fold's back didn't adapt: %s", out)
+	}
+}
+
+// Under upright, as without it, the fimbriation of every copy lies beneath all their fills.
+func TestUprightFimbriationLiesBeneathEveryCopy(t *testing.T) {
+	src := header + "charge disc a { radius 2; fimbriate b 1; repeat line count=2 fly=3; }\nvariant v { from rotate; upright; }\n"
+	out := render(t, src, Options{Variant: "v"})
+	last := strings.LastIndex(out, `stroke="#445566"`)
+	first := strings.Index(out, `fill="#112233"`)
+	if last < 0 || first < 0 || last > first {
+		t.Errorf("a fill comes before a fimbriation: %s", out)
+	}
+}
+
 func TestRaysByEdge(t *testing.T) {
 	f := parse(t, `vexyl 1
 meta { name "T"; }
@@ -1082,6 +1225,16 @@ func TestAdaptRules(t *testing.T) {
 		{"a top panel grows", "panel { side top; width 2; bars a b { along hoist; }; }\n" + `adapt { wider extend; }`, 3, `10,0 10,2 30,2 30,0`},
 		{"a canton keeps its size", "canton { fly 8; hoist 5; field a; }\n" + `adapt { wider extend; }`, 3, `0,0 8,0 8,5 0,5`},
 		{"scaling scales a canton", "canton { fly 8; hoist 5; field a; }\n" + `adapt { wider scale; }`, 3, `0,0 12,0 12,5 0,5`},
+		{"a group passes its anchor on", "group { anchor end; charge disc a { radius 1; at fly=18 hoist=5; }; }\n" + `adapt { wider extend; }`, 3, `cx="28" cy="5"`},
+		{"a use passes its anchor on", "define d { charge disc a { radius 1; at fly=18 hoist=5; }; }\nuse d { anchor end; }\n" + `adapt { wider extend; }`, 3, `cx="28" cy="5"`},
+		{"a panel passes its anchor on", "panel { side top; width 2; anchor end; charge disc a { radius 1; at fly=18 hoist=1; }; }\n" + `adapt { wider extend; }`, 3, `cx="28" cy="1"`},
+		{"a layer's own anchor wins over its group's", "group { anchor end; charge disc a { radius 1; at fly=18 hoist=5; anchor start; }; }\n" + `adapt { wider extend; }`, 3, `cx="18" cy="5"`},
+		{"a centered charge in an anchored group is pinned", "group { anchor start; charge disc a { radius 1; }; }\n" + `adapt { wider extend; }`, 3, `cx="10" cy="5"`},
+		{"a centered emblem with an anchor is pinned", "emblem { anchor start; charge disc a { radius 1; }; }\n" + `adapt { wider extend; }`, 3, `translate(10 5)`},
+		{"a centered panel with an anchor is pinned", "panel { fly 2; hoist 2; anchor start; field a; }\n" + `adapt { wider extend; }`, 3, `translate(9 4)`},
+		{"a centered panel follows the center", "panel { fly 2; hoist 2; field a; }\n" + `adapt { wider extend; }`, 3, `translate(14 4)`},
+		{"a ring stays round under scale", "charge disc a { radius 1; repeat ring count=4 radius=4; }\n" + `adapt { wider scale; }`, 3, `cx="19" cy="5"`},
+		{"a cut that leaves a part", "bars a b { along hoist; ratio 1 1; }\n" + `adapt { narrower cut; }`, 1.000001, `polygon`},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1103,6 +1256,10 @@ func TestAdaptRefusals(t *testing.T) {
 		{"wrong direction", `adapt { wider extend; }`, 1, "no rule for this direction"},
 		{"out of range", `adapt { range 1 2.5; wider extend; }`, 3, "only adapts between"},
 		{"cut too far", "cross a { fly 5 2 3; hoist 4 2 4; }\n" + `adapt { narrower cut; }`, 0.5, "can't be cut"},
+		{"cut to nothing", "bars a b { along hoist; ratio 1 1; }\n" + `adapt { narrower cut; }`, 1, "can't be cut"},
+		{"cut to almost nothing", "bars a b { along hoist; ratio 1 1; }\n" + `adapt { narrower cut; }`, 1 + 1e-12, "can't be cut"},
+		{"a cross's arm cut to nothing", "cross a { fly 5 2 3; hoist 4 2 4; }\n" + `adapt { narrower cut; }`, 0.7, "can't be cut"},
+		{"grown to nothing", "bars a b { along hoist; ratio 1 1; grow 0 1; }\n" + `adapt { narrower cut; }`, 1, "can't be cut"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -116,6 +116,11 @@ charge star night {
   at fly=3 hoist=10
   repeat arc count=3 radius=2 from=-40 to=40 turn=#true
 }
+charge triangle pink {
+  radius 0.8
+  at fly=8 hoist=10
+  repeat arc count=4 radius=2.5 from=300 to=60 turn=#true
+}
 charge motif pink
 checks white night {
   rows 2

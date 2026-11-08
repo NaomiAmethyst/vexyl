@@ -1,0 +1,56 @@
+// An invented flag exercising anchors that containers pass on, and what's at the center.
+vexyl 1
+meta {
+  name "Anchor Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7B4FD6"
+  gold "#F2c14e"
+  white "#ffffff"
+}
+proportion hoist=20 fly=30
+
+define mark {
+  charge star white {
+    radius 1.5
+    at fly=26 hoist=16
+  }
+}
+
+field violet
+panel {
+  fly 4
+  hoist 4
+  anchor end
+  field night
+}
+emblem {
+  anchor start
+  charge disc night {
+    radius 3
+  }
+  charge disc gold {
+    radius 1.5
+    at fly=1 hoist=0
+  }
+}
+group {
+  anchor end
+  charge disc gold {
+    radius 2
+    at fly=26 hoist=4
+  }
+  charge disc white {
+    radius 1
+    at fly=26 hoist=9
+    anchor start
+  }
+}
+use mark {
+  anchor end
+}
+adapt {
+  wider extend
+  narrower cut
+}

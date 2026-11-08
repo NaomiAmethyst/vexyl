@@ -940,6 +940,51 @@
   "file": "invalid/not-utf-8.kdl"
  },
  {
+  "name": "pile with a depth and a tip",
+  "file": "invalid/pile-with-a-depth-and-a-tip.kdl",
+  "line": 5
+ },
+ {
+  "name": "pile with a tip and a flat",
+  "file": "invalid/pile-with-a-tip-and-a-flat.kdl",
+  "line": 5
+ },
+ {
+  "name": "fold step through a line and along an axis",
+  "file": "invalid/fold-step-through-a-line-and-along-an-axis.kdl",
+  "line": 6
+ },
+ {
+  "name": "fold step through a line and at a place",
+  "file": "invalid/fold-step-through-a-line-and-at-a-place.kdl",
+  "line": 6
+ },
+ {
+  "name": "bars counting fewer than their colors",
+  "file": "invalid/bars-counting-fewer-than-their-colors.kdl",
+  "line": 5
+ },
+ {
+  "name": "rays counting fewer than their colors",
+  "file": "invalid/rays-counting-fewer-than-their-colors.kdl",
+  "line": 5
+ },
+ {
+  "name": "arc from and to the same place",
+  "file": "invalid/arc-from-and-to-the-same-place.kdl",
+  "line": 5
+ },
+ {
+  "name": "variant nested too deep",
+  "file": "invalid/variant-nested-too-deep.kdl",
+  "line": 39
+ },
+ {
+  "name": "reverse nested too deep",
+  "file": "invalid/reverse-nested-too-deep.kdl",
+  "line": 39
+ },
+ {
   "name": "problem after crlf",
   "file": "invalid/problem-after-crlf.kdl",
   "line": 5
@@ -1757,6 +1802,26 @@
  {
   "name": "sanitizer: a size beyond the limit",
   "file": "invalid/sanitizer-a-size-beyond-the-limit.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a preserveAspectRatio of none",
+  "file": "invalid/sanitizer-a-preserveaspectratio-of-none.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a preserveAspectRatio that slices",
+  "file": "invalid/sanitizer-a-preserveaspectratio-that-slices.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a preserveAspectRatio aligned elsewhere",
+  "file": "invalid/sanitizer-a-preserveaspectratio-aligned-elsewhere.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a preserveAspectRatio in another case",
+  "file": "invalid/sanitizer-a-preserveaspectratio-in-another-case.kdl",
   "line": 5
  },
  {

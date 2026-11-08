@@ -463,7 +463,8 @@ func (p *parser) paletteNode(n *kdl.Node, flag *Flag) {
 		if !colorValue.MatchString(value) {
 			p.errf(c, "color must be #rrggbb, got %q", value)
 		}
-		flag.Palette[c.Name()] = value
+		// Either case means the same, so the model has only one.
+		flag.Palette[c.Name()] = strings.ToLower(value)
 	}
 	for _, c := range gradients {
 		p.gradientNames = append(p.gradientNames, c.Name())
@@ -692,13 +693,7 @@ func (p *parser) bars(n *kdl.Node) Layer {
 	if len(l.Colors) == 0 {
 		return l
 	}
-	if count > 0 {
-		cycle := l.Colors
-		l.Colors = make([]string, count)
-		for i := range l.Colors {
-			l.Colors[i] = cycle[i%len(cycle)]
-		}
-	}
+	l.Colors = p.cycle(n, l.Colors, count)
 	p.checkWaves(n, l.Line)
 	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
 	if l.Grow != nil && len(l.Grow) != len(l.Colors) {
@@ -744,6 +739,23 @@ func (p *parser) chevrons(n *kdl.Node) Layer {
 	}
 	l.Ratio = p.ratio(n, l.Ratio, len(l.Colors))
 	return l
+}
+
+// cycle repeats colors until there are count of them, if count is given. Fewer would drop
+// colors without a word.
+func (p *parser) cycle(n *kdl.Node, colors []string, count int) []string {
+	if count == 0 {
+		return colors
+	}
+	if count < len(colors) {
+		p.errf(n, "has %d colors but a `count` of %d, which would leave some out", len(colors), count)
+		return colors
+	}
+	out := make([]string, count)
+	for i := range out {
+		out[i] = colors[i%len(colors)]
+	}
+	return out
 }
 
 func (p *parser) checkWaves(n *kdl.Node, l *Line) {
@@ -976,6 +988,9 @@ func (p *parser) repeat(n *kdl.Node) *Repeat {
 		if r.Count < 2 && r.Count != 0 {
 			p.errf(n, "an arc needs at least 2 copies")
 		}
+		if n.Prop("from").IsValid() && n.Prop("to").IsValid() && math.Mod(r.To-r.From, 360) == 0 {
+			p.errf(n, "`from` and `to` are the same place, so there's no arc to repeat along")
+		}
 	default:
 		p.errf(n, "unknown repeat %q", r.Kind)
 	}
@@ -1180,8 +1195,13 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 			p.errf(n, "needs `fly` or `hoist`")
 		}
 	case "pile":
-		if s.Tip == nil && s.Depth == 0 {
+		switch {
+		case s.Tip == nil && s.Depth == 0:
 			p.errf(n, "needs a `depth` or a `tip`")
+		case s.Tip != nil && s.Depth != 0:
+			p.errf(n, "takes a `depth` or a `tip`, not both")
+		case s.Tip != nil && s.Flat != 0:
+			p.errf(n, "a `flat` goes with a `depth`, not a `tip`")
 		}
 	case "pall":
 		if s.Width == 0 {

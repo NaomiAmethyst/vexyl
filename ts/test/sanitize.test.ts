@@ -350,8 +350,13 @@ test("the root's attributes go through the same checks", () => {
 	refused(`<svg xmlns="${ns}" viewBox="0 0 1 1" onload="alert(1)"/>`);
 	refused(`<svg xmlns="${ns}" viewBox="0 0 1 1" fill="url(https://example.test/)"/>`);
 	refused(`<svg xmlns="${ns}" viewBox="0 0 1 1" style="fill:url(https://example.test/)"/>`);
-	const out = accepted(`<svg xmlns="${ns}" viewBox="0 0 1 1" id="x" x="1" y="1" width="9" height="9" version="1.1" baseProfile="full" preserveAspectRatio="none" fill="red"/>`);
+	const out = accepted(`<svg xmlns="${ns}" viewBox="0 0 1 1" id="x" x="1" y="1" width="9" height="9" version="1.1" baseProfile="full" preserveAspectRatio="xMidYMid meet" fill="red"/>`);
 	assert.equal(out.attrs, ` fill="red"`);
+	// Artwork is always fitted the default way, so another way can't be asked for.
+	for (const fit of ["none", "xMinYMin", "xMidYMid slice", "xmidymid"]) {
+		refused(`<svg xmlns="${ns}" viewBox="0 0 1 1" preserveAspectRatio="${fit}"/>`);
+	}
+	accepted(`<svg xmlns="${ns}" viewBox="0 0 1 1" preserveAspectRatio=" xMidYMid "/>`);
 });
 
 test("a viewBox has to be four numbers with an area", () => {

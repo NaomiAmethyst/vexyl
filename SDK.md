@@ -124,7 +124,7 @@ something.
 | `meta` | `name`, `description`, `version`, `date`, `until`, `series`, `design-rights`, `license`, `render-license`; lists of `note`, `designer`, `encoder`, `source`, `law`, `restriction` and `adapted-from` |
 | `law`, `restriction` | The text under its own name, as `law` or `restriction`, and a list of `source` |
 | `adapted-from` | `url`, a list of `author`, `license`, `part` |
-| A `palette` color | `color`, `pantone`, `ncs`, `ral`, `munsell`, `thread`; a list of `dye`; `cmyk` as four numbers; a list of `reference`, each with `system` and `value` |
+| A `palette` color | `color`, in lowercase; `pantone`, `ncs`, `ral`, `munsell`, `thread`; a list of `dye`; `cmyk` as four numbers; a list of `reference`, each with `system` and `value` |
 | A `palette` gradient | `gradient`, a list of colors; `stops`; `along` (`fly`) |
 | `border` | `color`, `width`, `side` (`inside`) |
 | `fimbriate` | `color`, `width` |

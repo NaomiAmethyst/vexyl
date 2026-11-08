@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="900" height="600">
+  <title>Anchor Test</title>
+  <clipPath id="vx-990ce72616482e9f-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-990ce72616482e9f-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#7b4fd6"/>
+    <clipPath id="vx-990ce72616482e9f-panel2">
+      <polygon points="0,0 4,0 4,4 0,4"/>
+    </clipPath>
+    <g transform="translate(13 8)" clip-path="url(#vx-990ce72616482e9f-panel2)" style="isolation:isolate">
+      <polygon points="0,0 4,0 4,4 0,4" fill="#1b1035"/>
+    </g>
+    <g transform="translate(15 10) rotate(0)">
+      <circle cx="0" cy="0" r="3" fill="#1b1035"/>
+      <circle cx="1" cy="0" r="1.5" fill="#f2c14e"/>
+    </g>
+    <g style="isolation:isolate">
+      <circle cx="26" cy="4" r="2" fill="#f2c14e"/>
+      <circle cx="26" cy="9" r="1" fill="#ffffff"/>
+    </g>
+    <polygon points="26,14.5 26.336771,15.536475 27.426585,15.536475 26.544907,16.177051 26.881678,17.213525 26,16.572949 25.118322,17.213525 25.455093,16.177051 24.573415,15.536475 25.663229,15.536475" fill="#ffffff"/>
+  </g>
+</svg>

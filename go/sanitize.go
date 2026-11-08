@@ -68,6 +68,8 @@ var (
 	localURL    = regexp.MustCompile(`[uU][rR][lL]\(\s*["']?#([A-Za-z_][A-Za-z0-9_.:-]*)["']?\s*\)`)
 	viewBoxForm = regexp.MustCompile(`^\s*(` + decimalForm + `)[\s,]+(` + decimalForm + `)[\s,]+(` + decimalForm + `)[\s,]+(` + decimalForm + `)\s*$`)
 	lengthForm  = regexp.MustCompile(`^\s*(` + decimalForm + `)(?:px)?\s*$`)
+	// defaultFit is SVG's default preserveAspectRatio, the only way artwork is ever fitted.
+	defaultFit = regexp.MustCompile(`^\s*xMidYMid(?:\s+meet)?\s*$`)
 )
 
 func set(names ...string) map[string]bool {
@@ -176,6 +178,10 @@ func (e *embeddedSVG) readRoot(attrs []xmlAttr) error {
 			width = a.value
 		case "height":
 			height = a.value
+		case "preserveAspectRatio":
+			if !defaultFit.MatchString(a.value) {
+				return fmt.Errorf("SVG's preserveAspectRatio %q isn't the default, which is how artwork is always fitted", a.value)
+			}
 		}
 	}
 	switch {

@@ -13,6 +13,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,6 +21,8 @@ TAG = re.compile(r' data-vexyl-layer="[^"]*"')
 # A cut that a charge's copy has moved. A path's cut has a transform of its own, so this is only
 # for fixtures that have none.
 MOVED_CUT = re.compile(r'\s*<(?:circle|polygon|path) [^>]*fill="#000" transform="translate\([^"]*"/>')
+ARC = re.compile(r'(repeat arc [^\n;]*?)from=(\S+) to=(\S+)')
+SIDEWAYS = {"transpose", "anti-transpose", "rotate", "counter-rotate"}
 
 
 def run(command, args):
@@ -41,13 +44,48 @@ def rewrite_output(args, change):
         f.write(change(text))
 
 
+def arc_counterclockwise(match):
+    """Writes an arc so that it's drawn as one running straight from its start to its end would be,
+    which goes counterclockwise when the end is the smaller angle."""
+    start, end = float(match[2]), float(match[3])
+    if end < start:
+        return f"{match[1]}from={match[3]} to={match[2]}"
+    return match[0]
+
+
+def turned_back_first(text):
+    """Turns a render half way round, which is the back turned as the front is, not the mirror
+    image of the turned front."""
+    box = [float(v) for v in re.search(r'viewBox="([^"]*)"', text)[1].split()]
+    cx, cy = box[0] + box[2] / 2, box[1] + box[3] / 2
+    head, rest = text.split(">", 1)
+    body, tail = rest.rsplit("</svg>", 1)
+    # The title and description stay at the root, where they're allowed.
+    named = re.match(r"(\s*<title>.*?</title>)?(\s*<desc>.*?</desc>)?", body, re.S)[0]
+    body = body[len(named):]
+    return f'{head}>{named}<g transform="rotate(180 {cx} {cy})">{body}</g></svg>{tail}'
+
+
 def main():
     name, command, args = sys.argv[1], sys.argv[2].split(), sys.argv[3:]
     render = args[:1] == ["render"]
     tagged = "-tags" in args
     if name == "tags-always-on" and render and not tagged:
         args = args[:1] + ["-tags"] + args[1:]
+    scratch = None
+    if name == "arc-counterclockwise" and render:
+        with open(args[-1], encoding="utf-8") as f:
+            source = ARC.sub(arc_counterclockwise, f.read())
+        scratch = tempfile.TemporaryDirectory()
+        args = args[:-1] + [os.path.join(scratch.name, os.path.basename(args[-1]))]
+        with open(args[-1], "w", encoding="utf-8") as f:
+            f.write(source)
     done = run(command, args)
+    side = args[args.index("-side") + 1] if "-side" in args else "obverse"
+    if name == "reverse-turned-first" and render and not done.returncode and "-variant" in args and side == "reverse":
+        model = json.loads(run(command, ["model", args[-1]]).stdout)
+        if model["variant"][args[args.index("-variant") + 1]].get("from") in SIDEWAYS:
+            rewrite_output(args, turned_back_first)
     if name == "share-no-write-limit" and args[:2] == ["share", "encode"] and os.path.getsize(args[2]) > 8 * 1024 * 1024:
         finish(subprocess.CompletedProcess(args, 0, b"v1.AAAA\n", b""))
     if done.returncode:

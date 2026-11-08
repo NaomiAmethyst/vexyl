@@ -1921,6 +1921,106 @@
    ]
   },
   {
+   "name": "anchors",
+   "file": "valid/anchors.kdl",
+   "model": "valid/anchors.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/anchors/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/anchors/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/anchors/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/anchors/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/anchors/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/anchors/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/anchors/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "cut-to-nothing",
+   "file": "valid/cut-to-nothing.kdl",
+   "model": "valid/cut-to-nothing.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/cut-to-nothing/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/cut-to-nothing/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/cut-to-nothing/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/cut-to-nothing/pad-center.svg"
+    }
+   ]
+  },
+  {
    "name": "defined-shapes",
    "file": "valid/defined-shapes.kdl",
    "model": "valid/defined-shapes.model.json",
@@ -1958,24 +2058,6 @@
       "fit": "pad"
      },
      "svg": "valid/defined-shapes/pad-center.svg"
-    },
-    {
-     "name": "pad-start",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
-     },
-     "svg": "valid/defined-shapes/pad-start.svg"
-    },
-    {
-     "name": "pad-end",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
-     },
-     "svg": "valid/defined-shapes/pad-end.svg"
     }
    ]
   },
@@ -2203,6 +2285,22 @@
       "fit": "pad"
      },
      "svg": "valid/every-field/pad-center.svg"
+    },
+    {
+     "name": "reverse-ratio-1-2",
+     "options": {
+      "side": "reverse",
+      "ratio": "1:2"
+     },
+     "svg": "valid/every-field/reverse-ratio-1-2.svg"
+    },
+    {
+     "name": "reverse-ratio-1-1",
+     "options": {
+      "side": "reverse",
+      "ratio": "1:1"
+     },
+     "svg": "valid/every-field/reverse-ratio-1-1.svg"
     }
    ]
   },
@@ -2244,6 +2342,24 @@
       "fit": "pad"
      },
      "svg": "valid/gradient-cells/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/gradient-cells/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/gradient-cells/pad-end.svg"
     }
    ]
   },
@@ -2326,24 +2442,6 @@
       "fit": "pad"
      },
      "svg": "valid/heart-chevron/pad-center.svg"
-    },
-    {
-     "name": "pad-start",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
-     },
-     "svg": "valid/heart-chevron/pad-start.svg"
-    },
-    {
-     "name": "pad-end",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
-     },
-     "svg": "valid/heart-chevron/pad-end.svg"
     }
    ]
   },
@@ -2467,6 +2565,65 @@
       "fit": "pad"
      },
      "svg": "valid/line-endings/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/line-endings/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/line-endings/pad-end.svg"
+    }
+   ]
+  },
+  {
+   "name": "rays-from-points",
+   "file": "valid/rays-from-points.kdl",
+   "model": "valid/rays-from-points.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/rays-from-points/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/rays-from-points/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/rays-from-points/pad-center.svg"
     }
    ]
   },
@@ -2512,6 +2669,78 @@
    ]
   },
   {
+   "name": "reverse-adapts",
+   "file": "valid/reverse-adapts.kdl",
+   "model": "valid/reverse-adapts.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/reverse-adapts/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/reverse-adapts/reverse.svg"
+    },
+    {
+     "name": "variant-crossbar",
+     "options": {
+      "variant": "crossbar"
+     },
+     "svg": "valid/reverse-adapts/variant-crossbar.svg"
+    },
+    {
+     "name": "variant-crossbar-reverse",
+     "options": {
+      "variant": "crossbar",
+      "side": "reverse"
+     },
+     "svg": "valid/reverse-adapts/variant-crossbar-reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "svg": "valid/reverse-adapts/ratio-1-1.svg"
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "svg": "valid/reverse-adapts/ratio-1-2.svg"
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/reverse-adapts/pad-center.svg"
+    },
+    {
+     "name": "reverse-ratio-1-2",
+     "options": {
+      "side": "reverse",
+      "ratio": "1:2"
+     },
+     "svg": "valid/reverse-adapts/reverse-ratio-1-2.svg"
+    },
+    {
+     "name": "reverse-ratio-1-1",
+     "options": {
+      "side": "reverse",
+      "ratio": "1:1"
+     },
+     "svg": "valid/reverse-adapts/reverse-ratio-1-1.svg"
+    }
+   ]
+  },
+  {
    "name": "tiny-grid",
    "file": "valid/tiny-grid.kdl",
    "model": "valid/tiny-grid.model.json",
@@ -2549,6 +2778,122 @@
       "fit": "pad"
      },
      "svg": "valid/tiny-grid/pad-center.svg"
+    }
+   ]
+  },
+  {
+   "name": "turned-reverse",
+   "file": "valid/turned-reverse.kdl",
+   "model": "valid/turned-reverse.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/turned-reverse/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/turned-reverse/reverse.svg"
+    },
+    {
+     "name": "variant-crossbar",
+     "options": {
+      "variant": "crossbar"
+     },
+     "svg": "valid/turned-reverse/variant-crossbar.svg"
+    },
+    {
+     "name": "variant-crossbar-reverse",
+     "options": {
+      "variant": "crossbar",
+      "side": "reverse"
+     },
+     "svg": "valid/turned-reverse/variant-crossbar-reverse.svg"
+    },
+    {
+     "name": "variant-crossbar-upright",
+     "options": {
+      "variant": "crossbar-upright"
+     },
+     "svg": "valid/turned-reverse/variant-crossbar-upright.svg"
+    },
+    {
+     "name": "variant-crossbar-upright-reverse",
+     "options": {
+      "variant": "crossbar-upright",
+      "side": "reverse"
+     },
+     "svg": "valid/turned-reverse/variant-crossbar-upright-reverse.svg"
+    },
+    {
+     "name": "variant-left",
+     "options": {
+      "variant": "left"
+     },
+     "svg": "valid/turned-reverse/variant-left.svg"
+    },
+    {
+     "name": "variant-left-reverse",
+     "options": {
+      "variant": "left",
+      "side": "reverse"
+     },
+     "svg": "valid/turned-reverse/variant-left-reverse.svg"
+    },
+    {
+     "name": "variant-other",
+     "options": {
+      "variant": "other"
+     },
+     "svg": "valid/turned-reverse/variant-other.svg"
+    },
+    {
+     "name": "variant-other-reverse",
+     "options": {
+      "variant": "other",
+      "side": "reverse"
+     },
+     "svg": "valid/turned-reverse/variant-other-reverse.svg"
+    },
+    {
+     "name": "variant-right",
+     "options": {
+      "variant": "right"
+     },
+     "svg": "valid/turned-reverse/variant-right.svg"
+    },
+    {
+     "name": "variant-right-reverse",
+     "options": {
+      "variant": "right",
+      "side": "reverse"
+     },
+     "svg": "valid/turned-reverse/variant-right-reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/turned-reverse/pad-center.svg"
     },
     {
      "name": "pad-start",
@@ -2557,7 +2902,7 @@
       "fit": "pad",
       "align": "start"
      },
-     "svg": "valid/tiny-grid/pad-start.svg"
+     "svg": "valid/turned-reverse/pad-start.svg"
     },
     {
      "name": "pad-end",
@@ -2566,7 +2911,7 @@
       "fit": "pad",
       "align": "end"
      },
-     "svg": "valid/tiny-grid/pad-end.svg"
+     "svg": "valid/turned-reverse/pad-end.svg"
     }
    ]
   },
@@ -2860,6 +3205,22 @@
       "fit": "pad"
      },
      "svg": "valid/variants/pad-center.svg"
+    },
+    {
+     "name": "reverse-ratio-1-2",
+     "options": {
+      "side": "reverse",
+      "ratio": "1:2"
+     },
+     "svg": "valid/variants/reverse-ratio-1-2.svg"
+    },
+    {
+     "name": "reverse-ratio-1-1",
+     "options": {
+      "side": "reverse",
+      "ratio": "1:1"
+     },
+     "svg": "valid/variants/reverse-ratio-1-1.svg"
     }
    ]
   },

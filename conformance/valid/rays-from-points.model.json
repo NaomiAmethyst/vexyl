@@ -1,0 +1,152 @@
+{
+ "layers": [
+  {
+   "color": "white",
+   "layer": "field"
+  },
+  {
+   "corner": "upper-hoist",
+   "fly": 15,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "colors": [
+      "night",
+      "violet",
+      "gold",
+      "night"
+     ],
+     "from": {
+      "fly": 0,
+      "hoist": 0
+     },
+     "layer": "rays",
+     "ratio": [
+      1,
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "corner": "upper-fly",
+   "fly": 15,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "colors": [
+      "night",
+      "violet",
+      "gold",
+      "pink"
+     ],
+     "from": {
+      "fly": 6,
+      "hoist": 10
+     },
+     "layer": "rays",
+     "measure": "edge",
+     "ratio": [
+      1,
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "corner": "lower-hoist",
+   "fly": 15,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "colors": [
+      "night",
+      "rising",
+      "violet"
+     ],
+     "from": {
+      "fly": -6,
+      "hoist": 4
+     },
+     "layer": "rays",
+     "ratio": [
+      1,
+      2,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "corner": "lower-fly",
+   "fly": 15,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "colors": [
+      "gold",
+      "rising",
+      "night",
+      "violet"
+     ],
+     "from": {
+      "fly": 20,
+      "hoist": -3
+     },
+     "layer": "rays",
+     "measure": "edge",
+     "ratio": [
+      1,
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  }
+ ],
+ "meta": {
+  "name": "Rays Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "pink": {
+   "color": "#f0a0c8"
+  },
+  "rising": {
+   "along": "bend",
+   "gradient": [
+    "night",
+    "gold"
+   ],
+   "stops": [
+    0,
+    1
+   ]
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "vexyl": 1
+}

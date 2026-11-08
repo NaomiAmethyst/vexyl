@@ -7,7 +7,7 @@ import { foldFacets, foldShape } from "./fold.js";
 import { boundary, offsetPolygon } from "./geometry.js";
 import { addSize, inLimits, layersHeight, layersSize, maxCopies, maxSize, waves } from "./limits.js";
 import { canonical, sanitizeSvg, usesCurrentColor } from "./sanitize.js";
-import { decimalForm, dict, formatNumber, hash, numbersIn } from "./text.js";
+import { asciiLower, decimalForm, dict, formatNumber, hash, numbersIn } from "./text.js";
 import type {
 	Adapt, AdaptRule, Adaptation, Anchor, Axis, BandLayer, BarsLayer, BlendMode, Border, Box, ChargeLayer, ChecksLayer, ChevronsLayer,
 	ColorRef, CornerName, CrossLayer, Define, EdgeName, Effects, EmblemLayer, EmbeddedSvg, FieldLayer, Fimbriation, Flag, Fold, FoldStep,
@@ -567,7 +567,8 @@ class Parser {
 			if (!colorValue.test(value)) {
 				this.errf(c, `color must be #rrggbb, got "${value}"`);
 			}
-			flag.palette[name] = value;
+			// Either case means the same, so the model has only one.
+			flag.palette[name] = asciiLower(value);
 		}
 		for (const c of gradients) {
 			this.gradientNames.push(c.getName());
@@ -799,10 +800,7 @@ class Parser {
 		if (l.colors.length === 0) {
 			return l;
 		}
-		if (count > 0) {
-			const cycle = l.colors;
-			l.colors = Array.from({ length: count }, (_, i) => cycle[i % cycle.length]!);
-		}
+		l.colors = this.cycle(n, l.colors, count);
 		this.checkWaves(n, l.edge);
 		l.ratio = this.ratio(n, ratio, l.colors.length);
 		if (l.grow !== undefined && l.grow.length !== l.colors.length) {
@@ -1105,11 +1103,26 @@ class Parser {
 				if (count < 2 && count !== 0) {
 					this.errf(n, "an arc needs at least 2 copies");
 				}
+				if (propValue(n, "from") !== undefined && propValue(n, "to") !== undefined && (to - from) % 360 === 0) {
+					this.errf(n, "`from` and `to` are the same place, so there's no arc to repeat along");
+				}
 				return { kind, count, radius, turn, from, to };
 			}
 		}
 		this.errf(n, `unknown repeat "${kind}"`);
 		return null;
+	}
+
+	/** Repeats colors until there are count of them, if count is given. Fewer would drop colors without a word. */
+	private cycle(n: Node, colors: string[], count: number): string[] {
+		if (count === 0) {
+			return colors;
+		}
+		if (count < colors.length) {
+			this.errf(n, `has ${colors.length} colors but a \`count\` of ${count}, which would leave some out`);
+			return colors;
+		}
+		return Array.from({ length: count }, (_, i) => colors[i % colors.length]!);
 	}
 
 	/** Reads a shape's children, along with any extra handlers. */
@@ -1348,6 +1361,10 @@ class Parser {
 			case "pile":
 				if (s.tip === undefined && !s.depth) {
 					this.errf(n, "needs a `depth` or a `tip`");
+				} else if (s.tip !== undefined && s.depth) {
+					this.errf(n, "takes a `depth` or a `tip`, not both");
+				} else if (s.tip !== undefined && s.flat) {
+					this.errf(n, "a `flat` goes with a `depth`, not a `tip`");
 				}
 				break;
 			case "pall":
@@ -1793,10 +1810,7 @@ class Parser {
 		if (l.colors.length === 0) {
 			return l;
 		}
-		if (count > 0) {
-			const cycle = l.colors;
-			l.colors = Array.from({ length: count }, (_, i) => cycle[i % cycle.length]!);
-		}
+		l.colors = this.cycle(n, l.colors, count);
 		l.ratio = this.ratio(n, ratio, l.colors.length);
 		return l;
 	}
@@ -2036,7 +2050,8 @@ class Parser {
 		this.noValues(n);
 		const r: Reverse = { layers: [] };
 		for (const c of childNodes(n)) {
-			const l = this.layer(c, 2);
+			// It holds the flag's layers for that side, so they're at the top level.
+			const l = this.layer(c, 1);
 			if (l !== null) {
 				r.layers.push(l);
 			}
@@ -2116,7 +2131,8 @@ class Parser {
 		for (const c of childNodes(n)) {
 			const child = c.getName();
 			if (!has(settings, child)) {
-				const l = this.layer(c, 2);
+				// Its layers replace the flag's, so they're at the top level.
+				const l = this.layer(c, 1);
 				if (l !== null) {
 					v.layers.push(l);
 				}
@@ -2254,6 +2270,10 @@ class Parser {
 		}
 		const through = propValue(n, "through");
 		if (through !== undefined) {
+			if (propValue(n, "along") !== undefined || propValue(n, "at") !== undefined) {
+				this.errf(n, "a crease is `through=` or `along=` and `at=`, not both");
+				return null;
+			}
 			const line = this.pointList(n, through, 4);
 			const point = this.pointList(n, move, 2);
 			if (line === null || point === null) {

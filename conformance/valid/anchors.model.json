@@ -1,0 +1,125 @@
+{
+ "adapt": {
+  "narrower": "extend",
+  "wider": "extend"
+ },
+ "define": {
+  "mark": {
+   "layers": [
+    {
+     "at": [
+      {
+       "fly": 26,
+       "hoist": 16
+      }
+     ],
+     "color": "white",
+     "inner": 0.5729490168751579,
+     "layer": "charge",
+     "radius": 1.5,
+     "shape": "star"
+    }
+   ]
+  }
+ },
+ "layers": [
+  {
+   "color": "violet",
+   "layer": "field"
+  },
+  {
+   "anchor": "end",
+   "fly": 4,
+   "hoist": 4,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "night",
+     "layer": "field"
+    }
+   ]
+  },
+  {
+   "anchor": "start",
+   "layer": "emblem",
+   "layers": [
+    {
+     "color": "night",
+     "layer": "charge",
+     "radius": 3,
+     "shape": "disc"
+    },
+    {
+     "at": [
+      {
+       "fly": 1,
+       "hoist": 0
+      }
+     ],
+     "color": "gold",
+     "layer": "charge",
+     "radius": 1.5,
+     "shape": "disc"
+    }
+   ]
+  },
+  {
+   "anchor": "end",
+   "layer": "group",
+   "layers": [
+    {
+     "at": [
+      {
+       "fly": 26,
+       "hoist": 4
+      }
+     ],
+     "color": "gold",
+     "layer": "charge",
+     "radius": 2,
+     "shape": "disc"
+    },
+    {
+     "anchor": "start",
+     "at": [
+      {
+       "fly": 26,
+       "hoist": 9
+      }
+     ],
+     "color": "white",
+     "layer": "charge",
+     "radius": 1,
+     "shape": "disc"
+    }
+   ]
+  },
+  {
+   "anchor": "end",
+   "layer": "use",
+   "name": "mark"
+  }
+ ],
+ "meta": {
+  "name": "Anchor Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "vexyl": 1
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="600" height="600">
+  <title>Every field</title>
+  <desc>Uses every field the canonical model has, so a library can&#39;t guess one</desc>
+  <clipPath id="vx-ff608d82e80305dc-5917-flag1">
+    <polygon points="0,0 40,1 36,20 40,39 0,40"/>
+  </clipPath>
+  <g clip-path="url(#vx-ff608d82e80305dc-5917-flag1)">
+    <polygon points="0,0 40,0 40,40 0,40" fill="#cc0000"/>
+    <polygon points="0,0 40,1 36,20 40,39 0,40" fill="none" stroke="#ffcc00" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
+  </g>
+</svg>

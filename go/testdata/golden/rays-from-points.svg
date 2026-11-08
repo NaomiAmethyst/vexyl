@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="900" height="600">
+  <title>Rays Test</title>
+  <clipPath id="vx-2d6195348e99932d-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-2d6195348e99932d-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#ffffff"/>
+    <clipPath id="vx-2d6195348e99932d-panel2">
+      <polygon points="0,0 15,0 15,10 0,10"/>
+    </clipPath>
+    <g transform="translate(0 0)" clip-path="url(#vx-2d6195348e99932d-panel2)" style="isolation:isolate">
+      <polygon points="0,0 15,0 15,10 0,10" fill="#1b1035"/>
+      <polygon points="15,0 15,6.213203 0,0 0,0" fill="#1b1035"/>
+      <polygon points="15,10 10,10 0,0 15,6.213203" fill="#7b4fd6"/>
+      <polygon points="4.142136,10 0,0 10,10" fill="#f2c14e"/>
+      <polygon points="0,10 0,0 4.142136,10" fill="#1b1035"/>
+    </g>
+    <clipPath id="vx-2d6195348e99932d-panel3">
+      <polygon points="0,0 15,0 15,10 0,10"/>
+    </clipPath>
+    <g transform="translate(15 0)" clip-path="url(#vx-2d6195348e99932d-panel3)" style="isolation:isolate">
+      <polygon points="0,0 15,0 15,10 0,10" fill="#1b1035"/>
+      <polygon points="6,10 0,10 0,1.25" fill="#1b1035"/>
+      <polygon points="6,10 0,1.25 0,0 7.5,0" fill="#7b4fd6"/>
+      <polygon points="6,10 7.5,0 15,0 15,1.25" fill="#f2c14e"/>
+      <polygon points="6,10 15,1.25 15,10 15,10" fill="#f0a0c8"/>
+    </g>
+    <clipPath id="vx-2d6195348e99932d-panel4">
+      <polygon points="0,0 15,0 15,10 0,10"/>
+    </clipPath>
+    <g transform="translate(0 10)" clip-path="url(#vx-2d6195348e99932d-panel4)" style="isolation:isolate">
+      <polygon points="0,0 15,0 15,10 0,10" fill="#1b1035"/>
+      <polygon points="10.022214,0 0,2.50208 0,0 0,0" fill="#1b1035"/>
+      <linearGradient id="vx-2d6195348e99932d-gradient5" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1b1035"/>
+        <stop offset="1" stop-color="#f2c14e"/>
+      </linearGradient>
+      <polygon points="15,0 15,10 6.677356,10 0,6.839709 0,2.50208 10.022214,0" fill="url(#vx-2d6195348e99932d-gradient5)"/>
+      <polygon points="0,10 0,10 0,6.839709 6.677356,10" fill="#7b4fd6"/>
+    </g>
+    <clipPath id="vx-2d6195348e99932d-panel6">
+      <polygon points="0,0 15,0 15,10 0,10"/>
+    </clipPath>
+    <g transform="translate(15 10)" clip-path="url(#vx-2d6195348e99932d-panel6)" style="isolation:isolate">
+      <polygon points="0,0 15,0 15,10 0,10" fill="#f2c14e"/>
+      <polygon points="15,2.777778 15,10 15,10 8.75,10" fill="#f2c14e"/>
+      <polygon points="15,0.714286 15,2.777778 8.75,10 2.5,10" fill="url(#vx-2d6195348e99932d-gradient5)"/>
+      <polygon points="13.513514,0 15,0 15,0.714286 2.5,10 0,10 0,6.25" fill="#1b1035"/>
+      <polygon points="0,0 13.513514,0 0,6.25 0,0 0,0" fill="#7b4fd6"/>
+    </g>
+  </g>
+</svg>

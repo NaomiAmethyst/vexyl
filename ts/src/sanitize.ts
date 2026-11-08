@@ -63,6 +63,8 @@ const localUrl = new RegExp(`[uU][rR][lL]\\(${space}*["']?#([A-Za-z_][A-Za-z0-9_
 const separator = "[\\t\\n\\f\\r ,]+";
 const viewBoxForm = new RegExp(`^${space}*(${decimalForm})${separator}(${decimalForm})${separator}(${decimalForm})${separator}(${decimalForm})${space}*$`);
 const lengthForm = new RegExp(`^${space}*(${decimalForm})(?:px)?${space}*$`);
+/** SVG's default preserveAspectRatio, the only way artwork is ever fitted. */
+const defaultFit = new RegExp(`^${space}*xMidYMid(?:${space}+meet)?${space}*$`);
 
 export function usesCurrentColor(e: EmbeddedSvg): boolean {
 	return asciiLower(e.attrs + e.body).includes("currentcolor");
@@ -185,6 +187,11 @@ function readRoot(e: EmbeddedSvg, attrs: XmlAttr[]): void {
 				break;
 			case "height":
 				height = a.value;
+				break;
+			case "preserveAspectRatio":
+				if (!defaultFit.test(a.value)) {
+					throw new SanitizeError(`SVG's preserveAspectRatio "${a.value}" isn't the default, which is how artwork is always fitted`);
+				}
 				break;
 		}
 	}

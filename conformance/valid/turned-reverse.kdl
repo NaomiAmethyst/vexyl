@@ -1,0 +1,51 @@
+// An invented flag exercising the reverse of each turned variant, which is its turned front
+// seen from behind.
+vexyl 1
+meta {
+  name "Turned Reverse Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+}
+proportion hoist=20 fly=30
+
+field violet
+panel {
+  side hoist
+  width 6
+  field night
+}
+charge crescent white {
+  radius 2.5
+  inner 2
+  offset 1
+  at fly=3 hoist=5
+}
+charge star gold {
+  radius 2.5
+  at fly=14 hoist=6
+  fimbriate white 0.5
+  repeat line count=3 fly=3 hoist=3
+}
+
+variant crossbar {
+  from transpose
+}
+variant crossbar-upright {
+  from transpose
+  upright
+}
+variant right {
+  from rotate
+  upright
+}
+variant left {
+  from counter-rotate
+}
+variant other {
+  from anti-transpose
+  upright
+}

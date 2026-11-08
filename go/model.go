@@ -37,6 +37,9 @@ type Flag struct {
 	// idPrefix is unique to the source document, so that several flags can be
 	// inlined in one page without their definitions colliding.
 	idPrefix string
+	// seenFromBehind says that Layers are a reverse's own, as seen from behind, while
+	// it's being drawn.
+	seenFromBehind bool
 }
 
 // Gradient is a linear blend between palette colors, across the shape it fills.

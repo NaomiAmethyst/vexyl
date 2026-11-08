@@ -164,10 +164,17 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 		}
 		x0, y0, width, tall = bounds(outer)
 	}
-	transform, undo := view(turn, x0, y0, width, tall)
+	shown := turn
+	if opts.Side == "reverse" {
+		// Seen from behind, the turned flag is the mirror image of its front.
+		shown = reverseTurn[turn]
+	}
+	transform, undo := view(shown, x0, y0, width, tall)
 	if mirror {
-		// The back is the mirror image, then turned as the front would be.
+		// The back is the mirror image of the front, then turned.
 		transform = strings.TrimSpace(transform + fmt.Sprintf(" matrix(-1 0 0 1 %s 0)", num(2*x0+width)))
+		// A charge is put back the way it is on the back, which is the front's turn undone.
+		_, undo = view(turn, x0, y0, width, tall)
 	}
 	vx, vy, vw, vh := x0, y0, width, tall
 	sideways := turn == "rotate" || turn == "counter-rotate" || turn == "transpose" || turn == "anti-transpose"
@@ -220,6 +227,14 @@ func (f *Flag) WriteSVG(w io.Writer, opts Options) (err error) {
 	return err
 }
 
+// reverseTurn is how a flag's back turns in a variant, so that it's the mirror image of
+// the turned front: the turn, seen in a mirror.
+var reverseTurn = map[string]string{
+	"none": "none", "mirror": "mirror", "half-turn": "half-turn", "invert": "invert",
+	"transpose": "anti-transpose", "anti-transpose": "transpose",
+	"rotate": "counter-rotate", "counter-rotate": "rotate",
+}
+
 // tagScope gives what starts the paths of a render's layers and of its border.
 func (f *Flag) tagScope(opts Options) (layers, border string) {
 	v := f.Variants[opts.Variant]
@@ -247,7 +262,13 @@ func (r *renderer) flagArt(f *Flag) {
 		// Reading the flag refused any that fails, and its bounds were worked out from this.
 		outer, _ := offsetPolygon(f.boundary(), f.Border.Width)
 		r.tag = r.scopeBorder + "border"
-		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.fill(f.Border.Color, nil)))
+		// A gradient spans the shape that the border edges.
+		var box *[4]float64
+		if shape := f.boundary(); shape != nil {
+			x, y, w, h := bounds(shape)
+			box = &[4]float64{x, y, w, h}
+		}
+		r.geom(geom{poly: outer}, fmt.Sprintf(`fill="%s"`, r.fill(f.Border.Color, box)))
 	}
 	root := region{w: f.Fly, h: f.Hoist}
 	shape := geom{poly: rectPoly(0, 0, f.Fly, f.Hoist)}
@@ -453,7 +474,13 @@ func (r *renderer) content(l Layer, reg region, path string) {
 			polys = bands
 		}
 		if l.Fimbriate != nil {
-			r.paint(l.Colors[len(polys)-1], nil, l.Fimbriate, []geom{{poly: nested[0]}}, nil)
+			// A gradient spans the outermost chevron's part inside the region.
+			var box *[4]float64
+			if inside := clipConvex(nested[0], reg); len(inside) > 0 {
+				x, y, w, h := bounds(inside)
+				box = &[4]float64{x, y, w, h}
+			}
+			r.paint(l.Colors[len(polys)-1], box, l.Fimbriate, []geom{{poly: nested[0]}}, nil)
 		}
 		for i, poly := range polys {
 			if len(poly) > 0 {
@@ -465,7 +492,9 @@ func (r *renderer) content(l Layer, reg region, path string) {
 		// band's unclipped shape. A clipped polygon can be empty.
 		stroke := []geom{{poly: bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, true)}}
 		if poly := bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, false); len(poly) > 0 {
-			r.paint(l.Color, nil, l.Fimbriate, stroke, []geom{{poly: poly}})
+			// A gradient spans the part inside the region, for the fimbriation too.
+			x, y, w, h := bounds(poly)
+			r.paint(l.Color, &[4]float64{x, y, w, h}, l.Fimbriate, stroke, []geom{{poly: poly}})
 		} else {
 			r.paint(l.Color, nil, l.Fimbriate, stroke, nil)
 		}
@@ -685,22 +714,40 @@ func (r *renderer) charge(c *Charge, reg region) {
 		copies = append(copies, shapeGeom(s, p.at, p.turn))
 		centers = append(centers, p.at)
 	}
-	draw := func(shapes []geom) {
+	var box *[4]float64
+	if c.Shape.Kind == "pile" || c.Shape.Kind == "pall" {
+		// Its shape runs on past the region, and a gradient spans only what's inside.
+		points := make([]vec, len(s.Vertices))
+		for i, p := range s.Vertices {
+			points[i] = vec{p.Fly, p.Hoist}
+		}
+		if inside := clipConvex(points, reg); len(inside) > 0 {
+			x, y, w, h := bounds(inside)
+			box = &[4]float64{x, y, w, h}
+		}
+	}
+	draw := func(shapes []geom, fimbriate *Edge, color string) {
 		switch {
 		case s.Hollow > 0:
-			r.outlineOnly(c.Color, s.Hollow, shapes)
+			r.outlineOnly(color, box, s.Hollow, shapes)
 		case s.Lines > 0:
-			r.outlineOnly(c.Color, s.Lines, shapes)
+			r.outlineOnly(color, box, s.Lines, shapes)
 		default:
-			r.paint(c.Color, nil, c.Fimbriate, shapes, shapes)
+			r.paint(color, box, fimbriate, shapes, shapes)
 		}
 	}
 	if r.upright == "" || s.Kind == "polygon" {
-		draw(copies)
+		draw(copies, c.Fimbriate, c.Color)
 		return
 	}
+	if c.Fimbriate != nil {
+		// Every copy's fimbriation lies beneath all of their fills, as it does unturned.
+		for i := range copies {
+			r.keepUpright(centers[i], func() { r.paint(noColor, nil, c.Fimbriate, copies[i:i+1], nil) })
+		}
+	}
 	for i := range copies {
-		r.keepUpright(centers[i], func() { draw(copies[i : i+1]) })
+		r.keepUpright(centers[i], func() { draw(copies[i:i+1], nil, c.Color) })
 	}
 }
 
@@ -738,8 +785,13 @@ func chargePlaces(c *Charge, s *Shape, reg region) []copyPlace {
 			add(at.add(vec{0, -c.Repeat.Radius}.rotate(a)), turn)
 		}
 	case c.Repeat.Kind == "arc":
+		// Clockwise from one to the other, as a ring's own arc goes.
+		span := math.Mod(c.Repeat.To-c.Repeat.From, 360)
+		if span < 0 {
+			span += 360
+		}
 		for i := range c.Repeat.Count {
-			a := c.Repeat.From + (c.Repeat.To-c.Repeat.From)*float64(i)/float64(c.Repeat.Count-1)
+			a := c.Repeat.From + span*float64(i)/float64(c.Repeat.Count-1)
 			turn := 0.0
 			if c.Repeat.Turn {
 				turn = a
@@ -804,11 +856,11 @@ func (r *renderer) keepUpright(at vec, draw func()) {
 	r.line(`</g>`)
 }
 
-func (r *renderer) outlineOnly(color string, width float64, shapes []geom) {
+func (r *renderer) outlineOnly(color string, box *[4]float64, width float64, shapes []geom) {
 	if color == noColor {
 		return
 	}
-	stroke := r.fill(color, nil)
+	stroke := r.fill(color, box)
 	for _, g := range shapes {
 		r.geom(g, fmt.Sprintf(`fill="none" stroke="%s" stroke-width="%s" stroke-linejoin="miter" stroke-miterlimit="10"`,
 			stroke, num(width/g.strokeScale())))

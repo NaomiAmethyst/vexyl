@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 30" width="400" height="600">
+  <title>Turned Reverse Test</title>
+  <g transform="matrix(0 -1 1 0 0 30) matrix(-1 0 0 1 30 0)">
+    <clipPath id="vx-0934c50b9723f4fe-deb2-flag1">
+      <polygon points="0,0 30,0 30,20 0,20"/>
+    </clipPath>
+    <g clip-path="url(#vx-0934c50b9723f4fe-deb2-flag1)">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#7b4fd6"/>
+      <clipPath id="vx-0934c50b9723f4fe-deb2-panel2">
+        <polygon points="0,0 6,0 6,20 0,20"/>
+      </clipPath>
+      <g transform="translate(0 0)" clip-path="url(#vx-0934c50b9723f4fe-deb2-panel2)" style="isolation:isolate">
+        <polygon points="0,0 6,0 6,20 0,20" fill="#1b1035"/>
+      </g>
+      <g transform="translate(3 5) matrix(0 -1 1 0 0 0) translate(-3 -5)">
+        <path d="M4.625 3.100164A2.5 2.5 0 1 0 4.625 6.899836A2 2 0 1 1 4.625 3.100164Z" fill="#ffffff"/>
+      </g>
+      <g transform="translate(14 6) matrix(0 -1 1 0 0 0) translate(-14 -6)">
+        <polygon points="14,3.5 14.561285,5.227458 16.377641,5.227458 14.908178,6.295085 15.469463,8.022542 14,6.954915 12.530537,8.022542 13.091822,6.295085 11.622359,5.227458 13.438715,5.227458" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      </g>
+      <g transform="translate(17 9) matrix(0 -1 1 0 0 0) translate(-17 -9)">
+        <polygon points="17,6.5 17.561285,8.227458 19.377641,8.227458 17.908178,9.295085 18.469463,11.022542 17,9.954915 15.530537,11.022542 16.091822,9.295085 14.622359,8.227458 16.438715,8.227458" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      </g>
+      <g transform="translate(20 12) matrix(0 -1 1 0 0 0) translate(-20 -12)">
+        <polygon points="20,9.5 20.561285,11.227458 22.377641,11.227458 20.908178,12.295085 21.469463,14.022542 20,12.954915 18.530537,14.022542 19.091822,12.295085 17.622359,11.227458 19.438715,11.227458" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>
+      </g>
+      <g transform="translate(14 6) matrix(0 -1 1 0 0 0) translate(-14 -6)">
+        <polygon points="14,3.5 14.561285,5.227458 16.377641,5.227458 14.908178,6.295085 15.469463,8.022542 14,6.954915 12.530537,8.022542 13.091822,6.295085 11.622359,5.227458 13.438715,5.227458" fill="#f2c14e"/>
+      </g>
+      <g transform="translate(17 9) matrix(0 -1 1 0 0 0) translate(-17 -9)">
+        <polygon points="17,6.5 17.561285,8.227458 19.377641,8.227458 17.908178,9.295085 18.469463,11.022542 17,9.954915 15.530537,11.022542 16.091822,9.295085 14.622359,8.227458 16.438715,8.227458" fill="#f2c14e"/>
+      </g>
+      <g transform="translate(20 12) matrix(0 -1 1 0 0 0) translate(-20 -12)">
+        <polygon points="20,9.5 20.561285,11.227458 22.377641,11.227458 20.908178,12.295085 21.469463,14.022542 20,12.954915 18.530537,14.022542 19.091822,12.295085 17.622359,11.227458 19.438715,11.227458" fill="#f2c14e"/>
+      </g>
+    </g>
+  </g>
+</svg>

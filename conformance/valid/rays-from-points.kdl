@@ -1,0 +1,52 @@
+// An invented flag exercising rays from points on, at a corner of and outside their region.
+vexyl 1
+meta {
+  name "Rays Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+  pink "#f0a0c8"
+  rising gradient night gold along=bend
+}
+proportion hoist=20 fly=30
+
+field white
+panel {
+  corner upper-hoist
+  fly 15
+  hoist 10
+  rays night violet gold {
+    from fly=0 hoist=0
+    count 4
+  }
+}
+panel {
+  corner upper-fly
+  fly 15
+  hoist 10
+  rays night violet gold pink {
+    from fly=6 hoist=10
+    measure edge
+  }
+}
+panel {
+  corner lower-hoist
+  fly 15
+  hoist 10
+  rays night rising violet {
+    from fly=-6 hoist=4
+    ratio 1 2 1
+  }
+}
+panel {
+  corner lower-fly
+  fly 15
+  hoist 10
+  rays gold rising night violet {
+    from fly=20 hoist=-3
+    measure edge
+  }
+}

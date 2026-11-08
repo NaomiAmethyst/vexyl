@@ -4,7 +4,7 @@
 import { resolve, view } from "./adapt.js";
 import { foldFacets, foldShape, then, type Matrix } from "./fold.js";
 import {
-	add, axis, bandPoly, barPolys, boundary, chevronPolys, crossPolys, mul, offsetPolygon, position, rawChevrons, rectPoly,
+	add, axis, bandPoly, barPolys, boundary, chevronPolys, clipConvex, crossPolys, mul, offsetPolygon, position, rawChevrons, rectPoly,
 	regionBounds, regionCenter, regionCorners, rotate, shapeGeom, type Geom, type Region, type Vec,
 } from "./geometry.js";
 import { inLimits } from "./limits.js";
@@ -15,7 +15,7 @@ import { esc, factor, hash, num } from "./text.js";
 import { RenderError } from "./types.js";
 import type {
 	ChargeLayer, ChecksLayer, Effects, EmblemLayer, Fimbriation, Flag, Layer, Options, PanelLayer, QuartersLayer, SaltireLayer, Shape, SvgElement,
-	SvgShape,
+	SvgShape, Turn,
 } from "./types.js";
 import { XmlDecoder } from "./xml.js";
 
@@ -62,6 +62,21 @@ function checkOptions(flag: Flag, opts: Options): void {
 	}
 }
 
+/**
+ * How a flag's back turns in a variant, so that it's the mirror image of the turned front: the
+ * turn, seen in a mirror.
+ */
+const reverseTurn: Record<Turn, Turn> = {
+	none: "none",
+	mirror: "mirror",
+	"half-turn": "half-turn",
+	invert: "invert",
+	transpose: "anti-transpose",
+	"anti-transpose": "transpose",
+	rotate: "counter-rotate",
+	"counter-rotate": "rotate",
+};
+
 /** Renders the flag as a standalone SVG document. */
 export function svg(flag: Flag, opts: Options = {}): string {
 	checkOptions(flag, opts);
@@ -95,11 +110,16 @@ export function svg(flag: Flag, opts: Options = {}): string {
 	if (f.border?.side === "outside") {
 		[x0, y0, width, tall] = bounds(outerBorder(f));
 	}
-	const turned = view(turn, x0, y0, width, tall);
+	// Seen from behind, the turned flag is the mirror image of its front.
+	const shown = opts.side === "reverse" ? reverseTurn[turn] : turn;
+	const turned = view(shown, x0, y0, width, tall);
 	let transform = turned.transform;
+	let undo = turned.upright;
 	if (mirror) {
-		// The back is the mirror image, then turned as the front would be.
+		// The back is the mirror image of the front, then turned.
 		transform = `${transform} matrix(-1 0 0 1 ${num(2 * x0 + width)} 0)`.trim();
+		// A charge is put back the way it is on the back, which is the front's turn undone.
+		undo = view(turn, x0, y0, width, tall).upright;
 	}
 	let vx = x0;
 	let vy = y0;
@@ -110,7 +130,7 @@ export function svg(flag: Flag, opts: Options = {}): string {
 		[vx, vy, vw, vh] = [y0, x0, tall, width];
 	}
 	if (upright) {
-		r.upright = turned.upright;
+		r.upright = undo;
 	}
 	if (canvas !== 0) {
 		// The canvas ratio is the design's, so a turned flag's is the other way up.
@@ -310,7 +330,9 @@ class Renderer {
 			// fold gets here, and as in the reference it then draws no border.
 			const shape = boundary(f);
 			this.tag = this.scope.border + "border";
-			this.geom({ poly: shape === null ? [] : outerBorder(f) }, `fill="${this.fill(f.border.color)}"`);
+			// A gradient spans the shape that the border edges.
+			const box = shape === null ? undefined : bounds(shape);
+			this.geom({ poly: shape === null ? [] : outerBorder(f) }, `fill="${this.fill(f.border.color, box)}"`);
 		}
 		const root: Region = { w: f.fly, h: f.hoist };
 		const shape: Geom = f.outline !== undefined ? outlineGeom(f.outline, f.fly, f.hoist) : { poly: rectPoly(0, 0, f.fly, f.hoist) };
@@ -425,7 +447,10 @@ class Renderer {
 				// A gap has to show what's beneath, so each band stands alone.
 				const polys = l.colors.includes(noColor) ? bands : chevronPolys(l, reg);
 				if (l.fimbriate !== undefined) {
-					this.paint(l.colors[polys.length - 1]!, undefined, l.fimbriate, [{ poly: nested[0]! }], []);
+					// A gradient spans the outermost chevron's part inside the region.
+					const inside = clipConvex(nested[0]!, reg);
+					const box = inside.length > 0 ? bounds(inside) : undefined;
+					this.paint(l.colors[polys.length - 1]!, box, l.fimbriate, [{ poly: nested[0]! }], []);
 				}
 				polys.forEach((poly, i) => {
 					if (poly.length > 0) {
@@ -439,7 +464,8 @@ class Renderer {
 				// unclipped shape. A clipped polygon can be empty.
 				const stroke = [{ poly: bandPoly(reg, l.along, l.rotate, l.width, l.offset, true) }];
 				const poly = bandPoly(reg, l.along, l.rotate, l.width, l.offset, false);
-				this.paint(l.color, undefined, l.fimbriate, stroke, poly.length > 0 ? [{ poly }] : []);
+				// A gradient spans the part inside the region, for the fimbriation too.
+				this.paint(l.color, poly.length > 0 ? bounds(poly) : undefined, l.fimbriate, stroke, poly.length > 0 ? [{ poly }] : []);
 				break;
 			}
 			case "cross": {
@@ -648,23 +674,40 @@ class Renderer {
 			copies.push(shapeGeom(s, p.at, p.turn));
 			centers.push(p.at);
 		}
+		let box: GradientBox | undefined;
+		if ((c.shape.kind === "pile" || c.shape.kind === "pall") && s.kind === "polygon") {
+			// Its shape runs on past the region, and a gradient spans only what's inside.
+			const inside = clipConvex(
+				s.vertices.map((p) => ({ x: p.fly, y: p.hoist })),
+				reg,
+			);
+			box = inside.length > 0 ? bounds(inside) : undefined;
+		}
 		const hollow = s.hollow ?? 0;
 		const lines = s.kind === "star" ? (s.lines ?? 0) : 0;
-		const draw = (shapes: Geom[]): void => {
+		const color = c.color ?? "";
+		const draw = (shapes: Geom[], fimbriate: Fimbriation | undefined): void => {
 			if (hollow > 0) {
-				this.outlineOnly(c.color ?? "", hollow, shapes);
+				this.outlineOnly(color, box, hollow, shapes);
 			} else if (lines > 0) {
-				this.outlineOnly(c.color ?? "", lines, shapes);
+				this.outlineOnly(color, box, lines, shapes);
 			} else {
-				this.paint(c.color ?? "", undefined, c.fimbriate, shapes, shapes);
+				this.paint(color, box, fimbriate, shapes, shapes);
 			}
 		};
 		if (this.upright === "" || s.kind === "polygon") {
-			draw(copies);
+			draw(copies, c.fimbriate);
 			return;
 		}
+		if (c.fimbriate !== undefined) {
+			// Every copy's fimbriation lies beneath all of their fills, as it does unturned.
+			const fimbriate = c.fimbriate;
+			copies.forEach((copy, i) => {
+				this.keepUpright(centers[i]!, () => this.paint(noColor, undefined, fimbriate, [copy], []));
+			});
+		}
 		copies.forEach((copy, i) => {
-			this.keepUpright(centers[i]!, () => draw([copy]));
+			this.keepUpright(centers[i]!, () => draw([copy], undefined));
 		});
 	}
 
@@ -681,11 +724,11 @@ class Renderer {
 		this.line("</g>");
 	}
 
-	private outlineOnly(color: string, width: number, shapes: Geom[]): void {
+	private outlineOnly(color: string, box: GradientBox | undefined, width: number, shapes: Geom[]): void {
 		if (color === noColor) {
 			return;
 		}
-		const stroke = this.fill(color);
+		const stroke = this.fill(color, box);
 		for (const g of shapes) {
 			this.geom(g, `fill="none" stroke="${stroke}" stroke-width="${num(width / strokeScale(g))}" ${miter}`);
 		}
@@ -857,8 +900,13 @@ function chargePlaces(c: ChargeLayer, s: Shape, reg: Region): CopyPlace[] {
 			addPlace(add(at, rotate({ x: 0, y: -repeat.radius }, a)), repeat.turn ? a : 0);
 		}
 	} else if (repeat.kind === "arc") {
+		// Clockwise from one to the other, as a ring's own arc goes.
+		let span = (repeat.to - repeat.from) % 360;
+		if (span < 0) {
+			span += 360;
+		}
 		for (let i = 0; i < repeat.count; i++) {
-			const a = repeat.from + ((repeat.to - repeat.from) * i) / (repeat.count - 1);
+			const a = repeat.from + (span * i) / (repeat.count - 1);
 			addPlace(add(at, rotate({ x: 0, y: -repeat.radius }, a)), repeat.turn ? a : 0);
 		}
 	} else if (repeat.kind === "line") {

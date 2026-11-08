@@ -114,6 +114,10 @@ var refusedMarkup = []struct{ name, markup string }{
 	{"a viewBox too small", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1e-13 1"/>`},
 	{"a viewBox past what a number can hold", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1e999 1"/>`},
 	{"a size beyond the limit", `<svg xmlns="http://www.w3.org/2000/svg" width="1e13" height="1"/>`},
+	{"a preserveAspectRatio of none", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" preserveAspectRatio="none"/>`},
+	{"a preserveAspectRatio that slices", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice"/>`},
+	{"a preserveAspectRatio aligned elsewhere", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" preserveAspectRatio="xMinYMin meet"/>`},
+	{"a preserveAspectRatio in another case", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" preserveAspectRatio="xmidymid"/>`},
 }
 
 // hostileBodies are what an attacker tries against a parser that is not the browser's.
@@ -273,6 +277,10 @@ var keptMarkup = []struct{ name, markup, want string }{
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect fill="url(#a)" stroke="url(#b)" mask="url(#c)" clip-path="url(#d)"></rect></svg>`},
 	{"nesting up to the limit", svgOpen + strings.Repeat("<g>", maxSVGDepth-1) + strings.Repeat("</g>", maxSVGDepth-1) + `</svg>`,
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">` + strings.Repeat("<g>", maxSVGDepth-1) + strings.Repeat("</g>", maxSVGDepth-1) + `</svg>`},
+	{"the default preserveAspectRatio, said outright", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" preserveAspectRatio=" xMidYMid` + "\t" + `meet "></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>`},
+	{"the default preserveAspectRatio's alignment alone", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" preserveAspectRatio="xMidYMid"></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>`},
 	{"a declaration with everything", `<?xml version='1.0' encoding='utf-8' standalone = "no" ?>` + svgOpen + `</svg>`,
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>`},
 }
@@ -637,6 +645,11 @@ var acceptedDocuments = []invalidCase{
 	{name: "a quoted negative infinity is only text", src: header + `define "-inf" { field a; }` + "\nuse \"-inf\"\n"},
 	{name: "a meta's date within the same year as its end", src: "vexyl 1\nmeta { name \"T\"; date \"2000\"; until \"2001\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
 	{name: "an end known only to the year of its beginning", src: "vexyl 1\nmeta { name \"T\"; date \"2000-06\"; until \"2000\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
+	{name: "palette colors in capitals", src: "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#ABCDEF\"; b \"#aBcDeF\"; }\nproportion hoist=1 fly=1\nbars a b\n"},
+	{name: "whole numbers written as decimals", src: "vexyl 1.0\nmeta { name \"T\"; }\npalette { a \"#112233\"; b \"#445566\"; }\nproportion hoist=10 fly=20\nbars a b { count 4.0; }\ncharge star a { radius 1; points 5.0; repeat grid rows=2e0 columns=1.0; }\n"},
+	{name: "nests exactly the limit in a variant", src: header + "field a\nvariant v {\n" + strings.Repeat("group {\n", 31) + "field a\n" + strings.Repeat("}\n", 32)},
+	{name: "nests exactly the limit in a reverse", src: header + "field a\nreverse {\n" + strings.Repeat("group {\n", 31) + "field a\n" + strings.Repeat("}\n", 32)},
+	{name: "a count as large as the colors", src: header + "bars a b a { count 3; }\nrays a b a { count 3; }\n"},
 	{name: "a number at each end of what's allowed", src: header + "charge disc a { radius 1e12; at fly=1e-12 hoist=-1e12; }\n"},
 }
 

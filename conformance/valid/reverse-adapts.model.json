@@ -1,0 +1,107 @@
+{
+ "adapt": {
+  "narrower": "extend",
+  "wider": "extend"
+ },
+ "layers": [
+  {
+   "along": "hoist",
+   "colors": [
+    "night",
+    "violet"
+   ],
+   "layer": "bars",
+   "ratio": [
+    1,
+    2
+   ]
+  },
+  {
+   "at": [
+    {
+     "fly": 5,
+     "hoist": 5
+    }
+   ],
+   "color": "gold",
+   "layer": "charge",
+   "radius": 2,
+   "shape": "disc"
+  }
+ ],
+ "meta": {
+  "name": "Reverse Adapt Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "reverse": {
+  "layers": [
+   {
+    "along": "hoist",
+    "colors": [
+     "violet",
+     "night"
+    ],
+    "layer": "bars",
+    "ratio": [
+     2,
+     1
+    ]
+   },
+   {
+    "at": [
+     {
+      "fly": 25,
+      "hoist": 5
+     }
+    ],
+    "color": "gold",
+    "layer": "charge",
+    "radius": 2,
+    "shape": "disc"
+   },
+   {
+    "anchor": "end",
+    "layer": "group",
+    "layers": [
+     {
+      "at": [
+       {
+        "fly": 5,
+        "hoist": 15
+       }
+      ],
+      "color": "white",
+      "inner": 0.7639320225002104,
+      "layer": "charge",
+      "radius": 2,
+      "shape": "star"
+     }
+    ]
+   }
+  ]
+ },
+ "variant": {
+  "crossbar": {
+   "from": "transpose",
+   "ratio": 2
+  }
+ },
+ "vexyl": 1
+}

@@ -58,6 +58,9 @@ def main():
                     wanted.append((f"variant-{variant}-fold-{fold}", {"variant": variant, "fold": fold}))
         # Other proportions: the same request is drawn or refused, depending on the flag's rules.
         wanted += [("ratio-1-1", {"ratio": "1:1"}), ("ratio-1-2", {"ratio": "1:2"}), ("pad-center", {"ratio": "1:1", "fit": "pad"})]
+        if "reverse" in model and "adapt" in model:
+            # A reverse of its own adapts with its hoist on the right, as it's seen from behind.
+            wanted += [("reverse-ratio-1-2", {"side": "reverse", "ratio": "1:2"}), ("reverse-ratio-1-1", {"side": "reverse", "ratio": "1:1"})]
         if number % 5 == 0:
             wanted += [("pad-start", {"ratio": "1:1", "fit": "pad", "align": "start"}), ("pad-end", {"ratio": "1:1", "fit": "pad", "align": "end"})]
         renders = []

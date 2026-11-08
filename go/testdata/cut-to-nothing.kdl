@@ -1,0 +1,20 @@
+// An invented flag whose last bar a square proportion cuts to nothing, within floating-point
+// error, so it can't be drawn at 1:1.
+vexyl 1
+meta {
+  name "Cut To Nothing Test"
+}
+palette {
+  night "#1b1035"
+  gold "#f2c14e"
+}
+proportion hoist=20 fly=30
+
+bars night gold {
+  along hoist
+  ratio 0.3 0.15
+}
+adapt {
+  wider extend
+  narrower cut
+}

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 24.7" width="315.789474" height="600">
   <title>United States</title>
-  <g transform="matrix(0 1 1 0 0 0) matrix(-1 0 0 1 24.7 0)">
+  <g transform="matrix(0 -1 -1 0 13 24.7) matrix(-1 0 0 1 24.7 0)">
     <clipPath id="vx-029d1618b1163ef4-6d49-flag1">
       <polygon points="0,0 24.7,0 24.7,13 0,13"/>
     </clipPath>
