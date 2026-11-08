@@ -32,13 +32,41 @@ a tricolor can simply spread out. `variant` describes vertical, banner and other
 describes how it's folded, and can be drawn step by step. Colors can also record their
 Pantone, NCS, dye or other values, for print and manufacturing.
 
-**Status:** early draft. The format can still change.
+**Status:** version 1 of the format is frozen. A change to what a document means or how it renders needs a new format version.
+
+## Installing
+
+The `vexyl` command needs Go 1.25 or later:
+
+```sh
+go install github.com/NaomiAmethyst/vexyl/go/cmd/vexyl@latest
+```
+
+Each [release](https://github.com/NaomiAmethyst/vexyl/releases) also has it built for Linux,
+macOS and Windows.
+
+The TypeScript library, which has the same command, is on npm:
+
+```sh
+npm install vexyl
+```
+
+The command is also an image. It reads files from `/work`, so mount the folder they're in:
+
+```sh
+docker run --rm -v "$PWD:/work:ro" ghcr.io/naomiamethyst/vexyl render flags/sweden.kdl > sweden.svg
+```
+
+The editor is at [vexyl.amethyst.name](https://vexyl.amethyst.name/). To run your own, its image
+serves it on port 8080:
+
+```sh
+docker run --rm -p 8080:8080 ghcr.io/naomiamethyst/vexyl-web
+```
 
 ## Use
 
 ```sh
-go install github.com/NaomiAmethyst/vexyl/go/cmd/vexyl@latest
-
 vexyl check flags/*.kdl
 vexyl render -o sweden.svg flags/sweden.kdl
 vexyl render -height 1200 flags/sweden.kdl > sweden.svg
@@ -97,7 +125,8 @@ lives in `go/testdata/golden`; after an intended change, rewrite it by running
 
 ## The editor
 
-[`web/`](web/README.md) is an editor for flags in this format, as a static site with no server. `make web` builds it
+[`web/`](web/README.md) is an editor for flags in this format, as a static site with no server. It's hosted at
+[vexyl.amethyst.name](https://vexyl.amethyst.name/). `make web` builds it
 into `web/dist`, and `make check-web` tests it. Both need Node, so `make check` leaves them out.
 
 ## License

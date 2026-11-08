@@ -1,0 +1,41 @@
+name: conformance tools
+description: Python with the suite's packages, and resvg at the version conformance/manifest.json pins
+
+inputs:
+  root:
+    description: Where the repository is checked out, relative to the workspace
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Install the Python packages
+      shell: bash
+      run: python3 -m pip install --disable-pip-version-check -r "${{ inputs.root }}/conformance/requirements.txt"
+
+    # Rasterizers differ, so the suite needs exactly this resvg.
+    - name: Read the resvg version
+      id: resvg
+      shell: bash
+      run: echo "version=$(jq -r .resvg "${{ inputs.root }}/conformance/manifest.json")" >> "$GITHUB_OUTPUT"
+
+    - id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.resvg
+        key: resvg-${{ steps.resvg.outputs.version }}-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Build resvg
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: cargo install resvg --version "${{ steps.resvg.outputs.version }}" --locked --root ~/.resvg
+
+    - name: Put resvg on the path
+      shell: bash
+      run: |
+        echo "$HOME/.resvg/bin" >> "$GITHUB_PATH"
+        "$HOME/.resvg/bin/resvg" --version

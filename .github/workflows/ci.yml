@@ -1,0 +1,143 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # Go tests, vet and gofmt, and the tools' Python tests.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/go.mod
+          cache-dependency-path: go/go.sum
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install the Python packages
+        run: python3 -m pip install --disable-pip-version-check -r conformance/requirements.txt
+
+      - run: make check
+
+  check-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ts/package-lock.json
+
+      - run: make check-ts
+
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/go.mod
+          cache-dependency-path: go/go.sum
+
+      - uses: ./.github/actions/conformance-tools
+
+      - run: make conformance
+
+  conformance-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ts/package-lock.json
+
+      - uses: ./.github/actions/conformance-tools
+
+      - run: make conformance-ts
+
+  # Runs the suite against libraries with one thing wrong, some of them the Go reference patched.
+  conformance-prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/go.mod
+          cache-dependency-path: go/go.sum
+
+      - uses: ./.github/actions/conformance-tools
+
+      - run: make conformance-prove
+
+  # The editor's tests read flags from a vexyl-flags checkout beside this one, so both are checked
+  # out side by side.
+  check-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vexyl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: vexyl
+
+      - uses: actions/checkout@v4
+        with:
+          repository: NaomiAmethyst/vexyl-flags
+          path: vexyl-flags
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vexyl/web/package-lock.json
+
+      # The end-to-end tests drive playwright-core, which brings no browser. They use the newest
+      # Chromium in Playwright's cache, so this installs the one its version expects.
+      - name: Install Chromium
+        run: npx --yes playwright@1.64.1 install --with-deps chromium
+
+      - run: make check-web
+
+  check-rescale:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vexyl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: vexyl
+
+      - uses: actions/checkout@v4
+        with:
+          repository: NaomiAmethyst/vexyl-flags
+          path: vexyl-flags
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vexyl/web/package-lock.json
+
+      - uses: ./vexyl/.github/actions/conformance-tools
+        with:
+          root: vexyl
+
+      - run: make check-rescale

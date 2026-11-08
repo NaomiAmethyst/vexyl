@@ -115,6 +115,16 @@ func TestInfo(t *testing.T) {
 	}
 }
 
+func TestVersion(t *testing.T) {
+	var out bytes.Buffer
+	if err := run([]string{"version"}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(out.String(), "vexyl ") || !strings.HasSuffix(out.String(), ", format 1\n") {
+		t.Errorf("version printed %q", out.String())
+	}
+}
+
 func TestErrors(t *testing.T) {
 	tests := []struct {
 		name string

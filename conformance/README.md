@@ -6,8 +6,8 @@ Every Vexyl library has to pass this. [SDK.md](../SDK.md) says what the suite ch
 python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct,options,tags,locate,share] [--filter TEXT] [--resvg PATH] COMMAND...
 ```
 
-It needs Python with numpy, Pillow and jsonschema, and resvg at the version in `manifest.json`, since
-different rasterizers draw differently. COMMAND runs the library under test, and has to offer:
+It needs Python with numpy, Pillow and jsonschema, as `requirements.txt` pins them, and resvg at the version in
+`manifest.json`, since different rasterizers draw differently. COMMAND runs the library under test, and has to offer:
 
 ```
 COMMAND render [-height PIXELS] [-ratio H:F] [-variant NAME] [-side SIDE] [-fit FIT] [-align WHERE]

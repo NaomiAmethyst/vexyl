@@ -12,6 +12,7 @@ import (
 	"io"
 	"maps"
 	"os"
+	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ const usage = `usage:
                                 or just what's innermost at a line
   vexyl share encode FILE       print a document as a share link's part after its #
   vexyl share decode FILE       print the document in a file holding that part
+  vexyl version                 print this command's version and the format version it reads
 
 render options:
   -o FILE         write to a file instead of standard output
@@ -48,6 +50,23 @@ render options:
 
 FILE can be - for standard input.
 `
+
+// version is set when a release is built, with -ldflags "-X main.version=1.2.3".
+var version string
+
+// versionString is the release's version, or the module's when it was installed with go install.
+func versionString() string {
+	v := version
+	if v == "" {
+		if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+			v = info.Main.Version
+		}
+	}
+	if v == "" {
+		return "devel"
+	}
+	return strings.TrimPrefix(v, "v")
+}
 
 func main() {
 	if err := run(os.Args[1:], os.Stdin, os.Stdout); err != nil {
@@ -78,6 +97,9 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 		return locate(args[1:], stdin, stdout)
 	case "share":
 		return share(args[1:], stdin, stdout)
+	case "version", "-version", "--version":
+		_, err := fmt.Fprintf(stdout, "vexyl %s, format %d\n", versionString(), vexyl.FormatVersion)
+		return err
 	case "help", "-h", "--help":
 		_, err := io.WriteString(stdout, usage)
 		return err

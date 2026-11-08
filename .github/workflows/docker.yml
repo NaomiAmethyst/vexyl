@@ -1,0 +1,81 @@
+name: docker
+
+# The CLI as ghcr.io/naomiamethyst/vexyl, and the editor as ghcr.io/naomiamethyst/vexyl-web. Pushes
+# to main are tagged main and sha-<commit>, releases by their version and latest. Pull requests
+# only build.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: vexyl
+            dockerfile: Dockerfile
+            description: Checks Vexyl flag documents and renders them to SVG
+          - name: vexyl-web
+            dockerfile: web/Dockerfile
+            description: The Vexyl flag editor, as a static site
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        env:
+          # So that GHCR shows the description for the multi-arch image too.
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ghcr.io/naomiamethyst/${{ matrix.name }}
+          tags: |
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
+            type=ref,event=pr
+          flavor: latest=false
+          labels: |
+            org.opencontainers.image.source=https://github.com/NaomiAmethyst/vexyl
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.licenses=Apache-2.0
+          annotations: |
+            org.opencontainers.image.description=${{ matrix.description }}
+
+      - if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          # Only a release says which version it is; anything else reports itself as devel.
+          build-args: |
+            VERSION=${{ github.ref_type == 'tag' && steps.meta.outputs.version || '' }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}

@@ -2,8 +2,26 @@
   "name": "vexyl",
   "version": "0.1.0",
   "description": "A KDL format for describing flags the way a flag specification does, and a renderer to SVG",
+  "keywords": [
+    "vexyl",
+    "flag",
+    "flags",
+    "vexillology",
+    "kdl",
+    "svg",
+    "renderer"
+  ],
   "license": "Apache-2.0",
   "author": "Naomi Persephone Amethyst",
+  "homepage": "https://github.com/NaomiAmethyst/vexyl/tree/main/ts#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaomiAmethyst/vexyl.git",
+    "directory": "ts"
+  },
+  "bugs": {
+    "url": "https://github.com/NaomiAmethyst/vexyl/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -16,11 +34,12 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "vexyl": "./dist/cli.js"
+    "vexyl": "dist/cli.js"
   },
   "files": [
     "dist/*.js",
-    "dist/*.d.ts"
+    "dist/*.d.ts",
+    "NOTICE"
   ],
   "engines": {
     "node": ">=20"

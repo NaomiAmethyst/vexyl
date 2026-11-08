@@ -1,0 +1,13 @@
+# Only what the two images build from: go/ for the CLI, and web/, ts/src and the logo for the editor.
+*
+!go/
+!ts/src/
+!ts/tsconfig.json
+!web/
+!docs/logo/
+!LICENSE
+!NOTICE
+go/testdata/
+**/node_modules/
+**/dist/
+web/test/

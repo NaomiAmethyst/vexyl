@@ -1,0 +1,4 @@
+# What conformance/run.py, conformance/prove.py, tools/ and web/test/rescale_corpus.py import.
+jsonschema==4.19.2
+numpy==2.2.4
+Pillow==11.3.0
