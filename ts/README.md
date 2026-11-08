@@ -5,7 +5,7 @@ port of the Go reference implementation, and it runs in browsers as well as Node
 reads the network or the filesystem. Only its command uses Node's modules.
 
 ```ts
-import { model, parse, svg, svgTree, validate } from "vexyl";
+import { model, parse, svg, svgTree, validate } from "@naomiamethyst/vexyl";
 
 const problems = validate(source);          // empty if the document is valid
 const flag = parse(source);                 // throws a ParseError holding every problem

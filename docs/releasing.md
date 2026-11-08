@@ -45,6 +45,9 @@ because everything it refers to is relative.
 
 ### npm
 
+The library is `@naomiamethyst/vexyl`, in Naomi's own scope: npm refuses the plain name `vexyl` as
+too close to the existing `vinyl`, and refuses `vexyl` as an organization too.
+
 npm can only trust a workflow for a package that already exists, so the first version has to be
 published by hand. npm's docs for `npm trust` say "The package you're configuring must already
 exist on the npm registry" (<https://docs.npmjs.com/cli/v11/commands/npm-trust>), and there's no
@@ -63,9 +66,13 @@ way to set up a publisher for a name that hasn't been published yet.
    rm LICENSE NOTICE
    ```
 
+   With a passkey as the only second factor, `npm publish` prints a link to approve the publish in
+   a browser, but only when it's run in a terminal; run anywhere else, it just fails asking for a
+   one-time password.
+
    This can be the current 0.1.0, so that 1.0.0 is the first to come from the workflow, with
    provenance. Or it can be the first release's own version, which the workflow will then skip.
-3. On <https://www.npmjs.com/package/vexyl/access>, under "Trusted Publisher", choose GitHub
+3. On <https://www.npmjs.com/package/@naomiamethyst/vexyl/access>, under "Trusted Publisher", choose GitHub
    Actions, and enter:
    - Organization or user: `NaomiAmethyst`
    - Repository: `vexyl`

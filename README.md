@@ -48,7 +48,7 @@ macOS and Windows.
 The TypeScript library, which has the same command, is on npm:
 
 ```sh
-npm install vexyl
+npm install @naomiamethyst/vexyl
 ```
 
 The command is also an image. It reads files from `/work`, so mount the folder they're in:

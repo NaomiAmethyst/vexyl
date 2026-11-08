@@ -167,8 +167,8 @@ jobs:
       # A re-run, or a version published by hand, is left alone.
       - name: Publish
         run: |
-          if [ "$(npm view "vexyl@$VERSION" version 2> /dev/null)" = "$VERSION" ]; then
-            echo "vexyl@$VERSION is already on npm"
+          if [ "$(npm view "@naomiamethyst/vexyl@$VERSION" version 2> /dev/null)" = "$VERSION" ]; then
+            echo "@naomiamethyst/vexyl@$VERSION is already on npm"
             exit 0
           fi
           flags=()
