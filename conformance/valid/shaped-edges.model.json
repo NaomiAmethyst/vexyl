@@ -1,0 +1,204 @@
+{
+ "layers": [
+  {
+   "at": {
+    "fly": 10,
+    "hoist": 5
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "along": "bend",
+     "colors": [
+      "night",
+      "violet",
+      "gold"
+     ],
+     "edge": {
+      "count": 5,
+      "depth": 1,
+      "form": "zigzag"
+     },
+     "layer": "bars",
+     "ratio": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 30,
+    "hoist": 5
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "along": "bend-sinister",
+     "colors": [
+      "night",
+      "gold"
+     ],
+     "edge": {
+      "depth": 1.5,
+      "form": "wavy",
+      "period": 4
+     },
+     "layer": "bars",
+     "ratio": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 10,
+    "hoist": 15
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "along": "hoist",
+     "colors": [
+      "violet",
+      "gold",
+      "white"
+     ],
+     "edge": {
+      "depth": 2,
+      "form": "zigzag",
+      "period": 8.4
+     },
+     "layer": "bars",
+     "ratio": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 30,
+    "hoist": 15
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "colors": [
+      "night",
+      "white"
+     ],
+     "edge": {
+      "count": 4,
+      "depth": 1,
+      "form": "zigzag"
+     },
+     "layer": "bars",
+     "ratio": [
+      1,
+      1
+     ],
+     "rotate": 30
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 10,
+    "hoist": 25
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "white",
+     "layer": "field"
+    },
+    {
+     "edge": {
+      "count": 3,
+      "depth": 2,
+      "form": "zigzag"
+     },
+     "layer": "panel",
+     "layers": [
+      {
+       "color": "night",
+       "layer": "field"
+      }
+     ],
+     "side": "fly",
+     "width": 6
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 30,
+    "hoist": 25
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "gold",
+     "layer": "field"
+    },
+    {
+     "edge": {
+      "depth": 1,
+      "form": "wavy",
+      "period": 5
+     },
+     "layer": "panel",
+     "layers": [
+      {
+       "color": "violet",
+       "layer": "field"
+      }
+     ],
+     "side": "top",
+     "width": 3
+    }
+   ]
+  }
+ ],
+ "meta": {
+  "name": "Shaped Edges Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 40,
+  "hoist": 30
+ },
+ "vexyl": 1
+}

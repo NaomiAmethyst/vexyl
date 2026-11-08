@@ -52,10 +52,37 @@
      ]
     }
    ]
+  },
+  {
+   "corner": "lower-hoist",
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "gold",
+     "layer": "field"
+    },
+    {
+     "angle": 60,
+     "colors": [
+      "dark",
+      "none",
+      "shade"
+     ],
+     "depth": 12,
+     "layer": "chevrons",
+     "ratio": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
   }
  ],
  "meta": {
-  "description": "A gradient on a quarter, a check or a wedge spans that cell, not the region",
+  "description": "A gradient on a quarter, a check or a wedge spans that cell, not the region, and one on a chevron spans the whole chevron inside the region, even where a gap leaves only its band",
   "name": "Gradient cells"
  },
  "palette": {

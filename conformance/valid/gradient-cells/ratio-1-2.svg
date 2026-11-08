@@ -1,42 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20" width="1200" height="600">
   <title>Gradient cells</title>
-  <desc>A gradient on a quarter, a check or a wedge spans that cell, not the region</desc>
-  <clipPath id="vx-844163e5695ed181-09b4-flag1">
+  <desc>A gradient on a quarter, a check or a wedge spans that cell, not the region, and one on a chevron spans the whole chevron inside the region, even where a gap leaves only its band</desc>
+  <clipPath id="vx-2e9f29282c045782-09b4-flag1">
     <polygon points="0,0 40,0 40,20 0,20"/>
   </clipPath>
-  <g clip-path="url(#vx-844163e5695ed181-09b4-flag1)">
-    <linearGradient id="vx-844163e5695ed181-09b4-gradient2" x1="0" y1="0" x2="1" y2="0">
+  <g clip-path="url(#vx-2e9f29282c045782-09b4-flag1)">
+    <linearGradient id="vx-2e9f29282c045782-09b4-gradient2" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#112244"/>
       <stop offset="1" stop-color="#ddeeff"/>
     </linearGradient>
-    <polygon points="0,0 20,0 20,10 0,10" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+    <polygon points="0,0 20,0 20,10 0,10" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
     <polygon points="20,0 40,0 40,20 20,20" fill="#ffcc00"/>
     <polygon points="0,10 40,10 40,20 0,20" fill="#ffcc00"/>
-    <polygon points="20,10 40,10 40,20 20,20" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
-    <clipPath id="vx-844163e5695ed181-09b4-panel3">
+    <polygon points="20,10 40,10 40,20 20,20" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
+    <clipPath id="vx-2e9f29282c045782-09b4-panel3">
       <polygon points="0,0 20,0 20,10 0,10"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-844163e5695ed181-09b4-panel3)" style="isolation:isolate">
-      <polygon points="0,0 5,0 5,5 0,5" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+    <g transform="translate(0 0)" clip-path="url(#vx-2e9f29282c045782-09b4-panel3)" style="isolation:isolate">
+      <polygon points="0,0 5,0 5,5 0,5" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
       <polygon points="5,0 20,0 20,10 5,10" fill="#ffcc00"/>
-      <polygon points="10,0 15,0 15,5 10,5" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+      <polygon points="10,0 15,0 15,5 10,5" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
       <polygon points="15,0 20,0 20,10 15,10" fill="#ffcc00"/>
       <polygon points="0,5 20,5 20,10 0,10" fill="#ffcc00"/>
-      <polygon points="5,5 10,5 10,10 5,10" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+      <polygon points="5,5 10,5 10,10 5,10" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
       <polygon points="10,5 20,5 20,10 10,10" fill="#ffcc00"/>
-      <polygon points="15,5 20,5 20,10 15,10" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+      <polygon points="15,5 20,5 20,10 15,10" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
     </g>
-    <clipPath id="vx-844163e5695ed181-09b4-panel4">
+    <clipPath id="vx-2e9f29282c045782-09b4-panel4">
       <polygon points="0,0 20,0 20,10 0,10"/>
     </clipPath>
-    <g transform="translate(20 10)" clip-path="url(#vx-844163e5695ed181-09b4-panel4)" style="isolation:isolate">
-      <polygon points="0,0 20,0 20,10 0,10" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
-      <polygon points="18.660254,0 10,5 10,0" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+    <g transform="translate(20 10)" clip-path="url(#vx-2e9f29282c045782-09b4-panel4)" style="isolation:isolate">
+      <polygon points="0,0 20,0 20,10 0,10" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
+      <polygon points="18.660254,0 10,5 10,0" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
       <polygon points="20,0 20,10 18.660254,10 10,5 18.660254,0" fill="#ffcc00"/>
-      <polygon points="10,10 10,5 18.660254,10" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+      <polygon points="10,10 10,5 18.660254,10" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
       <polygon points="1.339746,10 10,5 10,10" fill="#ffcc00"/>
-      <polygon points="0,10 0,0 1.339746,0 10,5 1.339746,10" fill="url(#vx-844163e5695ed181-09b4-gradient2)"/>
+      <polygon points="0,10 0,0 1.339746,0 10,5 1.339746,10" fill="url(#vx-2e9f29282c045782-09b4-gradient2)"/>
       <polygon points="10,0 10,5 1.339746,0" fill="#ffcc00"/>
+    </g>
+    <clipPath id="vx-2e9f29282c045782-09b4-panel5">
+      <polygon points="0,0 20,0 20,10 0,10"/>
+    </clipPath>
+    <g transform="translate(0 10)" clip-path="url(#vx-2e9f29282c045782-09b4-panel5)" style="isolation:isolate">
+      <polygon points="0,0 20,0 20,10 0,10" fill="#ffcc00"/>
+      <linearGradient id="vx-2e9f29282c045782-09b4-gradient6" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(12 10)">
+        <stop offset="0" stop-color="#112244"/>
+        <stop offset="1" stop-color="#ddeeff"/>
+      </linearGradient>
+      <polygon points="12,5 -0.909944,27.36068 -4.909944,27.36068 8,5 -4.909944,-17.36068 -0.909944,-17.36068" fill="url(#vx-2e9f29282c045782-09b4-gradient6)"/>
+      <polygon points="4,5 -8.909944,27.36068 -31.270624,27.36068 -31.270624,-17.36068 -8.909944,-17.36068" fill="#112244"/>
     </g>
   </g>
 </svg>

@@ -2287,6 +2287,23 @@
      "svg": "valid/every-field/pad-center.svg"
     },
     {
+     "name": "variant-turned-ratio-1-2",
+     "options": {
+      "variant": "turned",
+      "ratio": "1:2"
+     },
+     "svg": "valid/every-field/variant-turned-ratio-1-2.svg"
+    },
+    {
+     "name": "variant-turned-pad-1-4",
+     "options": {
+      "variant": "turned",
+      "ratio": "1:4",
+      "fit": "pad"
+     },
+     "svg": "valid/every-field/variant-turned-pad-1-4.svg"
+    },
+    {
      "name": "reverse-ratio-1-2",
      "options": {
       "side": "reverse",
@@ -2723,6 +2740,23 @@
      "svg": "valid/reverse-adapts/pad-center.svg"
     },
     {
+     "name": "variant-crossbar-ratio-1-2",
+     "options": {
+      "variant": "crossbar",
+      "ratio": "1:2"
+     },
+     "svg": "valid/reverse-adapts/variant-crossbar-ratio-1-2.svg"
+    },
+    {
+     "name": "variant-crossbar-pad-1-4",
+     "options": {
+      "variant": "crossbar",
+      "ratio": "1:4",
+      "fit": "pad"
+     },
+     "svg": "valid/reverse-adapts/variant-crossbar-pad-1-4.svg"
+    },
+    {
      "name": "reverse-ratio-1-2",
      "options": {
       "side": "reverse",
@@ -2737,6 +2771,47 @@
       "ratio": "1:1"
      },
      "svg": "valid/reverse-adapts/reverse-ratio-1-1.svg"
+    }
+   ]
+  },
+  {
+   "name": "shaped-edges",
+   "file": "valid/shaped-edges.kdl",
+   "model": "valid/shaped-edges.model.json",
+   "renders": [
+    {
+     "name": "default",
+     "options": {},
+     "svg": "valid/shaped-edges/default.svg"
+    },
+    {
+     "name": "reverse",
+     "options": {
+      "side": "reverse"
+     },
+     "svg": "valid/shaped-edges/reverse.svg"
+    },
+    {
+     "name": "ratio-1-1",
+     "options": {
+      "ratio": "1:1"
+     },
+     "refused": true
+    },
+    {
+     "name": "ratio-1-2",
+     "options": {
+      "ratio": "1:2"
+     },
+     "refused": true
+    },
+    {
+     "name": "pad-center",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad"
+     },
+     "svg": "valid/shaped-edges/pad-center.svg"
     }
    ]
   },
@@ -2778,6 +2853,24 @@
       "fit": "pad"
      },
      "svg": "valid/tiny-grid/pad-center.svg"
+    },
+    {
+     "name": "pad-start",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "start"
+     },
+     "svg": "valid/tiny-grid/pad-start.svg"
+    },
+    {
+     "name": "pad-end",
+     "options": {
+      "ratio": "1:1",
+      "fit": "pad",
+      "align": "end"
+     },
+     "svg": "valid/tiny-grid/pad-end.svg"
     }
    ]
   },
@@ -2894,24 +2987,6 @@
       "fit": "pad"
      },
      "svg": "valid/turned-reverse/pad-center.svg"
-    },
-    {
-     "name": "pad-start",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "start"
-     },
-     "svg": "valid/turned-reverse/pad-start.svg"
-    },
-    {
-     "name": "pad-end",
-     "options": {
-      "ratio": "1:1",
-      "fit": "pad",
-      "align": "end"
-     },
-     "svg": "valid/turned-reverse/pad-end.svg"
     }
    ]
   },
@@ -3155,6 +3230,21 @@
      "svg": "valid/variants/variant-mirrored-reverse.svg"
     },
     {
+     "name": "variant-mirrored-upright",
+     "options": {
+      "variant": "mirrored-upright"
+     },
+     "svg": "valid/variants/variant-mirrored-upright.svg"
+    },
+    {
+     "name": "variant-mirrored-upright-reverse",
+     "options": {
+      "variant": "mirrored-upright",
+      "side": "reverse"
+     },
+     "svg": "valid/variants/variant-mirrored-upright-reverse.svg"
+    },
+    {
      "name": "variant-plain",
      "options": {
       "variant": "plain"
@@ -3205,6 +3295,74 @@
       "fit": "pad"
      },
      "svg": "valid/variants/pad-center.svg"
+    },
+    {
+     "name": "variant-anti-ratio-1-2",
+     "options": {
+      "variant": "anti",
+      "ratio": "1:2"
+     },
+     "svg": "valid/variants/variant-anti-ratio-1-2.svg"
+    },
+    {
+     "name": "variant-anti-pad-1-4",
+     "options": {
+      "variant": "anti",
+      "ratio": "1:4",
+      "fit": "pad"
+     },
+     "svg": "valid/variants/variant-anti-pad-1-4.svg"
+    },
+    {
+     "name": "variant-banner-ratio-1-2",
+     "options": {
+      "variant": "banner",
+      "ratio": "1:2"
+     },
+     "svg": "valid/variants/variant-banner-ratio-1-2.svg"
+    },
+    {
+     "name": "variant-banner-pad-1-4",
+     "options": {
+      "variant": "banner",
+      "ratio": "1:4",
+      "fit": "pad"
+     },
+     "svg": "valid/variants/variant-banner-pad-1-4.svg"
+    },
+    {
+     "name": "variant-counter-ratio-1-2",
+     "options": {
+      "variant": "counter",
+      "ratio": "1:2"
+     },
+     "svg": "valid/variants/variant-counter-ratio-1-2.svg"
+    },
+    {
+     "name": "variant-counter-pad-1-4",
+     "options": {
+      "variant": "counter",
+      "ratio": "1:4",
+      "fit": "pad"
+     },
+     "svg": "valid/variants/variant-counter-pad-1-4.svg"
+    },
+    {
+     "name": "variant-vertical-ratio-1-2",
+     "options": {
+      "variant": "vertical",
+      "ratio": "1:2"
+     },
+     "svg": "valid/variants/variant-vertical-ratio-1-2.svg"
+    },
+    {
+     "name": "variant-vertical-pad-1-4",
+     "options": {
+      "variant": "vertical",
+      "ratio": "1:4",
+      "fit": "pad"
+     },
+     "svg": "valid/variants/variant-vertical-pad-1-4.svg"
     },
     {
      "name": "reverse-ratio-1-2",

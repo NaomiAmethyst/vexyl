@@ -1,0 +1,8 @@
+vexyl 1
+meta {
+  name "T"
+  render-license "CC-BY-4.0"
+  adapted-from "https://example.test/a" {
+    license "cc-by-4.0"
+  }
+}

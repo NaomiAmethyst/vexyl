@@ -1,0 +1,5 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; g gradient a b a { stops 0 0.5 0.5; }; }
+proportion hoist=1 fly=1
+field g

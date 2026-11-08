@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 40" width="300" height="600">
+  <title>Reverse Adapt Test</title>
+  <g transform="matrix(0 1 1 0 0 0)">
+    <clipPath id="vx-42dd4902c94f6aa6-bc84-flag1">
+      <polygon points="0,0 40,0 40,20 0,20"/>
+    </clipPath>
+    <g clip-path="url(#vx-42dd4902c94f6aa6-bc84-flag1)">
+      <polygon points="0,0 0,20 40,20 40,0" fill="#1b1035"/>
+      <polygon points="10,0 10,20 40,20 40,0" fill="#7b4fd6"/>
+      <circle cx="5" cy="5" r="2" fill="#f2c14e"/>
+    </g>
+  </g>
+</svg>

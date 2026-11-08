@@ -76,6 +76,11 @@ variant mirrored {
   from mirror
 }
 
+variant mirrored-upright {
+  from mirror
+  upright
+}
+
 variant half {
   from half-turn
 }

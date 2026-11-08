@@ -63,5 +63,30 @@
   "name": "a declaration with everything",
   "file": "sanitize/a-declaration-with-everything.kdl",
   "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "root-only attributes, read and removed",
+  "file": "sanitize/root-only-attributes-read-and-removed.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\" fill=\"red\"\u003e\u003crect id=\"s\" x=\"1\" y=\"2\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "the root's attributes after its viewBox, in their order",
+  "file": "sanitize/the-root-s-attributes-after-its-viewbox-in-their-order.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\" fill=\"red\" stroke=\"blue\"\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "a viewBox's numbers as written",
+  "file": "sanitize/a-viewbox-s-numbers-as-written.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"+0 0.50 1e0 1E0\"\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "a style written afresh",
+  "file": "sanitize/a-style-written-afresh.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 10\"\u003e\u003crect style=\"fill:url(#g)\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
+ },
+ {
+  "name": "a presentation value kept as written around its url",
+  "file": "sanitize/a-presentation-value-kept-as-written-around-its-url.kdl",
+  "markup": "\u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"\u003e\u003crect fill=\" url(#g) red\"\u003e\u003c/rect\u003e\u003c/svg\u003e"
  }
 ]

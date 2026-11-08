@@ -70,5 +70,41 @@
  {
   "name": "a number at each end of what's allowed",
   "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
+ },
+ {
+  "name": "switches written with #true and #false",
+  "file": "accepted/switches-written-with-true-and-false.kdl"
+ },
+ {
+  "name": "stops at the same place",
+  "file": "accepted/stops-at-the-same-place.kdl"
+ },
+ {
+  "name": "a series with digits",
+  "file": "accepted/a-series-with-digits.kdl"
+ },
+ {
+  "name": "a render license over a work under the same one",
+  "file": "accepted/a-render-license-over-a-work-under-the-same-one.kdl"
+ },
+ {
+  "name": "an apex past the end of its edge",
+  "file": "accepted/an-apex-past-the-end-of-its-edge.kdl"
+ },
+ {
+  "name": "a path defined either way",
+  "file": "accepted/a-path-defined-either-way.kdl"
+ },
+ {
+  "name": "a lone pile defined as a design",
+  "file": "accepted/a-lone-pile-defined-as-a-design.kdl"
+ },
+ {
+  "name": "edges of either kind by either measure",
+  "file": "accepted/edges-of-either-kind-by-either-measure.kdl"
+ },
+ {
+  "name": "sizes that can be zero or negative",
+  "file": "accepted/sizes-that-can-be-zero-or-negative.kdl"
  }
 ]

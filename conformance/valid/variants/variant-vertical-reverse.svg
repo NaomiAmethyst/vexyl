@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 40" width="300" height="600">
   <title>Variants Test</title>
   <g transform="matrix(0 -1 -1 0 20 40)">
-    <clipPath id="vx-cb6d37f55be78485-6d49-flag1">
+    <clipPath id="vx-7a84a357bf328657-6d49-flag1">
       <polygon points="0,0 40,0 40,20 0,20"/>
     </clipPath>
-    <g clip-path="url(#vx-cb6d37f55be78485-6d49-flag1)">
+    <g clip-path="url(#vx-7a84a357bf328657-6d49-flag1)">
       <polygon points="0,0 40,0 40,20 0,20" fill="#1b1035"/>
     </g>
   </g>

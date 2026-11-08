@@ -51,6 +51,9 @@ var refusedBodies = []struct{ name, body string }{
 	{"css src function", `<rect fill="src('https://example.test/x')"/>`},
 	{"css image function", `<rect style="fill:image('https://example.test/x')"/>`},
 	{"class", `<rect class="a"/>`},
+	{"version on an element", `<g version="1.1"/>`},
+	{"viewBox on an element", `<g viewBox="0 0 1 1"/>`},
+	{"preserveAspectRatio on an element", `<rect preserveAspectRatio="xMidYMid"/>`},
 	{"element with no namespace", `<g xmlns=""><rect/></g>`},
 	{"repeated attribute", `<rect fill="red" fill="blue"/>`},
 	{"repeated attribute by its expanded name", `<rect xmlns:a="urn:a" xmlns:b="urn:a" a:x="1" b:x="2"/>`},
@@ -283,6 +286,16 @@ var keptMarkup = []struct{ name, markup, want string }{
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>`},
 	{"a declaration with everything", `<?xml version='1.0' encoding='utf-8' standalone = "no" ?>` + svgOpen + `</svg>`,
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>`},
+	{"root-only attributes, read and removed", `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" id="r" x="1" y="2" viewBox="0 0 10 10" fill="red"><rect id="s" x="1" y="2"/></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="red"><rect id="s" x="1" y="2"></rect></svg>`},
+	{"the root's attributes after its viewBox, in their order", `<svg fill="red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" stroke="blue"></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="red" stroke="blue"></svg>`},
+	{"a viewBox's numbers as written", `<svg xmlns="http://www.w3.org/2000/svg" viewBox=" +0,0.50 1e0  1E0 "></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="+0 0.50 1e0 1E0"></svg>`},
+	{"a style written afresh", `<s:svg xmlns:s="http://www.w3.org/2000/svg" version="1.1" width="20px" height="10"><s:rect style="FILL : URL( '#g' ) ; ;"/></s:svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><rect style="fill:url(#g)"></rect></svg>`},
+	{"a presentation value kept as written around its url", svgOpen + `<rect fill=" url( #g ) red"/></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect fill=" url(#g) red"></rect></svg>`},
 }
 
 // kdlString writes any text as a KDL string, including what can't be written literally.
@@ -651,6 +664,15 @@ var acceptedDocuments = []invalidCase{
 	{name: "nests exactly the limit in a reverse", src: header + "field a\nreverse {\n" + strings.Repeat("group {\n", 31) + "field a\n" + strings.Repeat("}\n", 32)},
 	{name: "a count as large as the colors", src: header + "bars a b a { count 3; }\nrays a b a { count 3; }\n"},
 	{name: "a number at each end of what's allowed", src: header + "charge disc a { radius 1e12; at fly=1e-12 hoist=-1e12; }\n"},
+	{name: "switches written with #true and #false", src: header + "quarters a b a b { diagonal #false; }\nsaltire a { width 1; counterchange #true; }\ncharge path a { d \"M0 0H1V1Z\"; box \"0 0 1 1\"; fly 1; evenodd #false; }\nvariant v { from rotate; upright #false; }\n"},
+	{name: "stops at the same place", src: "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; b \"#445566\"; g gradient a b a { stops 0 0.5 0.5; }; }\nproportion hoist=1 fly=1\nfield g\n"},
+	{name: "a series with digits", src: "vexyl 1\nmeta { name \"T\"; series \"flag-2\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
+	{name: "a render license over a work under the same one", src: "vexyl 1\nmeta {\n  name \"T\"\n  render-license \"CC-BY-4.0\"\n  adapted-from \"https://example.test/a\" {\n    license \"CC-BY-4.0\"\n  }\n  adapted-from \"https://example.test/b\" {\n    license \"CC0-1.0\"\n  }\n}\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
+	{name: "an apex past the end of its edge", src: header + "chevrons a { depth 2; angle 30; apex 15; }\n"},
+	{name: "a path defined either way", src: header + "define p1 { path \"M0 0H1V1Z\" box=\"0 0 1 1\"; }\ndefine p2 { path { d \"M0 0H1V1Z\"; box \"0 0 1 1\"; hoist 2; }; }\ncharge p1 a { fly 1; }\ncharge p2 a\n"},
+	{name: "a lone pile defined as a design", src: header + "define d { pile a { depth 2; }; }\nuse d\n"},
+	{name: "edges of either kind by either measure", src: header + "bars a b { edge wavy depth=1 count=3; }\nbars a b { along hoist; edge zigzag depth=1 period=3; }\n"},
+	{name: "sizes that can be zero or negative", src: header + "band a { width 1; offset -2; }\ncross a { fly 0 1 0; hoist 0 1 0; }\npile a { base -1 12; tip 5 3; }\ncharge disc a { radius 1; at fly=-1 hoist=0; rotate -30; repeat line count=2 fly=-1 hoist=0; }\n"},
 }
 
 // pathCopies is 10000 copies of a path of about that many bytes.

@@ -1,0 +1,13 @@
+vexyl 1
+meta {
+  name "T"
+  render-license "CC-BY-4.0"
+  adapted-from "https://example.test/a" {
+    license "CC-BY-4.0"
+  }
+  adapted-from "https://example.test/b" {
+    license "CC0-1.0"
+  }
+}
+palette { a "#112233"; }
+proportion hoist=1 fly=1

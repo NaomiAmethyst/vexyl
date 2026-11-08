@@ -995,6 +995,298 @@
   "line": 5
  },
  {
+  "name": "plus as wide as its arms are long",
+  "file": "invalid/plus-as-wide-as-its-arms-are-long.kdl",
+  "line": 5
+ },
+ {
+  "name": "plus with no width",
+  "file": "invalid/plus-with-no-width.kdl",
+  "line": 5
+ },
+ {
+  "name": "a ratio with a zero",
+  "file": "invalid/a-ratio-with-a-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "hollow of zero",
+  "file": "invalid/hollow-of-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "a sun's gap written as zero",
+  "file": "invalid/a-sun-s-gap-written-as-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "checks of one color",
+  "file": "invalid/checks-of-one-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "inline svg at several places",
+  "file": "invalid/inline-svg-at-several-places.kdl",
+  "line": 5
+ },
+ {
+  "name": "hollow inline svg",
+  "file": "invalid/hollow-inline-svg.kdl",
+  "line": 5
+ },
+ {
+  "name": "star of two points",
+  "file": "invalid/star-of-two-points.kdl",
+  "line": 5
+ },
+ {
+  "name": "star with its inner at its radius",
+  "file": "invalid/star-with-its-inner-at-its-radius.kdl",
+  "line": 5
+ },
+ {
+  "name": "sun of two points, reported on the charge",
+  "file": "invalid/sun-of-two-points-reported-on-the-charge.kdl",
+  "line": 5
+ },
+ {
+  "name": "sun spread past one, reported on the charge",
+  "file": "invalid/sun-spread-past-one-reported-on-the-charge.kdl",
+  "line": 5
+ },
+ {
+  "name": "negative grow, reported on the bars",
+  "file": "invalid/negative-grow-reported-on-the-bars.kdl",
+  "line": 5
+ },
+ {
+  "name": "ratio not matching, reported on the bars",
+  "file": "invalid/ratio-not-matching-reported-on-the-bars.kdl",
+  "line": 5
+ },
+ {
+  "name": "stops not matching, reported on the stops",
+  "file": "invalid/stops-not-matching-reported-on-the-stops.kdl",
+  "line": 6
+ },
+ {
+  "name": "a child given twice, reported on the second",
+  "file": "invalid/a-child-given-twice-reported-on-the-second.kdl",
+  "line": 7
+ },
+ {
+  "name": "groups nested too deep, reported on the deepest",
+  "file": "invalid/groups-nested-too-deep-reported-on-the-deepest.kdl",
+  "line": 37
+ },
+ {
+  "name": "cross arm of no width",
+  "file": "invalid/cross-arm-of-no-width.kdl",
+  "line": 5
+ },
+ {
+  "name": "cross with a negative distance",
+  "file": "invalid/cross-with-a-negative-distance.kdl",
+  "line": 5
+ },
+ {
+  "name": "range from zero",
+  "file": "invalid/range-from-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "chevron angle of zero",
+  "file": "invalid/chevron-angle-of-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "chevrons with a ratio not matching",
+  "file": "invalid/chevrons-with-a-ratio-not-matching.kdl",
+  "line": 5
+ },
+ {
+  "name": "rays with a ratio not matching",
+  "file": "invalid/rays-with-a-ratio-not-matching.kdl",
+  "line": 5
+ },
+ {
+  "name": "fold with no steps",
+  "file": "invalid/fold-with-no-steps.kdl",
+  "line": 6
+ },
+ {
+  "name": "empty panel",
+  "file": "invalid/empty-panel.kdl",
+  "line": 5
+ },
+ {
+  "name": "empty reverse",
+  "file": "invalid/empty-reverse.kdl",
+  "line": 6
+ },
+ {
+  "name": "define named svg",
+  "file": "invalid/define-named-svg.kdl",
+  "line": 5
+ },
+ {
+  "name": "define named pile",
+  "file": "invalid/define-named-pile.kdl",
+  "line": 5
+ },
+ {
+  "name": "define given twice",
+  "file": "invalid/define-given-twice.kdl",
+  "line": 6
+ },
+ {
+  "name": "quarters split and diagonal",
+  "file": "invalid/quarters-split-and-diagonal.kdl",
+  "line": 5
+ },
+ {
+  "name": "side panel with a size",
+  "file": "invalid/side-panel-with-a-size.kdl",
+  "line": 5
+ },
+ {
+  "name": "side panel at a place",
+  "file": "invalid/side-panel-at-a-place.kdl",
+  "line": 5
+ },
+ {
+  "name": "corner panel at a place",
+  "file": "invalid/corner-panel-at-a-place.kdl",
+  "line": 5
+ },
+ {
+  "name": "position with only a fly",
+  "file": "invalid/position-with-only-a-fly.kdl",
+  "line": 5
+ },
+ {
+  "name": "crescent with no inner",
+  "file": "invalid/crescent-with-no-inner.kdl",
+  "line": 5
+ },
+ {
+  "name": "sun with no disc",
+  "file": "invalid/sun-with-no-disc.kdl",
+  "line": 5
+ },
+ {
+  "name": "ring with no inner",
+  "file": "invalid/ring-with-no-inner.kdl",
+  "line": 5
+ },
+ {
+  "name": "band with no width",
+  "file": "invalid/band-with-no-width.kdl",
+  "line": 5
+ },
+ {
+  "name": "saltire with no width",
+  "file": "invalid/saltire-with-no-width.kdl",
+  "line": 5
+ },
+ {
+  "name": "variant ratio without adapt",
+  "file": "invalid/variant-ratio-without-adapt.kdl"
+ },
+ {
+  "name": "arc with no ends",
+  "file": "invalid/arc-with-no-ends.kdl",
+  "line": 5
+ },
+ {
+  "name": "use of a shape",
+  "file": "invalid/use-of-a-shape.kdl",
+  "line": 6
+ },
+ {
+  "name": "define using a later one",
+  "file": "invalid/define-using-a-later-one.kdl",
+  "line": 5
+ },
+ {
+  "name": "define using itself",
+  "file": "invalid/define-using-itself.kdl",
+  "line": 5
+ },
+ {
+  "name": "color given twice",
+  "file": "invalid/color-given-twice.kdl",
+  "line": 3
+ },
+ {
+  "name": "variant given twice",
+  "file": "invalid/variant-given-twice.kdl",
+  "line": 7
+ },
+ {
+  "name": "fold given twice",
+  "file": "invalid/fold-given-twice.kdl",
+  "line": 7
+ },
+ {
+  "name": "variant proportion with a ratio",
+  "file": "invalid/variant-proportion-with-a-ratio.kdl",
+  "line": 7
+ },
+ {
+  "name": "variant proportion without layers",
+  "file": "invalid/variant-proportion-without-layers.kdl",
+  "line": 6
+ },
+ {
+  "name": "fold moving a point on its crease",
+  "file": "invalid/fold-moving-a-point-on-its-crease.kdl"
+ },
+ {
+  "name": "fold with nothing to move",
+  "file": "invalid/fold-with-nothing-to-move.kdl"
+ },
+ {
+  "name": "swallowtail with no depth",
+  "file": "invalid/swallowtail-with-no-depth.kdl",
+  "line": 5
+ },
+ {
+  "name": "tongued with no tongue",
+  "file": "invalid/tongued-with-no-tongue.kdl",
+  "line": 5
+ },
+ {
+  "name": "outline with no form",
+  "file": "invalid/outline-with-no-form.kdl",
+  "line": 5
+ },
+ {
+  "name": "render license over another license",
+  "file": "invalid/render-license-over-another-license.kdl",
+  "line": 2
+ },
+ {
+  "name": "render license over a work with no license",
+  "file": "invalid/render-license-over-a-work-with-no-license.kdl",
+  "line": 2
+ },
+ {
+  "name": "render license in another case",
+  "file": "invalid/render-license-in-another-case.kdl",
+  "line": 2
+ },
+ {
+  "name": "outline path written as children",
+  "file": "invalid/outline-path-written-as-children.kdl",
+  "line": 5
+ },
+ {
+  "name": "clip path written on one line",
+  "file": "invalid/clip-path-written-on-one-line.kdl",
+  "line": 5
+ },
+ {
   "name": "sanitizer: script",
   "file": "invalid/sanitizer-script.kdl",
   "line": 5
@@ -1147,6 +1439,21 @@
  {
   "name": "sanitizer: class",
   "file": "invalid/sanitizer-class.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: version on an element",
+  "file": "invalid/sanitizer-version-on-an-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: viewBox on an element",
+  "file": "invalid/sanitizer-viewbox-on-an-element.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: preserveAspectRatio on an element",
+  "file": "invalid/sanitizer-preserveaspectratio-on-an-element.kdl",
   "line": 5
  },
  {

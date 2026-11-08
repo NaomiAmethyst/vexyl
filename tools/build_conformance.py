@@ -58,6 +58,12 @@ def main():
                     wanted.append((f"variant-{variant}-fold-{fold}", {"variant": variant, "fold": fold}))
         # Other proportions: the same request is drawn or refused, depending on the flag's rules.
         wanted += [("ratio-1-1", {"ratio": "1:1"}), ("ratio-1-2", {"ratio": "1:2"}), ("pad-center", {"ratio": "1:1", "fit": "pad"})]
+        if "adapt" in model:
+            # A proportion asked of a sideways variant is measured before it turns, for padding too.
+            for variant, form in sorted(model.get("variant", {}).items()):
+                if form.get("from") in ("rotate", "counter-rotate", "transpose", "anti-transpose"):
+                    wanted += [(f"variant-{variant}-ratio-1-2", {"variant": variant, "ratio": "1:2"}),
+                               (f"variant-{variant}-pad-1-4", {"variant": variant, "ratio": "1:4", "fit": "pad"})]
         if "reverse" in model and "adapt" in model:
             # A reverse of its own adapts with its hoist on the right, as it's seen from behind.
             wanted += [("reverse-ratio-1-2", {"side": "reverse", "ratio": "1:2"}), ("reverse-ratio-1-1", {"side": "reverse", "ratio": "1:1"})]

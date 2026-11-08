@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -10 20 80" width="150" height="600">
+  <title>Variants Test</title>
+  <g transform="matrix(0 -1 -1 0 20 60)">
+    <clipPath id="vx-7a84a357bf328657-5a37-flag1">
+      <polygon points="0,0 60,0 54,10 60,20 0,20"/>
+    </clipPath>
+    <g clip-path="url(#vx-7a84a357bf328657-5a37-flag1)">
+      <polygon points="0,0 0,20 60,20 60,0" fill="#1b1035"/>
+      <polygon points="15,0 15,20 60,20 60,0" fill="#7b4fd6"/>
+      <clipPath id="vx-7a84a357bf328657-5a37-panel2">
+        <polygon points="0,0 4,0 4,20 0,20"/>
+      </clipPath>
+      <g transform="translate(0 0)" clip-path="url(#vx-7a84a357bf328657-5a37-panel2)" style="isolation:isolate">
+        <polygon points="0,0 4,0 4,20 0,20" fill="#f2c14e"/>
+      </g>
+      <path d="M33.083333 7.451853A4 4 0 1 0 33.083333 12.548147A3 3 0 1 1 33.083333 7.451853Z" fill="#ffffff"/>
+      <path d="M0 0H10V10H0Z" fill="#f2c14e" transform="translate(2 2) scale(0.2) translate(-5 -5)"/>
+    </g>
+  </g>
+</svg>

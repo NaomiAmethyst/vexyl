@@ -483,9 +483,17 @@ func (r *renderer) content(l Layer, reg region, path string) {
 			r.paint(l.Colors[len(polys)-1], box, l.Fimbriate, []geom{{poly: nested[0]}}, nil)
 		}
 		for i, poly := range polys {
-			if len(poly) > 0 {
-				r.paint(l.Colors[len(polys)-1-i], nil, nil, nil, []geom{{poly: poly}})
+			if len(poly) == 0 {
+				continue
 			}
+			// A gradient spans the whole chevron's part inside the region, even where a gap
+			// leaves only its band to paint.
+			var box *[4]float64
+			if inside := clipConvex(nested[i], reg); len(inside) > 0 {
+				x, y, w, h := bounds(inside)
+				box = &[4]float64{x, y, w, h}
+			}
+			r.paint(l.Colors[len(polys)-1-i], box, nil, nil, []geom{{poly: poly}})
 		}
 	case *Band:
 		// The fimbriation's stroke mustn't follow the region's edge, so it uses the

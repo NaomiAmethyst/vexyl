@@ -10,8 +10,9 @@ This describes what every Vexyl library offers, whatever its language, so that a
 move between them. [SPEC.md](SPEC.md) defines the format and how it's drawn. The key words
 MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
-Go is the reference implementation. Where this and it disagree, that's a bug in one of them,
-and the [conformance suite](conformance) is what a library has to pass.
+This and SPEC.md are normative. Go is the reference implementation, and the
+[conformance suite](conformance) is what a library has to pass, but where either disagrees with
+these documents, it's the one to be fixed.
 
 ## 1. Operations
 
@@ -48,7 +49,28 @@ KDL parser may stop at its first syntax error, so a document with one MAY report
 
 Wording and order are the library's own, so programs MUST NOT depend on them. A valid document
 MUST have no problems. An invalid one MUST have at least one, and for a problem that isn't a
-syntax error, one on the line that the suite records.
+syntax error, one on the line that the suite records. That's the line where the node it's about
+starts:
+
+- A value that's wrong in itself is on the node holding it: a child such as `angle 90`, or a node
+  with a bad property or argument, such as a `repeat` or a color's value.
+- Something missing, or values that don't go together, is on the node they belong to: a `charge`
+  with no `radius` or an `inner` past it, a `bars` whose `ratio` doesn't match its colors, or a
+  `pile` with both `depth` and `tip`. So is a sun's `points` below 3 or `spread` above 1, and a
+  negative value in `grow`. A gradient's `stops` that don't match its colors are on `stops`.
+- A shape's problems are on the node naming it, which for a charge is the `charge`, and inline SVG's
+  are on its `charge` too.
+- A child given twice is on the second, and an unknown one on itself. A top-level node out of order
+  is on itself.
+- An outside border that can't go around the shape is on the `border`, or on the `variant` whose
+  outline or border brings them together.
+- A flag that paints too much is on the top-level layer that takes it past the limit, or on the
+  `reverse` or `variant` whose layers do. A layer nested too deep is on itself, or on the `use` whose
+  definition takes it too deep. Too many waves are on the layer with the `edge`, too many cells on
+  the `checks`, and too many copies from a grid on its `repeat`.
+- Some have no one place, so no line: a document that doesn't start with `vexyl`, a missing `meta`,
+  `palette` or `proportion`, a variant's `ratio` when there's no `adapt`, and a fold whose steps fail
+  on the flag's shape.
 
 A document can name its colors, definitions, variants and folds anything but the empty string,
 including `__proto__`, `constructor` or `toString`, and those names are keys in the model. A library
@@ -63,7 +85,7 @@ Every option is optional, and rendering with none gives the flag as it is. A com
 | Option | Values | Default | Meaning |
 |---|---|---|---|
 | `height` | A positive number | 600 | The image's height in pixels. Its width follows the proportion |
-| `ratio` | A positive number | The flag's own | The proportion wanted, as fly divided by hoist |
+| `ratio` | A positive number | The flag's own | The proportion wanted, as fly divided by hoist, measured before a variant turns it, both for adapting and for padding |
 | `fit` | `error`, `pad` | `error` | What to do if the flag can't reach `ratio` |
 | `align` | `start`, `center`, `end` | `center` | Where a padded flag sits |
 | `variant` | A variant's name | None | Which form of the flag |
@@ -83,7 +105,8 @@ These MUST be errors, so that no option is ever silently ignored:
 - A `height` or `ratio` that isn't a positive number within the format's limits, including 0.
 - `fit` with neither a `ratio` nor a variant that has one, and `align` unless `fit` is `pad`.
 - `foldStep` without `fold`, or that isn't from 1 to the fold's number of steps.
-- A `fold` on a turned variant, with `side` of `reverse`, or with `fit` of `pad`. A fold shows
+- A `fold` on a variant with a `from` other than `none`, with `side` of `reverse`, or with `fit` of
+  `pad`. A fold shows
   both sides and is cropped to its pieces, so neither has a meaning. A `fold` with a `ratio` folds
   the flag at that proportion.
 
@@ -91,7 +114,8 @@ These MUST be errors, so that no option is ever silently ignored:
 
 `model` gives a flag as plain maps, lists, strings, numbers and booleans. It's the same in every
 language, so the suite can compare what a library understood, apart from how it draws. Its numbers
-compare allowing a difference of one part in a million. [`conformance/model.schema.json`](conformance/model.schema.json)
+compare allowing a difference of one part in a million of the larger, or of 0.000001 where both are
+less than 1. [`conformance/model.schema.json`](conformance/model.schema.json)
 is the same thing as a schema, and every library's models have to fit it.
 
 Three rules say what's there:
@@ -101,7 +125,7 @@ Three rules say what's there:
   `layers`, `reverse`, `adapt`, `variant` and `fold`. A repeatable node gives a list under its own
   name, such as `note`, `cut`, `at` or `point`, and a named one gives a map under its own name, such
   as `define`, `variant` and `fold`.
-- **A value is left out only if it equals the format's default.** The fixed defaults are below. A
+- **A value is left out if, and only if, it equals the format's default.** The fixed defaults are below. A
   zero that means something stays, so `at` at the origin isn't the same as no `at`, and two flags
   that draw differently never have the same model.
 - **What depends on other values is worked out.** `inner` on a star, `spread` on a heart, `stops`
@@ -183,10 +207,40 @@ word `center`. One `at center` is the default, so it isn't there.
 
 A charge using a defined shape gives that shape's fields, with the charge's changes applied.
 
+### 4.2 Inline SVG
+
 Inline SVG is as it is after being sanitized, and the source's other content isn't kept anywhere.
-It's written as `<svg xmlns="..." viewBox="X Y W H" ...>`, then its elements with nothing between
-them and never self-closed, with attributes in source order, IDs and references as written, and
-`& < > " ' tab LF CR` in values as `&amp; &lt; &gt; &#34; &#39; &#x9; &#xA; &#xD;`.
+Every library writes it in this one form, so that models compare exactly and the format's size
+limit counts the same bytes:
+
+```
+markup    = "<svg" ' xmlns="http://www.w3.org/2000/svg"' ' viewBox="' viewbox '"' attribute* ">"
+            element* "</svg>"
+element   = "<" name attribute* ">" element* "</" name ">"
+attribute = " " name '="' value '"'
+```
+
+- `viewbox` is the root's four `viewBox` numbers as written, joined by single spaces, or else
+  `0 0 W H` with its `width` and `height` as written, without any `px`.
+- The root's attributes are its others, without the root-only ones that section 8.3 of the format
+  removes. Elements and attributes are in source order, with nothing between elements, and elements
+  are never self-closed.
+- A `name` is the local name, with no prefix. `xlink:href` is written `href`. Namespace declarations
+  aren't attributes, so they aren't written.
+- Removed are comments, processing instructions, the XML declaration, whitespace and CDATA between
+  elements, `title`, `desc` and `metadata` and elements in another namespace with all they hold, and
+  attributes in another namespace.
+- A value is as XML reads it, with references resolved and literal tabs and newlines as spaces. IDs
+  and `href`s are as written. In a presentation attribute, each `url(#id)` is written just so, however
+  its case, spaces and quotes were written, and the rest is as it was.
+- A `style` is its declarations in order, each `property:value` with the property in lowercase,
+  neither with whitespace around it, and with any `url(#id)` written as above. Empty ones are
+  dropped, and the rest are joined by `;`.
+- In values, `& < > " ' tab LF CR` are written `&amp; &lt; &gt; &#34; &#39; &#x9; &#xA; &#xD;`.
+
+So `<s:svg xmlns:s="http://www.w3.org/2000/svg" version="1.1" width="20px" height="10"><s:rect
+style="FILL : URL( '#g' ) ; ;"/></s:svg>` is written
+`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><rect style="fill:url(#g)"></rect></svg>`.
 
 ## 5. SVG output
 
@@ -210,6 +264,17 @@ first characters, and within one render, IDs MUST be unique.
 Inline SVG MUST be sanitized as section 8.3 of the format says, in every library. It's the one
 place where a document can carry another format's markup, and a gap here is a security problem.
 
+A render MUST NOT hold anything that inline SVG couldn't, apart from these:
+
+- its root `svg`, with `viewBox` and `preserveAspectRatio`, and other `svg` elements with those,
+  outside artwork;
+- a `title` and a `desc` directly in the root, which are the only elements holding text;
+- `use`, outside artwork, as a fold places its pieces;
+- `data-vexyl-layer` in a tagged render (section 7.2).
+
+Every `href` is `#id` and every function in a value is `url(#id)` or a color, as in artwork, and no
+two elements have the same `id`.
+
 ## 6. Conformance
 
 A library passes when the suite in [`conformance/`](conformance/README.md) reports no failures,
@@ -229,8 +294,8 @@ at the suite's version for the format's version, which `manifest.json` gives as 
 | Locations | Each part of a document is found on its lines, and those lines lead back to it |
 | Share links | Each library reads the suite's links, refuses its bad ones, and writes links that zlib can read |
 
-Every render is also checked for what mustn't be in it, such as an element or attribute off the
-allowlist or a reference leaving the document, since pixels can't show those.
+Every render is also checked for what mustn't be in it, as section 5 says, since pixels can't show
+those.
 
 Each library offers a small command for the suite to run, as the `vexyl` command does.
 
@@ -262,7 +327,8 @@ properties. Paths are only as stable as the document: adding a layer renumbers t
 With the option `tags`, every element that draws something MUST have an attribute
 `data-vexyl-layer` holding the path of the layer that drew it. That's any shape, and each piece
 of inline SVG, which is marked on its own root as one thing. Whatever's only a definition isn't marked, such
-as what's in a `clipPath` or a `mask`. Nothing else in a render changes, so it MUST draw the same pixels
+as what's in a `clipPath`, a `mask` or a gradient. A fold's artwork is in `defs`, but it's drawn with
+`use`, so it's marked. Nothing else in a render changes, so it MUST draw the same pixels
 as without the option.
 
 These keep a path through whatever changes the drawing but not the layer:

@@ -143,6 +143,10 @@
   "mirrored": {
    "from": "mirror"
   },
+  "mirrored-upright": {
+   "from": "mirror",
+   "upright": true
+  },
   "plain": {
    "layers": [
     {

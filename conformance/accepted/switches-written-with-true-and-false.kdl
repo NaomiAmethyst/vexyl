@@ -1,0 +1,8 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+quarters a b a b { diagonal #false; }
+saltire a { width 1; counterchange #true; }
+charge path a { d "M0 0H1V1Z"; box "0 0 1 1"; fly 1; evenodd #false; }
+variant v { from rotate; upright #false; }

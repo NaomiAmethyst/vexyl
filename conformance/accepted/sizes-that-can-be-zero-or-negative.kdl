@@ -1,0 +1,8 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+band a { width 1; offset -2; }
+cross a { fly 0 1 0; hoist 0 1 0; }
+pile a { base -1 12; tip 5 3; }
+charge disc a { radius 1; at fly=-1 hoist=0; rotate -30; repeat line count=2 fly=-1 hoist=0; }

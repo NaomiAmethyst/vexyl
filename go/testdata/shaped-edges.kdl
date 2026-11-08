@@ -1,0 +1,74 @@
+// An invented flag exercising shaped edges: between bars on every axis, rotated, by count and
+// by a period that doesn't fit, and on side panels.
+vexyl 1
+meta {
+  name "Shaped Edges Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+}
+proportion hoist=30 fly=40
+
+panel {
+  at fly=10 hoist=5
+  fly 20
+  hoist 10
+  bars night violet gold {
+    along bend
+    edge zigzag depth=1 count=5
+  }
+}
+panel {
+  at fly=30 hoist=5
+  fly 20
+  hoist 10
+  bars night gold {
+    along bend-sinister
+    edge wavy depth=1.5 period=4
+  }
+}
+panel {
+  at fly=10 hoist=15
+  fly 20
+  hoist 10
+  bars violet gold white {
+    along hoist
+    edge zigzag depth=2 period=8.4
+  }
+}
+panel {
+  at fly=30 hoist=15
+  fly 20
+  hoist 10
+  bars night white {
+    rotate 30
+    edge zigzag depth=1 count=4
+  }
+}
+panel {
+  at fly=10 hoist=25
+  fly 20
+  hoist 10
+  field white
+  panel {
+    side fly
+    width 6
+    edge zigzag depth=2 count=3
+    field night
+  }
+}
+panel {
+  at fly=30 hoist=25
+  fly 20
+  hoist 10
+  field gold
+  panel {
+    side top
+    width 3
+    edge wavy depth=1 period=5
+    field violet
+  }
+}

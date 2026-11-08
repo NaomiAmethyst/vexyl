@@ -1,7 +1,7 @@
 vexyl 1
 meta {
   name "Gradient cells"
-  description "A gradient on a quarter, a check or a wedge spans that cell, not the region"
+  description "A gradient on a quarter, a check or a wedge spans that cell, not the region, and one on a chevron spans the whole chevron inside the region, even where a gap leaves only its band"
 }
 palette {
   dark "#112244"
@@ -26,5 +26,15 @@ panel {
   hoist 10
   rays shade gold {
     count 6
+  }
+}
+panel {
+  corner lower-hoist
+  fly 20
+  hoist 10
+  field gold
+  chevrons dark none shade {
+    depth 12
+    angle 60
   }
 }

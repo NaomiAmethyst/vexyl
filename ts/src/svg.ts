@@ -453,9 +453,12 @@ class Renderer {
 					this.paint(l.colors[polys.length - 1]!, box, l.fimbriate, [{ poly: nested[0]! }], []);
 				}
 				polys.forEach((poly, i) => {
-					if (poly.length > 0) {
-						this.paint(l.colors[polys.length - 1 - i]!, undefined, undefined, [], [{ poly }]);
-					}
+					if (poly.length === 0) return;
+					// A gradient spans the whole chevron's part inside the region, even where a gap
+					// leaves only its band to paint.
+					const inside = clipConvex(nested[i]!, reg);
+					const box = inside.length > 0 ? bounds(inside) : undefined;
+					this.paint(l.colors[polys.length - 1 - i]!, box, undefined, [], [{ poly }]);
 				});
 				break;
 			}
