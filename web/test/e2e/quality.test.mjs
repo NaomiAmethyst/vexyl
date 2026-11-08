@@ -2,7 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
+import { after, before, describe, test } from "node:test";
 import { axe, fromTopbar, launch, mockWorld, openUrl, readFlag, ready, serve, startFlag, subpath, watch } from "./helpers.mjs";
 
 let srv;
@@ -78,50 +78,53 @@ const themes = [
 	{ name: "light, high contrast", colorScheme: "light", contrast: "more" },
 ];
 
-for (const theme of themes) {
-	test(`no accessibility violations on any screen, ${theme.name}`, async () => {
-		const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
-		await mockWorld(context);
-		const found = {};
-		for (const [name, go] of Object.entries(screens)) {
-			const p = await context.newPage();
-			await go(p);
-			await p.waitForTimeout(350);
-			const violations = await axe(p);
-			if (violations.length > 0) {
-				found[name] = violations;
+// Each theme has a context of its own, and nothing else is shared, so the themes are checked at once.
+describe("every screen in every theme", { concurrency: true }, () => {
+	for (const theme of themes) {
+		test(`no accessibility violations on any screen, ${theme.name}`, async () => {
+			const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
+			await mockWorld(context);
+			const found = {};
+			for (const [name, go] of Object.entries(screens)) {
+				const p = await context.newPage();
+				await go(p);
+				await p.waitForTimeout(350);
+				const violations = await axe(p);
+				if (violations.length > 0) {
+					found[name] = violations;
+				}
+				await p.close();
 			}
-			await p.close();
-		}
-		await context.close();
-		const basic = await browser.newContext({ viewport: { width: 1440, height: 1100 }, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
-		await mockWorld(basic, { basic: true });
-		for (const [name, go] of Object.entries(basicScreens)) {
-			const p = await basic.newPage();
-			await go(p);
-			await p.waitForTimeout(350);
-			const violations = await axe(p);
-			if (violations.length > 0) {
-				found[name] = violations;
+			await context.close();
+			const basic = await browser.newContext({ viewport: { width: 1440, height: 1100 }, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
+			await mockWorld(basic, { basic: true });
+			for (const [name, go] of Object.entries(basicScreens)) {
+				const p = await basic.newPage();
+				await go(p);
+				await p.waitForTimeout(350);
+				const violations = await axe(p);
+				if (violations.length > 0) {
+					found[name] = violations;
+				}
+				await p.close();
 			}
-			await p.close();
-		}
-		await basic.close();
-		for (const [name, go] of Object.entries(narrowScreens)) {
-			const narrow = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
-			await mockWorld(narrow, { basic: name.startsWith("basic") });
-			const p = await narrow.newPage();
-			await go(p);
-			await p.waitForTimeout(350);
-			const violations = await axe(p);
-			if (violations.length > 0) {
-				found[name] = violations;
+			await basic.close();
+			for (const [name, go] of Object.entries(narrowScreens)) {
+				const narrow = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, colorScheme: theme.colorScheme, ...(theme.contrast ? { contrast: theme.contrast } : {}) });
+				await mockWorld(narrow, { basic: name.startsWith("basic") });
+				const p = await narrow.newPage();
+				await go(p);
+				await p.waitForTimeout(350);
+				const violations = await axe(p);
+				if (violations.length > 0) {
+					found[name] = violations;
+				}
+				await narrow.close();
 			}
-			await narrow.close();
-		}
-		assert.deepEqual(found, {}, JSON.stringify(found, null, 1));
-	});
-}
+			assert.deepEqual(found, {}, JSON.stringify(found, null, 1));
+		});
+	}
+});
 
 /** The contrast of two computed colors, as WCAG works it out. */
 function contrast(a, b) {

@@ -10,6 +10,7 @@ mistakes are deep in a library's geometry, where no change to its input or outpu
 them, so those mutants are the reference library itself, patched, and run in place of COMMAND.
 """
 import base64
+import fcntl
 import hashlib
 import json
 import os
@@ -88,21 +89,39 @@ def patched(name):
             if each.endswith((".go", ".mod", ".sum", ".dict")):
                 with open(os.path.join(directory, each), "rb") as f:
                     digest.update(each.encode() + b"\0" + f.read())
-    binary = os.path.join(tempfile.gettempdir(), f"vexyl-mutant-{name}-{digest.hexdigest()[:16]}")
-    if not os.path.exists(binary):
-        with tempfile.TemporaryDirectory() as scratch:
-            tree = os.path.join(scratch, "go")
-            shutil.copytree(source, tree, ignore=shutil.ignore_patterns("testdata"))
-            path = os.path.join(tree, file)
-            with open(path, encoding="utf-8") as f:
-                text = f.read()
-            if old not in text:
-                sys.exit(f"mutant {name}: {file} no longer has {old!r}")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(text.replace(old, new))
-            subprocess.run(["go", "build", "-buildvcs=false", "-trimpath", "-o", binary + ".tmp", "./cmd/vexyl"], cwd=tree, check=True)
-            os.replace(binary + ".tmp", binary)
+    # prove.py gives each of its runs a directory that it removes afterwards. Run another way, this
+    # keeps the binary where it always has.
+    where = os.environ.get("VEXYL_MUTANT_DIR")
+    binary = os.path.join(where or tempfile.gettempdir(), f"vexyl-mutant-{name}-{digest.hexdigest()[:16]}")
+    if os.path.exists(binary):
+        return [binary]
+    if where is None:
+        build(name, file, old, new, source, binary)
+        return [binary]
+    # The suite runs cases at once, so only one of them builds it, and the rest wait for that.
+    with open(binary + ".lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if not os.path.exists(binary):
+            build(name, file, old, new, source, binary)
     return [binary]
+
+
+def build(name, file, old, new, source, binary):
+    """Builds the reference with a patch, in a copy of its source, to a binary."""
+    with tempfile.TemporaryDirectory() as scratch:
+        tree = os.path.join(scratch, "go")
+        shutil.copytree(source, tree, ignore=shutil.ignore_patterns("testdata"))
+        path = os.path.join(tree, file)
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        if old not in text:
+            sys.exit(f"mutant {name}: {file} no longer has {old!r}")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text.replace(old, new))
+        # Each build writes a file of its own, so that two at once can't spoil each other's.
+        partial = f"{binary}.{os.getpid()}.tmp"
+        subprocess.run(["go", "build", "-buildvcs=false", "-trimpath", "-o", partial, "./cmd/vexyl"], cwd=tree, check=True)
+        os.replace(partial, binary)
 
 
 def main():

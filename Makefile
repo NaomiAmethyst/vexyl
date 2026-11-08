@@ -25,6 +25,8 @@ check: test
 	python3 -m unittest discover -s tools
 	@test -z "$$(gofmt -l go)" || { gofmt -l go; exit 1; }
 
+# The suite runs a case for each CPU at once, or $VEXYL_JOBS of them; VEXYL_JOBS=1 runs one at a time,
+# and either way it reports the same, in the same order. So do the other checks that draw.
 conformance: vexyl
 	python3 conformance/run.py ./vexyl
 
@@ -65,7 +67,7 @@ check-web: web/node_modules
 	cd web && $(NPM) run e2e
 
 # Draws a construction sheet for every flag in a vexyl-flags checkout beside this one, and counts
-# labels that overlap or leave the sheet. It takes a minute or two, so CI leaves it out.
+# labels that overlap or leave the sheet. It takes a minute or two on one CPU, so CI leaves it out.
 check-construction: ts/node_modules
 	cd ts && $(NPM) run build
 	node ts/test/construction-corpus.mjs

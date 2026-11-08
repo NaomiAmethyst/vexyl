@@ -14,7 +14,13 @@ const out = process.argv[2];
 const { applyOps } = await load("document");
 const lib = await loadLibrary();
 mkdirSync(out, { recursive: true });
-const dirs = [join(repo, "conformance/valid"), ...handWrittenDirs()].filter(existsSync);
+const handWritten = handWrittenDirs();
+// Without the hand-written flags this would pass having rescaled only the suite's few.
+if (handWritten.length === 0) {
+	console.error(`no hand-written flags in ${resolve(repo, "../vexyl-flags/flags")}`);
+	process.exit(2);
+}
+const dirs = [join(repo, "conformance/valid"), ...handWritten].filter(existsSync);
 let count = 0;
 for (const dir of dirs) {
 	for (const file of readdirSync(dir).filter((f) => f.endsWith(".kdl"))) {

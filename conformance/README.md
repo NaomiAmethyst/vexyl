@@ -3,8 +3,11 @@
 Every Vexyl library has to pass this. [SDK.md](../SDK.md) says what the suite checks, and why.
 
 ```
-python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct,options,tags,locate,share] [--filter TEXT] [--resvg PATH] COMMAND...
+python3 conformance/run.py [--only render,model,invalid,accepted,sanitize,distinct,options,tags,locate,share] [--filter TEXT] [--resvg PATH] [--jobs N] COMMAND...
 ```
+
+Options go before COMMAND. Everything from COMMAND's first word on is passed through as it is, even words that look
+like options, so `run.py --jobs 4 java -jar vexyl.jar` works, as does COMMAND given as one quoted string.
 
 It needs Python with numpy, Pillow and jsonschema, as `requirements.txt` pins them, and resvg at the version in
 `manifest.json`, since different rasterizers draw differently. COMMAND runs the library under test, and has to offer:
@@ -22,6 +25,10 @@ COMMAND locate -line N FILE       prints what's innermost at that line, as JSON
 COMMAND share encode FILE         prints the document as a share link's part after its #
 COMMAND share decode FILE         prints the document held by the link in a file, exiting nonzero if it's refused
 ```
+
+It runs `--jobs` cases at once, by default `$VEXYL_JOBS` or one for each CPU, each with files of its own. What it
+reports doesn't change with that: the same failures, in the same order, and the same counts, as `--jobs 1`, which
+runs one case after another, as it always used to, for a COMMAND that can't run beside itself.
 
 A render that's refused exits nonzero. `-ratio` is written hoist then fly, as flags' proportions
 are, so `1:2` is the option `ratio` of 2. `-align` takes `start`, `center` or `end`.
@@ -93,10 +100,11 @@ within 15% of what zlib manages with the dictionary, which it can't be without u
 file changes at all, this fails.
 
 `conformance/prove.py` shows that all of these can fail, by running the suite against a library with one thing wrong
-at a time, through `conformance/mutant.py`. It's `make conformance-prove`. It also shows that renders catch a few
-mistakes in geometry: a charge's cuts, an arc's direction, a turned reverse, a rotated layer adapted as if it weren't
-rotated, and a panel's shaped edge slanting to its corner. The last two are the reference itself, patched and built
-with Go, since no change to a library's input or output stands in for them.
+at a time, through `conformance/mutant.py`. It's `make conformance-prove`, which runs a few of these at once, sharing
+`--jobs` between them. It also shows that renders catch a few mistakes in geometry: a charge's cuts, an arc's
+direction, a turned reverse, a rotated layer adapted as if it weren't rotated, and a panel's shaped edge slanting to
+its corner. The last two are the reference itself, patched and built with Go, since no change to a library's input
+or output stands in for them.
 
 ## What else is checked
 

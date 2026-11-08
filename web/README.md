@@ -62,4 +62,6 @@ Downloads and files stop at 16 MB, share links at 8 MiB. Links from a file only 
 `test/unit` needs only Node. `test/e2e` runs the built site from a subpath on a plain file server, in Chromium, with
 every request to GitHub answered from a checkout of vexyl-flags next to this repository (or `$VEXYL_FLAGS`). They use
 `playwright-core` with a browser already on the machine: the newest in Playwright's cache, or `$VEXYL_CHROME`.
+Each runs four test files at once, or `$VEXYL_TEST_JOBS`, since every file has a server, a browser and contexts of its
+own, and nothing is written to disk but downloads, which Playwright keeps apart.
 `node test/shots/shots.mjs DIR` takes a picture of every screen.
