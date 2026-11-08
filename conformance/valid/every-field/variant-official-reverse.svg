@@ -3,10 +3,10 @@
   <desc>Uses every field the canonical model has, so a library can&#39;t guess one</desc>
   <g transform="matrix(-1 0 0 1 2 0)">
     <polygon points="-0.01,-0.01 2.01,-0.01 2.01,1.01 -0.01,1.01" fill="#ffcc00"/>
-    <clipPath id="vx-ff608d82e80305dc-69a0-flag1">
+    <clipPath id="vx-0fc83150b350b994-69a0-flag1">
       <polygon points="0,0 2,0 2,1 0,1"/>
     </clipPath>
-    <g clip-path="url(#vx-ff608d82e80305dc-69a0-flag1)">
+    <g clip-path="url(#vx-0fc83150b350b994-69a0-flag1)">
       <polygon points="0,0 2,0 2,1 0,1" fill="#cc0000"/>
     </g>
   </g>

@@ -1,0 +1,5 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+charge star a { radius 2; inner 1; points 4; lines 0.1; }

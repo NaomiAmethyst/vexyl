@@ -1,0 +1,8 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+outline {
+  polygon { point fly=0 hoist=0; point fly=20 hoist=0; point fly=0 hoist=10; }
+  polygon { point fly=0 hoist=0; point fly=20 hoist=0; point fly=20 hoist=10; }
+}

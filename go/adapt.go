@@ -270,6 +270,9 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 		c := *t
 		var anchor string
 		c.Effects, anchor = a.effects(t.Effects, old, new)
+		if t.Rotate != 0 {
+			return a.rotatedBars(&c, old, new, anchor)
+		}
 		if (a.axis == "fly") != (t.Along == "hoist") || t.Along == "bend" || t.Along == "bend-sinister" {
 			return &c
 		}
@@ -309,6 +312,15 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 		c := *t
 		var anchor string
 		c.Effects, anchor = a.effects(t.Effects, old, new)
+		if t.Rotate != 0 {
+			// It keeps its angle and width, and its center line moves like any position.
+			before, _ := a.regions(old, new)
+			frame, center := t.fixed.place(before)
+			_, normal := axis(frame, t.Along, t.Rotate)
+			c.fixed = &fixedFrame{a.moveVec(center.add(normal.mul(t.Offset)), old, new, anchor), frame}
+			c.Offset = 0
+			return &c
+		}
 		acrossAxis := (a.axis == "fly" && t.Along == "hoist") || (a.axis == "hoist" && t.Along == "fly")
 		if acrossAxis {
 			switch anchor {
@@ -402,6 +414,64 @@ func (a *adapter) layer(l Layer, old, new float64) Layer {
 		return &c
 	}
 	return l
+}
+
+// regions are the region before and after the change.
+func (a *adapter) regions(old, new float64) (before, after region) {
+	if a.axis == "hoist" {
+		return region{w: a.other, h: old}, region{w: a.other, h: new}
+	}
+	return region{w: old, h: a.other}, region{w: new, h: a.other}
+}
+
+// moveVec moves a point along the axis, by a layer's anchor.
+func (a *adapter) moveVec(v vec, old, new float64, anchor string) vec {
+	if a.axis == "hoist" {
+		v.y = move(v.y, old, new, anchor)
+	} else {
+		v.x = move(v.x, old, new, anchor)
+	}
+	return v
+}
+
+// spread is how far a region reaches either side of a point, along a normal.
+func spread(r region, c, normal vec) (lo, hi float64) {
+	lo, hi = math.Inf(1), math.Inf(-1)
+	for _, corner := range r.corners() {
+		offset := corner.sub(c).dot(normal)
+		lo, hi = min(lo, offset), max(hi, offset)
+	}
+	return lo, hi
+}
+
+// rotatedBars keeps a rotated bars' angle, and the lines between its bars where they were
+// about its center, which moves like any position. The first and last bars reach the new
+// region's corners, so only they change, and neither can reach nothing.
+func (a *adapter) rotatedBars(c *Bars, old, new float64, anchor string) Layer {
+	before, after := a.regions(old, new)
+	frame, center := c.fixed.place(before)
+	_, normal := axis(frame, c.Along, c.Rotate)
+	moved := a.moveVec(center, old, new, anchor)
+	lo, hi := spread(before, center, normal)
+	newLo, newHi := spread(after, moved, normal)
+	total := 0.0
+	for _, part := range c.Ratio {
+		total += part
+	}
+	ratio := make([]float64, len(c.Ratio))
+	line, start := lo, newLo
+	for i, part := range c.Ratio {
+		line += (hi - lo) * part / total
+		end := line
+		if i == len(ratio)-1 {
+			end = newHi
+		}
+		ratio[i], start = end-start, end
+	}
+	a.keep("bars", ratio[0], old)
+	a.keep("bars", ratio[len(ratio)-1], old)
+	c.Ratio, c.fixed = ratio, &fixedFrame{moved, frame}
+	return c
 }
 
 // panel keeps a panel at its edge or corner. One running along the axis grows with

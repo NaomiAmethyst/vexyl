@@ -115,13 +115,17 @@ A few values are numbers written inside a string, such as a `box` or a fold's `t
 have one grammar, and there's no hexadecimal, underscore, `inf` or `nan`:
 
 ```
+list      = space* number (separator number)* space*
+separator = space+ | space* "," space*
 number    = sign? (digits "."? digits? | "." digits) (("e" | "E") sign? digits)?
 sign      = "+" | "-"
 digits    = one or more of 0-9
+space     = " " | tab | LF | FF | CR
 ```
 
-They're separated by ASCII whitespace (space, tab, LF, FF or CR), commas or both, with any ASCII
-whitespace around the whole. Each is subject to the limits in §15.
+So two numbers are separated by ASCII whitespace, or by one comma with any whitespace around it,
+as SVG's own number lists are. `"0 0, 1 1"` is four numbers, and `"0 0,,1 1"` and `"0 0 1 1,"` are
+errors. Each number is subject to the limits in §15.
 
 ### 4.1 meta
 
@@ -278,17 +282,19 @@ Color names MUST NOT be empty or given twice.
 Each section says what its nodes take. A document MUST also meet these, and a renderer MUST reject
 one that doesn't.
 
-Every size is positive: each `width`, `radius`, `inner`, `depth`, `flat`, `junction`, `hollow` and
-`lines`; a crescent's `offset`; a sun's `disc`, `gap` and `spread`; the `fly` and `hoist` of a shape,
-panel, canton, `proportion` or `define`; the width in `fimbriate` and `border`; an edge's `depth` and
-`period`; a repeat's `radius`; an outline's `depth`, `taper`, `tongue` and `tip`; and each `ratio`
-value, a variant's included. One that defaults to 0, such as a sun's `gap`, is left out rather than
-written as 0. Positions, angles, a band's `offset`, a pile's `base` and `tip` and a line's steps can
-be any number. A count is a whole number from 1.
+Every size is positive: each `width`, `radius`, `inner`, `depth`, `junction`, `hollow` and `lines`;
+a crescent's `offset`; a sun's `disc` and `spread`; the `fly` and `hoist` of a shape, panel, canton,
+`proportion` or `define`; the width in `fimbriate` and `border`; an edge's `depth` and `period`; a
+repeat's `radius`; an outline's `depth` and `tongue`; and each `ratio` value, a variant's included.
+A size that defaults to 0 can be 0 as well: a sun's `gap`, a pile's `flat`, a swallowtail's `taper`
+and a pennant's `tip`. Each of those can't be negative, and writing it as 0 means the same as leaving
+it out. Positions, angles, a band's `offset`, a pile's `base` and `tip` and a line's steps can be any
+number. A count is a whole number from 1.
 
 | Node | Constraints |
 |---|---|
 | `bars`, `chevrons`, `rays` | `ratio` has one value for each color, after any `count`. `grow` has one for each bar, and none is negative |
+| `bars` | No `grow` with a `rotate` other than 0, since rotated bars keep their widths (§11) |
 | `chevrons` | `angle` is more than 0 and less than 90. `apex` isn't negative, but can be past the far end of the edge, as any position can be outside its region |
 | `band`, `saltire`, `pall` | `width` is required |
 | `cross` | `fly` and `hoist` are required, each with three values: distances that aren't negative, and a positive width |
@@ -297,23 +303,23 @@ be any number. A count is a whole number from 1.
 | `pile`, `pall` | No `at` or `rotate`, since the edge places them. `base` and `tip` each have two values |
 | Shapes with a `radius` | It's required: `disc`, `ring`, `plus`, `triangle`, `star`, `crescent`, `sun`, `heart` and `cardioid` |
 | `ring` | `inner` is required, and less than `radius` |
-| `star` | `inner` is less than `radius`. At least 3 `points`. `lines` and `hollow` can't be combined |
+| `star` | `inner` is less than `radius`. At least 3 `points`, and at least 5 with `lines`. `lines` and `hollow` can't be combined |
 | `crescent` | `inner` and `offset` are required |
 | `sun` | `disc` is required, and `disc + gap` is less than `radius`. At least 3 `points` |
 | `plus` | `width` is required, and less than `2 * radius` |
 | `rect`, `ellipse` | Both `fly` and `hoist` |
-| `path` | `d` and `box` are required, and at least one of `fly` and `hoist` |
+| `path` | `d` and `box` are required, and at least one of `fly` and `hoist`. The one-line form (§8.1) has its data, `box=` and nothing else: no other property and no children |
 | `svg` | Not `hollow`, and only one `at` |
 | `at` | `at center`, or both `fly=` and `hoist=` |
 | `repeat` | `ring` needs `count` and `radius`; `grid` needs `rows` and `columns`; `line` needs `count`; and `arc` needs `count`, `radius`, `from` and `to` |
 | `edge` | `depth`, and either `period` or `count` but not both, whichever its kind |
-| `group`, `panel`, `emblem`, `reverse { }` | At least one layer, or for an emblem one charge |
-| `panel` | `side` or `corner`, not both. A side panel needs a `width`, and takes no `fly`, `hoist` or `at`. Any other needs `fly` and `hoist`, takes no `width` or `edge`, and can't have both `corner` and `at` |
+| `group`, `panel`, `canton`, `emblem`, `reverse { }` | At least one layer, or for an emblem one charge |
+| `panel` | `side` or `corner`, not both. A side panel needs a `width`, and takes no `fly`, `hoist` or `at`, not even `at center`. Any other needs `fly` and `hoist`, takes no `width` or `edge`, and can't have both `corner` and `at`, `at center` included |
 | `canton` | Both `fly` and `hoist` |
 | `clip`, `cut` | Exactly one shape |
 | `define` | A name that isn't empty and isn't another definition's, a shape's name from §8.1, `svg`, `pile` or `pall`. At least one child. A shape takes no `hoist` or `fly` |
 | `use` | A design that's already defined, not a shape |
-| `outline` | One named form, or one `polygon` or `path` inside it. A form takes only its own values: `depth` and `taper` for `swallowtail`, `depth` and `tongue` for `tongued`, and `tip` for `pennant`. `depth` is required, and `tongue` for `tongued` |
+| `outline` | One named form, or one shape inside it: a `polygon` or a one-line `path`, and never two. The polygon can't be `hollow`. A form takes only its own values, even written as 0: `depth` and `taper` for `swallowtail`, `depth` and `tongue` for `tongued`, and `tip` for `pennant`. `depth` is required, and `tongue` for `tongued` |
 | `adapt` | `wider`, `narrower` or both. `range` has two values, the first positive and the second no smaller |
 | `variant`, `fold` | A name that isn't empty or another's of the same kind. A variant's `ratio` needs the flag's `adapt` |
 | `fold` | At least one step. Each needs `move`, and `along` is `fly` or `hoist` |
@@ -375,6 +381,10 @@ unit, so its children never blend with anything outside it. So is any layer with
 1, a `blend`, a `clip` or a `cut`, since those apply to the layer as a whole. Otherwise an `emblem`
 or `use` isn't, and a blend inside one mixes with whatever is beneath it, as it would if its layers
 were written in its place.
+
+A renderer MUST keep a blend inside a layer that's composited as a unit, so that it mixes only with
+what's beneath it within that layer. SVG renderers don't all isolate a group that has only a clip
+or a mask, so SVG output says so on each such layer's group with `isolation: isolate`.
 
 `clip` and `cut` take any shape, including `pile` and `pall`, or a shape from a
 `define`. They use a shape's whole area, so it can't be `hollow` or have `lines`. The shapes use the coordinates of the region the layer sits in. A `clip` applies to the layer as a whole, after any `repeat`, and so does a `cut` on any layer but a charge. A charge's own cuts go with each of its copies, as §8.2 says.
@@ -688,6 +698,25 @@ for a `hoist` or `fly` panel and from the hoist for a `top` or `bottom` one, `sp
 that side, and the positive side is away from the panel. So a zigzag starts with a point toward the
 panel. The panel's region is `width + depth / 2` deep, so that it reaches the line's farthest points.
 
+A zigzag whose period doesn't fit ends at a corner short of the end of the side. As between bars,
+the line then runs on flat at that corner's offset, rather than slanting to the panel's corner:
+
+```
+function panel_edge(panel, region):          // the panel's outline, in its own region
+    span = region.height for a hoist or fly panel, or region.width for a top or bottom one
+    line = the points (s, offset) of edge_offsets(panel.edge, span), in order
+    if the last point's s < span: add (span, the last point's offset) to line
+    for a hoist panel:
+        outline = (0, 0), then (panel.width + offset, s) for each point of line, then (0, span)
+    for a fly panel:
+        outline = (region.width, 0), then (region.width - panel.width - offset, s) for each, then (region.width, span)
+    for a top panel:
+        outline = (0, 0), then (s, panel.width + offset) for each, then (span, 0)
+    for a bottom panel:
+        outline = (0, region.height), then (s, region.height - panel.width - offset) for each, then (span, region.height)
+    return outline
+```
+
 ### 7.12 Fimbriation
 
 `fimbriate COLOR W` paints the ordinary or charge's shape, expanded outward by `W`
@@ -751,7 +780,8 @@ and they MUST NOT be the same place, since that leaves nothing to draw.
 
 `hollow W` draws any shape's outline at a width of `W` centered on its edge, instead of
 filling it. `lines W` draws a star as lines between its points, skipping one each time.
-That's a single closed line for five points and two triangles for six.
+That's a single closed line for five points and two triangles for six. It needs at least five
+points, since with three the lines are only a triangle, and with four they double back on themselves.
 
 A `crescent`'s cut has radius `inner`, with its center `offset` toward the fly. Its two
 circles MUST cross. A `sun`'s `disc` is its radius, and `radius` reaches the tips of its
@@ -769,7 +799,7 @@ which makes it the better choice over inline SVG for anything in one color.
 In a `charge`, `clip` or `cut`, a path's values are children, as `d "M0 0H1V1Z"` and `box "0 0 1 1"`.
 A `define` takes that form, which is checked as a charge's is, or the one-line
 `path "M0 0H1V1Z" box="0 0 1 1"`, whose size comes from each charge using it. An `outline` takes
-only the one-line form.
+only the one-line form. That form holds its data and `box=`, and nothing else.
 
 The default `inner` of a star is that of the regular star polygon {n/2}:
 
@@ -910,6 +940,12 @@ A palette color is optional, as in `charge svg gold { ... }`. Artwork using
 wherever the artwork allows. A document whose artwork uses `currentColor` MUST give
 a palette color, so that it can't pick up a color from wherever it's displayed.
 Using it for lettering or seals doesn't make them part of the format.
+
+Artwork uses `currentColor` only where a paint (`fill`, `stroke`, `stop-color`, `flood-color` or
+`lighting-color`) or `color` has it as its value, or as a keyword within its value, such as the
+fallback after a `url(#id)`. That's as an attribute or as a declaration in a `style`, on any element,
+the root included. The keyword is matched ignoring ASCII case, as CSS keywords are. An `id`, or any
+other text that contains the word, doesn't count, and nor does a `url(#id)` naming one.
 
 Markup MUST be a well-formed XML 1.0 document (fifth edition) that's also namespace-well-formed
 under Namespaces in XML 1.0, and every library MUST read it that way, whatever its XML parser
@@ -1160,10 +1196,11 @@ function move(x, old, new, anchor):
 
 | Layer | What happens |
 |---|---|
-| `field`, `saltire`, `checks`; axes `bend` and `bend-sinister` | They follow the region, so nothing's needed |
-| `bars` across the axis, `cross` arms | The last part grows for `start`, the first for `end`, and the first and last equally for `center`. Under `scale`, the ratio holds. A part reaching zero is an error, as below |
-| `bars` along the axis | Nothing's needed |
-| `band` across the axis | Stays put by its anchor. Its width only changes under `scale` |
+| `field`, `saltire`, `checks`; axes `bend` and `bend-sinister` at rotation 0 | They follow the region, so nothing's needed |
+| `bars` across the axis at rotation 0, `cross` arms | The last part grows for `start`, the first for `end`, and the first and last equally for `center`. Under `scale`, the ratio holds. A part reaching zero is an error, as below |
+| `bars` along the axis at rotation 0 | Nothing's needed |
+| `band` across the axis at rotation 0 | Stays put by its anchor. Its width only changes under `scale` |
+| `bars` or `band` with a `rotate` other than 0, on any axis | Keeps its angle and its widths under every rule, `scale` included. Its center moves by the anchor, as a charge's position does. The first and last bars reach the new region's corners, as below |
 | `chevrons`, `pile`, `pall` | They stay on their edge. Depths only change under `scale`. Positions along an edge that's changing size move by the anchor |
 | `quarters`, `rays`, `charge`, `emblem` | Positions move by the anchor |
 | A charge's `repeat ring` or `repeat arc` | Its position moves by the anchor, and the copies keep their radius around it, so that the ring stays round under every rule, `scale` too |
@@ -1185,6 +1222,34 @@ arms meet the corners of its edge, and one without an `apex` keeps it at the edg
 `bars` can take `grow N...`, which shares out the change between them by these weights
 instead, under every rule, `scale` included. Canada's pale would stay its own width with
 `grow 1 0 1`. Weights that are all 0 leave the change to the anchor, as if there were none.
+Rotated bars keep their widths, so they can't have `grow`.
+
+A rotated `bars` or `band` is measured across a slanted line, and no share of the change in one
+direction keeps its widths, so it's kept as it was drawn instead. Its center is the region's center,
+or for a band the point on its center line nearest that. That moves by the anchor like any position,
+even when it's the region's center, since the layer is measured from it. Its axis keeps the angle it
+had, which matters for `bend` and `bend-sinister`, and a shaped edge keeps its `span` and so its
+start. The lines between bars stay where they were from the center, and only the first and last
+bars change, to reach the new region's corners:
+
+```
+function adapt_rotated(layer, before, after, anchor):    // the regions before and after
+    dir, normal = axis(before, layer.along, layer.rotate)
+    c = center(before)
+    if layer is a band: c = c + normal * layer.offset
+    moved = c, with its coordinate along the changing axis moved by move(that, old, new, anchor)
+    if layer is a band:
+        paint it with its center line through moved, along dir, and its own width
+        return
+    lines = the offsets from c along normal between bars, as paint_bars has them in before
+    lo, hi = min and max of dot(corner - moved, normal) over the corners of after
+    paint the bars from lo through each of lines to hi, about moved, along dir
+    if there are lines, and hi - last of lines or first of lines - lo <= 1e-9 * old:
+        error, as share_change says
+```
+
+At rotation 0 on the `fly` or `hoist` axis, this would give what the rows above give, except under
+`scale` and for bars with `grow`, which is why only a rotated layer is kept this way.
 
 Floating-point arithmetic can leave a part that should be exactly zero a little either side of it,
 so a part that changes MUST stay longer than `1e-9` of the region's size along the axis:

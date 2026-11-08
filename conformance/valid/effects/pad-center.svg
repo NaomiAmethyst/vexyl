@@ -11,12 +11,12 @@
     <polygon points="30,20 30,0 16.76327,0 13.23673,20" fill="#7b4fd6"/>
     <polygon points="30,20 30,0 22.351026,0 18.824487,20" fill="#1b1035"/>
     <polygon points="30,20 30,0 27.938783,0 24.412243,20" fill="#7b4fd6"/>
-    <g opacity="0.5">
+    <g opacity="0.5" style="isolation:isolate">
       <polygon points="30,0 26,10 30,20" fill="#f0a0c8"/>
     </g>
     <polygon points="9.803848,0 15,3 20.196152,0" fill="#7b4fd6"/>
     <polygon points="11.535898,0 15,2 18.464102,0" fill="#f2c14e"/>
-    <g opacity="0.6">
+    <g opacity="0.6" style="isolation:isolate">
       <polygon points="-15.27735,-9.583975 44.72265,30.416025 45.27735,29.583975 -14.72265,-10.416025" fill="#1b1035" stroke="#1b1035" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
       <polygon points="-15.27735,29.583975 44.72265,-10.416025 45.27735,-9.583975 -14.72265,30.416025" fill="#1b1035" stroke="#1b1035" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
       <polygon points="0,0 0,0.600925 29.098612,20 30,20 30,19.399075 0.901388,0" fill="#ffffff"/>
@@ -41,10 +41,10 @@
     <clipPath id="vx-4499d673aac6fb2b-b554-clip3">
       <polygon points="22,11.5 28,11.5 28,14.5 22,14.5"/>
     </clipPath>
-    <g clip-path="url(#vx-4499d673aac6fb2b-b554-clip3)">
+    <g clip-path="url(#vx-4499d673aac6fb2b-b554-clip3)" style="isolation:isolate">
       <polygon points="25,11 25.382683,13.07612 27.12132,11.87868 25.92388,13.617317 28,14 25.92388,14.382683 27.12132,16.12132 25.382683,14.92388 25,17 24.617317,14.92388 22.87868,16.12132 24.07612,14.382683 22,14 24.07612,13.617317 22.87868,11.87868 24.617317,13.07612" fill="#ffffff"/>
     </g>
-    <g style="mix-blend-mode:multiply">
+    <g style="mix-blend-mode:multiply;isolation:isolate">
       <polygon points="4.957633,0 30,16.694911 30,16.093986 5.859021,0" fill="#f2c14e"/>
     </g>
   </g>

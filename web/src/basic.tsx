@@ -398,6 +398,8 @@ function ChargeControls(props: { item: Item; nodes: readonly ONode[] }): preact.
 	const period = turnPeriod(c.shape, c.points, arcShape);
 	const live = useLive();
 	const points = live.value ?? c.points ?? 5;
+	// A star drawn in lines needs at least five points.
+	const fewest = kid(c.node, "lines") !== undefined ? 5 : 3;
 	return (
 		<>
 			<ColorRow label="Color" value={String(c.node.args[1]?.v ?? "")} nodes={nodes} onPick={(color, ...more) => { edit(colorOp(c.node, 1, color), ...more); }} />
@@ -407,7 +409,7 @@ function ChargeControls(props: { item: Item; nodes: readonly ONode[] }): preact.
 			{c.shape === "star" ? (
 				<div class="field">
 					<label class="nx-label" for={`${id}-points`}>Points</label>
-					<input id={`${id}-points`} type="range" min="3" max="16" step="1" value={points} aria-valuetext={`${points} points`} onInput={(e) => {
+					<input id={`${id}-points`} type="range" min={fewest} max="16" step="1" value={points} aria-valuetext={`${points} points`} onInput={(e) => {
 						const n = Number((e.currentTarget as HTMLInputElement).value);
 						live.slide(n, pointsOps(c, n));
 					}} onChange={live.release} />

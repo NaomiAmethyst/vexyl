@@ -18,8 +18,8 @@ import (
 var (
 	seriesValue  = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	decimalWhole = regexp.MustCompile(`^` + decimalForm + `$`)
-	numberList   = regexp.MustCompile(`^\s*` + decimalForm + `(?:[\s,]+` + decimalForm + `)*\s*$`)
-	numberSplit  = regexp.MustCompile(`[\s,]+`)
+	numberList   = regexp.MustCompile(`^\s*` + decimalForm + `(?:` + commaSpace + decimalForm + `)*\s*$`)
+	numberSplit  = regexp.MustCompile(commaSpace)
 	pathNumber   = regexp.MustCompile(`^` + decimalForm)
 	cornerValues = []string{"upper-hoist", "upper-fly", "lower-hoist", "lower-fly"}
 	rayFromNames = append([]string{"center", "hoist", "fly", "top", "bottom"}, cornerValues...)
@@ -56,6 +56,10 @@ func (p *parser) pathData(n *kdl.Node) string {
 // decimalForm is the one way to write a number inside a string.
 const decimalForm = `[-+]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][-+]?[0-9]+)?`
 
+// commaSpace separates numbers in a string, as SVG's comma-wsp does: whitespace, or one
+// comma with any whitespace around it.
+const commaSpace = `(?:\s*,\s*|\s+)`
+
 // asciiSpace is what counts as whitespace inside strings and inline SVG.
 const asciiSpace = " \t\n\f\r"
 
@@ -74,7 +78,7 @@ func decimalValue(text string) (float64, bool) {
 	return v, true
 }
 
-// numbersIn reads a string holding numbers, separated by whitespace, commas or both.
+// numbersIn reads a string holding numbers, separated by whitespace, a comma or both.
 func numbersIn(text string) ([]float64, bool) {
 	if !numberList.MatchString(text) {
 		return nil, false
@@ -290,11 +294,13 @@ func (p *parser) ordinaryShape(n *kdl.Node) Layer {
 
 func (p *parser) panel(n *kdl.Node, depth int) Layer {
 	l := &Panel{Effects: newEffects()}
+	// An `at center` gives no position, but it's still an `at`.
+	placed := false
 	p.noValues(n)
 	p.container(n, depth, &l.Effects, &l.Layers, map[string]func(*kdl.Node){
 		"side":   func(c *kdl.Node) { l.Side = p.oneOf(c, fromValues) },
 		"corner": func(c *kdl.Node) { l.Corner = p.oneOf(c, cornerValues) },
-		"at":     func(c *kdl.Node) { l.At = p.at(c) },
+		"at":     func(c *kdl.Node) { l.At, placed = p.at(c), true },
 		"width":  func(c *kdl.Node) { l.Width = p.positive(c, p.number(c)) },
 		"fly":    func(c *kdl.Node) { l.Fly = p.positive(c, p.number(c)) },
 		"hoist":  func(c *kdl.Node) { l.Hoist = p.positive(c, p.number(c)) },
@@ -308,7 +314,7 @@ func (p *parser) panel(n *kdl.Node, depth int) Layer {
 		if l.Width == 0 {
 			p.errf(n, "a side panel needs a `width`")
 		}
-		if l.Fly != 0 || l.Hoist != 0 || l.At != nil {
+		if l.Fly != 0 || l.Hoist != 0 || placed {
 			p.errf(n, "a side panel takes a `width`, and no `fly`, `hoist` or `at`")
 		}
 	default:
@@ -318,7 +324,7 @@ func (p *parser) panel(n *kdl.Node, depth int) Layer {
 		if l.Line != nil {
 			p.errf(n, "only a side panel can have an `edge`")
 		}
-		if l.Corner != "" && l.At != nil {
+		if l.Corner != "" && placed {
 			p.errf(n, "needs either `corner` or `at`, not both")
 		}
 		if l.Width != 0 {
@@ -386,19 +392,9 @@ func (p *parser) define(n *kdl.Node) {
 		}
 		s := Shape{Kind: c.Name()}
 		if s.Kind == "path" && len(c.Arguments()) > 0 {
-			// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
-			if a := c.Arguments(); len(a) == 1 && a[0].Kind() == kdl.String && validPath(a[0].String()) {
-				s.D = a[0].String()
-			} else {
-				p.errf(c, "isn't SVG path data")
-			}
-			if b := c.Prop("box"); b.IsValid() && b.Kind() == kdl.String {
-				s.Box = p.boxValue(c, b.String())
-			}
-			// Its size comes from each charge using it, so nothing can be checked yet.
-			if s.Box[2] <= 0 || s.Box[3] <= 0 {
-				p.errf(c, "needs a `box` with an area")
-			}
+			// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line. Its size
+			// comes from each charge using it, so nothing more can be checked yet.
+			s.D, s.Box = p.linePath(c)
 			d.Shape = &s
 			p.defines[name] = d
 			return
@@ -419,6 +415,25 @@ func (p *parser) define(n *kdl.Node) {
 	p.defines[name] = d
 }
 
+// linePath reads the one-line form of a path, `path "M..." box="x y width height"`, which
+// takes nothing else.
+func (p *parser) linePath(n *kdl.Node) (d string, box [4]float64) {
+	p.only(n, 1, "box")
+	p.noChildren(n)
+	if a := n.Arguments(); len(a) == 1 && a[0].Kind() == kdl.String && validPath(a[0].String()) {
+		d = a[0].String()
+	} else {
+		p.errf(n, "isn't SVG path data")
+	}
+	if b := n.Prop("box"); b.IsValid() && b.Kind() == kdl.String {
+		box = p.boxValue(n, b.String())
+	}
+	if box[2] <= 0 || box[3] <= 0 {
+		p.errf(n, "needs a `box` with an area")
+	}
+	return d, box
+}
+
 // outline reads a flag's silhouette: a polygon or path inside it, or a named form.
 func (p *parser) outline(n *kdl.Node) *Outline {
 	p.noProps(n)
@@ -436,11 +451,12 @@ func (p *parser) outline(n *kdl.Node) *Outline {
 			p.errf(n, "unknown form %q", o.Kind)
 			return nil
 		}
+		given := map[string]bool{}
 		p.children(n, nil, map[string]func(*kdl.Node){
-			"depth":  func(c *kdl.Node) { o.Depth = p.positive(c, p.number(c)) },
-			"tip":    func(c *kdl.Node) { o.Tip = p.positive(c, p.number(c)) },
-			"tongue": func(c *kdl.Node) { o.Tongue = p.positive(c, p.number(c)) },
-			"taper":  func(c *kdl.Node) { o.Taper = p.positive(c, p.number(c)) },
+			"depth":  func(c *kdl.Node) { o.Depth, given["depth"] = p.positive(c, p.number(c)), true },
+			"tip":    func(c *kdl.Node) { o.Tip, given["tip"] = p.notNegative(c, p.number(c)), true },
+			"tongue": func(c *kdl.Node) { o.Tongue, given["tongue"] = p.positive(c, p.number(c)), true },
+			"taper":  func(c *kdl.Node) { o.Taper, given["taper"] = p.notNegative(c, p.number(c)), true },
 		})
 		if o.Kind != "pennant" && o.Depth == 0 {
 			p.errf(n, "needs a `depth`")
@@ -448,31 +464,31 @@ func (p *parser) outline(n *kdl.Node) *Outline {
 		if o.Kind == "tongued" && o.Tongue == 0 {
 			p.errf(n, "needs a `tongue`")
 		}
-		if (o.Tip != 0 && o.Kind != "pennant") || (o.Tongue != 0 && o.Kind != "tongued") || (o.Taper != 0 && o.Kind != "swallowtail") || (o.Depth != 0 && o.Kind == "pennant") {
+		if (given["tip"] && o.Kind != "pennant") || (given["tongue"] && o.Kind != "tongued") || (given["taper"] && o.Kind != "swallowtail") || (given["depth"] && o.Kind == "pennant") {
 			p.errf(n, "has a value that a %s doesn't use", o.Kind)
 		}
 		return o
 	}
+	shapes := 0
 	p.children(n, nil, map[string]func(*kdl.Node){
 		"polygon": func(c *kdl.Node) {
+			if shapes++; shapes > 1 {
+				p.errf(c, "an outline holds one shape")
+			}
 			s := Shape{Kind: "polygon"}
 			p.noValues(c)
 			p.shapeBody(c, &s, nil)
+			if s.Hollow > 0 {
+				p.errf(c, "an outline is a whole shape, so it can't be `hollow`")
+			}
 			o.Kind, o.Vertices = "polygon", s.Vertices
 		},
 		"path": func(c *kdl.Node) {
-			a := c.Arguments()
-			if len(a) != 1 || a[0].Kind() != kdl.String || !validPath(a[0].String()) {
-				p.errf(c, "isn't SVG path data")
-				return
+			if shapes++; shapes > 1 {
+				p.errf(c, "an outline holds one shape")
 			}
-			o.Kind, o.D = "path", a[0].String()
-			if b := c.Prop("box"); b.IsValid() && b.Kind() == kdl.String {
-				o.Box = p.boxValue(c, b.String())
-			}
-			if o.Box[2] <= 0 || o.Box[3] <= 0 {
-				p.errf(c, "needs a `box` with an area")
-			}
+			o.Kind = "path"
+			o.D, o.Box = p.linePath(c)
 		},
 	})
 	if o.Kind == "" {

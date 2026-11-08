@@ -5,7 +5,7 @@
 // is an allowlist, and the output is written afresh from what passed, so nothing the parser saw
 // reaches a page except by being copied here on purpose.
 
-import { asciiLower, decimalValue, decimalForm, esc, trimSpace } from "./text.js";
+import { asciiLower, commaSpace, decimalValue, decimalForm, esc, trimSpace } from "./text.js";
 import type { EmbeddedSvg } from "./types.js";
 import { svgNamespace, xlinkNamespace, XmlDecoder, XmlError, type XmlAttr } from "./xml.js";
 
@@ -60,14 +60,34 @@ const space = "[\\t\\n\\f\\r ]";
 const localId = /^[A-Za-z_][A-Za-z0-9_.:-]*$/;
 const colorFunction = /\b(?:[rR][gG][bB][aA]?|[hH][sS][lL][aA]?)\(/g;
 const localUrl = new RegExp(`[uU][rR][lL]\\(${space}*["']?#([A-Za-z_][A-Za-z0-9_.:-]*)["']?${space}*\\)`, "g");
-const separator = "[\\t\\n\\f\\r ,]+";
-const viewBoxForm = new RegExp(`^${space}*(${decimalForm})${separator}(${decimalForm})${separator}(${decimalForm})${separator}(${decimalForm})${space}*$`);
+const viewBoxForm = new RegExp(`^${space}*(${decimalForm})${commaSpace}(${decimalForm})${commaSpace}(${decimalForm})${commaSpace}(${decimalForm})${space}*$`);
 const lengthForm = new RegExp(`^${space}*(${decimalForm})(?:px)?${space}*$`);
 /** SVG's default preserveAspectRatio, the only way artwork is ever fitted. */
 const defaultFit = new RegExp(`^${space}*xMidYMid(?:${space}+meet)?${space}*$`);
 
 export function usesCurrentColor(e: EmbeddedSvg): boolean {
-	return asciiLower(e.attrs + e.body).includes("currentcolor");
+	return e.currentColor;
+}
+
+/** The properties that can take currentColor: the paints, and color itself. */
+const colorProps: ReadonlySet<string> = new Set(["fill", "stroke", "stop-color", "flood-color", "lighting-color", "color"]);
+
+/**
+ * Says whether an attribute, or a declaration in a style, paints in currentColor, as its value or
+ * as a keyword in it such as a fallback after url(#id). An id or other text containing the word
+ * doesn't count.
+ */
+function takesCurrentColor(name: string, value: string): boolean {
+	if (name === "style") {
+		return value.split(";").some((decl) => {
+			const colon = decl.indexOf(":");
+			return takesCurrentColor(asciiLower(trimSpace(colon < 0 ? decl : decl.slice(0, colon))), colon < 0 ? "" : decl.slice(colon + 1));
+		});
+	}
+	if (!colorProps.has(name)) {
+		return false;
+	}
+	return (value.replace(localUrl, "").match(/[A-Za-z0-9_-]+/g) ?? []).some((word) => asciiLower(word) === "currentcolor");
 }
 
 /** The sanitized artwork as one document, with its IDs as they were written. */
@@ -93,7 +113,7 @@ export function sanitizeSvg(markup: string): EmbeddedSvg {
 
 function sanitize(markup: string): EmbeddedSvg {
 	const dec = new XmlDecoder(markup);
-	const result: EmbeddedSvg = { viewBox: "", attrs: "", body: "" };
+	const result: EmbeddedSvg = { viewBox: "", currentColor: false, attrs: "", body: "" };
 	const body: string[] = [];
 	let depth = 0;
 	let skip = 0;
@@ -138,7 +158,7 @@ function sanitize(markup: string): EmbeddedSvg {
 				}
 				let attrs: string;
 				try {
-					attrs = cleanAttrs(t.attrs, noAttrs);
+					attrs = cleanAttrs(t.attrs, noAttrs, result);
 				} catch (e) {
 					throw e instanceof SanitizeError ? new SanitizeError(`SVG element <${t.name.local}>: ${e.message}`) : e;
 				}
@@ -221,14 +241,14 @@ function readRoot(e: EmbeddedSvg, attrs: XmlAttr[]): void {
 		e.viewBox = `0 0 ${wm[1]} ${hm[1]}`;
 	}
 	try {
-		e.attrs = cleanAttrs(attrs, rootOnlyAttrs);
+		e.attrs = cleanAttrs(attrs, rootOnlyAttrs, e);
 	} catch (err) {
 		throw err instanceof SanitizeError ? new SanitizeError(`SVG root: ${err.message}`) : err;
 	}
 }
 
-/** Checks attributes against the allowlist and writes them out. */
-function cleanAttrs(attrs: XmlAttr[], ignored: ReadonlySet<string>): string {
+/** Checks attributes against the allowlist and writes them out, noting whether any of them paints in currentColor. */
+function cleanAttrs(attrs: XmlAttr[], ignored: ReadonlySet<string>, e: EmbeddedSvg): string {
 	let out = "";
 	let href = false;
 	for (const a of attrs) {
@@ -250,6 +270,9 @@ function cleanAttrs(attrs: XmlAttr[], ignored: ReadonlySet<string>): string {
 			href = true;
 		}
 		out += ` ${name}="${cleanValue(name, a.value)}"`;
+		if (takesCurrentColor(name, a.value)) {
+			e.currentColor = true;
+		}
 	}
 	return out;
 }

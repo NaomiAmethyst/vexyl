@@ -21,7 +21,7 @@
     <g transform="translate(0 17.5)" clip-path="url(#vx-dbc71950245ea5a5-panel3)" style="isolation:isolate">
       <polygon points="0,0 30,0 30,2.5 0,2.5" fill="#ffffff"/>
     </g>
-    <g opacity="0.4">
+    <g opacity="0.4" style="isolation:isolate">
       <polygon points="14,0 8,6 8,0" fill="#f2c14e"/>
       <polygon points="30,20 22,20 8,6 30,6" fill="#f2c14e"/>
       <polygon points="0,20 0,14 8,6 8,20" fill="#f2c14e"/>
@@ -30,7 +30,7 @@
     <polygon points="15,6 51.055513,-8.422205 51.055513,-9.622205 15,4.8 -21.055513,-9.622205 -21.055513,-8.422205" fill="#f2c14e"/>
     <polygon points="66.055513,-10.534695 26,14.5 26,15.5 66.055513,40.534695" fill="#1b1035" stroke="#1b1035" stroke-width="0.4" stroke-linejoin="miter" stroke-miterlimit="10"/>
     <polygon points="66.055513,-10.534695 26,14.5 26,15.5 66.055513,40.534695" fill="#ffffff"/>
-    <g opacity="0.5">
+    <g opacity="0.5" style="isolation:isolate">
       <polygon points="-34.590875,33.297834 14.5,13.661484 14.5,-37.055513 15.5,-37.055513 15.5,13.661484 64.590875,33.297834 64.219485,34.22631 15,14.538516 -34.219485,34.22631" fill="#f0a0c8"/>
     </g>
     <polygon points="3,1.5 4.5,4 3,6.5 1.5,4" fill="none" stroke="#f2c14e" stroke-width="0.3" stroke-linejoin="miter" stroke-miterlimit="10"/>
@@ -52,7 +52,7 @@
     <clipPath id="vx-dbc71950245ea5a5-clip4">
       <polygon points="11,9 13,9 13,11 11,11"/>
     </clipPath>
-    <g clip-path="url(#vx-dbc71950245ea5a5-clip4)">
+    <g clip-path="url(#vx-dbc71950245ea5a5-clip4)" style="isolation:isolate">
       <polygon points="0,0 30,0 30,20 0,20" fill="#ffffff"/>
       <polygon points="15,0 30,0 30,20 15,20" fill="#1b1035"/>
       <polygon points="0,10 30,10 30,20 0,20" fill="#1b1035"/>

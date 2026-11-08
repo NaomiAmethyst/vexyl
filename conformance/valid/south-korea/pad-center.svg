@@ -10,7 +10,7 @@
       <clipPath id="vx-f068f58cdabd08d5-b554-clip2">
         <polygon points="-24,-24 24,-24 24,0 -24,0"/>
       </clipPath>
-      <g clip-path="url(#vx-f068f58cdabd08d5-b554-clip2)">
+      <g clip-path="url(#vx-f068f58cdabd08d5-b554-clip2)" style="isolation:isolate">
         <circle cx="0" cy="0" r="24" fill="#cd2e3a"/>
       </g>
       <circle cx="-12" cy="0" r="12" fill="#cd2e3a"/>
@@ -24,7 +24,7 @@
         <polygon points="35,-1 41,-1 41,1 35,1" fill="#000" transform="translate(6 0)"/>
         <polygon points="35,-1 41,-1 41,1 35,1" fill="#000" transform="translate(12 0)"/>
       </mask>
-      <g mask="url(#vx-f068f58cdabd08d5-b554-mask3)">
+      <g mask="url(#vx-f068f58cdabd08d5-b554-mask3)" style="isolation:isolate">
         <polygon points="36,-12 40,-12 40,12 36,12" fill="#000000"/>
         <polygon points="42,-12 46,-12 46,12 42,12" fill="#000000"/>
         <polygon points="48,-12 52,-12 52,12 48,12" fill="#000000"/>
@@ -37,7 +37,7 @@
         <polygon points="-86.533231,-86.533231 86.533231,-86.533231 86.533231,86.533231 -86.533231,86.533231" fill="#fff"/>
         <polygon points="-48,-1 -40,-1 -40,1 -48,1" fill="#000"/>
       </mask>
-      <g mask="url(#vx-f068f58cdabd08d5-b554-mask4)">
+      <g mask="url(#vx-f068f58cdabd08d5-b554-mask4)" style="isolation:isolate">
         <polygon points="-46,-12 -42,-12 -42,12 -46,12" fill="#000000"/>
       </g>
       <polygon points="42,-12 46,-12 46,12 42,12" fill="#000000"/>
@@ -46,7 +46,7 @@
         <polygon points="35,-1 41,-1 41,1 35,1" fill="#000"/>
         <polygon points="35,-1 41,-1 41,1 35,1" fill="#000" transform="translate(12 0)"/>
       </mask>
-      <g mask="url(#vx-f068f58cdabd08d5-b554-mask5)">
+      <g mask="url(#vx-f068f58cdabd08d5-b554-mask5)" style="isolation:isolate">
         <polygon points="36,-12 40,-12 40,12 36,12" fill="#000000"/>
         <polygon points="48,-12 52,-12 52,12 48,12" fill="#000000"/>
       </g>

@@ -2,7 +2,7 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 import { axisSpan, crescentPath, ellipsePath, heartPath, outlinePoints, pathGeom, ringArcPath, starChords, sunPath, waveEdge } from "./shapes.js";
-import type { Axis, BarsLayer, ChevronsLayer, CrossLayer, Flag, Shape } from "./types.js";
+import type { Axis, BarsLayer, ChevronsLayer, CrossLayer, FixedFrame, Flag, Shape } from "./types.js";
 
 export interface Vec {
 	x: number;
@@ -158,8 +158,8 @@ export function clipConvex(input: Vec[], r: Region): Vec[] {
  * the shape it fills, so a bar for which `exact` returns true stays its true width.
  */
 export function barPolys(b: BarsLayer, r: Region, exact?: (i: number) => boolean): Vec[][] {
-	const { dir, normal } = axis(r, b.along, b.rotate);
-	const c = regionCenter(r);
+	const { frame, center: c } = placeIn(b.fixed, r);
+	const { dir, normal } = axis(frame, b.along, b.rotate);
 	let lo = Infinity;
 	let hi = -Infinity;
 	for (const corner of regionCorners(r)) {
@@ -168,7 +168,7 @@ export function barPolys(b: BarsLayer, r: Region, exact?: (i: number) => boolean
 		hi = Math.max(hi, offset);
 	}
 	const total = sum(b.ratio);
-	const reach = regionReach(r);
+	const reach = reachFrom(c, r);
 	const polys: Vec[][] = [];
 	let t = lo;
 	b.ratio.forEach((part, i) => {
@@ -179,7 +179,19 @@ export function barPolys(b: BarsLayer, r: Region, exact?: (i: number) => boolean
 			end = next;
 		}
 		if (b.edge === undefined) {
-			polys.push(clipConvex(stripPoly(c, dir, normal, t, end, reach), r));
+			let from = t;
+			let to = end;
+			if (b.rotate !== 0) {
+				// The outermost lines pass through corners, where rounding in the angle could leave a
+				// sliver either side, so the outer ends reach well past the region.
+				if (i === 0) {
+					from -= reach;
+				}
+				if (end === hi || i === b.ratio.length - 1) {
+					to = hi + reach;
+				}
+			}
+			polys.push(clipConvex(stripPoly(c, dir, normal, from, to, reach), r));
 			t = next;
 			return;
 		}
@@ -190,19 +202,36 @@ export function barPolys(b: BarsLayer, r: Region, exact?: (i: number) => boolean
 			add(add(c, mul(normal, lo - margin)), mul(dir, reach)),
 		];
 		if (i > 0) {
-			near = waveEdge(c, dir, normal, t, axisSpan(r, b.along), reach, b.edge);
+			near = waveEdge(c, dir, normal, t, axisSpan(frame, b.along), reach, b.edge);
 		}
 		let far = [
 			add(add(c, mul(normal, hi + margin)), mul(dir, reach)),
 			sub(add(c, mul(normal, hi + margin)), mul(dir, reach)),
 		];
 		if (isExact && i < b.ratio.length - 1) {
-			far = waveEdge(c, dir, normal, next, axisSpan(r, b.along), reach, b.edge).reverse();
+			far = waveEdge(c, dir, normal, next, axisSpan(frame, b.along), reach, b.edge).reverse();
 		}
 		polys.push([...near, ...far]);
 		t = next;
 	});
 	return polys;
+}
+
+/**
+ * The region a layer's axis is measured in and the center it's drawn about, which are the region's
+ * own unless adapting fixed them.
+ */
+export function placeIn(fixed: FixedFrame | undefined, r: Region): { frame: Region; center: Vec } {
+	if (fixed === undefined) {
+		return { frame: r, center: regionCenter(r) };
+	}
+	return { frame: { w: fixed.w, h: fixed.h }, center: { x: fixed.center.x, y: fixed.center.y } };
+}
+
+/** Far enough from a point to cross the whole region, wherever the point is. */
+function reachFrom(c: Vec, r: Region): number {
+	const d = sub(c, regionCenter(r));
+	return regionReach(r) + Math.hypot(d.x, d.y);
 }
 
 export function sum(parts: readonly number[]): number {
@@ -315,9 +344,10 @@ export function rawChevrons(ch: ChevronsLayer, r: Region): { nested: Vec[][]; ba
  * A band's rectangle. It's clipped to the region unless it will be stroked, since a clipped
  * polygon's new edges would pick up fimbriation.
  */
-export function bandPoly(r: Region, along: Axis, rotation: number, width: number, offset: number, stroked: boolean): Vec[] {
-	const { dir, normal } = axis(r, along, rotation);
-	const poly = stripPoly(regionCenter(r), dir, normal, offset - width / 2, offset + width / 2, regionReach(r));
+export function bandPoly(r: Region, along: Axis, rotation: number, width: number, offset: number, stroked: boolean, fixed?: FixedFrame): Vec[] {
+	const { frame, center } = placeIn(fixed, r);
+	const { dir, normal } = axis(frame, along, rotation);
+	const poly = stripPoly(center, dir, normal, offset - width / 2, offset + width / 2, reachFrom(center, r));
 	return stroked ? poly : clipConvex(poly, r);
 }
 

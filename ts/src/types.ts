@@ -237,6 +237,18 @@ export interface BarsLayer extends Effects {
 	/** Shares out any change of proportion between the bars. */
 	grow?: number[];
 	edge?: ShapedEdge;
+	/** Where adapting put a rotated bars, if it did. */
+	fixed?: FixedFrame;
+}
+
+/**
+ * Where adapting to another proportion put a rotated bars or band: its center, and the size of the
+ * region it was drawn for, which its axis and any edge are measured in. Only an adapted flag has one.
+ */
+export interface FixedFrame {
+	center: { x: number; y: number };
+	w: number;
+	h: number;
 }
 
 export interface ChevronsLayer extends Effects {
@@ -262,6 +274,8 @@ export interface BandLayer extends Effects {
 	offset: number;
 	rotate: number;
 	fimbriate?: Fimbriation;
+	/** Where adapting put a rotated band, if it did. */
+	fixed?: FixedFrame;
 }
 
 export interface CrossLayer extends Effects {
@@ -508,6 +522,8 @@ export type Shape =
 /** Inline SVG that has passed the sanitizer. */
 export interface EmbeddedSvg {
 	viewBox: string;
+	/** Whether the artwork paints in currentColor anywhere. */
+	currentColor: boolean;
 	/** The root element's attributes, each with a leading space, marked where IDs get their prefixes. */
 	attrs: string;
 	/** Its contents, marked the same way. */

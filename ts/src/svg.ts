@@ -366,8 +366,10 @@ class Renderer {
 			this.tag = path;
 		}
 		const { attrs, style } = this.effects(l, reg, cutMoves(l, reg));
-		if (l.layer === "group") {
-			// A group composites as a unit, so its children blend only with each other.
+		// A group, and any layer with an opacity, a blend, a clip or a cut, composites as a unit, so a
+		// blend inside it mixes only with what else is inside. Saying so outright keeps every renderer
+		// to that. A panel's own group already says it.
+		if (l.layer === "group" || l.opacity !== 1 || l.blend !== "normal" || l.clip !== undefined || l.cuts.length > 0) {
 			style.push("isolation:isolate");
 		}
 		if (style.length > 0) {
@@ -465,8 +467,8 @@ class Renderer {
 			case "band": {
 				// The fimbriation's stroke mustn't follow the region's edge, so it uses the band's
 				// unclipped shape. A clipped polygon can be empty.
-				const stroke = [{ poly: bandPoly(reg, l.along, l.rotate, l.width, l.offset, true) }];
-				const poly = bandPoly(reg, l.along, l.rotate, l.width, l.offset, false);
+				const stroke = [{ poly: bandPoly(reg, l.along, l.rotate, l.width, l.offset, true, l.fixed) }];
+				const poly = bandPoly(reg, l.along, l.rotate, l.width, l.offset, false, l.fixed);
 				// A gradient spans the part inside the region, for the fimbriation too.
 				this.paint(l.color, poly.length > 0 ? bounds(poly) : undefined, l.fimbriate, stroke, poly.length > 0 ? [{ poly }] : []);
 				break;

@@ -17,8 +17,36 @@ const (
 	maxSVGDepth    = 64
 )
 
-func (e *embeddedSVG) usesCurrentColor() bool {
-	return strings.Contains(asciiLower(e.attrs+e.body), "currentcolor")
+func (e *embeddedSVG) usesCurrentColor() bool { return e.currentColor }
+
+// colorProps are the properties that can take currentColor: the paints, and color itself.
+var colorProps = set("fill", "stroke", "stop-color", "flood-color", "lighting-color", "color")
+
+// cssWord finds the keywords in a value, so that currentColor counts only as a whole one.
+var cssWord = regexp.MustCompile(`[A-Za-z0-9_-]+`)
+
+// takesCurrentColor says whether an attribute, or a declaration in a style, paints in
+// currentColor, as its value or as a keyword in it such as a fallback after url(#id). An id
+// or other text containing the word doesn't count.
+func takesCurrentColor(name, value string) bool {
+	if name == "style" {
+		for decl := range strings.SplitSeq(value, ";") {
+			prop, v, _ := strings.Cut(decl, ":")
+			if takesCurrentColor(asciiLower(strings.Trim(prop, asciiSpace)), v) {
+				return true
+			}
+		}
+		return false
+	}
+	if !colorProps[name] {
+		return false
+	}
+	for _, word := range cssWord.FindAllString(localURL.ReplaceAllString(value, ""), -1) {
+		if asciiLower(word) == "currentcolor" {
+			return true
+		}
+	}
+	return false
 }
 
 // idMark stands in for an ID's prefix in sanitized markup until it's drawn. It can't
@@ -28,6 +56,8 @@ const idMark = "\x00"
 // embeddedSVG is inline SVG that has passed sanitizeSVG.
 type embeddedSVG struct {
 	viewBox string
+	// currentColor says whether the artwork paints in currentColor anywhere.
+	currentColor bool
 	// attrs are the root element's attributes, each with a leading space.
 	attrs string
 	body  string
@@ -66,7 +96,7 @@ var (
 	// These spell their cases out, because (?i) would also take letters like U+017F as an s.
 	colorFunc   = regexp.MustCompile(`\b(?:[rR][gG][bB][aA]?|[hH][sS][lL][aA]?)\(`)
 	localURL    = regexp.MustCompile(`[uU][rR][lL]\(\s*["']?#([A-Za-z_][A-Za-z0-9_.:-]*)["']?\s*\)`)
-	viewBoxForm = regexp.MustCompile(`^\s*(` + decimalForm + `)[\s,]+(` + decimalForm + `)[\s,]+(` + decimalForm + `)[\s,]+(` + decimalForm + `)\s*$`)
+	viewBoxForm = regexp.MustCompile(`^\s*(` + decimalForm + `)` + commaSpace + `(` + decimalForm + `)` + commaSpace + `(` + decimalForm + `)` + commaSpace + `(` + decimalForm + `)\s*$`)
 	lengthForm  = regexp.MustCompile(`^\s*(` + decimalForm + `)(?:px)?\s*$`)
 	// defaultFit is SVG's default preserveAspectRatio, the only way artwork is ever fitted.
 	defaultFit = regexp.MustCompile(`^\s*xMidYMid(?:\s+meet)?\s*$`)
@@ -139,7 +169,7 @@ func sanitizeSVG(markup string) (*embeddedSVG, error) {
 			if depth > maxSVGDepth {
 				return nil, fmt.Errorf("SVG is nested more than %d levels deep", maxSVGDepth)
 			}
-			attrs, err := cleanAttrs(t.attrs, nil)
+			attrs, err := cleanAttrs(t.attrs, nil, &result.currentColor)
 			if err != nil {
 				return nil, fmt.Errorf("SVG element <%s>: %w", t.name.local, err)
 			}
@@ -213,7 +243,7 @@ func (e *embeddedSVG) readRoot(attrs []xmlAttr) error {
 		}
 		e.viewBox = "0 0 " + wm[1] + " " + hm[1]
 	}
-	cleaned, err := cleanAttrs(attrs, rootOnlyAttrs)
+	cleaned, err := cleanAttrs(attrs, rootOnlyAttrs, &e.currentColor)
 	if err != nil {
 		return fmt.Errorf("SVG root: %w", err)
 	}
@@ -221,8 +251,9 @@ func (e *embeddedSVG) readRoot(attrs []xmlAttr) error {
 	return nil
 }
 
-// cleanAttrs checks attributes against the allowlist and renders them.
-func cleanAttrs(attrs []xmlAttr, ignored map[string]bool) (string, error) {
+// cleanAttrs checks attributes against the allowlist and renders them, noting whether any
+// of them paints in currentColor.
+func cleanAttrs(attrs []xmlAttr, ignored map[string]bool, currentColor *bool) (string, error) {
 	var b strings.Builder
 	href := false
 	for _, a := range attrs {
@@ -247,6 +278,9 @@ func cleanAttrs(attrs []xmlAttr, ignored map[string]bool) (string, error) {
 		value, err := cleanValue(name, a.value)
 		if err != nil {
 			return "", err
+		}
+		if takesCurrentColor(name, a.value) {
+			*currentColor = true
 		}
 		b.WriteString(" " + name + `="` + value + `"`)
 	}

@@ -671,6 +671,10 @@ var acceptedDocuments = []invalidCase{
 	{name: "an apex past the end of its edge", src: header + "chevrons a { depth 2; angle 30; apex 15; }\n"},
 	{name: "a path defined either way", src: header + "define p1 { path \"M0 0H1V1Z\" box=\"0 0 1 1\"; }\ndefine p2 { path { d \"M0 0H1V1Z\"; box \"0 0 1 1\"; hoist 2; }; }\ncharge p1 a { fly 1; }\ncharge p2 a\n"},
 	{name: "a lone pile defined as a design", src: header + "define d { pile a { depth 2; }; }\nuse d\n"},
+	{name: "sizes that default to 0 written as 0", src: header + "outline swallowtail { depth 4; taper 0; }\ncharge sun a { radius 3; disc 1; gap 0; }\npile b { depth 4; flat 0; }\n"},
+	{name: "a pennant's tip written as 0", src: header + "outline pennant { tip 0; }\nfield a\n"},
+	{name: "an id containing currentColor, with no palette color", src: header + "charge svg { fly 1; hoist 1; markup \"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><linearGradient id='currentColorStops'><stop stop-color='#fff'/></linearGradient><g id='currentColorLayer'><rect width='1' height='1' fill='url(#currentColor)'/></g><rect id='currentColor' width='1' height='1' fill='red'/></svg>\"; }\n"},
+	{name: "a single comma between numbers, with whitespace around it", src: header + "charge path a { d \"M0 0H1V1Z\"; box \"0 ,0, 1 ,\\t1\"; fly 1; }\ncharge svg a { fly 1; hoist 1; markup \"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 , 0,1 ,1'/>\"; }\n"},
 	{name: "edges of either kind by either measure", src: header + "bars a b { edge wavy depth=1 count=3; }\nbars a b { along hoist; edge zigzag depth=1 period=3; }\n"},
 	{name: "sizes that can be zero or negative", src: header + "band a { width 1; offset -2; }\ncross a { fly 0 1 0; hoist 0 1 0; }\npile a { base -1 12; tip 5 3; }\ncharge disc a { radius 1; at fly=-1 hoist=0; rotate -30; repeat line count=2 fly=-1 hoist=0; }\n"},
 }

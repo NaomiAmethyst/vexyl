@@ -520,7 +520,13 @@ export function panelRect(p: PanelLayer, r: Region): [number, number, number, nu
 /** A panel's outline when it has a shaped edge, in its own coordinates. */
 export function panelEdge(p: PanelLayer, w: number, h: number): Vec[] {
 	const edge = p.edge!;
-	const { along, offset } = linePoints(edge, p.side === "hoist" || p.side === "fly" ? h : w);
+	const span = p.side === "hoist" || p.side === "fly" ? h : w;
+	const { along, offset } = linePoints(edge, span);
+	// A line whose last point falls short of the side's end runs on flat to it, as one between bars does.
+	if (span - along[along.length - 1]! > 1e-9 * span) {
+		along.push(span);
+		offset.push(offset[offset.length - 1]!);
+	}
 	const half = edge.depth / 2;
 	const points: Vec[] = [];
 	switch (p.side) {

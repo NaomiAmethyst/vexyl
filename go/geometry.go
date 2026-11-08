@@ -149,8 +149,8 @@ func clipConvex(poly []vec, r region) []vec {
 // leave a seam showing what's beneath. A gradient spans the shape it fills, so a
 // bar for which exact returns true stays its true width.
 func barPolys(b *Bars, r region, exact func(i int) bool) [][]vec {
-	dir, normal := axis(r, b.Along, b.Rotate)
-	c := r.center()
+	frame, c := b.fixed.place(r)
+	dir, normal := axis(frame, b.Along, b.Rotate)
 	lo, hi := math.Inf(1), math.Inf(-1)
 	for _, corner := range r.corners() {
 		offset := corner.sub(c).dot(normal)
@@ -160,7 +160,7 @@ func barPolys(b *Bars, r region, exact func(i int) bool) [][]vec {
 	for _, part := range b.Ratio {
 		total += part
 	}
-	reach := r.reach()
+	reach := reachFrom(c, r)
 	polys := make([][]vec, 0, len(b.Ratio))
 	t := lo
 	for i, part := range b.Ratio {
@@ -171,7 +171,18 @@ func barPolys(b *Bars, r region, exact func(i int) bool) [][]vec {
 			end = next
 		}
 		if b.Line == nil {
-			polys = append(polys, clipConvex(stripPoly(c, dir, normal, t, end, reach), r))
+			from, to := t, end
+			if b.Rotate != 0 {
+				// The outermost lines pass through corners, where rounding in the angle could
+				// leave a sliver either side, so the outer ends reach well past the region.
+				if i == 0 {
+					from -= reach
+				}
+				if end == hi || i == len(b.Ratio)-1 {
+					to = hi + reach
+				}
+			}
+			polys = append(polys, clipConvex(stripPoly(c, dir, normal, from, to, reach), r))
 			t = next
 			continue
 		}
@@ -179,17 +190,39 @@ func barPolys(b *Bars, r region, exact func(i int) bool) [][]vec {
 		margin := b.Line.Depth + 1
 		near := []vec{c.add(normal.mul(lo - margin)).sub(dir.mul(reach)), c.add(normal.mul(lo - margin)).add(dir.mul(reach))}
 		if i > 0 {
-			near = waveEdge(c, dir, normal, t, axisSpan(r, b.Along), reach, b.Line)
+			near = waveEdge(c, dir, normal, t, axisSpan(frame, b.Along), reach, b.Line)
 		}
 		far := []vec{c.add(normal.mul(hi + margin)).add(dir.mul(reach)), c.add(normal.mul(hi + margin)).sub(dir.mul(reach))}
 		if isExact && i < len(b.Ratio)-1 {
-			far = waveEdge(c, dir, normal, next, axisSpan(r, b.Along), reach, b.Line)
+			far = waveEdge(c, dir, normal, next, axisSpan(frame, b.Along), reach, b.Line)
 			slices.Reverse(far)
 		}
 		polys = append(polys, append(near, far...))
 		t = next
 	}
 	return polys
+}
+
+// fixedFrame keeps a rotated bars or band where adapting to another proportion put it: its
+// center, and the region it was drawn for, which its axis and any edge are measured in.
+type fixedFrame struct {
+	center vec
+	frame  region
+}
+
+// place gives the region a layer's axis is measured in and the center it's drawn about,
+// which are the region's own unless adapting fixed them.
+func (f *fixedFrame) place(r region) (frame region, center vec) {
+	if f == nil {
+		return r, r.center()
+	}
+	return f.frame, f.center
+}
+
+// reachFrom is far enough from a point to cross the whole region, wherever the point is.
+func reachFrom(c vec, r region) float64 {
+	d := c.sub(r.center())
+	return r.reach() + math.Hypot(d.x, d.y)
 }
 
 // stripPoly is the rectangle between two offsets along normal.
@@ -284,8 +317,14 @@ func rawChevrons(ch *Chevrons, r region) (nested, bands [][]vec) {
 // bandPoly is a band's rectangle. It's clipped to the region unless it will be
 // stroked, since a clipped polygon's new edges would pick up fimbriation.
 func bandPoly(r region, along string, rotation, width, offset float64, stroked bool) []vec {
-	dir, normal := axis(r, along, rotation)
-	poly := stripPoly(r.center(), dir, normal, offset-width/2, offset+width/2, r.reach())
+	return placedBandPoly(r, nil, along, rotation, width, offset, stroked)
+}
+
+// placedBandPoly is bandPoly for a band whose place adapting may have fixed.
+func placedBandPoly(r region, fixed *fixedFrame, along string, rotation, width, offset float64, stroked bool) []vec {
+	frame, c := fixed.place(r)
+	dir, normal := axis(frame, along, rotation)
+	poly := stripPoly(c, dir, normal, offset-width/2, offset+width/2, reachFrom(c, r))
 	if stroked {
 		return poly
 	}

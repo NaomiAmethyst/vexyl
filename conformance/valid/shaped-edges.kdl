@@ -1,5 +1,5 @@
 // An invented flag exercising shaped edges: between bars on every axis, rotated, by count and
-// by a period that doesn't fit, and on side panels.
+// by a period that doesn't fit, and on side panels, where a period that doesn't fit runs on flat.
 vexyl 1
 meta {
   name "Shaped Edges Test"
@@ -10,7 +10,7 @@ palette {
   gold "#f2c14e"
   white "#ffffff"
 }
-proportion hoist=30 fly=40
+proportion hoist=40 fly=40
 
 panel {
   at fly=10 hoist=5
@@ -69,6 +69,30 @@ panel {
     side top
     width 3
     edge wavy depth=1 period=5
+    field violet
+  }
+}
+panel {
+  at fly=10 hoist=35
+  fly 20
+  hoist 10
+  field gold
+  panel {
+    side hoist
+    width 6
+    edge zigzag depth=2 period=8.4
+    field night
+  }
+}
+panel {
+  at fly=30 hoist=35
+  fly 20
+  hoist 10
+  field white
+  panel {
+    side bottom
+    width 4
+    edge zigzag depth=2 period=9
     field violet
   }
 }

@@ -1015,8 +1015,33 @@
   "line": 5
  },
  {
-  "name": "a sun's gap written as zero",
-  "file": "invalid/a-sun-s-gap-written-as-zero.kdl",
+  "name": "a sun's gap below zero",
+  "file": "invalid/a-sun-s-gap-below-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "a pile's flat below zero",
+  "file": "invalid/a-pile-s-flat-below-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "a swallowtail's taper below zero",
+  "file": "invalid/a-swallowtail-s-taper-below-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "a pennant's tip below zero",
+  "file": "invalid/a-pennant-s-tip-below-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "a swallowtail given a tip of zero",
+  "file": "invalid/a-swallowtail-given-a-tip-of-zero.kdl",
+  "line": 5
+ },
+ {
+  "name": "a pennant given a taper of zero",
+  "file": "invalid/a-pennant-given-a-taper-of-zero.kdl",
   "line": 5
  },
  {
@@ -1284,6 +1309,126 @@
  {
   "name": "clip path written on one line",
   "file": "invalid/clip-path-written-on-one-line.kdl",
+  "line": 5
+ },
+ {
+  "name": "a box with two commas together",
+  "file": "invalid/a-box-with-two-commas-together.kdl",
+  "line": 5
+ },
+ {
+  "name": "a box with a comma at its end",
+  "file": "invalid/a-box-with-a-comma-at-its-end.kdl",
+  "line": 5
+ },
+ {
+  "name": "a box starting with a comma",
+  "file": "invalid/a-box-starting-with-a-comma.kdl",
+  "line": 5
+ },
+ {
+  "name": "through with two commas together",
+  "file": "invalid/through-with-two-commas-together.kdl",
+  "line": 6
+ },
+ {
+  "name": "a viewBox with two commas together",
+  "file": "invalid/a-viewbox-with-two-commas-together.kdl",
+  "line": 5
+ },
+ {
+  "name": "a viewBox with a comma on its own between spaces twice",
+  "file": "invalid/a-viewbox-with-a-comma-on-its-own-between-spaces-twice.kdl",
+  "line": 5
+ },
+ {
+  "name": "currentColor in a style without a color",
+  "file": "invalid/currentcolor-in-a-style-without-a-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "currentColor as a fallback without a color",
+  "file": "invalid/currentcolor-as-a-fallback-without-a-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "currentColor in a stop without a color",
+  "file": "invalid/currentcolor-in-a-stop-without-a-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "currentColor in the root's color without a color",
+  "file": "invalid/currentcolor-in-the-root-s-color-without-a-color.kdl",
+  "line": 5
+ },
+ {
+  "name": "a star of 3 points with lines",
+  "file": "invalid/a-star-of-3-points-with-lines.kdl",
+  "line": 5
+ },
+ {
+  "name": "a star of 4 points with lines",
+  "file": "invalid/a-star-of-4-points-with-lines.kdl",
+  "line": 5
+ },
+ {
+  "name": "an empty canton",
+  "file": "invalid/an-empty-canton.kdl",
+  "line": 5
+ },
+ {
+  "name": "a rotated bars with grow",
+  "file": "invalid/a-rotated-bars-with-grow.kdl",
+  "line": 5
+ },
+ {
+  "name": "a defined one-line path with another property",
+  "file": "invalid/a-defined-one-line-path-with-another-property.kdl",
+  "line": 5
+ },
+ {
+  "name": "a defined one-line path with children",
+  "file": "invalid/a-defined-one-line-path-with-children.kdl",
+  "line": 5
+ },
+ {
+  "name": "an outline path with another property",
+  "file": "invalid/an-outline-path-with-another-property.kdl",
+  "line": 5
+ },
+ {
+  "name": "an outline path with children",
+  "file": "invalid/an-outline-path-with-children.kdl",
+  "line": 5
+ },
+ {
+  "name": "an outline of a polygon and a path",
+  "file": "invalid/an-outline-of-a-polygon-and-a-path.kdl",
+  "line": 7
+ },
+ {
+  "name": "an outline of a path and a polygon",
+  "file": "invalid/an-outline-of-a-path-and-a-polygon.kdl",
+  "line": 7
+ },
+ {
+  "name": "an outline of two polygons",
+  "file": "invalid/an-outline-of-two-polygons.kdl",
+  "line": 7
+ },
+ {
+  "name": "a hollow outline polygon",
+  "file": "invalid/a-hollow-outline-polygon.kdl",
+  "line": 5
+ },
+ {
+  "name": "a side panel at the center",
+  "file": "invalid/a-side-panel-at-the-center.kdl",
+  "line": 5
+ },
+ {
+  "name": "a corner panel at the center",
+  "file": "invalid/a-corner-panel-at-the-center.kdl",
   "line": 5
  },
  {

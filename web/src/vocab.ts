@@ -86,9 +86,9 @@ export const layers: Readonly<Record<string, Term>> = {
 			{ k: "num", label: "Count", child: "count", note: "Cycles through the colors until there are this many bars." },
 			unevenly,
 			{ k: "heading", label: "More" },
-			rotated,
+			{ ...rotated, when: { lacks: ["grow"] } },
 			{ k: "edge" },
-			{ k: "nums", label: "Grow", child: "grow", note: "How the bars share a change of proportion." },
+			{ k: "nums", label: "Grow", child: "grow", note: "How the bars share a change of proportion. Rotated bars keep their widths, so they can't.", when: { lacks: ["rotate"] } },
 		],
 	},
 	chevrons: {
@@ -256,7 +256,7 @@ export const shapes: Readonly<Record<string, ShapeTerm>> = {
 	triangle: { label: "Triangle", desc: "An equilateral triangle, point up.", fields: [radius, hollow], skeleton: "radius 1" },
 	star: {
 		label: "Star", desc: "A star with any number of points, one straight up.",
-		fields: [{ ...radius, note: "From its center to a point." }, { k: "num", label: "Points", child: "points", note: "5 if it's left out. Under 5, it needs an inner." }, { k: "num", label: "Inner", child: "inner", note: "From its center to the notches. Leave it empty for a regular star." }, { k: "num", label: "Lines", child: "lines", note: "Draws it as lines between its points, like a pentagram.", when: { lacks: ["hollow"] } }, { ...hollow, when: { lacks: ["lines"] } }],
+		fields: [{ ...radius, note: "From its center to a point." }, { k: "num", label: "Points", child: "points", note: "5 if it's left out. Under 5, it needs an inner and can't be drawn in lines." }, { k: "num", label: "Inner", child: "inner", note: "From its center to the notches. Leave it empty for a regular star." }, { k: "num", label: "Lines", child: "lines", note: "Draws it as lines between its points, like a pentagram. It needs at least 5 points.", when: { lacks: ["hollow"] } }, { ...hollow, when: { lacks: ["lines"] } }],
 		skeleton: "radius 1",
 	},
 	crescent: { label: "Crescent", desc: "A circle with another cut from it, opening to the right.", fields: [radius, { k: "num", label: "Inner", child: "inner", note: "The size of the circle cut away." }, { k: "num", label: "Offset", child: "offset", note: "How far right of center that circle sits." }, hollow], skeleton: "radius 1\ninner 0.8\noffset 0.3" },

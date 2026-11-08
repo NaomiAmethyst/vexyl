@@ -93,7 +93,10 @@ within 15% of what zlib manages with the dictionary, which it can't be without u
 file changes at all, this fails.
 
 `conformance/prove.py` shows that all of these can fail, by running the suite against a library with one thing wrong
-at a time, through `conformance/mutant.py`. It's `make conformance-prove`.
+at a time, through `conformance/mutant.py`. It's `make conformance-prove`. It also shows that renders catch a few
+mistakes in geometry: a charge's cuts, an arc's direction, a turned reverse, a rotated layer adapted as if it weren't
+rotated, and a panel's shaped edge slanting to its corner. The last two are the reference itself, patched and built
+with Go, since no change to a library's input or output stands in for them.
 
 ## What else is checked
 

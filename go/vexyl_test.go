@@ -699,7 +699,12 @@ func TestRejected(t *testing.T) {
 		{"plus with no width", header + `charge plus a { radius 1; }`, "less than twice"},
 		{"a ratio with a zero", header + `bars a b { ratio 1 0; }`, "positive"},
 		{"hollow of zero", header + `charge disc a { radius 1; hollow 0; }`, "positive"},
-		{"a sun's gap written as zero", header + `charge sun a { radius 3; disc 1; gap 0; }`, "positive"},
+		{"a sun's gap below zero", header + `charge sun a { radius 3; disc 1; gap -1; }`, "can't be negative"},
+		{"a pile's flat below zero", header + `pile a { depth 2; flat -1; }`, "can't be negative"},
+		{"a swallowtail's taper below zero", header + "outline swallowtail { depth 2; taper -1; }\n", "can't be negative"},
+		{"a pennant's tip below zero", header + "outline pennant { tip -1; }\n", "can't be negative"},
+		{"a swallowtail given a tip of zero", header + "outline swallowtail { depth 2; tip 0; }\n", "doesn't use"},
+		{"a pennant given a taper of zero", header + "outline pennant { taper 0; }\n", "doesn't use"},
 		{"checks of one color", header + `checks a { rows 2; columns 2; }`, "at least 2 colors"},
 		{"inline svg at several places", header + `charge svg { fly 1; hoist 1; at center; at fly=1 hoist=1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>"; }`, "can't be repeated"},
 		{"hollow inline svg", header + `charge svg { fly 1; hoist 1; hollow 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>"; }`, "unknown here"},
@@ -754,6 +759,30 @@ func TestRejected(t *testing.T) {
 		{"render license in another case", "vexyl 1\nmeta {\n  name \"T\"\n  render-license \"CC-BY-4.0\"\n  adapted-from \"https://example.test/a\" {\n    license \"cc-by-4.0\"\n  }\n}\n", "can't cover"},
 		{"outline path written as children", header + "outline { path { d \"M0 0H1V1Z\"; box \"0 0 1 1\"; }; }\n", "isn't SVG path data"},
 		{"clip path written on one line", header + `field a { clip { path "M0 0H1V1Z" box="0 0 1 1"; }; }`, "takes no arguments"},
+		{"a box with two commas together", header + `charge path a { d "M0 0H1V1Z"; box "0 0,,1 1"; fly 1; }`, "box must be"},
+		{"a box with a comma at its end", header + `charge path a { d "M0 0H1V1Z"; box "0 0 1 1,"; fly 1; }`, "box must be"},
+		{"a box starting with a comma", header + `charge path a { d "M0 0H1V1Z"; box ",0 0 1 1"; fly 1; }`, "box must be"},
+		{"through with two commas together", header + "field a\nfold f { over through=\"0 5,,20 5\" move=\"10 2\"; }\n", "decimal numbers"},
+		{"a viewBox with two commas together", header + `charge svg a { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0,,0 1 1'/>"; }`, "invalid viewBox"},
+		{"a viewBox with a comma on its own between spaces twice", header + `charge svg a { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 , , 0 1 1'/>"; }`, "invalid viewBox"},
+		{"currentColor in a style without a color", header + `charge svg { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect width='1' height='1' style='fill: CURRENTCOLOR'/></svg>"; }`, "needs a palette color"},
+		{"currentColor as a fallback without a color", header + `charge svg { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect width='1' height='1' fill='url(#g) currentColor'/></svg>"; }`, "needs a palette color"},
+		{"currentColor in a stop without a color", header + `charge svg { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><linearGradient id='g'><stop stop-color='currentcolor'/></linearGradient></svg>"; }`, "needs a palette color"},
+		{"currentColor in the root's color without a color", header + `charge svg { fly 1; hoist 1; markup "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1' color='currentColor'/>"; }`, "needs a palette color"},
+		{"a star of 3 points with lines", header + `charge star a { radius 2; inner 1; points 3; lines 0.1; }`, "at least 5 points"},
+		{"a star of 4 points with lines", header + `charge star a { radius 2; inner 1; points 4; lines 0.1; }`, "at least 5 points"},
+		{"an empty canton", header + `canton { fly 5; hoist 5; }`, "at least one layer"},
+		{"a rotated bars with grow", header + `bars a b { rotate 10; grow 1 0; }`, "takes no `grow`"},
+		{"a defined one-line path with another property", header + "define d { path \"M0 0H1V1Z\" box=\"0 0 1 1\" foo=1; }\n", "unknown property"},
+		{"a defined one-line path with children", header + "define d { path \"M0 0H1V1Z\" box=\"0 0 1 1\" { evenodd; }; }\n", "takes no children"},
+		{"an outline path with another property", header + "outline { path \"M0 0H1V1Z\" box=\"0 0 1 1\" foo=1; }\n", "unknown property"},
+		{"an outline path with children", header + "outline { path \"M0 0H1V1Z\" box=\"0 0 1 1\" { fly 1; }; }\n", "takes no children"},
+		{"an outline of a polygon and a path", header + "outline {\n  polygon { point fly=0 hoist=0; point fly=20 hoist=0; point fly=0 hoist=10; }\n  path \"M0 0H1V1Z\" box=\"0 0 1 1\"\n}\n", "one shape"},
+		{"an outline of a path and a polygon", header + "outline {\n  path \"M0 0H1V1Z\" box=\"0 0 1 1\"\n  polygon { point fly=0 hoist=0; point fly=20 hoist=0; point fly=0 hoist=10; }\n}\n", "one shape"},
+		{"an outline of two polygons", header + "outline {\n  polygon { point fly=0 hoist=0; point fly=20 hoist=0; point fly=0 hoist=10; }\n  polygon { point fly=0 hoist=0; point fly=20 hoist=0; point fly=20 hoist=10; }\n}\n", "one shape"},
+		{"a hollow outline polygon", header + "outline { polygon { hollow 1; point fly=0 hoist=0; point fly=20 hoist=0; point fly=0 hoist=10; }; }\n", "can't be `hollow`"},
+		{"a side panel at the center", header + `panel { side top; width 1; at center; field a; }`, "no `fly`"},
+		{"a corner panel at the center", header + `panel { corner upper-fly; at center; fly 1; hoist 1; field a; }`, "not both"},
 	}
 	if *update {
 		var cases []invalidCase
@@ -2253,4 +2282,53 @@ func FuzzParse(f *testing.F) {
 			}
 		}
 	})
+}
+
+// A rotated bars or band keeps its angle and its widths at another proportion, and its center
+// moves as a position does, so under extend it stays where it was from the hoist.
+func TestRotatedLayersKeepTheirWidths(t *testing.T) {
+	src := header + "bars a b a { ratio 1 2 1; rotate 20; }\nband b { along hoist; width 2; offset 3; rotate 20; }\n" +
+		"band a { along hoist; width 2; offset 3; }\nadapt { wider extend; narrower scale; }\n"
+	f := parse(t, src)
+	inner := func(f *Flag) float64 {
+		b := f.Layers[0].(*Bars)
+		total := 0.0
+		for _, part := range b.Ratio {
+			total += part
+		}
+		frame, c := b.fixed.place(region{w: f.Fly, h: f.Hoist})
+		_, normal := axis(frame, b.Along, b.Rotate)
+		lo, hi := spread(region{w: f.Fly, h: f.Hoist}, c, normal)
+		return (hi - lo) * b.Ratio[1] / total
+	}
+	middle := func(f *Flag, i int) vec {
+		b := f.Layers[i].(*Band)
+		poly := placedBandPoly(region{w: f.Fly, h: f.Hoist}, b.fixed, b.Along, b.Rotate, b.Width, b.Offset, true)
+		return poly[0].add(poly[2]).mul(0.5)
+	}
+	width := inner(f)
+	for _, ratio := range []float64{3, 1} {
+		g, err := f.withRatio(ratio)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := inner(g); math.Abs(got-width) > 1e-9 {
+			t.Errorf("ratio %v: the middle bar is %v wide, not %v", ratio, got, width)
+		}
+		for i := 1; i <= 2; i++ {
+			if got := g.Layers[i].(*Band).Width; got != 2 && (i == 1 || ratio > 2) {
+				t.Errorf("ratio %v: band %d is %v wide", ratio, i, got)
+			}
+		}
+	}
+	// Under extend, the rotated band stays put as the unrotated one does.
+	g, _ := f.withRatio(3)
+	if a, b := middle(f, 1), middle(g, 1); math.Abs(a.x-b.x) > 1e-9 || math.Abs(a.y-b.y) > 1e-9 {
+		t.Errorf("the rotated band moved from %v to %v", a, b)
+	}
+	// Under scale, its center line scales as any position does.
+	g, _ = f.withRatio(1)
+	if a, b := middle(f, 1), middle(g, 1); math.Abs(a.x*0.5-b.x) > 1e-9 || math.Abs(a.y-b.y) > 1e-9 {
+		t.Errorf("the rotated band moved from %v to %v, not by half", a, b)
+	}
 }

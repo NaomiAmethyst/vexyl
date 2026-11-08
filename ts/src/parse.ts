@@ -694,6 +694,9 @@ class Parser {
 				if (!l.fly || !l.hoist) {
 					this.errf(n, "needs `fly` and `hoist`");
 				}
+				if (l.layers.length === 0) {
+					this.errf(n, "needs at least one layer");
+				}
 				return l;
 			}
 		}
@@ -810,6 +813,9 @@ class Parser {
 			if (g < 0) {
 				this.errf(n, "`grow` can't be negative");
 			}
+		}
+		if (l.grow !== undefined && l.rotate !== 0) {
+			this.errf(n, "a rotated bars keeps its widths at other proportions, so it takes no `grow`");
 		}
 		return l;
 	}
@@ -1170,7 +1176,7 @@ class Parser {
 				s.spread ??= 1;
 				handlers.radius = radius;
 				handlers.disc = (c) => { s.disc = this.positive(c, this.number(c)); };
-				handlers.gap = (c) => { s.gap = this.positive(c, this.number(c)); };
+				handlers.gap = (c) => { s.gap = this.notNegative(c, this.number(c)); };
 				handlers.points = (c) => { s.points = this.integer(c, this.number(c), maxCopies); };
 				handlers.spread = (c) => { s.spread = this.positive(c, this.number(c)); };
 				break;
@@ -1208,7 +1214,7 @@ class Parser {
 					}
 				};
 				handlers.depth = (c) => { s.depth = this.positive(c, this.number(c)); };
-				handlers.flat = (c) => { s.flat = this.positive(c, this.number(c)); };
+				handlers.flat = (c) => { s.flat = this.notNegative(c, this.number(c)); };
 				break;
 			case "pall":
 				delete handlers.at;
@@ -1302,6 +1308,9 @@ class Parser {
 				if ((s.lines ?? 0) > 0 && (s.hollow ?? 0) > 0) {
 					this.errf(n, "`lines` and `hollow` can't be combined");
 				}
+				if ((s.lines ?? 0) > 0 && points < 5) {
+					this.errf(n, "`lines` needs at least 5 points");
+				}
 				if (inner >= radius && radius > 0) {
 					this.errf(n, "`inner` must be smaller than `radius`");
 				}
@@ -1363,7 +1372,7 @@ class Parser {
 					this.errf(n, "needs a `depth` or a `tip`");
 				} else if (s.tip !== undefined && s.depth) {
 					this.errf(n, "takes a `depth` or a `tip`, not both");
-				} else if (s.tip !== undefined && s.flat) {
+				} else if (s.tip !== undefined && s.flat !== undefined) {
 					this.errf(n, "a `flat` goes with a `depth`, not a `tip`");
 				}
 				break;
@@ -1640,6 +1649,14 @@ class Parser {
 		return v;
 	}
 
+	/** Reads a size that defaults to 0, which can also be written as 0. */
+	private notNegative(n: Node, v: number): number {
+		if (v < 0) {
+			this.errf(n, "can't be negative");
+		}
+		return v;
+	}
+
 	private integer(n: Node, v: number, limit: number): number {
 		if (v !== Math.trunc(v) || v < 1) {
 			this.errf(n, "needs a positive whole number");
@@ -1832,11 +1849,14 @@ class Parser {
 
 	private panel(n: Node, depth: number): Layer {
 		const l: PanelLayer = { layer: "panel", ...newEffects(), layers: [] };
+		// An `at center` gives no position, but it's still an `at`.
+		let placed = false;
 		this.noValues(n);
 		this.container(n, depth, l, l.layers, {
 			side: (c) => { l.side = this.oneOf(c, fromValues) as EdgeName; },
 			corner: (c) => { l.corner = this.oneOf(c, cornerValues) as CornerName; },
 			at: (c) => {
+				placed = true;
 				const at = this.at(c);
 				if (at !== null) {
 					l.at = at;
@@ -1863,7 +1883,7 @@ class Parser {
 			if (!l.width) {
 				this.errf(n, "a side panel needs a `width`");
 			}
-			if (l.fly || l.hoist || l.at !== undefined) {
+			if (l.fly || l.hoist || placed) {
 				this.errf(n, "a side panel takes a `width`, and no `fly`, `hoist` or `at`");
 			}
 		} else {
@@ -1873,7 +1893,7 @@ class Parser {
 			if (l.edge !== undefined) {
 				this.errf(n, "only a side panel can have an `edge`");
 			}
-			if (l.corner && l.at !== undefined) {
+			if (l.corner && placed) {
 				this.errf(n, "needs either `corner` or `at`, not both");
 			}
 			if (l.width) {
@@ -1937,22 +1957,13 @@ class Parser {
 			}
 			const s: ShapeDraft = { kind: c.getName() };
 			if (s.kind === "path" && c.hasArguments()) {
-				// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line.
-				const a1 = args(c);
-				if (a1.length === 1 && typeof a1[0] === "string" && validPath(a1[0])) {
-					s.d = a1[0];
-				} else {
-					this.errf(c, "isn't SVG path data");
+				// The usual form, `path "M..." box="0 0 10 10"`, puts it all on one line. Its size
+				// comes from each charge using it, so nothing more can be checked yet.
+				const { d: data, box } = this.linePath(c);
+				if (data !== "") {
+					s.d = data;
 				}
-				const b = propValue(c, "box");
-				if (typeof b === "string") {
-					s.box = this.boxValue(c, b);
-				}
-				// Its size comes from each charge using it, so nothing can be checked yet.
-				const box = s.box ?? [0, 0, 0, 0];
-				if (box[2] <= 0 || box[3] <= 0) {
-					this.errf(c, "needs a `box` with an area");
-				}
+				s.box = box;
 				d.shape = finishShape(s);
 				this.defines[name] = d;
 				return;
@@ -1974,6 +1985,25 @@ class Parser {
 		this.defines[name] = d;
 	}
 
+	/** Reads the one-line form of a path, `path "M..." box="x y width height"`, which takes nothing else. */
+	private linePath(n: Node): { d: string; box: Box } {
+		this.only(n, 1, ["box"]);
+		this.noChildren(n);
+		const a1 = args(n);
+		let d = "";
+		if (a1.length === 1 && typeof a1[0] === "string" && validPath(a1[0])) {
+			d = a1[0];
+		} else {
+			this.errf(n, "isn't SVG path data");
+		}
+		const b = propValue(n, "box");
+		const box: Box = typeof b === "string" ? this.boxValue(n, b) : [0, 0, 0, 0];
+		if (box[2] <= 0 || box[3] <= 0) {
+			this.errf(n, "needs a `box` with an area");
+		}
+		return { d, box };
+	}
+
 	/** Reads a flag's silhouette: a polygon or path inside it, or a named form. */
 	private outline(n: Node): Outline | undefined {
 		this.noProps(n);
@@ -1992,11 +2022,12 @@ class Parser {
 			let tip = 0;
 			let tongue = 0;
 			let taper = 0;
+			const given = new Set<string>();
 			this.children(n, [], {
-				depth: (c) => { depth = this.positive(c, this.number(c)); },
-				tip: (c) => { tip = this.positive(c, this.number(c)); },
-				tongue: (c) => { tongue = this.positive(c, this.number(c)); },
-				taper: (c) => { taper = this.positive(c, this.number(c)); },
+				depth: (c) => { depth = this.positive(c, this.number(c)); given.add("depth"); },
+				tip: (c) => { tip = this.notNegative(c, this.number(c)); given.add("tip"); },
+				tongue: (c) => { tongue = this.positive(c, this.number(c)); given.add("tongue"); },
+				taper: (c) => { taper = this.notNegative(c, this.number(c)); given.add("taper"); },
 			});
 			if (kind !== "pennant" && depth === 0) {
 				this.errf(n, "needs a `depth`");
@@ -2004,32 +2035,32 @@ class Parser {
 			if (kind === "tongued" && tongue === 0) {
 				this.errf(n, "needs a `tongue`");
 			}
-			if ((tip !== 0 && kind !== "pennant") || (tongue !== 0 && kind !== "tongued") || (taper !== 0 && kind !== "swallowtail") || (depth !== 0 && kind === "pennant")) {
+			if ((given.has("tip") && kind !== "pennant") || (given.has("tongue") && kind !== "tongued") || (given.has("taper") && kind !== "swallowtail") || (given.has("depth") && kind === "pennant")) {
 				this.errf(n, `has a value that a ${kind} doesn't use`);
 			}
 			// Each form reads all four, so a stray one is kept for the model to report.
 			return { kind, depth, tip, tongue, taper } as Outline;
 		}
 		let outline: Outline | undefined;
+		let shapes = 0;
 		this.children(n, [], {
 			polygon: (c) => {
+				if (++shapes > 1) {
+					this.errf(c, "an outline holds one shape");
+				}
 				const s: ShapeDraft = { kind: "polygon" };
 				this.noValues(c);
 				this.shapeBody(c, s, null);
+				if ((s.hollow ?? 0) > 0) {
+					this.errf(c, "an outline is a whole shape, so it can't be `hollow`");
+				}
 				outline = { kind: "polygon", vertices: s.vertices ?? [] };
 			},
 			path: (c) => {
-				const a1 = args(c);
-				const d = a1[0];
-				if (a1.length !== 1 || typeof d !== "string" || !validPath(d)) {
-					this.errf(c, "isn't SVG path data");
-					return;
+				if (++shapes > 1) {
+					this.errf(c, "an outline holds one shape");
 				}
-				const b = propValue(c, "box");
-				const box: Box = typeof b === "string" ? this.boxValue(c, b) : [0, 0, 0, 0];
-				if (box[2] <= 0 || box[3] <= 0) {
-					this.errf(c, "needs a `box` with an area");
-				}
+				const { d, box } = this.linePath(c);
 				outline = { kind: "path", d, box };
 			},
 		});

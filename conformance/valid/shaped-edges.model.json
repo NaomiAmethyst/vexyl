@@ -177,6 +177,68 @@
      "width": 3
     }
    ]
+  },
+  {
+   "at": {
+    "fly": 10,
+    "hoist": 35
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "gold",
+     "layer": "field"
+    },
+    {
+     "edge": {
+      "depth": 2,
+      "form": "zigzag",
+      "period": 8.4
+     },
+     "layer": "panel",
+     "layers": [
+      {
+       "color": "night",
+       "layer": "field"
+      }
+     ],
+     "side": "hoist",
+     "width": 6
+    }
+   ]
+  },
+  {
+   "at": {
+    "fly": 30,
+    "hoist": 35
+   },
+   "fly": 20,
+   "hoist": 10,
+   "layer": "panel",
+   "layers": [
+    {
+     "color": "white",
+     "layer": "field"
+    },
+    {
+     "edge": {
+      "depth": 2,
+      "form": "zigzag",
+      "period": 9
+     },
+     "layer": "panel",
+     "layers": [
+      {
+       "color": "violet",
+       "layer": "field"
+      }
+     ],
+     "side": "bottom",
+     "width": 4
+    }
+   ]
   }
  ],
  "meta": {
@@ -198,7 +260,7 @@
  },
  "proportion": {
   "fly": 40,
-  "hoist": 30
+  "hoist": 40
  },
  "vexyl": 1
 }

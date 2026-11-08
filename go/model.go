@@ -228,6 +228,8 @@ type Bars struct {
 	Grow []float64
 	// Line shapes the edges between the bars.
 	Line *Line
+	// fixed is where adapting put a rotated bars, if it did.
+	fixed *fixedFrame
 }
 
 // Chevrons nests V-shaped bands outward from an edge of its region.
@@ -256,6 +258,8 @@ type Band struct {
 	Offset    float64
 	Rotate    float64
 	Fimbriate *Edge
+	// fixed is where adapting put a rotated band, if it did.
+	fixed *fixedFrame
 }
 
 // Cross is a cross of two arms, each described by the distance before the arm,
@@ -428,7 +432,9 @@ type Shape struct {
 	// autoInner and autoSpread record values worked out from the shape's others, which
 	// change if a charge using a definition changes those.
 	autoInner, autoSpread bool
-	embedded              *embeddedSVG
+	// hasFlat records a pile's `flat`, even `flat 0`.
+	hasFlat  bool
+	embedded *embeddedSVG
 }
 
 // Repeat paints a charge several times.

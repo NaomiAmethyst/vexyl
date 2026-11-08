@@ -100,6 +100,22 @@
   "file": "accepted/a-lone-pile-defined-as-a-design.kdl"
  },
  {
+  "name": "sizes that default to 0 written as 0",
+  "file": "accepted/sizes-that-default-to-0-written-as-0.kdl"
+ },
+ {
+  "name": "a pennant's tip written as 0",
+  "file": "accepted/a-pennant-s-tip-written-as-0.kdl"
+ },
+ {
+  "name": "an id containing currentColor, with no palette color",
+  "file": "accepted/an-id-containing-currentcolor-with-no-palette-color.kdl"
+ },
+ {
+  "name": "a single comma between numbers, with whitespace around it",
+  "file": "accepted/a-single-comma-between-numbers-with-whitespace-around-it.kdl"
+ },
+ {
   "name": "edges of either kind by either measure",
   "file": "accepted/edges-of-either-kind-by-either-measure.kdl"
  },

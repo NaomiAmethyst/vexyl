@@ -1,0 +1,82 @@
+{
+ "adapt": {
+  "narrower": "hoist-extend",
+  "wider": "scale"
+ },
+ "layers": [
+  {
+   "colors": [
+    "night",
+    "violet"
+   ],
+   "edge": {
+    "count": 4,
+    "depth": 2,
+    "form": "zigzag"
+   },
+   "layer": "bars",
+   "ratio": [
+    1,
+    1
+   ],
+   "rotate": -12
+  },
+  {
+   "along": "bend-sinister",
+   "colors": [
+    "none",
+    "gold",
+    "none"
+   ],
+   "layer": "bars",
+   "ratio": [
+    2,
+    1,
+    3
+   ],
+   "rotate": 8
+  },
+  {
+   "along": "bend",
+   "color": "white",
+   "fimbriate": {
+    "color": "night",
+    "width": 0.5
+   },
+   "layer": "band",
+   "offset": 2,
+   "rotate": -25,
+   "width": 1.5
+  },
+  {
+   "along": "hoist",
+   "anchor": "start",
+   "color": "gold",
+   "layer": "band",
+   "rotate": 30,
+   "width": 1
+  }
+ ],
+ "meta": {
+  "name": "Rotated Adapt Scale Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "vexyl": 1
+}

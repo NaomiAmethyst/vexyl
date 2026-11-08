@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
+import { add, axis, dot, mul, placeIn, regionCorners, sub, sum, type Region, type Vec } from "./geometry.js";
 import { num } from "./text.js";
 import { RenderError } from "./types.js";
-import type { Anchor, Effects, Flag, Layer, Options, PanelLayer, Point, Shape, Turn, Variant } from "./types.js";
+import type { Anchor, BarsLayer, Effects, Flag, Layer, Options, PanelLayer, Point, Shape, Turn, Variant } from "./types.js";
 
 type AxisName = "fly" | "hoist";
 
@@ -64,6 +65,18 @@ function move(x: number, old: number, next: number, anchor: Anchor): number {
 		default:
 			return x;
 	}
+}
+
+/** How far a region reaches either side of a point, along a normal. */
+function spread(r: Region, c: Vec, normal: Vec): [number, number] {
+	let lo = Infinity;
+	let hi = -Infinity;
+	for (const corner of regionCorners(r)) {
+		const offset = dot(sub(corner, c), normal);
+		lo = Math.min(lo, offset);
+		hi = Math.max(hi, offset);
+	}
+	return [lo, hi];
 }
 
 /** Moves layers along one axis as their region changes size. */
@@ -134,6 +147,47 @@ class Adapter {
 		return this.axis === "fly"
 			? { fly: move(p.fly, old, next, anchor), hoist: p.hoist }
 			: { fly: p.fly, hoist: move(p.hoist, old, next, anchor) };
+	}
+
+	/** The region before and after the change. */
+	private regions(old: number, next: number): { before: Region; after: Region } {
+		return this.axis === "hoist"
+			? { before: { w: this.other, h: old }, after: { w: this.other, h: next } }
+			: { before: { w: old, h: this.other }, after: { w: next, h: this.other } };
+	}
+
+	/** Moves a point along the axis, by a layer's anchor. */
+	private moveVec(v: Vec, old: number, next: number, anchor: Anchor): Vec {
+		return this.axis === "hoist" ? { x: v.x, y: move(v.y, old, next, anchor) } : { x: move(v.x, old, next, anchor), y: v.y };
+	}
+
+	/**
+	 * Keeps a rotated bars' angle, and the lines between its bars where they were about its center,
+	 * which moves like any position. The first and last bars reach the new region's corners, so only
+	 * they change, and neither can reach nothing.
+	 */
+	private rotatedBars(copy: BarsLayer, old: number, next: number, anchor: Anchor): BarsLayer {
+		const { before, after } = this.regions(old, next);
+		const { frame, center } = placeIn(copy.fixed, before);
+		const { normal } = axis(frame, copy.along, copy.rotate);
+		const moved = this.moveVec(center, old, next, anchor);
+		const [lo, hi] = spread(before, center, normal);
+		const [newLo, newHi] = spread(after, moved, normal);
+		const total = sum(copy.ratio);
+		let line = lo;
+		let start = newLo;
+		const ratio = copy.ratio.map((part, i) => {
+			line += ((hi - lo) * part) / total;
+			const end = i === copy.ratio.length - 1 ? newHi : line;
+			const size = end - start;
+			start = end;
+			return size;
+		});
+		this.keep("bars", ratio[0]!, old);
+		this.keep("bars", ratio[ratio.length - 1]!, old);
+		copy.ratio = ratio;
+		copy.fixed = { center: moved, w: frame.w, h: frame.h };
+		return copy;
 	}
 
 	private optionalPoint(p: Point | undefined, old: number, next: number, anchor: Anchor): Point | undefined {
@@ -256,6 +310,9 @@ class Adapter {
 				return this.effects(l, old, next).copy;
 			case "bars": {
 				const { copy, anchor } = this.effects(l, old, next);
+				if (l.rotate !== 0) {
+					return this.rotatedBars(copy, old, next, anchor);
+				}
 				if ((this.axis === "fly") !== (l.along === "hoist") || l.along === "bend" || l.along === "bend-sinister") {
 					return copy;
 				}
@@ -292,6 +349,15 @@ class Adapter {
 			}
 			case "band": {
 				const { copy, anchor } = this.effects(l, old, next);
+				if (l.rotate !== 0) {
+					// It keeps its angle and width, and its center line moves like any position.
+					const { frame, center } = placeIn(l.fixed, this.regions(old, next).before);
+					const { normal } = axis(frame, l.along, l.rotate);
+					const moved = this.moveVec(add(center, mul(normal, l.offset)), old, next, anchor);
+					copy.fixed = { center: moved, w: frame.w, h: frame.h };
+					copy.offset = 0;
+					return copy;
+				}
 				const acrossAxis = (this.axis === "fly" && l.along === "hoist") || (this.axis === "hoist" && l.along === "fly");
 				if (acrossAxis) {
 					switch (anchor) {

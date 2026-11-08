@@ -591,6 +591,9 @@ func (p *parser) layer(n *kdl.Node, depth int) Layer {
 		if l.Fly == 0 || l.Hoist == 0 {
 			p.errf(n, "needs `fly` and `hoist`")
 		}
+		if len(l.Layers) == 0 {
+			p.errf(n, "needs at least one layer")
+		}
 		return l
 	}
 	p.errf(n, "unknown layer")
@@ -703,6 +706,9 @@ func (p *parser) bars(n *kdl.Node) Layer {
 		if g < 0 {
 			p.errf(n, "`grow` can't be negative")
 		}
+	}
+	if l.Grow != nil && l.Rotate != 0 {
+		p.errf(n, "a rotated bars keeps its widths at other proportions, so it takes no `grow`")
 	}
 	return l
 }
@@ -1038,7 +1044,7 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 		}
 		handlers["radius"] = radius
 		handlers["disc"] = func(c *kdl.Node) { s.Disc = p.positive(c, p.number(c)) }
-		handlers["gap"] = func(c *kdl.Node) { s.Gap = p.positive(c, p.number(c)) }
+		handlers["gap"] = func(c *kdl.Node) { s.Gap = p.notNegative(c, p.number(c)) }
 		handlers["points"] = func(c *kdl.Node) { s.Points = p.integer(c, p.number(c), maxCopies) }
 		handlers["spread"] = func(c *kdl.Node) { s.Spread = p.positive(c, p.number(c)) }
 	case "lozenge", "ellipse":
@@ -1070,7 +1076,7 @@ func (p *parser) shapeBody(n *kdl.Node, s *Shape, extra map[string]func(*kdl.Nod
 			}
 		}
 		handlers["depth"] = func(c *kdl.Node) { s.Depth = p.positive(c, p.number(c)) }
-		handlers["flat"] = func(c *kdl.Node) { s.Flat = p.positive(c, p.number(c)) }
+		handlers["flat"] = func(c *kdl.Node) { s.Flat, s.hasFlat = p.notNegative(c, p.number(c)), true }
 	case "pall":
 		delete(handlers, "at")
 		delete(handlers, "rotate")
@@ -1149,6 +1155,9 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 		if s.Lines > 0 && s.Hollow > 0 {
 			p.errf(n, "`lines` and `hollow` can't be combined")
 		}
+		if s.Lines > 0 && s.Points < 5 {
+			p.errf(n, "`lines` needs at least 5 points")
+		}
 		if s.Inner >= s.Radius && s.Radius > 0 {
 			p.errf(n, "`inner` must be smaller than `radius`")
 		}
@@ -1200,7 +1209,7 @@ func (p *parser) checkShape(n *kdl.Node, s *Shape) {
 			p.errf(n, "needs a `depth` or a `tip`")
 		case s.Tip != nil && s.Depth != 0:
 			p.errf(n, "takes a `depth` or a `tip`, not both")
-		case s.Tip != nil && s.Flat != 0:
+		case s.Tip != nil && s.hasFlat:
 			p.errf(n, "a `flat` goes with a `depth`, not a `tip`")
 		}
 	case "pall":
@@ -1493,6 +1502,14 @@ func (p *parser) positives(n *kdl.Node) []float64 {
 func (p *parser) positive(n *kdl.Node, v float64) float64 {
 	if v <= 0 {
 		p.errf(n, "needs a positive number")
+	}
+	return v
+}
+
+// notNegative reads a size that defaults to 0, which can also be written as 0.
+func (p *parser) notNegative(n *kdl.Node, v float64) float64 {
+	if v < 0 {
+		p.errf(n, "can't be negative")
 	}
 	return v
 }

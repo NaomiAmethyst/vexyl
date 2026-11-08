@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="900" height="600">
+  <title>Rotated Adapt Hoist Test</title>
+  <g transform="matrix(-1 0 0 1 30 0)">
+    <clipPath id="vx-3af298fab79d5045-b34d-flag1">
+      <polygon points="0,0 30,0 30,20 0,20"/>
+    </clipPath>
+    <g clip-path="url(#vx-3af298fab79d5045-b34d-flag1)">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#1b1035"/>
+      <polygon points="30,0 30,4.214968 6.095727,0" fill="#7b4fd6"/>
+      <polygon points="0,3.140127 30,8.429936 30,16.859873 0,11.570064" fill="#f2c14e"/>
+      <polygon points="0,20 0,15.785032 23.904273,20" fill="#ffffff"/>
+      <polygon points="0,20 0,18.160343 30,10.121867 30,12.192419 0.861712,20" fill="#ffffff"/>
+      <polygon points="6.087643,0 4.33787,20 5.8436,20 7.593373,0" fill="#f2c14e"/>
+    </g>
+  </g>
+</svg>

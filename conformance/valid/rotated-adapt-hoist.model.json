@@ -1,0 +1,68 @@
+{
+ "adapt": {
+  "narrower": "hoist-scale",
+  "wider": "hoist-center"
+ },
+ "layers": [
+  {
+   "color": "night",
+   "layer": "field"
+  },
+  {
+   "colors": [
+    "violet",
+    "none",
+    "gold",
+    "none",
+    "white"
+   ],
+   "layer": "bars",
+   "ratio": [
+    1,
+    1,
+    2,
+    1,
+    1
+   ],
+   "rotate": 10
+  },
+  {
+   "anchor": "end",
+   "color": "white",
+   "layer": "band",
+   "offset": 5,
+   "rotate": -15,
+   "width": 2
+  },
+  {
+   "along": "hoist",
+   "color": "gold",
+   "layer": "band",
+   "offset": -9,
+   "rotate": 5,
+   "width": 1.5
+  }
+ ],
+ "meta": {
+  "name": "Rotated Adapt Hoist Test"
+ },
+ "palette": {
+  "gold": {
+   "color": "#f2c14e"
+  },
+  "night": {
+   "color": "#1b1035"
+  },
+  "violet": {
+   "color": "#7b4fd6"
+  },
+  "white": {
+   "color": "#ffffff"
+  }
+ },
+ "proportion": {
+  "fly": 30,
+  "hoist": 20
+ },
+ "vexyl": 1
+}

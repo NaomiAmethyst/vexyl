@@ -387,9 +387,13 @@ func (r *renderer) layer(l Layer, reg region, path string) {
 	if r.using == 0 {
 		r.tag = path
 	}
-	attrs, style := r.effects(l.effects(), reg, cutMoves(l, reg))
-	if _, isGroup := l.(*Group); isGroup {
-		// A group composites as a unit, so its children blend only with each other.
+	e := l.effects()
+	attrs, style := r.effects(e, reg, cutMoves(l, reg))
+	// A group, and any layer with an opacity, a blend, a clip or a cut, composites as a unit,
+	// so a blend inside it mixes only with what else is inside. Saying so outright keeps
+	// every renderer to that. A panel's own group already says it.
+	_, isGroup := l.(*Group)
+	if isGroup || e.Opacity != 1 || e.Blend != "normal" || e.Clip != nil || len(e.Cuts) > 0 {
 		style = append(style, "isolation:isolate")
 	}
 	if len(style) > 0 {
@@ -498,8 +502,8 @@ func (r *renderer) content(l Layer, reg region, path string) {
 	case *Band:
 		// The fimbriation's stroke mustn't follow the region's edge, so it uses the
 		// band's unclipped shape. A clipped polygon can be empty.
-		stroke := []geom{{poly: bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, true)}}
-		if poly := bandPoly(reg, l.Along, l.Rotate, l.Width, l.Offset, false); len(poly) > 0 {
+		stroke := []geom{{poly: placedBandPoly(reg, l.fixed, l.Along, l.Rotate, l.Width, l.Offset, true)}}
+		if poly := placedBandPoly(reg, l.fixed, l.Along, l.Rotate, l.Width, l.Offset, false); len(poly) > 0 {
 			// A gradient spans the part inside the region, for the fimbriation too.
 			x, y, w, h := bounds(poly)
 			r.paint(l.Color, &[4]float64{x, y, w, h}, l.Fimbriate, stroke, []geom{{poly: poly}})

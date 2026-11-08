@@ -470,9 +470,15 @@ func panelRect(p *Panel, r region) (x, y, w, h float64) {
 	return at.x - p.Fly/2, at.y - p.Hoist/2, p.Fly, p.Hoist
 }
 
-// panelEdge is a panel's outline when it has a shaped edge, in its own coordinates.
+// panelEdge is a panel's outline when it has a shaped edge, in its own coordinates. A line
+// whose last point falls short of the side's end runs on flat to it, as one between bars does.
+// Rounding can leave the last point a hair short, which needs nothing.
 func panelEdge(p *Panel, w, h float64) []vec {
-	along, offset := linePoints(p.Line, map[bool]float64{true: h, false: w}[p.Side == "hoist" || p.Side == "fly"])
+	span := map[bool]float64{true: h, false: w}[p.Side == "hoist" || p.Side == "fly"]
+	along, offset := linePoints(p.Line, span)
+	if last := len(along) - 1; span-along[last] > 1e-9*span {
+		along, offset = append(along, span), append(offset, offset[last])
+	}
 	half := p.Line.Depth / 2
 	var points []vec
 	switch p.Side {

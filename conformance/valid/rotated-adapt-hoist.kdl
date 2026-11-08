@@ -1,0 +1,36 @@
+// An invented flag exercising rotated bars and bands as the hoist changes: by hoist-center
+// when it's wider, and by hoist-scale when it's narrower.
+vexyl 1
+meta {
+  name "Rotated Adapt Hoist Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+}
+proportion hoist=20 fly=30
+
+field night
+bars violet none gold none white {
+  ratio 1 1 2 1 1
+  rotate 10
+}
+band white {
+  along fly
+  width 2
+  offset 5
+  rotate -15
+  anchor end
+}
+band gold {
+  along hoist
+  width 1.5
+  offset -9
+  rotate 5
+}
+adapt {
+  wider hoist-center
+  narrower hoist-scale
+}

@@ -1,0 +1,44 @@
+// An invented flag exercising rotated bars and bands at other proportions. They keep their
+// angles and widths, and their centers move as positions do: by extend when it's wider, and
+// by center when it's narrower.
+vexyl 1
+meta {
+  name "Rotated Adapt Test"
+}
+palette {
+  night "#1b1035"
+  violet "#7b4fd6"
+  gold "#f2c14e"
+  white "#ffffff"
+  red "#d0312d"
+}
+proportion hoist=20 fly=30
+
+field violet
+bars night none gold none red {
+  along hoist
+  ratio 3 2 1 2 3
+  rotate 15
+}
+band white {
+  along hoist
+  width 2
+  offset 3
+  rotate 20
+}
+band night {
+  along fly
+  width 1
+  offset -4
+  rotate -10
+  anchor end
+}
+band gold {
+  along hoist
+  width 1
+  offset -10
+}
+adapt {
+  wider extend
+  narrower center
+}

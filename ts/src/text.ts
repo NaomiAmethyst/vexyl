@@ -36,7 +36,10 @@ export function asciiLower(s: string): string {
 /** The one way to write a number inside a string. */
 export const decimalForm = "[-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?";
 const decimalWhole = new RegExp(`^${decimalForm}$`);
-const numberList = new RegExp(`^[\\t\\n\\f\\r ]*${decimalForm}(?:[\\t\\n\\f\\r ,]+${decimalForm})*[\\t\\n\\f\\r ]*$`);
+/** Separates numbers in a string, as SVG's comma-wsp does: whitespace, or one comma with any whitespace around it. */
+export const commaSpace = "(?:[\\t\\n\\f\\r ]*,[\\t\\n\\f\\r ]*|[\\t\\n\\f\\r ]+)";
+const numberList = new RegExp(`^[\\t\\n\\f\\r ]*${decimalForm}(?:${commaSpace}${decimalForm})*[\\t\\n\\f\\r ]*$`);
+const numberSplit = new RegExp(commaSpace);
 
 /** Reads one number written that way, or gives undefined if it isn't one or is beyond the limits. */
 export function decimalValue(text: string): number | undefined {
@@ -47,13 +50,13 @@ export function decimalValue(text: string): number | undefined {
 	return inLimits(v) ? v : undefined;
 }
 
-/** Reads a string holding numbers, separated by whitespace, commas or both. */
+/** Reads a string holding numbers, separated by whitespace, a comma or both. */
 export function numbersIn(text: string): number[] | undefined {
 	if (!numberList.test(text)) {
 		return undefined;
 	}
 	const out: number[] = [];
-	for (const part of trimSpace(text).split(/[\t\n\f\r ,]+/)) {
+	for (const part of trimSpace(text).split(numberSplit)) {
 		const v = decimalValue(part);
 		if (v === undefined) {
 			return undefined;

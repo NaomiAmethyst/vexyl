@@ -2,10 +2,10 @@
   <title>Every field</title>
   <desc>Uses every field the canonical model has, so a library can&#39;t guess one</desc>
   <g transform="matrix(0 -1 -1 0 20 40)">
-    <clipPath id="vx-ff608d82e80305dc-e899-flag1">
+    <clipPath id="vx-0fc83150b350b994-e899-flag1">
       <polygon points="0,0 40,1 36,10 40,19 0,20"/>
     </clipPath>
-    <g clip-path="url(#vx-ff608d82e80305dc-e899-flag1)">
+    <g clip-path="url(#vx-0fc83150b350b994-e899-flag1)">
       <polygon points="0,0 40,0 40,20 0,20" fill="#cc0000"/>
       <polygon points="0,0 40,1 36,10 40,19 0,20" fill="none" stroke="#ffcc00" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
     </g>

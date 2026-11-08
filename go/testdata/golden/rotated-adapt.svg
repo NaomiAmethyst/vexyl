@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="900" height="600">
+  <title>Rotated Adapt Test</title>
+  <clipPath id="vx-9cb4ca6c6807cfd3-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-9cb4ca6c6807cfd3-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#7b4fd6"/>
+    <polygon points="0,0 0,20 4.284375,20 9.643359,0" fill="#1b1035"/>
+    <polygon points="16.072265,0 10.713282,20 13.927735,20 19.286718,0" fill="#f2c14e"/>
+    <polygon points="30,20 30,0 25.715625,0 20.356641,20" fill="#d0312d"/>
+    <polygon points="20.768058,0 13.488653,20 15.617009,20 22.896413,0" fill="#ffffff"/>
+    <polygon points="0,8.075485 30,2.785676 30,3.801102 0,9.090912" fill="#1b1035"/>
+    <polygon points="4.5,0 4.5,20 5.5,20 5.5,0" fill="#f2c14e"/>
+  </g>
+</svg>

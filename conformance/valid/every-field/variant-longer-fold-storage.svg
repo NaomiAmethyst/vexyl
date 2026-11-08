@@ -1,34 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10" width="1200" height="600">
   <title>Every field</title>
   <defs>
-    <g id="vx-ff608d82e80305dc-c6db-front1">
-      <clipPath id="vx-ff608d82e80305dc-c6db-flag2">
+    <g id="vx-0fc83150b350b994-c6db-front1">
+      <clipPath id="vx-0fc83150b350b994-c6db-flag2">
         <polygon points="0,0 50,1 46,10 50,19 0,20"/>
       </clipPath>
-      <g clip-path="url(#vx-ff608d82e80305dc-c6db-flag2)">
-        <g opacity="0">
+      <g clip-path="url(#vx-0fc83150b350b994-c6db-flag2)">
+        <g opacity="0" style="isolation:isolate">
           <polygon points="0,0 50,0 50,20 0,20" fill="#003399"/>
         </g>
-        <clipPath id="vx-ff608d82e80305dc-c6db-clip3">
+        <clipPath id="vx-0fc83150b350b994-c6db-clip3">
           <polygon points="24.5,9.5 25.5,9.5 25.5,10.5 24.5,10.5"/>
         </clipPath>
-        <mask id="vx-ff608d82e80305dc-c6db-mask4" maskUnits="userSpaceOnUse" x="0" y="0" width="50" height="20">
+        <mask id="vx-0fc83150b350b994-c6db-mask4" maskUnits="userSpaceOnUse" x="0" y="0" width="50" height="20">
           <polygon points="0,0 50,0 50,20 0,20" fill="#fff"/>
           <polygon points="-1346.291202,-53.851648 25,1 25,1 1396.291202,-53.851648" fill="#000"/>
           <polygon points="-38.114221,-38.184932 10.020711,9.95 103.951648,9.95 103.951648,10.05 10.020711,10.05 -38.114221,58.184932 -38.184932,58.114221 9.929289,10 -38.184932,-38.114221" fill="#000"/>
         </mask>
-        <g opacity="0.5" clip-path="url(#vx-ff608d82e80305dc-c6db-clip3)" mask="url(#vx-ff608d82e80305dc-c6db-mask4)" style="mix-blend-mode:multiply">
+        <g opacity="0.5" clip-path="url(#vx-0fc83150b350b994-c6db-clip3)" mask="url(#vx-0fc83150b350b994-c6db-mask4)" style="mix-blend-mode:multiply;isolation:isolate">
           <polygon points="0,0 50,0 50,20 0,20" fill="#ffffff"/>
         </g>
-        <polygon points="-1.226737,-44.317641 -3.106419,63.369252 51.226737,64.317641 53.106419,-43.369252" fill="#003399"/>
-        <polygon points="24.262049,-43.872732 23.496732,-0.027763 23.620304,0.307778 23.735059,0.643165 23.832779,0.978255 23.906409,1.312924 23.950534,1.647079 23.961751,1.980659 23.938899,2.313644 23.883139,2.646055 23.797874,2.977951 23.688519,3.309426 23.56213,3.640604 23.426922,3.971628 23.291715,4.302652 23.165325,4.63383 23.05597,4.965305 22.970706,5.297201 22.914946,5.629612 22.892094,5.962597 22.903311,6.296177 22.947436,6.630331 23.021065,6.965001 23.118786,7.30009 23.23354,7.635478 23.357113,7.971019 23.480685,8.30656 23.59544,8.641947 23.69316,8.977037 23.76679,9.311706 23.810915,9.64586 23.822132,9.97944 23.79928,10.312425 23.74352,10.644836 23.658255,10.976732 23.5489,11.308207 23.42251,11.639385 23.287303,11.970409 23.152096,12.301433 23.025706,12.632611 22.916351,12.964087 22.831086,13.295983 22.775326,13.628393 22.752474,13.961379 22.763691,14.294959 22.807816,14.629113 22.881446,14.963782 22.979166,15.298872 23.093921,15.634259 23.217493,15.9698 23.341066,16.305341 23.45582,16.640728 23.553541,16.975818 23.62717,17.310488 23.671295,17.644642 23.682512,17.978222 23.65966,18.311207 23.6039,18.643618 23.518636,18.975514 23.409281,19.306989 23.282891,19.638167 23.147684,19.969191 22.382367,63.81416 51.226737,64.317641 53.106419,-43.369252" fill="#ffffff"/>
-        <polygon points="-28.851648,-1.5 78.851648,-1.5 78.851648,21.5 -28.851648,21.5" fill="#003399"/>
-        <polygon points="-28.851648,9.75 0,9.75 6.25,10.25 12.5,9.75 18.75,10.25 25,9.75 31.25,10.25 37.5,9.75 43.75,10.25 50,9.75 78.851648,9.75 78.851648,21.5 -28.851648,21.5" fill="#ffffff"/>
+        <polygon points="-2,-43.851648 -2,63.851648 52,63.851648 52,-43.851648" fill="#003399"/>
+        <polygon points="23.333333,-43.851648 23.333333,0 23.462743,0.333333 23.583333,0.666667 23.686887,1 23.766346,1.333333 23.816296,1.666667 23.833333,2 23.816296,2.333333 23.766346,2.666667 23.686887,3 23.583333,3.333333 23.462743,3.666667 23.333333,4 23.203924,4.333333 23.083333,4.666667 22.97978,5 22.900321,5.333333 22.85037,5.666667 22.833333,6 22.85037,6.333333 22.900321,6.666667 22.97978,7 23.083333,7.333333 23.203924,7.666667 23.333333,8 23.462743,8.333333 23.583333,8.666667 23.686887,9 23.766346,9.333333 23.816296,9.666667 23.833333,10 23.816296,10.333333 23.766346,10.666667 23.686887,11 23.583333,11.333333 23.462743,11.666667 23.333333,12 23.203924,12.333333 23.083333,12.666667 22.97978,13 22.900321,13.333333 22.85037,13.666667 22.833333,14 22.85037,14.333333 22.900321,14.666667 22.97978,15 23.083333,15.333333 23.203924,15.666667 23.333333,16 23.462743,16.333333 23.583333,16.666667 23.686887,17 23.766346,17.333333 23.816296,17.666667 23.833333,18 23.816296,18.333333 23.766346,18.666667 23.686887,19 23.583333,19.333333 23.462743,19.666667 23.333333,20 23.333333,63.851648 52,63.851648 52,-43.851648" fill="#ffffff"/>
+        <polygon points="-38.632871,-3.047321 79.052498,-0.993115 78.635917,22.872824 -39.049453,20.818618" fill="#003399"/>
+        <polygon points="-38.838322,8.722935 0.007409,9.40099 4.997921,9.988176 10.005886,9.575514 14.996398,10.1627 20.004363,9.750038 24.994875,10.337224 30.00284,9.924562 34.993352,10.511748 40.001317,10.099086 78.847048,10.777141 78.635917,22.872824 -39.049453,20.818618" fill="#ffffff"/>
         <polygon points="46.171326,0.368024 108.898884,65.324312 172.740807,66.438677 174.969537,-61.24517 111.127614,-62.359535" fill="#003399" stroke="#003399" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
         <polygon points="50,0 46.552425,0 46.171326,0.368024 50,4.332732" fill="#ffcc00"/>
         <polygon points="50,0 47.909652,0 47.504456,0.391293 50,2.975505" fill="#cc0000"/>
-        <polygon points="-24.449567,-11.330501 74.837106,30.408647 75.224644,29.486794 -24.062029,-12.252355" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
-        <polygon points="2.502773,0 50,19.967371 50,18.8826 5.083164,0" fill="#cc0000"/>
+        <polygon points="-31.60561,-17.502717 72.068366,36.616231 72.531121,35.729745 -31.142855,-18.389203" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
+        <polygon points="1.923798,0 40.237171,20 42.39814,20 4.084766,0" fill="#cc0000"/>
         <polygon points="0,-0.2 10,-0.2 10,20.2 0,20.2" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
         <polygon points="-0.2,5 50.2,5 50.2,10 -0.2,10" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
         <polygon points="0,0 10,0 10,20 0,20" fill="#cc0000"/>
@@ -37,10 +37,10 @@
         <polygon points="-25.185695,29.535762 74.814305,-10.464238 75.185695,-9.535762 -24.814305,30.464238" fill="#ffffff" stroke="#ffffff" stroke-width="0.2" stroke-linejoin="miter" stroke-miterlimit="10"/>
         <polygon points="0,0 0,0.538516 48.653709,20 50,20 50,19.461484 1.346291,0" fill="#cc0000"/>
         <polygon points="0,20 0,19.461484 48.653709,0 50,0 50,0.538516 1.346291,20" fill="#cc0000"/>
-        <clipPath id="vx-ff608d82e80305dc-c6db-clip5">
+        <clipPath id="vx-0fc83150b350b994-c6db-clip5">
           <polygon points="25,10 50,10 50,20 25,10 25,20 0,20 25,10 0,10 0,0 25,10 25,0 50,0"/>
         </clipPath>
-        <g clip-path="url(#vx-ff608d82e80305dc-c6db-clip5)">
+        <g clip-path="url(#vx-0fc83150b350b994-c6db-clip5)">
           <polygon points="0,0 0,1.077033 47.307418,20 50,20 50,18.922967 2.692582,0" fill="#cc0000"/>
           <polygon points="0,20 0,18.922967 47.307418,0 50,0 50,1.077033 2.692582,20" fill="#cc0000"/>
         </g>
@@ -104,32 +104,32 @@
           <circle cx="0" cy="0" r="1" fill="#cc0000"/>
         </g>
         <g style="isolation:isolate">
-          <g opacity="0.1">
+          <g opacity="0.1" style="isolation:isolate">
             <polygon points="0,0 50,0 50,20 0,20" fill="#ffffff"/>
           </g>
         </g>
-        <clipPath id="vx-ff608d82e80305dc-c6db-panel7">
+        <clipPath id="vx-0fc83150b350b994-c6db-panel7">
           <polygon points="0,0 0,0.75 6.25,1.25 12.5,0.75 18.75,1.25 25,0.75 31.25,1.25 37.5,0.75 43.75,1.25 50,0.75 50,0"/>
         </clipPath>
-        <g transform="translate(0 0)" clip-path="url(#vx-ff608d82e80305dc-c6db-panel7)" style="isolation:isolate">
+        <g transform="translate(0 0)" clip-path="url(#vx-0fc83150b350b994-c6db-panel7)" style="isolation:isolate">
           <polygon points="0,0 50,0 50,1.25 0,1.25" fill="#cc0000"/>
         </g>
-        <clipPath id="vx-ff608d82e80305dc-c6db-panel8">
+        <clipPath id="vx-0fc83150b350b994-c6db-panel8">
           <polygon points="0,0 2,0 2,2 0,2"/>
         </clipPath>
-        <g transform="translate(48 0)" clip-path="url(#vx-ff608d82e80305dc-c6db-panel8)" style="isolation:isolate">
+        <g transform="translate(48 0)" clip-path="url(#vx-0fc83150b350b994-c6db-panel8)" style="isolation:isolate">
           <polygon points="0,0 2,0 2,2 0,2" fill="#cc0000"/>
         </g>
-        <clipPath id="vx-ff608d82e80305dc-c6db-panel9">
+        <clipPath id="vx-0fc83150b350b994-c6db-panel9">
           <polygon points="0,0 2,0 2,2 0,2"/>
         </clipPath>
-        <g transform="translate(4 4)" clip-path="url(#vx-ff608d82e80305dc-c6db-panel9)" style="isolation:isolate">
+        <g transform="translate(4 4)" clip-path="url(#vx-0fc83150b350b994-c6db-panel9)" style="isolation:isolate">
           <polygon points="0,0 2,0 2,2 0,2" fill="#cc0000"/>
         </g>
-        <clipPath id="vx-ff608d82e80305dc-c6db-panel10">
+        <clipPath id="vx-0fc83150b350b994-c6db-panel10">
           <polygon points="0,0 4,0 4,4 0,4"/>
         </clipPath>
-        <g transform="translate(0 0)" clip-path="url(#vx-ff608d82e80305dc-c6db-panel10)" style="isolation:isolate">
+        <g transform="translate(0 0)" clip-path="url(#vx-0fc83150b350b994-c6db-panel10)" style="isolation:isolate">
           <g transform="scale(2 2)">
             <polygon points="0,0 2,0 2,2 0,2" fill="#ffffff"/>
           </g>
@@ -138,34 +138,34 @@
         <polygon points="0,0 50,1 46,10 50,19 0,20" fill="none" stroke="#ffcc00" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
       </g>
     </g>
-    <g id="vx-ff608d82e80305dc-c6db-back11">
-      <clipPath id="vx-ff608d82e80305dc-c6db-flag12">
+    <g id="vx-0fc83150b350b994-c6db-back11">
+      <clipPath id="vx-0fc83150b350b994-c6db-flag12">
         <polygon points="0,0 50,1 46,10 50,19 0,20"/>
       </clipPath>
-      <g clip-path="url(#vx-ff608d82e80305dc-c6db-flag12)">
+      <g clip-path="url(#vx-0fc83150b350b994-c6db-flag12)">
         <polygon points="0,0 50,0 50,20 0,20" fill="#cc0000"/>
         <polygon points="0,0 50,1 46,10 50,19 0,20" fill="none" stroke="#ffcc00" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
       </g>
     </g>
   </defs>
-  <clipPath id="vx-ff608d82e80305dc-c6db-facet13">
+  <clipPath id="vx-0fc83150b350b994-c6db-facet13">
     <polygon points="20,10 20,10 1.538462,0.769231 20,0.4"/>
   </clipPath>
-  <g clip-path="url(#vx-ff608d82e80305dc-c6db-facet13)"><use href="#vx-ff608d82e80305dc-c6db-front1" transform="matrix(-1 0 0 -1 40 20)"/></g>
+  <g clip-path="url(#vx-0fc83150b350b994-c6db-facet13)"><use href="#vx-0fc83150b350b994-c6db-front1" transform="matrix(-1 0 0 -1 40 20)"/></g>
   <polygon points="20,10 20,10 1.538462,0.769231 20,0.4" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.08"/>
-  <clipPath id="vx-ff608d82e80305dc-c6db-facet14">
+  <clipPath id="vx-0fc83150b350b994-c6db-facet14">
     <polygon points="20,10 20,0.4 1.538462,0.769231"/>
   </clipPath>
-  <g clip-path="url(#vx-ff608d82e80305dc-c6db-facet14)"><use href="#vx-ff608d82e80305dc-c6db-back11" transform="matrix(1 0 0 1 -10 0)"/></g>
+  <g clip-path="url(#vx-0fc83150b350b994-c6db-facet14)"><use href="#vx-0fc83150b350b994-c6db-back11" transform="matrix(1 0 0 1 -10 0)"/></g>
   <polygon points="20,10 20,0.4 1.538462,0.769231" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.08"/>
-  <clipPath id="vx-ff608d82e80305dc-c6db-facet15">
+  <clipPath id="vx-0fc83150b350b994-c6db-facet15">
     <polygon points="20,10 20,10 0,0 0,0 20,0.4"/>
   </clipPath>
-  <g clip-path="url(#vx-ff608d82e80305dc-c6db-facet15)"><use href="#vx-ff608d82e80305dc-c6db-front1" transform="matrix(1 0 0 1 0 0)"/></g>
+  <g clip-path="url(#vx-0fc83150b350b994-c6db-facet15)"><use href="#vx-0fc83150b350b994-c6db-front1" transform="matrix(1 0 0 1 0 0)"/></g>
   <polygon points="20,10 20,10 0,0 0,0 20,0.4" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.08"/>
-  <clipPath id="vx-ff608d82e80305dc-c6db-facet16">
+  <clipPath id="vx-0fc83150b350b994-c6db-facet16">
     <polygon points="0,0 20,10 20,10 20,0.4 0,0"/>
   </clipPath>
-  <g clip-path="url(#vx-ff608d82e80305dc-c6db-facet16)"><use href="#vx-ff608d82e80305dc-c6db-back11" transform="matrix(-1 0 0 -1 50 20)"/></g>
+  <g clip-path="url(#vx-0fc83150b350b994-c6db-facet16)"><use href="#vx-0fc83150b350b994-c6db-back11" transform="matrix(-1 0 0 -1 50 20)"/></g>
   <polygon points="0,0 20,10 20,10 20,0.4 0,0" fill="none" stroke="#000" stroke-opacity="0.35" stroke-linejoin="round" stroke-width="0.08"/>
 </svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="600" height="600">
+  <title>A variant&#39;s reverse</title>
+  <desc>A variant with its own layers mirrors them, and one without has the flag&#39;s reverse</desc>
+  <clipPath id="vx-78e0e78cced4d954-9e2f-flag1">
+    <polygon points="0,0 40,0 40,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-78e0e78cced4d954-9e2f-flag1)">
+    <polygon points="0,0 40,0 40,20 0,20" fill="#006633"/>
+  </g>
+</svg>

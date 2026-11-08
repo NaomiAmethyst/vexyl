@@ -12,7 +12,7 @@ import {
 } from "../src/geometry.js";
 import { validPath } from "../src/parse.js";
 import { pallPoints, rayPolys } from "../src/shapes.js";
-import { model, parse, RenderError, svg, svgTree, treeToSvg, validate, type BarsLayer, type ChargeLayer, type ChevronsLayer, type CrossLayer, type EmblemLayer, type Options, type RaysLayer, type StarShape } from "../src/index.js";
+import { model, parse, RenderError, svg, svgTree, treeToSvg, validate, type BandLayer, type BarsLayer, type ChargeLayer, type ChevronsLayer, type CrossLayer, type EmblemLayer, type Options, type RaysLayer, type StarShape } from "../src/index.js";
 import { num } from "../src/text.js";
 import { header, readRepo, render, root, withoutIds } from "./helpers.js";
 
@@ -968,4 +968,33 @@ test("an end date compares only as far as both dates go", () => {
 	assert.deepEqual(validate(doc("2000-06", "2000")), []);
 	assert.ok(validate(doc("2000-06", "1999")).length > 0);
 	assert.ok(validate(doc("2000-06-15", "2000-05")).length > 0);
+});
+
+test("a rotated bars or band keeps its widths at another proportion, and its center moves as a position does", async () => {
+	const { withRatio } = await import("../src/adapt.js");
+	const { placeIn } = await import("../src/geometry.js");
+	const f = parse(header + "bars a b a { ratio 1 2 1; rotate 20; }\nband b { along hoist; width 2; offset 3; rotate 20; }\nadapt { wider extend; narrower scale; }\n");
+	const middleBar = (g: typeof f): number => {
+		const b = g.layers[0] as BarsLayer;
+		const r = { w: g.fly, h: g.hoist };
+		const { frame, center } = placeIn(b.fixed, r);
+		const { normal } = axis(frame, b.along, b.rotate);
+		const offsets = [v(0, 0), v(r.w, 0), v(r.w, r.h), v(0, r.h)].map((p) => dot(sub(p, center), normal));
+		const total = b.ratio.reduce((s, x) => s + x, 0);
+		return ((Math.max(...offsets) - Math.min(...offsets)) * b.ratio[1]!) / total;
+	};
+	const bandMiddle = (g: typeof f): Vec => {
+		const b = g.layers[1] as BandLayer;
+		const poly = bandPoly({ w: g.fly, h: g.hoist }, b.along, b.rotate, b.width, b.offset, true, b.fixed);
+		return v((poly[0]!.x + poly[2]!.x) / 2, (poly[0]!.y + poly[2]!.y) / 2);
+	};
+	const wider = withRatio(f, 3);
+	const narrower = withRatio(f, 1);
+	for (const g of [wider, narrower]) {
+		assert.ok(Math.abs(middleBar(g) - middleBar(f)) < 1e-9);
+		assert.equal((g.layers[1] as BandLayer).width, 2);
+	}
+	assert.ok(near(bandMiddle(wider), bandMiddle(f)), "under extend, it stays put");
+	const before = bandMiddle(f);
+	assert.ok(near(bandMiddle(narrower), v(before.x / 2, before.y)), "under scale, it moves as a position does");
 });

@@ -275,6 +275,12 @@ A render MUST NOT hold anything that inline SVG couldn't, apart from these:
 Every `href` is `#id` and every function in a value is `url(#id)` or a color, as in artwork, and no
 two elements have the same `id`.
 
+Each layer that section 6.1 of the format says is composited as a unit, a `group`, `panel` or
+`canton`, or any layer with an `opacity` below 1, a `blend`, a `clip` or a `cut`, MUST be drawn in a
+group that has `isolation: isolate`, in its `style` or as an attribute. Without it, a blend inside a
+layer that has only a clip or a mask could mix with what's outside it in one renderer and not in
+another, since SVG doesn't say that those isolate a group.
+
 ## 6. Conformance
 
 A library passes when the suite in [`conformance/`](conformance/README.md) reports no failures,

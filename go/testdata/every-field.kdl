@@ -93,11 +93,11 @@ field white {
 bars blue white {
   along hoist
   ratio 1 2
-  rotate 1
   grow 1 0
   edge wavy depth=1 period=8
 }
 bars blue white {
+  rotate 1
   edge zigzag depth=0.5 count=4
 }
 chevrons red gold {

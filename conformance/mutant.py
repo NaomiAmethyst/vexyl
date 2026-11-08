@@ -5,12 +5,16 @@
 
     mutant.py NAME COMMAND...
 
-It runs COMMAND with the arguments the suite gives it, and damages the result as NAME says.
+It runs COMMAND with the arguments the suite gives it, and damages the result as NAME says. A few
+mistakes are deep in a library's geometry, where no change to its input or output can stand in for
+them, so those mutants are the reference library itself, patched, and run in place of COMMAND.
 """
 import base64
+import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -23,6 +27,14 @@ TAG = re.compile(r' data-vexyl-layer="[^"]*"')
 MOVED_CUT = re.compile(r'\s*<(?:circle|polygon|path) [^>]*fill="#000" transform="translate\([^"]*"/>')
 ARC = re.compile(r'(repeat arc [^\n;]*?)from=(\S+) to=(\S+)')
 SIDEWAYS = {"transpose", "anti-transpose", "rotate", "counter-rotate"}
+
+# Each patch is a file in go/, and text in it replaced so that the reference gets one thing wrong.
+PATCHES = {
+    # Adapts a rotated bars or band as if it weren't rotated, so its widths change and it drifts.
+    "rotated-adapted-unrotated": ("adapt.go", "if t.Rotate != 0 {", "if false {"),
+    # Slants a panel's edge from its last point to the panel's corner, rather than running on flat.
+    "panel-edge-slants": ("shapes.go", "span-along[last] > 1e-9*span", "false"),
+}
 
 
 def run(command, args):
@@ -66,8 +78,37 @@ def turned_back_first(text):
     return f'{head}>{named}<g transform="rotate(180 {cx} {cy})">{body}</g></svg>{tail}'
 
 
+def patched(name):
+    """Builds the reference with a patch, once for each state of its source, and gives the command."""
+    file, old, new = PATCHES[name]
+    source = os.path.join(ROOT, "go")
+    digest = hashlib.sha256()
+    for directory, _, names in sorted(os.walk(source)):
+        for each in sorted(names):
+            if each.endswith((".go", ".mod", ".sum", ".dict")):
+                with open(os.path.join(directory, each), "rb") as f:
+                    digest.update(each.encode() + b"\0" + f.read())
+    binary = os.path.join(tempfile.gettempdir(), f"vexyl-mutant-{name}-{digest.hexdigest()[:16]}")
+    if not os.path.exists(binary):
+        with tempfile.TemporaryDirectory() as scratch:
+            tree = os.path.join(scratch, "go")
+            shutil.copytree(source, tree, ignore=shutil.ignore_patterns("testdata"))
+            path = os.path.join(tree, file)
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            if old not in text:
+                sys.exit(f"mutant {name}: {file} no longer has {old!r}")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(text.replace(old, new))
+            subprocess.run(["go", "build", "-buildvcs=false", "-trimpath", "-o", binary + ".tmp", "./cmd/vexyl"], cwd=tree, check=True)
+            os.replace(binary + ".tmp", binary)
+    return [binary]
+
+
 def main():
     name, command, args = sys.argv[1], sys.argv[2].split(), sys.argv[3:]
+    if name in PATCHES:
+        command = patched(name)
     render = args[:1] == ["render"]
     tagged = "-tags" in args
     if name == "tags-always-on" and render and not tagged:
