@@ -1,6 +1,6 @@
 {
   "name": "@naomiamethyst/vexyl",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A KDL format for describing flags the way a flag specification does, and a renderer to SVG",
   "keywords": [
     "vexyl",
