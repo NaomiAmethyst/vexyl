@@ -467,7 +467,7 @@ interface FlagRow {
 	stops: Fraction[];
 	/** How far across the axis what it measures reaches, which the row is drawn beyond. */
 	reach: number;
-	across: { at: number; from: Fraction; to: Fraction };
+	across?: { at: number; from: Fraction; to: Fraction };
 	/** What the notes say instead, if its labels have no room. */
 	fallback: (t: Format) => string;
 }
@@ -1575,52 +1575,69 @@ function spotAt(q: Vec, n: Vec, w: number, h: number, g: number): Box {
 	return { x0: c.x - w / 2, y0: c.y - h / 2, x1: c.x + w / 2, y1: c.y + h / 2 };
 }
 
+const edgeName = (from: EdgeName): string => (from === "hoist" || from === "fly" ? `the ${from}` : `the ${from} edge`);
+
 /**
  * Chevrons: each apex is a place on the row across their edge, so that the chain there gives the
  * depth and each chevron's share of it, and an `apex` is a place along the edge. An `angle` is
  * marked at the outermost apex, and without one the arms meet the edge's corners, which the notes say.
+ * Turned chevrons are measured in their own frame: their apexes along their center line, on a row
+ * drawn beside it, with the line as a construction line.
  */
 function chevrons(l: ChevronsLayer, f: Frame, m: Measured): void {
 	const name = describe(l);
-	if (l.rotate !== 0) {
-		skip(m, `the turned ${name}`);
-		return;
-	}
 	const e = edgeOf(l.from, f);
 	const ratio = l.ratio.map(exactOf);
 	const total = sum(ratio);
 	const depth = exactOf(l.depth);
 	const middle = l.apex !== undefined ? exactOf(l.apex) : half(e.length);
+	// The turn about the region's center, which for most chevrons is none.
+	const c = { x: toNumber(f.x) + toNumber(f.w) / 2, y: toNumber(f.y) + toNumber(f.h) / 2 };
+	const turn = (q: Vec): Vec => {
+		const r = rotate({ x: q.x - c.x, y: q.y - c.y }, l.rotate);
+		return { x: c.x + r.x, y: c.y + r.y };
+	};
+	const u = rotate(e.u, l.rotate);
+	const v = rotate(e.v, l.rotate);
 	let run = zero;
 	let apex = e.place(zero, middle);
+	const stops: Fraction[] = [zero];
 	for (const r of ratio) {
 		run = plus(run, r);
 		apex = e.place(times(depth, over(run, total)), middle);
-		part(m, across(e.along), coord(apex, across(e.along)));
+		stops.push(times(depth, over(run, total)));
+		if (l.rotate === 0) {
+			part(m, across(e.along), coord(apex, across(e.along)));
+		}
 	}
-	if (l.apex !== undefined) {
+	const edge = edgeName(l.from);
+	if (l.rotate !== 0) {
+		const o = turn(vec(e.place(zero, middle)));
+		const frame: Affine = [u.x, u.y, v.x, v.y, o.x, o.y];
+		m.guides.push(lineIn(o, u, f));
+		m.rows.push({ frame, stops, reach: 0, fallback: (t) => `Along the ${name}’s center line, from ${edge}: ${stops.slice(1).map((x, i) => t(minus(x, stops[i]!))).join(", ")}.` });
+		m.slanting = true;
+		m.notes.push((t) => `The ${name} ${l.colors.length === 1 ? "is" : "are"} turned ${Math.abs(l.rotate)}° ${l.rotate > 0 ? "clockwise" : "anticlockwise"} about the center, from ${edge}${l.apex !== undefined ? `, with ${l.colors.length === 1 ? "its" : "their"} center line ${t(middle)} along it` : ""}.`);
+	} else if (l.apex !== undefined) {
 		part(m, e.along, coord(apex, e.along));
 	}
+	const tip = turn(vec(apex));
 	if (l.fimbriate !== undefined) {
 		// Across the outermost chevron's arm, a little way from its apex toward the edge's end.
 		const len = toNumber(e.length);
 		const d = toNumber(depth);
 		const slope = l.angle !== undefined ? 1 / Math.tan((l.angle * Math.PI) / 180) : d / (len / 2);
 		const q = Math.min(len / 4, d / (2 * slope));
-		const tip = vec(apex);
 		const n = Math.hypot(1, slope);
-		fimbriation(m, name, l.fimbriate, { x: tip.x - e.u.x * slope * q + e.v.x * q, y: tip.y - e.u.y * slope * q + e.v.y * q }, { x: (e.u.x + e.v.x * slope) / n, y: (e.u.y + e.v.y * slope) / n });
+		fimbriation(m, name, l.fimbriate, { x: tip.x - u.x * slope * q + v.x * q, y: tip.y - u.y * slope * q + v.y * q }, { x: (u.x + v.x * slope) / n, y: (u.y + v.y * slope) / n });
 	}
-	const edge = l.from === "hoist" || l.from === "fly" ? `the ${l.from}` : `the ${l.from} edge`;
 	if (l.angle === undefined) {
-		m.notes.push(() => `The outermost arms of the ${name} meet the corners of ${edge}.`);
+		m.notes.push(() => `The outermost arms of the ${name} meet the corners of ${edge}${l.rotate !== 0 ? ", before they’re turned" : ""}.`);
 		return;
 	}
 	const degrees = l.angle;
 	const theta = (degrees * Math.PI) / 180;
-	const tip = vec(apex);
-	const foot = vec(e.place(zero, middle));
-	const { u, v } = e;
+	const foot = turn(vec(e.place(zero, middle)));
 	m.marks.push({
 		text: () => recordValue(`${degrees}°`, exactOf(degrees), "degrees"),
 		fallback: (text) => `The outermost arms of the ${name} are at ${text} to the line through their apexes.`,
@@ -1639,8 +1656,6 @@ function chevrons(l: ChevronsLayer, f: Frame, m: Measured): void {
 		}),
 	});
 }
-
-const edgeName = (from: EdgeName): string => (from === "hoist" || from === "fly" ? `the ${from}` : `the ${from} edge`);
 
 /**
  * A pile: both ends of its base are places along its edge, and its depth, or its tip, a place
@@ -3716,6 +3731,7 @@ function planRow(row: FlagRow, p: Placing, t: Format, taken: readonly Box[], fla
 	const end = compare(row.stops.at(-1)!, zero) > 0 ? 1 : -1;
 	// Above the axis on the sheet first, where a reader looks for it.
 	const sides = way({ x: 0, y: -1 }).y <= 0 ? [-1, 1] : [1, -1];
+	const tick = (q: Vec, d: Vec): string => `M${num(q.x - d.x * 5)} ${num(q.y - d.y * 5)}L${num(q.x + d.x * 5)} ${num(q.y + d.y * 5)}`;
 	for (const side of sides) {
 		const off = row.reach + 16 / s;
 		const xs = row.stops.map(toNumber);
@@ -3733,23 +3749,29 @@ function planRow(row: FlagRow, p: Placing, t: Format, taken: readonly Box[], fla
 			}
 			labels.push(slanted(text, { x: (a.x + b.x) / 2 + out.x * 10, y: (a.y + b.y) / 2 + out.y * 10 }, along));
 		}
-		// Across the outermost group, just beyond its end.
-		const ax = row.across.at + (end * 16) / s;
-		const [a0, a1] = [at(ax, toNumber(row.across.from)), at(ax, toNumber(row.across.to))];
-		const acrossText = t(minus(row.across.to, row.across.from));
-		const beyond = way({ x: end, y: 0 });
-		if (ok && monoWidth(acrossText, 12) + 8 <= Math.hypot(a1.x - a0.x, a1.y - a0.y)) {
-			labels.push(slanted(acrossText, { x: (a0.x + a1.x) / 2 + beyond.x * 10, y: (a0.y + a1.y) / 2 + beyond.y * 10 }, { x: a1.x - a0.x, y: a1.y - a0.y }));
-		} else {
-			ok = false;
+		// Across the outermost group, just beyond its end, if the row measures across.
+		const acrossSolid: string[] = [];
+		const acrossDashed: string[] = [];
+		const a = row.across;
+		if (a !== undefined && ok) {
+			const ax = a.at + (end * 16) / s;
+			const [a0, a1] = [at(ax, toNumber(a.from)), at(ax, toNumber(a.to))];
+			const acrossText = t(minus(a.to, a.from));
+			const beyond = way({ x: end, y: 0 });
+			if (monoWidth(acrossText, 12) + 8 <= Math.hypot(a1.x - a0.x, a1.y - a0.y)) {
+				labels.push(slanted(acrossText, { x: (a0.x + a1.x) / 2 + beyond.x * 10, y: (a0.y + a1.y) / 2 + beyond.y * 10 }, { x: a1.x - a0.x, y: a1.y - a0.y }));
+				acrossSolid.push(pathOf([a0, a1]), tick(a0, beyond), tick(a1, beyond));
+				acrossDashed.push(pathOf([at(a.at, toNumber(a.from)), a0]), pathOf([at(a.at, toNumber(a.to)), a1]));
+			} else {
+				ok = false;
+			}
 		}
 		ok &&= labels.every((l, i) => within(l.box) && !taken.some((b) => hits(b, l.box)) && labels.slice(i + 1).every((o) => labelOverlap(l.box, o.box) === 0));
 		if (!ok) {
 			continue;
 		}
-		const tick = (q: Vec, d: Vec): string => `M${num(q.x - d.x * 5)} ${num(q.y - d.y * 5)}L${num(q.x + d.x * 5)} ${num(q.y + d.y * 5)}`;
-		const solid = [pathOf([line[0]!, line.at(-1)!]), ...line.map((q) => tick(q, out)), pathOf([a0, a1]), tick(a0, beyond), tick(a1, beyond)];
-		const dashed = [...xs.map((x) => pathOf([at(x, 0), at(x, side * (off - 5 / s))])), pathOf([at(row.across.at, toNumber(row.across.from)), a0]), pathOf([at(row.across.at, toNumber(row.across.to)), a1])];
+		const solid = [...(line.length > 1 ? [pathOf([line[0]!, line.at(-1)!]), ...line.map((q) => tick(q, out))] : []), ...acrossSolid];
+		const dashed = [...(line.length > 1 ? xs.map((x) => pathOf([at(x, 0), at(x, side * (off - 5 / s))])) : []), ...acrossDashed];
 		return { solid, dashed, labels };
 	}
 	return null;

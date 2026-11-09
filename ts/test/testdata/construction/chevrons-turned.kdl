@@ -1,0 +1,31 @@
+// Not a real flag: chevrons from the hoist, turned, with an angle, and as a variant, one from the
+// top, turned the other way, with its arms to the corners and a fimbriation.
+vexyl 1
+meta {
+  name "Turned chevrons"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+}
+proportion hoist=20 fly=30
+
+field white
+chevrons red blue {
+  depth 16
+  ratio 1 3
+  angle 50
+  rotate 20
+}
+
+variant off {
+  field white
+  chevrons blue {
+    from top
+    depth 9
+    rotate -15
+    fimbriate red 0.5
+  }
+}

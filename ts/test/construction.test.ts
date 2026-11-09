@@ -717,6 +717,29 @@ test("designs: measured in their own frame, at the scale they're drawn at", () =
 	golden("designs.svg", sheet.svg);
 });
 
+test("turned chevrons: their apexes along their own center line, and their angle", () => {
+	const flag = flagOf("chevrons-turned");
+	// 16 deep in shares of 1 and 3, so apexes 4 and 16 along the center line, turned 20°.
+	const sheet = constructionSheet(flag, {});
+	const slanted = sheet.labels.filter((l) => l.corners !== undefined);
+	assert.ok(slanted.some((l) => l.text === "4") && slanted.some((l) => l.text === "12"));
+	assert.ok(sheet.labels.some((l) => l.text === "50°" && l.onFlag));
+	const text = textOf(sheet.svg);
+	assert.ok(text.includes("The chevrons are turned 20° clockwise about the center, from the hoist."));
+	assert.ok(text.includes("Sizes along a slanting axis are measured along it, and across it square to it."));
+	assert.doesNotMatch(text, /Not measured/);
+	// From the top, turned back, with its arms to the corners and a fimbriation.
+	const off = constructionSheet(flag, { form: { variant: "off" } });
+	assert.ok(off.labels.some((l) => l.text === "9" && l.corners !== undefined) && off.labels.some((l) => l.text === "0.5" && l.onFlag));
+	assert.ok(textOf(off.svg).includes("The blue chevron is turned 15° anticlockwise about the center, from the top edge.") && textOf(off.svg).includes("meet the corners of the top edge, before they’re turned."));
+	for (const form of [{}, { variant: "off" }, { side: "reverse" }] as ConstructionOptions["form"][]) {
+		for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { theme: "dark" }] as ConstructionOptions[]) {
+			assert.deepEqual(collisions(flag, { ...opts, form }), [], `${JSON.stringify(form)} ${JSON.stringify(opts)}`);
+		}
+	}
+	golden("chevrons-turned.svg", sheet.svg);
+});
+
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {
 	let layers = "field a\n";
 	for (let i = 0; i < 40; i++) {
