@@ -1,0 +1,36 @@
+// Not a real flag: rays by angle from the center, turned, and as variants, from the middle of the
+// hoist in shares, from a point of their own beyond the hoist, and by the edges from the center.
+vexyl 1
+meta {
+  name "Rays"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  red "#d81f2a"
+  blue "#0055a4"
+}
+proportion hoist=20 fly=30
+
+rays red white {
+  count 12
+  rotate 15
+}
+
+variant hoist {
+  rays red white blue {
+    from hoist
+    ratio 1 2 3
+  }
+}
+variant point {
+  rays red white {
+    from fly=-10 hoist=6
+    count 6
+  }
+}
+variant edges {
+  rays red white blue white {
+    measure edge
+  }
+}

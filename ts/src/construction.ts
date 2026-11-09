@@ -6,15 +6,15 @@
 // worked out exactly, and nothing is measured from the drawing.
 
 import {
-	compare, decimal, exactOf, fraction, half, minus, over, placesOf, plus, readExact, same, sum, times, toNumber, zero, type Fraction,
+	compare, decimal, exactOf, fraction, half, minus, negate, over, placesOf, plus, readExact, same, sum, times, toNumber, zero, type Fraction,
 } from "./exact.js";
 import { withRatioExactly } from "./adapt-exact.js";
 import { resolve } from "./adapt.js";
 import { axis, rotate, shapeGeom } from "./geometry.js";
-import { outlinePoints } from "./shapes.js";
+import { outlinePoints, rayFrame } from "./shapes.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, Repeat, Shape, ShapedEdge } from "./types.js";
+import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, RaysLayer, Repeat, Shape, ShapedEdge } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -407,6 +407,8 @@ interface ChargeMark {
 	circle?: number;
 	size?: (t: Format) => string;
 	name: string;
+	/** Says it's a point that something comes from, such as rays, rather than a charge. */
+	point?: boolean;
 }
 
 interface SaltireMark {
@@ -599,6 +601,125 @@ function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 		skip(m, `the ${name} fold`);
 	}
 	return m;
+}
+
+const abs = (f: Fraction): Fraction => (f.n < 0n ? negate(f) : f);
+
+const rayPoints: Record<string, string> = {
+	center: "the center", "upper-hoist": "the upper hoist corner", "lower-hoist": "the lower hoist corner", "upper-fly": "the upper fly corner", "lower-fly": "the lower fly corner",
+	hoist: "the middle of the hoist", fly: "the middle of the fly", top: "the middle of the top edge", bottom: "the middle of the bottom edge",
+};
+
+/** An angle in degrees: exactly, as a decimal or a fraction of whole degrees, or to four places and marked. */
+function degreesText(exact: Fraction | null, approx: number): string {
+	if (exact === null) {
+		return recordValue(`~${decimal(exactOf(approx), 4)}°`, exactOf(approx), "degrees");
+	}
+	const places = placesOf(exact);
+	return recordValue(places !== null && places <= 4 ? `${decimal(exact, places)}°` : `${exact.n}°/${exact.d}`, exact, "degrees");
+}
+
+/**
+ * Rays: the point they come from, marked + unless it's a corner, and each wedge's share, as an angle,
+ * with the first one's marked at the point, or for `measure edge` as the places along the far edges
+ * where the wedges meet, which are marked along the edges as any other places are.
+ */
+function rays(l: RaysLayer, f: Frame, m: Measured): void {
+	const [W, H] = [f.w, f.h];
+	const corner = (x: Fraction, y: Fraction): XY => ({ x, y });
+	const named: Record<string, XY> = {
+		center: corner(half(W), half(H)), "upper-hoist": corner(zero, zero), "lower-hoist": corner(zero, H), "upper-fly": corner(W, zero), "lower-fly": corner(W, H),
+		hoist: corner(zero, half(H)), fly: corner(W, half(H)), top: corner(half(W), zero), bottom: corner(half(W), H),
+	};
+	const p = l.at !== undefined ? point(l.at) : named[l.from]!;
+	const inside = compare(p.x, zero) >= 0 && compare(p.y, zero) >= 0 && compare(p.x, W) <= 0 && compare(p.y, H) <= 0;
+	const where = (t: Format): string => (l.at !== undefined ? `the point ${t(p.x)} along the fly and ${t(p.y)} down${inside ? ", marked +" : ", beyond the flag"}` : rayPoints[l.from]!);
+	const atCorner = l.at === undefined && l.from.includes("-");
+	if (!atCorner && inside) {
+		m.charges.push({ x: plus(f.x, p.x), y: plus(f.y, p.y), at: vec({ x: plus(f.x, p.x), y: plus(f.y, p.y) }), reach: { x: 0, y: 0 }, name: "point the rays come from", point: true });
+	}
+	const ratio = l.ratio.map(exactOf);
+	const total = sum(ratio);
+	const colors = l.colors.map(colorWord);
+	const shares = ratio.map((r) => decimal(r, placesOf(r) ?? 4)).join(" : ");
+	if (l.measure === "edge") {
+		// The far edges, walked clockwise, exactly: the corners, and the point at the top for rays from inside.
+		const corners = [corner(zero, zero), corner(W, zero), corner(W, H), corner(zero, H)];
+		const far = [compare(p.y, zero) > 0, compare(p.x, W) < 0, compare(p.y, H) < 0, compare(p.x, zero) > 0];
+		let first = -1;
+		for (let i = 0; i < 4; i++) {
+			if (far[i] && !far[(i + 3) % 4]) {
+				first = i;
+			}
+		}
+		let walk: XY[];
+		if (first < 0) {
+			const top = corner(p.x, zero);
+			walk = [top, corners[1]!, corners[2]!, corners[3]!, corners[0]!, top];
+		} else {
+			walk = [corners[first]!];
+			for (let i = first; far[i % 4]; i++) {
+				walk.push(corners[(i + 1) % 4]!);
+			}
+		}
+		const legs = walk.slice(1).map((q, i) => plus(abs(minus(q.x, walk[i]!.x)), abs(minus(q.y, walk[i]!.y))));
+		const length = sum(legs);
+		let run = zero;
+		for (const r of ratio.slice(0, -1)) {
+			run = plus(run, r);
+			// Where this wedge ends, along the walk, and so on which edge.
+			let left = times(length, over(run, total));
+			for (let i = 0; i < legs.length; i++) {
+				if (compare(left, legs[i]!) <= 0) {
+					const [a, b] = [walk[i]!, walk[i + 1]!];
+					const k = legs[i]!.n === 0n ? zero : over(left, legs[i]!);
+					const q = { x: plus(a.x, times(minus(b.x, a.x), k)), y: plus(a.y, times(minus(b.y, a.y), k)) };
+					if (same(a.y, b.y)) {
+						part(m, "fly", plus(f.x, q.x));
+					} else {
+						part(m, "hoist", plus(f.y, q.y));
+					}
+					break;
+				}
+				left = minus(left, legs[i]!);
+			}
+		}
+		m.notes.push((t) => `The rays come from ${where(t)}, and share the edges they reach by length, walking clockwise, as ${shares}, from the ${colors[0]} one. Each wedge ends at a place marked along the edges.`);
+		return;
+	}
+	// Angles clockwise from straight up, exactly for the four straight directions and so for any named point.
+	const frame = rayFrame(l, { w: toNumber(W), h: toNumber(H) });
+	const straight = (a: number): Fraction | null => ([0, 90, 180, 270, 360].includes(Math.round(a)) && Math.abs(a - Math.round(a)) < 1e-9 ? fraction(BigInt(Math.round(a))) : null);
+	const sweep = straight(frame.sweep);
+	const wedges = ratio.map((r) => degreesText(sweep !== null ? times(sweep, over(r, total)) : null, (frame.sweep * toNumber(r)) / toNumber(total)));
+	const start = frame.from + l.rotate;
+	const turned = l.rotate !== 0 ? `, turned ${l.rotate}° clockwise` : "";
+	const from = straight(frame.from) !== null ? ["straight up", "toward the fly", "straight down", "toward the hoist"][Math.round(frame.from) / 90]! : `${degreesText(null, frame.from)} past straight up`;
+	const each = wedges.every((w) => w === wedges[0]) ? `${wedges.length} wedges of ${wedges[0]} each` : wedges.length <= 12 ? `wedges of ${wedges.map((w, i) => `${w}, ${colors[i]}`).join("; ")}` : `wedges sharing their ${sweep !== null ? degreesText(sweep, 0) : "angle"} as ${shares}`;
+	m.notes.push((t) => `The rays come from ${where(t)}, going clockwise from ${from}${turned}, in ${each}.`);
+	// The first wedge's angle, at the point.
+	const theta = (toNumber(ratio[0]!) / toNumber(total)) * frame.sweep;
+	if (theta >= 180) {
+		return;
+	}
+	const toward = (a: number): Vec => ({ x: Math.sin((a * Math.PI) / 180), y: -Math.cos((a * Math.PI) / 180) });
+	const apex = vec({ x: plus(f.x, p.x), y: plus(f.y, p.y) });
+	m.marks.push({
+		text: () => wedges[0]!,
+		fallback: () => "",
+		options: (pl, w, h) => {
+			const at = pl.at(apex);
+			const r = 56;
+			const arc = Array.from({ length: 13 }, (_, i) => {
+				const d = pl.way(toward(start + (theta * i) / 12));
+				return { x: at.x + d.x * r, y: at.y + d.y * r };
+			});
+			const mid = pl.way(toward(start + theta / 2));
+			const edge = { x: at.x + mid.x * r, y: at.y + mid.y * r };
+			const sides = [toward(start), toward(start + theta)].map((d) => [at, { x: at.x + pl.way(d).x * (r + 8), y: at.y + pl.way(d).y * (r + 8) }]);
+			return [{ solid: [arc], dashed: sides, spots: [6, 16, 30].map((g) => spotAt(edge, mid, w, h, g)) }];
+		},
+	});
 }
 
 /** The most corners of a polygon outline whose places are each marked; past that, only its box is. */
@@ -850,7 +971,7 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 				chevrons(l, f, m);
 				break;
 			case "rays":
-				skip(m, `the ${l.layer}`);
+				rays(l, f, m);
 				break;
 		}
 	}
@@ -2698,8 +2819,10 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 	})();
 
 	// What the footer says, which the room for the drawing depends on.
-	const marked = showPositions && m.charges.length > 0 ? (m.charges.length === 1 ? ` The ${m.charges[0]!.name}’s center is marked +.` : " Each charge’s center is marked +.") : "";
-	const unitNote = (units === "grid" ? "Sizes in grid units, as the file gives them." : units === "hoist" ? "Sizes as parts of the hoist, H." : `Sizes in millimetres for a hoist of ${decimal(hoistMm, 3)} mm, to the nearest 0.1 mm, or 0.01 mm under 10 mm.`) + (rounded && units !== "mm" ? ` ${roundingNote}` : "") + marked;
+	const centres = m.charges.filter((c) => c.point !== true);
+	const points = m.charges.filter((c) => c.point === true);
+	const marked = !showPositions ? "" : (centres.length === 0 ? "" : centres.length === 1 ? ` The ${centres[0]!.name}’s center is marked +.` : " Each charge’s center is marked +.") + (points.length === 0 ? "" : ` ${points.length === 1 ? `The ${points[0]!.name} is` : "The points rays come from are"} marked +.`);
+	const unitNote = (units === "grid" ? "Sizes in grid units, as the file gives them." : units === "hoist" ? "Sizes as parts of the hoist, H." : `Sizes in millimetres for a hoist of ${decimal(hoistMm, 3)} mm, to the nearest 0.1 mm, or 0.01 mm under 10 mm.`) + (rounded && (units !== "mm" || values.some((v) => v.unit === "degrees" && v.text.startsWith("~"))) ? ` ${roundingNote}` : "") + marked;
 	const footRight = [options.path, options.tier !== undefined ? `tier ${options.tier}` : undefined, `Vexyl ${flag.version}`].filter((x): x is string => x !== undefined && x !== "").join(" · ");
 
 	const name = view.label !== "" ? `${flag.meta.name} · ${view.label}` : flag.meta.name;
@@ -3409,7 +3532,11 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 			}
 		}
 		if (got === null) {
-			plan.fallbacks.push(mark.fallback(text));
+			// A mark whose value the notes already give needs nothing more there.
+			const instead = mark.fallback(text);
+			if (instead !== "") {
+				plan.fallbacks.push(instead);
+			}
 			continue;
 		}
 		taken.push(got.box);

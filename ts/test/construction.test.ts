@@ -625,6 +625,43 @@ test("fimbriations and borders: each one's width, once, across it", () => {
 	golden("nepal.svg", constructionSvg(flagOf("nepal")));
 });
 
+test("rays: the point they come from, and each wedge's share, by angle or along the edges", () => {
+	// Seychelles' rays share the top and the fly by length: 2, 2 and 2 along the top, then 1, 1 and 1 down the fly.
+	const seychelles = constructionSheet(flagOf("seychelles"), {});
+	assert.equal(seychelles.labels.filter((l) => l.text === "2").length, 3);
+	assert.equal(seychelles.labels.filter((l) => l.text === "1").length, 3);
+	assert.ok(textOf(seychelles.svg).includes("The rays come from the lower hoist corner, and share the edges they reach by length, walking clockwise, as 2 : 2 : 3 : 1 : 1, from the blue one. Each wedge ends at a place marked along the edges."));
+	assert.doesNotMatch(textOf(seychelles.svg), /Not measured/);
+	// By angle from the center, turned: 12 wedges of 30°, the first marked at the center, which is marked +.
+	const flag = flagOf("rays");
+	const turned = constructionSheet(flag, {});
+	assert.ok(turned.labels.some((l) => l.text === "30°" && l.onFlag) && turned.labels.some((l) => l.text === "15"));
+	const text = textOf(turned.svg);
+	assert.ok(text.includes("The rays come from the center, going clockwise from straight up, turned 15° clockwise, in 12 wedges of 30° each."));
+	assert.ok(text.includes("The point the rays come from is marked +."));
+	assert.ok(textOf(constructionSvg(flag, { form: { variant: "hoist" } })).includes("The rays come from the middle of the hoist, going clockwise from straight up, in wedges of 30°, red; 60°, white; 90°, blue."));
+	// From a point beyond the flag, the angles are no fraction of a turn, so they're rounded and marked.
+	const beyond = constructionSheet(flag, { form: { variant: "point" } });
+	assert.ok(textOf(beyond.svg).includes("The rays come from the point -10 along the fly and 6 down, beyond the flag, going clockwise from ~59.0362° past straight up, in 6 wedges of ~14.2377° each."));
+	assert.ok(textOf(beyond.svg).includes("A ~ marks a size rounded to four places."));
+	// By the edges from the center: the walk round from the top is 100 long, so the wedges end 10 down the fly, 15 along the bottom and 10 up the hoist.
+	const edges = constructionSheet(flag, { form: { variant: "edges" } });
+	for (const want of ["10", "15"]) {
+		assert.ok(edges.labels.some((l) => l.text === want), want);
+	}
+	for (const variant of [undefined, "hoist", "point", "edges"]) {
+		const form = variant !== undefined ? { variant } : {};
+		assert.doesNotMatch(textOf(constructionSvg(flag, { form })), /Not measured/);
+		for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { form: { ...form, side: "reverse" } }] as ConstructionOptions[]) {
+			const sheet = constructionSheet(flag, { form, ...opts });
+			assert.deepEqual(collisions(flag, { form, ...opts }), [], `${variant} ${JSON.stringify(opts)}`);
+			assert.deepEqual(sheetValueProblems(sheet), [], `${variant} ${JSON.stringify(opts)}`);
+		}
+	}
+	golden("seychelles.svg", seychelles.svg);
+	golden("rays.svg", turned.svg);
+});
+
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {
 	let layers = "field a\n";
 	for (let i = 0; i < 40; i++) {
