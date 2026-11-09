@@ -8,6 +8,8 @@
 // them in the same order whatever that is.
 //
 //   node test/construction-corpus.mjs [../vexyl-flags] [-v] [--jobs=N]
+//
+// The checkout can also be given as $VEXYL_FLAGS.
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { availableParallelism } from "node:os";
@@ -15,13 +17,13 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { parse } from "../dist/index.js";
-import { constructionSheet, labelOverlap } from "../dist/construction.js";
+import { constructionSheet, labelOverlap, sheetValueProblems } from "../dist/construction.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = isMainThread ? process.argv.slice(2) : workerData.args;
 const verbose = args.includes("-v");
 const jobs = Number(args.find((a) => a.startsWith("--jobs="))?.slice("--jobs=".length) || process.env.VEXYL_JOBS || availableParallelism());
-const root = resolve(args.find((a) => !a.startsWith("-")) ?? join(here, "../../../vexyl-flags"));
+const root = resolve(args.find((a) => !a.startsWith("-")) ?? process.env.VEXYL_FLAGS ?? join(here, "../../../vexyl-flags"));
 if (!existsSync(root)) {
 	console.error(`no vexyl-flags checkout at ${root}`);
 	process.exit(2);
@@ -102,6 +104,7 @@ function sheetsOf(file) {
 	const name = path.split("/").at(-1).replace(/\.kdl$/, "");
 	const crashes = [];
 	const found = [];
+	const condensed = [];
 	let sheets = 0;
 	let count = 0;
 	for (const form of formsOf(flag)) {
@@ -115,14 +118,17 @@ function sheetsOf(file) {
 				continue;
 			}
 			sheets++;
-			const list = collisions(sheet);
+			if (sheet.condensed) {
+				condensed.push(`${path}${which === "" ? "" : ` (${which})`} ${run.units}${run.paper === "fit" ? " fit" : ""}`);
+			}
+			const list = [...collisions(sheet), ...sheetValueProblems(sheet).map((x) => `rounding: ${x}`)];
 			count += list.length;
 			for (const c of list) {
 				found.push({ kind: c.slice(0, c.indexOf(":")), text: `${which === "" ? "" : `${which}, `}${run.units}${run.paper === "fit" ? " fit" : ""}: ${c}` });
 			}
 		}
 	}
-	return { skipped: false, path, crashes, sheets, count, found };
+	return { skipped: false, path, crashes, sheets, count, found, condensed };
 }
 
 /** Each file's sheets, in the files' order, from workers that each take every jobs-th file. */
@@ -149,6 +155,7 @@ async function report() {
 	let total = 0;
 	const kinds = new Map();
 	const worst = [];
+	const condensed = [];
 	const started = Date.now();
 	for (const result of await allSheets()) {
 		if (result.skipped) {
@@ -160,6 +167,7 @@ async function report() {
 			console.log(crash);
 		}
 		sheets += result.sheets;
+		condensed.push(...result.condensed);
 		for (const { kind } of result.found) {
 			kinds.set(kind, (kinds.get(kind) ?? 0) + 1);
 		}
@@ -170,7 +178,12 @@ async function report() {
 	}
 	worst.sort((a, b) => b.count - a.count || a.path.localeCompare(b.path));
 	console.log(`${files.length} files, ${skipped} not valid, ${sheets} sheets in ${((Date.now() - started) / 1000).toFixed(1)} s`);
-	console.log(`${crashes} crashes, ${total} collisions on ${worst.length} flags`);
+	console.log(`${crashes} crashes, ${total} collisions and wrongly rounded values on ${worst.length} flags`);
+	// A colour key or laws cut short for room, which only a palette or laws too long for the sheet should need.
+	console.log(`${condensed.length} sheets with the sidebar condensed`);
+	for (const c of verbose ? condensed : condensed.slice(0, 10)) {
+		console.log(`\t${c}`);
+	}
 	for (const [kind, n] of kinds) {
 		console.log(`  ${kind}: ${n}`);
 	}
@@ -180,7 +193,8 @@ async function report() {
 			console.log(`\t${f}`);
 		}
 	}
-	process.exit(crashes > 0 ? 1 : 0);
+	// A value rounded without saying so is wrong, where a collision is only untidy.
+	process.exit(crashes > 0 || (kinds.get("rounding") ?? 0) > 0 ? 1 : 0);
 }
 
 if (isMainThread) {

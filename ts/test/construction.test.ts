@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { withRatioExactly } from "../src/adapt-exact.js";
 import { withRatio } from "../src/adapt.js";
-import { constructionSheet, gridText, hoistText, labelOverlap, mmText, proportionText, type ConstructionOptions, type LabelBox } from "../src/construction.js";
+import { constructionSheet, gridText, hoistText, labelOverlap, mmText, proportionText, sheetValueProblems, valueProblem, type ConstructionOptions, type LabelBox } from "../src/construction.js";
 import { decimal, exactOf, fraction, over, placesOf, plus, readExact, sum, times } from "../src/exact.js";
 import { constructionSvg, parse, sheetFaces, type Flag, type SheetFont } from "../src/index.js";
 import { header, readRepo, root } from "./helpers.js";
@@ -402,10 +402,10 @@ test("an emblem along a diagonal is measured along it, over the flag, and its tr
 		const deg = Number(m[1]);
 		assert.ok(deg >= -90 && deg <= 90, `${m[2]} at ${deg}°`);
 	}
-	// The detail: one broken trigram, with its bars, gaps and break.
-	const side = sidebarText(korea);
+	// The detail: one broken trigram, with its bars and length, and its gaps and break in the caption.
+	const side = korea.labels.filter((l) => l.y0 > korea.flag.y1).map((l) => l.text);
 	assert.ok(side.includes("DETAIL: BLACK RECTS"));
-	for (const want of ["4", "2", "16", "11", "24"]) {
+	for (const want of ["4", "16", "11", "24"]) {
 		assert.ok(side.includes(want), want);
 	}
 	const text = textOf(korea.svg);
@@ -438,6 +438,54 @@ test("slanting labels are checked by their own boxes", () => {
 	assert.equal(labelOverlap(box(0, 0, 45), box(15, 15, 45)), 0);
 	assert.ok(labelOverlap(box(0, 0, 45), box(3, 3, 45)) > 50);
 	assert.ok(Math.abs(labelOverlap(box(0, 0, 0), { x0: 0, y0: 0, x1: 20, y1: 20, text: "", onFlag: false }) - 30) < 1e-9);
+});
+
+test("every size and angle is written exactly, or marked ~ and the footer says so", () => {
+	const forms = (flag: Flag): ConstructionOptions["form"][] => [{}, { side: "reverse" }, ...Object.keys(flag.variants).flatMap((variant) => [{ variant }, { variant, side: "reverse" as const }])];
+	for (const name of [...fixtures, "turns", "adapt", "bosnia-and-herzegovina", "tanzania"]) {
+		const flag = flagOf(name);
+		for (const form of forms(flag)) {
+			for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 1234 }] as ConstructionOptions[]) {
+				const sheet = constructionSheet(flag, { ...opts, form });
+				assert.ok(sheet.values.length > 0);
+				assert.deepEqual(sheetValueProblems(sheet), [], `${name} ${JSON.stringify({ ...opts, form })}`);
+			}
+		}
+	}
+	// South Africa's apexes and angle are the file's own numbers, so they're exact, and unmarked.
+	const za = constructionSheet(flagOf("south-africa"), {});
+	for (const text of ["26.9722", "18.0278", "33.6901°"]) {
+		assert.ok(za.values.some((v) => v.text === text), text);
+	}
+	// A third of a depth no decimal says, written with a denominator too large to read, is marked.
+	const thirds = constructionSheet(parse(`${header}field a\nchevrons b a b { depth 1; }\npall a { width 0.123; }\n`), {});
+	assert.ok(thirds.labels.some((l) => l.text === "1/3"));
+	const odd = constructionSheet(parse(`${header.replace("hoist=10 fly=20", "hoist=10 fly=20.01")}field a\nchevrons b a b { depth 10.01; }\n`), {});
+	assert.ok(odd.labels.some((l) => l.text === "~3.3367") && textOf(odd.svg).includes("A ~ marks a size rounded to four places."));
+	assert.deepEqual(sheetValueProblems(odd), []);
+	// And the check itself catches what it's for.
+	const third = fraction(1n, 3n);
+	assert.match(valueProblem({ text: "0.3333", exact: third, unit: "grid" }, fraction(10n))!, /isn't marked ~/);
+	assert.equal(valueProblem({ text: "~0.3333", exact: third, unit: "grid" }, fraction(10n)), null);
+	assert.equal(valueProblem({ text: "1/3", exact: third, unit: "grid" }, fraction(10n)), null);
+	assert.equal(valueProblem({ text: "H/30", exact: third, unit: "hoist" }, fraction(10n)), null);
+	assert.match(valueProblem({ text: "33.69°", exact: exactOf(33.6901), unit: "degrees" }, fraction(10n))!, /isn't marked ~/);
+	assert.equal(valueProblem({ text: "333.3", exact: fraction(1000n, 3n), unit: "mm" }, fraction(10n)), null);
+});
+
+test("the colour key and the laws are never cut short for a detail", () => {
+	for (const name of ["south-korea", "united-states", "european-union", "venezuela", "bosnia-and-herzegovina"]) {
+		for (const opts of [{}, { theme: "dark" }, { paper: "letter" }, { units: "hoist" }] as ConstructionOptions[]) {
+			const sheet = constructionSheet(flagOf(name), opts);
+			assert.equal(sheet.condensed, false, `${name} ${JSON.stringify(opts)}`);
+			assert.doesNotMatch(textOf(sheet.svg), /more values? in the file|more colou?rs? in the file|named in the file/, `${name} ${JSON.stringify(opts)}`);
+			assert.ok(sheet.labels.some((l) => l.text.startsWith("DETAIL:")), `${name} keeps its detail`);
+		}
+	}
+	// South Korea's detail goes beside the notes, under the drawing, since its colours fill the sidebar.
+	const korea = constructionSheet(flagOf("south-korea"), {});
+	const detail = korea.labels.find((l) => l.text.startsWith("DETAIL:"))!;
+	assert.ok(detail.x0 < korea.flag.x1 && detail.y0 > korea.flag.y1, "under the drawing");
 });
 
 test("what isn't measured is listed, never left out", () => {

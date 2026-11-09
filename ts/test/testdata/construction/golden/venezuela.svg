@@ -44,7 +44,7 @@
 <text x="40" y="662.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">A star’s or sun’s size is the circle through its points, shown dashed.</text>
 <text x="40" y="682.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">8 white stars on an arc of radius 36.72 around the center marked +, from -66.5° to 66.5° clockwise from the top, turned with it.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">DETAIL: WHITE STARS</text>
-<svg x="866.519685" y="184" width="210" height="170.523982" viewBox="49.608554 54.265328 47.168446 38.301672" overflow="hidden">
+<svg x="866.519685" y="184" width="114.160866" height="92.700787" viewBox="49.608554 54.265328 47.168446 38.301672" overflow="hidden">
   <title>Venezuela</title>
   <clipPath id="vx-1279581d6d4d864b-cs-d0-flag1">
     <polygon points="0,0 180,0 180,120 0,120"/>
@@ -63,39 +63,45 @@
     <polygon points="128.463988,69.108427 125.639859,71.607005 127.143444,75.065014 123.894451,73.151211 121.070322,75.64979 121.886463,71.968416 118.63747,70.054613 122.390866,69.693202 123.207006,66.011828 124.710592,69.469837" fill="#ffffff"/>
   </g>
 </svg>
-<rect x="866.519685" y="184" width="210" height="170.523982" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<rect x="866.519685" y="184" width="114.160866" height="92.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
 <path d="" fill="none" stroke="#2a2833" stroke-width="1"/>
-<circle cx="896.558199" cy="259.297104" r="23.106549" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
-<circle cx="896.558199" cy="259.297104" r="23.106549" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
-<circle cx="925.949471" cy="214.038514" r="23.106549" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
-<circle cx="925.949471" cy="214.038514" r="23.106549" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
-<path d="M1046.481172 324.485468L896.558199 259.297104M1044.886175 328.153708L1048.076168 320.817228M894.963202 262.965345L898.153195 255.628864M1009.798769 308.535505L1010.137199 307.778714L1010.49124 307.029099L1010.860741 306.286981L1011.245542 305.552681L1011.645478 304.826514L1012.060378 304.108791L1012.490063 303.39982L1012.934349 302.699907L1013.393044 302.009351L1013.865952 301.32845L1014.35287 300.657496L1014.853589 299.996777L1015.367892 299.346577L1015.89556 298.707175L1016.436367 298.078846L1016.990078 297.46186" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
-<path d="M1046.481172 324.485468L896.558199 259.297104M1044.886175 328.153708L1048.076168 320.817228M894.963202 262.965345L898.153195 255.628864M1009.798769 308.535505L1010.137199 307.778714L1010.49124 307.029099L1010.860741 306.286981L1011.245542 305.552681L1011.645478 304.826514L1012.060378 304.108791L1012.490063 303.39982L1012.934349 302.699907L1013.393044 302.009351L1013.865952 301.32845L1014.35287 300.657496L1014.853589 299.996777L1015.367892 299.346577L1015.89556 298.707175L1016.436367 298.078846L1016.990078 297.46186" fill="none" stroke="#1c1b22" stroke-width="1"/>
-<rect x="987.747297" y="287.571195" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
-<text x="999.647297" y="297.571195" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">19°</text>
-<rect x="954.0645" y="267.809416" width="50.2" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
-<text x="979.1645" y="277.809416" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">r 36.72</text>
-<text x="832.519685" y="376.523982" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The center and the first two of 8 white</text>
-<text x="832.519685" y="392.523982" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">stars on an arc, 19° apart, 36.72 from it.</text>
-<text x="832.519685" y="408.523982" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Each is r 5.19.</text>
-<text x="832.519685" y="437.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
-<circle cx="840.519685" cy="454.523982" r="8" fill="#ffce00"/>
-<text x="858.519685" y="458.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Yellow</text>
-<text x="902.126485" y="458.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#ffce00</text>
-<text x="858.519685" y="472.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
-<circle cx="840.519685" cy="486.523982" r="8" fill="#0035ad"/>
-<text x="858.519685" y="490.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Blue</text>
-<text x="889.421485" y="490.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#0035ad</text>
-<text x="858.519685" y="504.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
-<circle cx="840.519685" cy="518.523982" r="8" fill="#d21034"/>
-<text x="858.519685" y="522.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Red</text>
-<text x="886.164385" y="522.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#d21034</text>
-<text x="858.519685" y="536.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
-<circle cx="840.519685" cy="550.523982" r="7.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
-<text x="858.519685" y="554.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">White</text>
-<text x="896.674885" y="554.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#ffffff</text>
-<text x="832.519685" y="591.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAW</text>
-<text x="832.519685" y="611.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#1c1b22">1 law, named in the file</text>
+<circle cx="882.849317" cy="224.93325" r="12.561255" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="882.849317" cy="224.93325" r="12.561255" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="898.827094" cy="200.329632" r="12.561255" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="898.827094" cy="200.329632" r="12.561255" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M964.350919 260.371155L882.849317 224.93325M962.755922 264.039396L965.945915 256.702915M881.254321 228.601491L884.444313 221.26501M927.675198 244.424098L928.013566 243.667445L928.367543 242.917966L928.736977 242.175984L929.121708 241.441818L929.521571 240.715782L929.936396 239.99819L930.366002 239.289348L930.810207 238.589563L931.268819 237.899133L931.741641 237.218356L932.22847 236.547524L932.729097 235.886925L933.243307 235.236844L933.770879 234.597558L934.311587 233.969344L934.865197 233.35247" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M964.350919 260.371155L882.849317 224.93325M962.755922 264.039396L965.945915 256.702915M881.254321 228.601491L884.444313 221.26501M927.675198 244.424098L928.013566 243.667445L928.367543 242.917966L928.736977 242.175984L929.121708 241.441818L929.521571 240.715782L929.936396 239.99819L930.366002 239.289348L930.810207 238.589563L931.268819 237.899133L931.741641 237.218356L932.22847 236.547524L932.729097 235.886925L933.243307 235.236844L933.770879 234.597558L934.311587 233.969344L934.865197 233.35247" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<rect x="905.623156" y="223.460851" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="917.523156" y="233.460851" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">19°</text>
+<rect x="890.855303" y="253.734073" width="50.2" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="915.955303" y="263.734073" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">r 36.72</text>
+<text x="832.519685" y="298.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The center and the first two of 8 white</text>
+<text x="832.519685" y="314.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">stars on an arc, 19° apart, 36.72 from it.</text>
+<text x="832.519685" y="330.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Each is r 5.19.</text>
+<text x="832.519685" y="369.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="843.519685" cy="395.700787" r="11" fill="#ffce00"/>
+<text x="864.519685" y="397.700787" font-family="Geist, system-ui, sans-serif" font-size="12" font-weight="500" fill="#1c1b22">Yellow</text>
+<text x="911.545285" y="397.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#3b3947">#ffce00</text>
+<text x="864.519685" y="414.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Pantone 116 C</text>
+<text x="864.519685" y="431.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">CMYK 0 19 93 0</text>
+<circle cx="843.519685" cy="456.700787" r="11" fill="#0035ad"/>
+<text x="864.519685" y="458.700787" font-family="Geist, system-ui, sans-serif" font-size="12" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="897.685285" y="458.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#3b3947">#0035ad</text>
+<text x="864.519685" y="475.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Pantone 286 C</text>
+<text x="864.519685" y="492.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">CMYK 99 80 0 0</text>
+<circle cx="843.519685" cy="517.700787" r="11" fill="#d21034"/>
+<text x="864.519685" y="519.700787" font-family="Geist, system-ui, sans-serif" font-size="12" font-weight="500" fill="#1c1b22">Red</text>
+<text x="894.132085" y="519.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#3b3947">#d21034</text>
+<text x="864.519685" y="536.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Pantone 186 C</text>
+<text x="864.519685" y="553.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">CMYK 10 100 74 2</text>
+<circle cx="843.519685" cy="578.700787" r="10.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="864.519685" y="580.700787" font-family="Geist, system-ui, sans-serif" font-size="12" font-weight="500" fill="#1c1b22">White</text>
+<text x="905.598085" y="580.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#3b3947">#ffffff</text>
+<text x="832.519685" y="622.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAW</text>
+<text x="832.519685" y="649.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#1c1b22">Law on the National Flag, National</text>
+<text x="832.519685" y="666.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#1c1b22">Anthem and Coat of Arms of the</text>
+<text x="832.519685" y="683.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#1c1b22">Bolivarian Republic of Venezuela, 2006,</text>
+<text x="832.519685" y="700.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#1c1b22">Article 3</text>
 <path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
 <text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The white star’s center is marked +.</text>
 <text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/venezuela.kdl · Vexyl 1</text>

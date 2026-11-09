@@ -6,7 +6,7 @@
 // worked out exactly, and nothing is measured from the drawing.
 
 import {
-	compare, decimal, exactOf, fraction, half, minus, over, placesOf, plus, same, sum, times, toNumber, zero, type Fraction,
+	compare, decimal, exactOf, fraction, half, minus, over, placesOf, plus, readExact, same, sum, times, toNumber, zero, type Fraction,
 } from "./exact.js";
 import { withRatioExactly } from "./adapt-exact.js";
 import { resolve } from "./adapt.js";
@@ -82,6 +82,77 @@ export interface Sheet {
 	labels: LabelBox[];
 	/** The flag's grid, on the sheet. */
 	flag: Box;
+	/**
+	 * Says the colour key or the laws are cut short for room, with how many more there are, which
+	 * only a palette or laws too long for the sheet need.
+	 */
+	condensed: boolean;
+	/** Every size and angle the sheet writes, with the exact value it stands for, which tests check its text against. */
+	values: SheetValue[];
+	/** The hoist of the form drawn, which sizes in parts of the hoist are parts of. */
+	hoist: Fraction;
+}
+
+/** A size or angle as a sheet writes it, and exactly what it is. */
+export interface SheetValue {
+	text: string;
+	exact: Fraction;
+	unit: "grid" | "hoist" | "mm" | "degrees";
+}
+
+/**
+ * What's wrong with how a sheet wrote a value, or null if nothing is: its text has to say the value
+ * exactly, or be marked ~ and right to the places it gives. Millimetres are rounded as the footer
+ * says, so they're only checked to that. `hoist` is the flag's, which parts of the hoist are of.
+ */
+export function valueProblem(v: SheetValue, hoist: Fraction): string | null {
+	const marked = v.text.startsWith("~");
+	const text = marked ? v.text.slice(1) : v.text;
+	const patterns: Record<SheetValue["unit"], RegExp> = {
+		grid: /^(-?\d+(?:\.\d+)?)(?:\/(\d+))?$/,
+		hoist: /^(-?\d*(?:\.\d+)?)H(?:\/(\d+))?$/,
+		mm: /^(-?\d+(?:\.\d+)?)()$/,
+		degrees: /^(-?\d+(?:\.\d+)?)°(?:\/(\d+))?$/,
+	};
+	const m = patterns[v.unit].exec(text);
+	if (m === null) {
+		return `can't read ${v.unit} value "${v.text}"`;
+	}
+	const top = m[1] === "" ? fraction(1n) : m[1] === "-" ? fraction(-1n) : readExact(m[1]!);
+	if (top === null) {
+		return `can't read ${v.unit} value "${v.text}"`;
+	}
+	let said = m[2] !== undefined && m[2] !== "" ? over(top, fraction(BigInt(m[2]))) : top;
+	if (v.unit === "hoist") {
+		said = times(said, hoist);
+	}
+	const off = Math.abs(toNumber(minus(said, v.exact)));
+	if (v.unit === "mm") {
+		return marked || off > (Math.abs(toNumber(v.exact)) < 10 ? 0.005 : 0.05) + 1e-12 ? `"${v.text}" isn't ${toNumber(v.exact)} mm to the places it gives` : null;
+	}
+	if (marked) {
+		const scale = v.unit === "hoist" ? Math.abs(toNumber(hoist)) : 1;
+		return off > 0.00005 * scale + 1e-12 ? `"${v.text}" isn't ${toNumber(v.exact)} to four places` : null;
+	}
+	return same(said, v.exact) ? null : `"${v.text}" is rounded from ${v.exact.n}/${v.exact.d} but isn't marked ~`;
+}
+
+/** Every value a sheet writes wrongly, and a footer that doesn't say a ~ marks rounding when one does. */
+export function sheetValueProblems(sheet: Sheet): string[] {
+	const out = sheet.values.map((v) => valueProblem(v, sheet.hoist)).filter((x): x is string => x !== null);
+	if (sheet.values.some((v) => v.unit !== "mm" && v.text.startsWith("~")) && !sheet.labels.map((l) => l.text).join(" ").includes(roundingNote)) {
+		out.push("a value is marked ~ but the footer doesn't say what that means");
+	}
+	return out;
+}
+
+/** What the sheet being drawn has written so far. Drawing a sheet is synchronous, so one at a time. */
+let recording: SheetValue[] | null = null;
+
+/** Notes a value a sheet writes, and gives its text back. */
+function recordValue(text: string, exact: Fraction, unit: SheetValue["unit"]): string {
+	recording?.push({ text, exact, unit });
+	return text;
 }
 
 export interface Box {
@@ -1025,7 +1096,7 @@ function chevrons(l: ChevronsLayer, f: Frame, m: Measured): void {
 	const foot = vec(e.place(zero, middle));
 	const { u, v } = e;
 	m.marks.push({
-		text: () => `${degrees}°`,
+		text: () => recordValue(`${degrees}°`, exactOf(degrees), "degrees"),
 		fallback: (text) => `The outermost arms of the ${name} are at ${text} to the line through their apexes.`,
 		// The angle is between the line back to the edge and an arm, on whichever side has room.
 		options: (p, w, h) => [1, -1].map((side) => {
@@ -1418,7 +1489,9 @@ function repeatDetail(name: string, rep: Repeat | undefined, ats: XY[] | null, f
 				// A step a decimal can't say is said as the share of the region it is, as laws do.
 				const exactly = (along: "fly" | "hoist", step: Fraction) => (t: Format): string => {
 					const text = t(step);
-					return text.startsWith("~") ? `${t(along === "fly" ? f.w : f.h)}/${along === "fly" ? rep.columns + 1 : rep.rows + 1}` : text;
+					const whole = t(along === "fly" ? f.w : f.h);
+					// In grid units only: a share of a part of the hoist is said as that part already.
+					return text.startsWith("~") && /^\d+(\.\d+)?$/.test(whole) ? recordValue(`${whole}/${along === "fly" ? rep.columns + 1 : rep.rows + 1}`, step, "grid") : text;
 				};
 				const allAt = [...copies, ...(rows > 1 ? [{ x: plus(f.x, dx), y: plus(f.y, times(dy, fraction(2n))) }] : []), ...(cols > 1 ? [{ x: plus(f.x, times(dx, fraction(2n))), y: plus(f.y, dy) }] : [])];
 				dims = chainsThrough(allAt, corner, exactly);
@@ -1449,7 +1522,7 @@ function repeatDetail(name: string, rep: Repeat | undefined, ats: XY[] | null, f
 				const p1 = { x: c.x + toward(a1).x * r, y: c.y + toward(a1).y * r };
 				const radius = exactOf(rep.radius);
 				const places = placesOf(step);
-				const stepText = places !== null && places <= 4 ? `${decimal(step, places)}°` : `${decimal(span, placesOf(span) ?? 4)}°/${rep.kind === "arc" ? rep.count - 1 : rep.count}`;
+				const stepText = recordValue(places !== null && places <= 4 ? `${decimal(step, places)}°` : `${decimal(span, placesOf(span) ?? 4)}°/${rep.kind === "arc" ? rep.count - 1 : rep.count}`, step, "degrees");
 				detail.radius = { centre: c, to: p0, text: (t) => `r ${t(radius)}` };
 				detail.angle = { centre: c, from: toward(a0), to: toward(a1), text: stepText };
 				const pts = [c, p0, p1];
@@ -1790,6 +1863,8 @@ function fontStyle(fonts: readonly SheetFont[], used: ReadonlySet<string>): stri
 interface SidebarItem {
 	height: number;
 	draw: (o: Out, x: number, y: number) => void;
+	/** Says it stands for what the sidebar had no room to list. */
+	condensed?: boolean;
 }
 
 function luminance(hex: string): number {
@@ -1826,6 +1901,9 @@ interface SidebarLook {
 const looks: SidebarLook[] = [
 	{ size: 13, line: 19, swatch: 26, gap: 12, refs: Infinity, laws: true },
 	{ size: 12, line: 17, swatch: 22, gap: 10, refs: Infinity, laws: true },
+	{ size: 12, line: 16, swatch: 20, gap: 8, refs: Infinity, laws: true },
+	{ size: 11, line: 15, swatch: 18, gap: 6, refs: Infinity, laws: true },
+	{ size: 11, line: 14, swatch: 16, gap: 4, refs: Infinity, laws: true },
 	{ size: 12, line: 16, swatch: 20, gap: 8, refs: 3, laws: true },
 	{ size: 11, line: 15, swatch: 18, gap: 6, refs: 1, laws: true },
 	{ size: 11, line: 14, swatch: 16, gap: 4, refs: 0, laws: false },
@@ -1860,7 +1938,7 @@ function detailRows(spans: readonly { lo: number; hi: number }[]): number[] {
  * with its dimensions above and beside it, and its caption. It's null if a label can't be read at
  * any size that fits, and the notes then say what it would have.
  */
-function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => string, idPrefix: string, theme: Theme, t: Format, width: number): SidebarItem[] | null {
+function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => string, idPrefix: string, theme: Theme, t: Format, width: number, maxHeight = Infinity): SidebarItem[] | null {
 	let level: Affine = identity;
 	let p = compose(map, d.frame);
 	if (d.level === true) {
@@ -1879,6 +1957,7 @@ function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => stri
 		return null;
 	}
 	const size = 11;
+	const caption = wrap(words(d.caption(t)), 12, width);
 	const dims = d.dims.map((dm) => {
 		const a = apply(p, dm.a);
 		const b = apply(p, dm.b);
@@ -1902,7 +1981,8 @@ function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => stri
 		lefts = detailRows(down);
 		top = 30 + pitchIn * Math.max(0, ...tops);
 		left = 34 + pitchIn * Math.max(0, ...lefts);
-		k = Math.min((width - left - 6) / vw, 200 / vh);
+		// As large as its room allows, under its heading, rows and caption.
+		k = Math.min((width - left - 6) / vw, 200 / vh, (maxHeight - 24 - top - 24 - caption.length * 16) / vh);
 		const small = kept.filter((x) => (x.hi - x.lo) * k < monoWidth(x.text, size) + 6);
 		if (small.length === 0) {
 			break;
@@ -1913,7 +1993,10 @@ function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => stri
 		}
 		kept = kept.filter((x) => !small.includes(x));
 	}
-	const caption = wrap(words(d.caption(t)), 12, width);
+	// Too small to be worth enlarging.
+	if (k * Math.max(vw, vh) < 80) {
+		return null;
+	}
 	const picW = vw * k;
 	const picH = vh * k;
 	const drawn = picture(idPrefix);
@@ -2121,6 +2204,7 @@ function sidebarItems(flag: Flag, theme: Theme, opts: { colors: boolean }, look:
 			const text = `and ${more} more ${more === 1 ? "color" : "colors"} in the file`;
 			items.push({
 				height: look.line + look.gap,
+				condensed: true,
 				draw: (o, x, y) => {
 					o.text(x, y + look.size, text, `font-family="${sansFamily}" font-size="${look.size}" fill="${theme.ink2}"`, { x0: x, y0: y, x1: x + sansWidth(text, look.size), y1: y + look.line });
 				},
@@ -2217,6 +2301,15 @@ function formView(flag: Flag, form: SheetForm, idPrefix?: string): FormView {
 }
 /** Lays out a sheet, and draws it. */
 export function constructionSheet(flag: Flag, options: ConstructionOptions = {}): Sheet {
+	const sheet = drawSheet(flag, options, false);
+	// The footer says what ~ means if any size is rounded, which it can only know for certain once
+	// every size is written, so a sheet that rounds one it didn't foresee is drawn again saying so.
+	return sheet.values.some((v) => v.unit !== "mm" && v.text.startsWith("~")) && !sheet.labels.map((l) => l.text).join(" ").includes(roundingNote) ? drawSheet(flag, options, true) : sheet;
+}
+
+const roundingNote = "A ~ marks a size rounded to four places.";
+
+function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): Sheet {
 	const units = options.units ?? "grid";
 	const theme = themes[options.theme ?? "paper"];
 	const paper = options.paper ?? "a4";
@@ -2239,7 +2332,12 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	const view = formView(flag, form, `${prefix}f-`);
 	const H = exactOf(view.flag.hoist);
 	const F = exactOf(view.flag.fly);
-	const t = formatFor(units, H, hoistMm);
+	const written = formatFor(units, H, hoistMm);
+	// Millimetres are recorded as millimetres; grid units and parts of the hoist as grid units.
+	const t: Format = (f) => recordValue(written(f), units === "mm" ? times(f, over(hoistMm, H)) : f, units);
+	const values: SheetValue[] = [];
+	// Each sheet starts its own record, so one that threw part way leaves nothing in the next.
+	recording = values;
 	const m = measure(flag, view.flag, form);
 
 	// Whether any size has to be rounded, which the footer then says, worked out by writing them all.
@@ -2280,12 +2378,12 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		for (const n of m.notes) {
 			n(f);
 		}
-		return all.some((x) => x.startsWith("~")) || proportionText(H, F).includes("~");
+		return rounds || all.some((x) => x.startsWith("~")) || proportionText(H, F).includes("~");
 	})();
 
 	// What the footer says, which the room for the drawing depends on.
 	const marked = showPositions && m.charges.length > 0 ? (m.charges.length === 1 ? ` The ${m.charges[0]!.name}’s center is marked +.` : " Each charge’s center is marked +.") : "";
-	const unitNote = (units === "grid" ? "Sizes in grid units, as the file gives them." : units === "hoist" ? "Sizes as parts of the hoist, H." : `Sizes in millimetres for a hoist of ${decimal(hoistMm, 3)} mm, to the nearest 0.1 mm, or 0.01 mm under 10 mm.`) + (rounded && units !== "mm" ? " A ~ marks a size rounded to four places." : "") + marked;
+	const unitNote = (units === "grid" ? "Sizes in grid units, as the file gives them." : units === "hoist" ? "Sizes as parts of the hoist, H." : `Sizes in millimetres for a hoist of ${decimal(hoistMm, 3)} mm, to the nearest 0.1 mm, or 0.01 mm under 10 mm.`) + (rounded && units !== "mm" ? ` ${roundingNote}` : "") + marked;
 	const footRight = [options.path, options.tier !== undefined ? `tier ${options.tier}` : undefined, `Vexyl ${flag.version}`].filter((x): x is string => x !== undefined && x !== "").join(" · ");
 
 	const name = view.label !== "" ? `${flag.meta.name} · ${view.label}` : flag.meta.name;
@@ -2359,21 +2457,54 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	};
 
 	const bodyTop = 100;
-	// Details of repeated charges, at most two, before the colours. Fewer are shown if the sidebar has no room.
-	const details = showSizes
-		? m.details.map((d, i) => detailItems(d, view.map, (idPrefix) => svg(flag, { ...form, idPrefix }), `${prefix}d${i}-`, theme, t, sidebarWidth)).filter((x): x is SidebarItem[] => x !== null).slice(0, 2)
-		: [];
-	const sideItemsFor = (room: number): SidebarItem[] => {
-		for (let n = details.length; n >= 0; n--) {
-			const extra = details.slice(0, n).flat();
-			for (const look of looks) {
-				const items = [...extra, ...sidebarItems(flag, theme, { colors: showColors }, look, sidebarWidth, prefix, room - heightOf(extra))];
-				if (heightOf(items) <= room || (n === 0 && look === looks[looks.length - 1])) {
-					return items;
+	// Details of repeated charges, at most two. The colours and the laws come first: a detail takes
+	// what room the sidebar has left, enlarged as far as that allows, and one that doesn't fit there
+	// goes under the drawing instead, which then gets a little smaller.
+	const detailFor = (i: number, maxHeight: number): SidebarItem[] | null => detailItems(m.details[i]!, view.map, (idPrefix) => svg(flag, { ...form, idPrefix }), `${prefix}d${i}-`, theme, t, sidebarWidth, maxHeight);
+	const detailCount = showSizes ? Math.min(m.details.length, 2) : 0;
+	/** The tallest a detail under the drawing gets, so that the flag stays the sheet's main thing. */
+	const belowHeight = 240;
+	const sideItemsFor = (room: number): { side: SidebarItem[]; below: SidebarItem[][]; condensed: boolean } => {
+		// The looks that list every colour and law in full, and fit, least condensed first.
+		const full = looks.map((look) => ({ look, items: sidebarItems(flag, theme, { colors: showColors }, look, sidebarWidth, prefix, room) }))
+			.filter(({ look, items }) => look.refs === Infinity && look.laws && !items.some((x) => x.condensed === true) && heightOf(items) <= room);
+		/** Details in the sidebar under a look's colours and laws, as many as fit, and the rest under the drawing. */
+		const withDetails = (items: SidebarItem[]): { side: SidebarItem[]; below: SidebarItem[][]; inSide: number } => {
+			const side: SidebarItem[] = [];
+			const below: SidebarItem[][] = [];
+			let left = room - heightOf(items);
+			let inSide = 0;
+			for (let i = 0; i < detailCount; i++) {
+				const here = detailFor(i, left - 10);
+				if (here !== null) {
+					side.push(...here, { height: 10, draw: () => undefined });
+					left -= heightOf(here) + 10;
+					inSide++;
+					continue;
+				}
+				// One beside the notes at most, which leaves them room to read.
+				const under = below.length === 0 ? detailFor(i, belowHeight) : null;
+				if (under !== null) {
+					below.push(under);
 				}
 			}
+			return { side: [...side, ...items], below, inSide };
+		};
+		// A smaller look that leaves room for every detail is better than a detail that shrinks the drawing.
+		const tries = full.map(({ items }) => withDetails(items));
+		const best = tries.find((x) => x.inSide === detailCount) ?? tries[0];
+		if (best !== undefined) {
+			return { side: best.side, below: best.below, condensed: false };
 		}
-		return [];
+		// A palette or laws too long to list in full, whichever look: the last resort is to say how many more there are.
+		for (const look of looks) {
+			const items = sidebarItems(flag, theme, { colors: showColors }, look, sidebarWidth, prefix, room);
+			if (heightOf(items) <= room || look === looks[looks.length - 1]) {
+				const below = Array.from({ length: detailCount }, (_, i) => detailFor(i, belowHeight)).filter((x): x is SidebarItem[] => x !== null).slice(0, 1);
+				return { side: items, below, condensed: true };
+			}
+		}
+		return { side: [], below: [], condensed: false };
 	};
 
 	// The drawing: the flag's scale, where it goes, its rows and its notes.
@@ -2440,6 +2571,8 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	const dw = view.sideways ? ho : fl;
 	const dh = view.sideways ? fl : ho;
 
+	/** Details beside the notes, under the drawing: how wide and tall they are together. */
+	let beside = { w: 0, h: 0 };
 	const layDrawing = (box: Box, fixedScale: number | null, fallbacks: readonly string[]): Drawing => {
 		const first = showSizes ? rowGap + pitch + 20 : showPositions ? rowGap + 20 : 10;
 		const ext: Record<Side, number> = { top: 0, bottom: 0, left: 0, right: 0 };
@@ -2449,10 +2582,10 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		let dropped = 0;
 		for (let pass = 0; pass < 8; pass++) {
 			const room = fixedScale === null ? Math.max(3, Math.floor(((box.y1 - box.y0) * 0.24) / 16)) : 40;
-			const notes = notesFor(fallbacks, Math.max(box.x1 - box.x0, 300), dropped, room);
+			const notes = notesFor(fallbacks, Math.max(box.x1 - box.x0 - (beside.w > 0 ? beside.w + 24 : 0), 300), dropped, room);
 			const nh = notesHeight(notes);
 			const availW = box.x1 - box.x0 - ext.left - ext.right - 14;
-			const availH = box.y1 - box.y0 - ext.top - ext.bottom - nh - 8;
+			const availH = box.y1 - box.y0 - ext.top - ext.bottom - Math.max(nh, beside.h) - 8;
 			const s = fixedScale ?? Math.max(0.01, Math.min(availW / dw, availH / dh));
 			const spareW = fixedScale === null ? Math.max(0, availW - dw * s) : 0;
 			const spareH = fixedScale === null ? Math.max(0, availH - dh * s) : 0;
@@ -2482,6 +2615,9 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	let drawing: Drawing;
 	let sideX: number;
 	let side: SidebarItem[];
+	// Details under the drawing, with where they start, and whether the sidebar had to be condensed.
+	let below: SidebarItem[][] = [];
+	let condensed = false;
 	let foot: string[];
 	let charges: ChargePlan;
 	let fallbacks: string[] = [];
@@ -2492,7 +2628,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 			const drawRight = Math.max(probe.right, probe.fx + dw * s) + 12;
 			const width = Math.max(drawRight - margin.side, 420);
 			drawing = layDrawing({ x0: margin.side, y0: bodyTop + 8, x1: margin.side + width, y1: 1e6 }, s, fallbacks);
-			side = sideItemsFor(1e6);
+			({ side, below, condensed } = sideItemsFor(1e6));
 			const hasSide = heightOf(side) > 0;
 			sideX = margin.side + width + 20;
 			W = Math.max(sideX + (hasSide ? sidebarWidth : -20) + margin.side, margin.side * 2 + sansWidth(name, 28, 500) + monoWidth(headRight, 13) + 40);
@@ -2503,9 +2639,10 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 			foot = footFor(W);
 			const footH = foot.length * 16 + 26;
 			const bodyBottom = Hpx - margin.bottom - footH - 10;
-			side = sideItemsFor(bodyBottom - (bodyTop + 30));
+			({ side, below, condensed } = sideItemsFor(bodyBottom - (bodyTop + 30)));
 			const hasSide = heightOf(side) > 0;
 			sideX = W - margin.side - sidebarWidth;
+			beside = below.length === 0 ? { w: 0, h: 0 } : { w: below.length * (sidebarWidth + 24) - 24, h: Math.max(...below.map(heightOf)) + 14 };
 			drawing = layDrawing({ x0: margin.side, y0: bodyTop + 8, x1: hasSide ? sideX - 20 : W - margin.side, y1: bodyBottom }, null, fallbacks);
 		}
 		const flagBox = { x0: drawing.fx, y0: drawing.fy, x1: drawing.fx + dw * drawing.s, y1: drawing.fy + dh * drawing.s };
@@ -2729,12 +2866,21 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		ny += 4;
 	});
 
-	// The sidebar.
+	// The sidebar, and any details under the drawing.
 	let sy = bodyTop + 30;
 	for (const item of side) {
 		item.draw(o, sideX, sy);
 		sy += item.height;
 	}
+	// Beside the notes, at the right of the drawing's column.
+	const besideX = (heightOf(side) > 0 ? sideX - 20 : W - margin.side) - beside.w;
+	below.forEach((items, i) => {
+		let y = drawing.notesY - 12;
+		for (const item of items) {
+			item.draw(o, besideX + i * (sidebarWidth + 24), y);
+			y += item.height;
+		}
+	});
 
 	// The footer.
 	const footH = foot.length * 16 + 26;
@@ -2753,7 +2899,8 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		o.lines.splice(2, 0, style);
 	}
 
-	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh } };
+	recording = null;
+	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh }, condensed, hoist: H, values: [...new Map(values.map((v) => [`${v.unit} ${v.text} ${v.exact.n}/${v.exact.d}`, v])).values()] };
 }
 
 /** How far apart the grid's lines are drawn, which is one unit unless that's too many lines. */
