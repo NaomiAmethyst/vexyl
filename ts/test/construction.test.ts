@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { constructionSheet, gridText, hoistText, mmText, proportionText, type ConstructionOptions } from "../src/construction.js";
 import { decimal, exactOf, fraction, over, placesOf, plus, readExact, sum, times } from "../src/exact.js";
-import { constructionSvg, parse, type Flag } from "../src/index.js";
+import { constructionSvg, parse, sheetFaces, type Flag, type SheetFont } from "../src/index.js";
 import { header, readRepo, root } from "./helpers.js";
 
 const data = join(root, "ts/test/testdata/construction");
@@ -93,6 +93,34 @@ test("a sheet is self-contained SVG, with nothing to run and nothing to fetch", 
 	}
 	const inline = parse(readRepo("go/testdata/inline-svg.kdl"));
 	assert.doesNotMatch(constructionSvg(inline), /<script|\bon[a-z]+=|href="(?!#)/i);
+});
+
+test("a sheet can carry its fonts, only the faces it uses, and still runs and fetches nothing", () => {
+	// Not real fonts, but they start as a WOFF2 file does, which is all the library checks.
+	const face = (family: string, weight: number, n: number): SheetFont => ({ family, weight, woff2: Uint8Array.from([0x77, 0x4f, 0x46, 0x32, ...Array.from({ length: n }, (_, i) => (i * 37 + weight) & 255)]) });
+	const fonts = [...sheetFaces.map((f, i) => face(f.family, f.weight, 40 + i)), face("Geist", 700, 9), face("Other", 400, 9)];
+	for (const name of fixtures) {
+		for (const theme of ["paper", "dark"] as const) {
+			const plain = constructionSvg(flagOf(name), { theme });
+			const out = constructionSvg(flagOf(name), { theme, fonts });
+			assert.doesNotMatch(plain, /@font-face|<style/, "nothing is embedded unless asked");
+			const faces = [...out.matchAll(/@font-face\{font-family:"([^"]+)";font-style:normal;font-weight:([0-9]+);src:url\(data:font\/woff2;base64,([A-Za-z0-9+/]+=*)\) format\("woff2"\)\}/g)];
+			assert.deepEqual(faces.map((m) => `${m[1]} ${m[2]}`), ["Geist 400", "Geist 500", "Geist Mono 400", "Geist Mono 500"], name);
+			for (const m of faces) {
+				const want = fonts.find((f) => `${f.family} ${f.weight}` === `${m[1]} ${m[2]}`)!;
+				assert.deepEqual(Buffer.from(m[3]!, "base64"), Buffer.from(want.woff2));
+			}
+			// The same checks as a sheet without them, once the fonts themselves, which are data, are set aside.
+			const rest = out.replace(/url\(data:font\/woff2;base64,[A-Za-z0-9+/]+=*\)/g, "");
+			assert.doesNotMatch(rest, /<script|\bon[a-z]+=|href=|url\((?!#)|<image|<foreignObject|@import|data:/i, name);
+			assert.equal(out.match(/<style>/g)?.length, 1);
+			assert.equal(rest.replace(/\n<defs><style>[^<]*<\/style><\/defs>/, ""), plain, "and the sheet is otherwise the same");
+		}
+	}
+	const chile = flagOf("chile");
+	assert.match(constructionSvg(chile, { fonts }), /^<svg [^>]*>\n<title>[^<]*<\/title>\n<defs><style>@font-face/);
+	assert.doesNotMatch(constructionSvg(chile, { fonts: [face("Other", 400, 9)] }), /<style/, "a face the sheet doesn't use is left out");
+	assert.throws(() => constructionSvg(chile, { fonts: [{ family: "Geist", weight: 400, woff2: new TextEncoder().encode("@import url(https://example.com/x.css)") }] }), RangeError);
 });
 
 test("every character set in Geist Mono is one it has", () => {

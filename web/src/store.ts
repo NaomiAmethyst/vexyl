@@ -8,6 +8,7 @@ import { claimTab, dropDraft, durable, loadDraft, orphanOf, saveDraft, TabPresen
 import { engine } from "./engine.js";
 import type { Analysis, ONode, Op, PickNode, RenderResult } from "./protocol.js";
 import { evidenceTiers, fetchRef, type GistFile } from "./remote.js";
+import { savedPicture, savePicture, type PicturePrefs } from "./png.js";
 import { savedSheet, saveSheet, type SheetPrefs } from "./sheet.js";
 
 export type View = "work" | "open" | "compare" | "share" | "new" | "construction";
@@ -90,13 +91,15 @@ export interface State {
 	storageNote: boolean;
 	/** How construction sheets are drawn. */
 	sheet: SheetPrefs;
+	/** How pictures of the flag are downloaded. */
+	picture: PicturePrefs;
 }
 
 function initial(): State {
 	return {
 		view: "work", level: savedLevel(), basicTab: "design", analyzed: "", gesturing: false, canUndo: false, canRedo: false, lawNoteDismissed: false, mode: "form", loading: null, loadError: null, gistFiles: null, text: "", base: "", eol: "\n", mixedEol: false, source: null,
 		analysis: null, lastReadable: null, lastValid: null, selected: null, hover: null, sourceJump: 0, form: "flag", padded: {}, foldStep: {},
-		images: new Map(), busy: false, tier: null, orphan: null, sameInOtherTab: { tabs: 0, dirty: false }, saved: true, notice: null, storageNote: false, sheet: savedSheet(),
+		images: new Map(), busy: false, tier: null, orphan: null, sameInOtherTab: { tabs: 0, dirty: false }, saved: true, notice: null, storageNote: false, sheet: savedSheet(), picture: savedPicture(),
 	};
 }
 
@@ -771,6 +774,13 @@ export class App {
 		const sheet = { ...this.state.sheet, ...patch };
 		saveSheet(sheet);
 		this.set({ sheet });
+	}
+
+	/** Changes how pictures are downloaded, and remembers it for next time. */
+	setPicture(patch: Partial<PicturePrefs>): void {
+		const picture = { ...this.state.picture, ...patch };
+		savePicture(picture);
+		this.set({ picture });
 	}
 
 	/** Goes straight to a part in Advanced. */

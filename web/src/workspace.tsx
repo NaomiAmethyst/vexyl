@@ -9,6 +9,8 @@ import { engine } from "./engine.js";
 import { BasicEditor } from "./basic.js";
 import { Form } from "./form.js";
 import { Handles } from "./handles.js";
+import { downloadPicture, PictureDialog } from "./picture.js";
+import type { PicturePrefs } from "./png.js";
 import type { PickNode } from "./protocol.js";
 import { redoInSource, refreshSource, SourceEditor, syncSource, undoInSource } from "./source.js";
 import { plainFormLabel, plainFormText } from "./plain.js";
@@ -505,14 +507,19 @@ function MenuLink(props: { view: View; close: () => void; children: preact.Compo
 	return <a role="menuitem" tabIndex={-1} class="row compact menu-item" href={app.href(props.view)} onClick={(e) => { if (plain(e)) { e.preventDefault(); props.close(); app.go(props.view); } }}>{props.children}</a>;
 }
 
-/** The one download button, which asks which of the two is wanted, in each editor's own words. */
-function DownloadMenu(props: { basic: boolean; picture: () => Promise<void>; file: () => void; paused: boolean; pausedNote?: string }): preact.JSX.Element {
+/**
+ * The one download button, which asks what's wanted, in each editor's own words. A picture that
+ * needs choosing about, Basic's or Advanced's PNG, asks how it's wanted first.
+ */
+function DownloadMenu(props: { basic: boolean; svg: () => Promise<void>; ask: () => void; file: () => void; paused: boolean; pausedNote?: string }): preact.JSX.Element {
 	const { basic } = props;
+	const pausedTitle = props.pausedNote !== undefined ? { title: props.pausedNote } : {};
 	return (
 		<MenuButton label="Download" menuLabel="What to download" buttonClass="nx-btn">
 			{(close) => (
 				<>
-					<MenuItem disabled={props.paused} {...(props.pausedNote !== undefined ? { title: props.pausedNote } : {})} onPick={() => { close(); void props.picture(); }}>{basic ? "A picture of the flag" : "SVG image"}</MenuItem>
+					{basic ? null : <MenuItem disabled={props.paused} {...pausedTitle} onPick={() => { close(); void props.svg(); }}>SVG image</MenuItem>}
+					<MenuItem disabled={props.paused} {...pausedTitle} onPick={() => { close(); props.ask(); }}>{basic ? "A picture of the flag…" : "PNG image…"}</MenuItem>
 					<MenuItem onPick={() => { close(); props.file(); }}>{basic ? "The flag's file, to keep working on" : "KDL file"}</MenuItem>
 				</>
 			)}
@@ -527,15 +534,16 @@ export function Header(): preact.JSX.Element {
 	const [ack, setAck] = useAck();
 	const basic = s.level === "basic";
 	const stem = fileStem(s.source?.ref !== undefined ? refLabel(s.source.ref).replace(/\.kdl$/, "") : app.displayName());
-	const downloadSvg = async (): Promise<void> => {
+	const [asking, setAsking] = useState(false);
+	const picture = async (prefs: PicturePrefs): Promise<void> => {
 		const result = await engine.ask({ kind: "render", slot: "main", options: optionsFor(s.form, s.padded[s.form] === true, s.foldStep[s.form]), exact: true });
 		if (result.svg !== undefined) {
-			download(`${stem}.svg`, result.svg, "image/svg+xml");
-			setAck("Downloaded the SVG.");
+			setAck(await downloadPicture(stem, result.svg, prefs));
 		} else {
 			setAck(result.refused ?? "That can't be drawn.");
 		}
 	};
+	const shown = s.images.get(s.form);
 	const downloadKdl = (): void => {
 		download(`${stem}.kdl`, app.exportText(), "text/plain");
 		app.markSaved();
@@ -560,7 +568,11 @@ export function Header(): preact.JSX.Element {
 				{basic ? null : <a class="nx-ghost" href={app.href("compare")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("compare"); } }}>Compare</a>}
 				<a class="nx-ghost" href={app.href("share")} onClick={(e) => { if (plain(e)) { e.preventDefault(); app.go("share"); } }}>Share</a>
 			</div>
-			<DownloadMenu basic={basic} picture={downloadSvg} file={downloadKdl} paused={paused || s.analysis === null} {...(paused ? { pausedNote: "Paused until the file is valid again" } : {})} />
+			<DownloadMenu basic={basic} svg={() => picture({ ...s.picture, format: "svg" })} ask={() => { setAsking(true); }} file={downloadKdl} paused={paused || s.analysis === null} {...(paused ? { pausedNote: "Paused until the file is valid again" } : {})} />
+			<PictureDialog open={asking} basic={basic} width={shown?.width} height={shown?.height} onClose={() => { setAsking(false); }} onDownload={() => {
+				setAsking(false);
+				void picture(basic ? s.picture : { ...s.picture, format: "png" });
+			}} />
 			<MenuButton class="topbar-narrow" label="Menu" menuLabel="Menu" buttonClass="nx-ghost">
 				{(close) => (
 					<>

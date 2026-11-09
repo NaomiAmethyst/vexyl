@@ -5,6 +5,7 @@ import { useEffect, useState } from "preact/hooks";
 import { openHref, refLabel } from "./address.js";
 import { copyText, download, fileStem, licenseName, Seg, useAck, useApp } from "./common.js";
 import { engine } from "./engine.js";
+import { downloadPicture, PictureFields } from "./picture.js";
 import { app, optionsFor } from "./store.js";
 
 /** Past this, a link is likely to break somewhere. Some programs give up at about this length. */
@@ -48,6 +49,7 @@ export function SharePage(): preact.JSX.Element {
 		const result = await engine.ask({ kind: "render", slot: "main", options: optionsFor(s.form, s.padded[s.form] === true, s.foldStep[s.form]), exact: true });
 		return result.svg ?? null;
 	};
+	const shown = s.images.get(s.form);
 	const nodes = s.lastReadable?.nodes ?? [];
 	const meta = nodes.find((n) => n.name === "meta");
 	const license = meta?.kids.find((k) => k.name === "license")?.args[0]?.v;
@@ -89,9 +91,10 @@ export function SharePage(): preact.JSX.Element {
 				</div>
 				<div class="field ruled">
 					<span class="nx-label">Or send the flag itself</span>
+					<PictureFields choose={true} width={shown?.width} height={shown?.height} />
 					<div class="chips">
 						<button type="button" class="nx-ghost" onClick={() => { download(`${stem}.kdl`, text, "text/plain"); app.markSaved(); setAck("Downloaded the KDL."); }}>Download KDL</button>
-						<button type="button" class="nx-ghost" disabled={paused} onClick={() => { void svgText().then((t) => { if (t !== null) { download(`${stem}.svg`, t, "image/svg+xml"); setAck("Downloaded the SVG."); } }); }}>Download SVG</button>
+						<button type="button" class="nx-ghost" disabled={paused} onClick={() => { void svgText().then(async (t) => { if (t !== null) { setAck(await downloadPicture(stem, t, s.picture)); } }); }}>{s.picture.format === "png" ? "Download PNG" : "Download SVG"}</button>
 						<button type="button" class="nx-ghost" disabled={paused} onClick={() => { void svgText().then((t) => (t === null ? false : copyText(t))).then((ok) => { setAck(ok ? "Copied the SVG." : "That couldn't be copied."); }); }}>Copy SVG</button>
 						<button type="button" class="nx-ghost" onClick={() => { void copyText(text).then((ok) => { setAck(ok ? "Copied the KDL." : "That couldn't be copied."); }); }}>Copy KDL</button>
 					</div>

@@ -190,7 +190,11 @@ export function safeColor(c: unknown): string | undefined {
 }
 
 export function download(name: string, text: string, type: string): void {
-	const url = URL.createObjectURL(new Blob([text], { type }));
+	downloadBlob(name, new Blob([text], { type }));
+}
+
+export function downloadBlob(name: string, blob: Blob): void {
+	const url = URL.createObjectURL(blob);
 	const a = document.createElement("a");
 	a.href = url;
 	a.download = name;

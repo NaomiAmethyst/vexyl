@@ -45,11 +45,11 @@ Every opened file, link and paste is untrusted. The page's Content Security Poli
 | `style-src 'self'` | Only this site's own style sheet. Styles set from script use the DOM, which this allows |
 | `img-src 'self' blob:` | The favicon, and flags drawn here |
 | `font-src 'self'` | The fonts are served from here, never from a font service |
-| `connect-src https:` | Any https site, because the Link tab can open a file from anywhere |
+| `connect-src 'self' https:` | Any https site, because the Link tab can open a file from anywhere, and this site's own fonts, which a construction sheet's PNG carries |
 | `base-uri 'none'`, `form-action 'none'` | Nothing can change where links lead, or send a form |
 | `require-trusted-types-for 'script'`, `trusted-types vexyl-worker` | In browsers that have it, no string can become HTML or script. The one policy makes the worker's URL |
 
-`connect-src` is the one trade-off. Without the Link tab it could be `https://api.github.com https://raw.githubusercontent.com
+`connect-src` is the one trade-off. Without the Link tab it could be `'self' https://api.github.com https://raw.githubusercontent.com
 https://gist.githubusercontent.com`. Since a meta tag can't change after the page loads, it has to allow what the Link tab might
 need. What keeps that safe is that no code but this site's can run, so nothing can use it to send anything anywhere. A meta tag
 also can't set `frame-ancestors`, so a host that wants to stop the page being framed has to send that as a header.

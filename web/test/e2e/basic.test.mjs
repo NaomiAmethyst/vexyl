@@ -570,11 +570,17 @@ test("Basic has one Download, for a picture or the file, from the pointer or the
 	await download.focus();
 	await p.keyboard.press("ArrowDown");
 	const menu = p.getByRole("menu", { name: "What to download" });
-	assert.deepEqual(await menu.getByRole("menuitem").allTextContents(), ["A picture of the flag", "The flag's file, to keep working on"]);
-	assert.equal(await p.evaluate(() => document.activeElement?.textContent), "A picture of the flag");
-	const [picture] = await Promise.all([p.waitForEvent("download"), p.keyboard.press("Enter")]);
-	assert.equal(picture.suggestedFilename(), "new-flag.svg");
+	assert.deepEqual(await menu.getByRole("menuitem").allTextContents(), ["A picture of the flag…", "The flag's file, to keep working on"]);
+	assert.equal(await p.evaluate(() => document.activeElement?.textContent), "A picture of the flag…");
+	// A picture asks how it's wanted, as SVG unless PNG was chosen before.
+	await p.keyboard.press("Enter");
+	const dialog = p.getByRole("dialog", { name: "Download a picture" });
+	await dialog.waitFor();
 	assert.equal(await menu.count(), 0);
+	assert.equal(await dialog.getByRole("radio", { name: "SVG" }).getAttribute("aria-checked"), "true");
+	const [picture] = await Promise.all([p.waitForEvent("download"), dialog.getByRole("button", { name: "Download SVG" }).click()]);
+	assert.equal(picture.suggestedFilename(), "new-flag.svg");
+	await dialog.waitFor({ state: "hidden" });
 	assert.equal(await p.evaluate(() => document.activeElement?.textContent), "Download");
 	await row(p, "Circle").click();
 	await p.locator(".swatch-pick[data-color='red']").first().click();

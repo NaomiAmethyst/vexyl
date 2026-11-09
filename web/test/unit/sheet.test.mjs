@@ -12,14 +12,15 @@ test("a sheet is dark on screen by default, in grid units on A4", () => {
 	assert.equal(defaultSheet.theme, "dark");
 	assert.equal(defaultSheet.units, "grid");
 	assert.equal(defaultSheet.paper, "a4");
+	assert.equal(defaultSheet.dpi, 300);
 });
 
 test("what was kept is read back, and anything that doesn't make sense is ignored", () => {
-	const kept = { units: "mm", hoistMm: 1500, theme: "paper", paper: "fit", sizes: false, positions: true, colors: false, grid: true };
+	const kept = { units: "mm", hoistMm: 1500, theme: "paper", paper: "fit", sizes: false, positions: true, colors: false, grid: true, dpi: 600 };
 	assert.deepEqual(readSheetPrefs(JSON.stringify(kept)), kept);
 	assert.deepEqual(readSheetPrefs("not json"), defaultSheet);
 	assert.deepEqual(readSheetPrefs("[1,2]"), defaultSheet);
-	const odd = readSheetPrefs(JSON.stringify({ units: "furlongs", hoistMm: -4, theme: 3, paper: "a3", sizes: "yes" }));
+	const odd = readSheetPrefs(JSON.stringify({ units: "furlongs", hoistMm: -4, theme: 3, paper: "a3", sizes: "yes", dpi: 72 }));
 	assert.deepEqual(odd, defaultSheet);
 	assert.equal(readSheetPrefs(JSON.stringify({ hoistMm: Infinity })).hoistMm, 1000);
 });

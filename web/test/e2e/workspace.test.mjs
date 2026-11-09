@@ -857,11 +857,11 @@ test("the editor's switch never wraps at phone width, and its hint goes below it
 	await context.close();
 });
 
-test("Advanced has one Download, for an SVG image or the KDL file, and the file is saved by it", async () => {
+test("Advanced has one Download, for an SVG or PNG image or the KDL file, and the file is saved by it", async () => {
 	const { p, context, errors } = await page("flags/country/japan.kdl");
 	assert.equal(await p.locator(".topbar").getByRole("button", { name: /^Download/ }).count(), 1);
 	const kdl = await downloadChoice(p, "KDL file");
-	assert.deepEqual(await p.getByRole("menu", { name: "What to download" }).getByRole("menuitem").allTextContents(), ["SVG image", "KDL file"]);
+	assert.deepEqual(await p.getByRole("menu", { name: "What to download" }).getByRole("menuitem").allTextContents(), ["SVG image", "PNG image…", "KDL file"]);
 	await p.keyboard.press("Escape");
 	assert.equal(await focused(p), "Download");
 	assert.equal(await kdl.count(), 0);

@@ -36,7 +36,24 @@ export interface ConstructionOptions {
 	tier?: string;
 	/** Starts every ID in the output, as for `svg`. */
 	idPrefix?: string;
+	/**
+	 * Fonts for the sheet to carry inside it, for a reader that won't load any, as a browser drawing
+	 * an SVG as an image won't. Only the faces the sheet's text is set in are kept; see `sheetFaces`.
+	 */
+	fonts?: readonly SheetFont[];
 }
+
+/** A face of a font, as a WOFF2 file, which the caller supplies, since this library holds none. */
+export interface SheetFont {
+	family: string;
+	weight: number;
+	woff2: Uint8Array;
+}
+
+/** The faces a sheet's text can be set in: Geist and Geist Mono, each at 400 and 500. */
+export const sheetFaces: readonly { family: string; weight: number }[] = [
+	{ family: "Geist", weight: 400 }, { family: "Geist", weight: 500 }, { family: "Geist Mono", weight: 400 }, { family: "Geist Mono", weight: 500 },
+];
 
 /** A sheet, with where its text is, which is what tests of its layout need. */
 export interface Sheet {
@@ -936,6 +953,8 @@ function rowTexts(l: SideLayout, top: boolean, fx: number, fy: number): RowText[
 class Out {
 	readonly lines: string[] = [];
 	readonly labels: LabelBox[] = [];
+	/** The faces text is set in, as family and weight, such as "Geist Mono 500". */
+	readonly faces = new Set<string>();
 	add(line: string): void {
 		this.lines.push(line);
 	}
@@ -943,7 +962,42 @@ class Out {
 	text(x: number, y: number, text: string, attrs: string, box: Box, onFlag = false): void {
 		this.lines.push(`<text x="${num(x)}" y="${num(y)}" ${attrs}>${esc(text)}</text>`);
 		this.labels.push({ ...box, text, onFlag });
+		this.faces.add(`${/font-family="([^",]*)/.exec(attrs)?.[1] ?? ""} ${/font-weight="([0-9]+)"/.exec(attrs)?.[1] ?? "400"}`);
 	}
+}
+
+const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+function base64(bytes: Uint8Array): string {
+	let out = "";
+	for (let i = 0; i < bytes.length; i += 3) {
+		const n = bytes.length - i;
+		const v = (bytes[i]! << 16) | ((n > 1 ? bytes[i + 1]! : 0) << 8) | (n > 2 ? bytes[i + 2]! : 0);
+		out += base64Chars[v >> 18]! + base64Chars[(v >> 12) & 63]! + (n > 1 ? base64Chars[(v >> 6) & 63]! : "=") + (n > 2 ? base64Chars[v & 63]! : "=");
+	}
+	return out;
+}
+
+/**
+ * The style that carries a sheet's fonts, with only the faces it uses. It's built here, from the
+ * fonts' bytes, so that nothing a caller passes can become CSS that runs or fetches anything.
+ */
+function fontStyle(fonts: readonly SheetFont[], used: ReadonlySet<string>): string {
+	const rules: string[] = [];
+	const seen = new Set<string>();
+	for (const f of fonts) {
+		const b = f.woff2;
+		if (!(b instanceof Uint8Array) || b.length < 4 || b[0] !== 0x77 || b[1] !== 0x4f || b[2] !== 0x46 || b[3] !== 0x32) {
+			throw new RangeError("a sheet's font must be a WOFF2 file");
+		}
+		const key = `${f.family} ${f.weight}`;
+		if (!used.has(key) || seen.has(key)) {
+			continue;
+		}
+		seen.add(key);
+		rules.push(`@font-face{font-family:"${f.family}";font-style:normal;font-weight:${f.weight};src:url(data:font/woff2;base64,${base64(b)}) format("woff2")}`);
+	}
+	return rules.length === 0 ? "" : `<defs><style>${rules.join("")}</style></defs>`;
 }
 
 interface SidebarItem {
@@ -1565,6 +1619,11 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	const footRightW = monoWidth(footRight, 12);
 	o.text(W - margin.side, footTop + 22, footRight, `font-family="${monoFamily}" font-size="12" text-anchor="end" fill="${theme.ink2}"`, { x0: W - margin.side - footRightW, y0: footTop + 12, x1: W - margin.side, y1: footTop + 25 });
 	o.add("</svg>");
+	const style = fontStyle(options.fonts ?? [], o.faces);
+	if (style !== "") {
+		// After the title, which readers look for first.
+		o.lines.splice(2, 0, style);
+	}
 
 	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh } };
 }

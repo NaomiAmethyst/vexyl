@@ -508,6 +508,13 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .sheet-options .nx-note { margin: 0; }
 .sheet-options .hoist-mm { width: 140px; }
 .nx-seg.wrap { flex-wrap: wrap; }
+/* Asking how a picture is wanted, over the page. */
+.picture-dialog { width: min(440px, calc(100vw - 32px)); color: var(--ink); }
+.picture-dialog:not([open]) { display: none; }
+.picture-dialog::backdrop { background: rgba(9, 8, 12, 0.6); }
+.png-height { width: 140px; }
+.png-capped { color: var(--warn); }
+
 .sheet-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .sheet-view { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .sheet-frame { width: 100%; border-radius: 6px; overflow: hidden; border: 1px solid var(--line2); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; }

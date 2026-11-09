@@ -15,12 +15,14 @@ export interface SheetPrefs {
 	positions: boolean;
 	colors: boolean;
 	grid: boolean;
+	/** A PNG's dots per inch, on the sheet's paper. */
+	dpi: 150 | 300 | 600;
 }
 
 export const sheetKey = "vexyl.construction";
 
 /** On screen, a sheet is dark by default, as the editor is. */
-export const defaultSheet: SheetPrefs = { units: "grid", hoistMm: 1000, theme: "dark", paper: "a4", sizes: true, positions: true, colors: true, grid: false };
+export const defaultSheet: SheetPrefs = { units: "grid", hoistMm: 1000, theme: "dark", paper: "a4", sizes: true, positions: true, colors: true, grid: false, dpi: 300 };
 
 const oneOf = <T extends string>(v: unknown, list: readonly T[], fallback: T): T => (list.includes(v as T) ? (v as T) : fallback);
 const flag = (v: unknown, fallback: boolean): boolean => (typeof v === "boolean" ? v : fallback);
@@ -47,6 +49,7 @@ export function readSheetPrefs(text: string | null): SheetPrefs {
 		positions: flag(v["positions"], d.positions),
 		colors: flag(v["colors"], d.colors),
 		grid: flag(v["grid"], d.grid),
+		dpi: v["dpi"] === 150 || v["dpi"] === 600 ? v["dpi"] : 300,
 	};
 }
 
@@ -83,3 +86,14 @@ export function sheetOptions(prefs: SheetPrefs, path: string | undefined, tier: 
 
 /** The rule that prints a sheet on paper of its own size, with nothing around it. */
 export const pageRule = (widthMm: number, heightMm: number): string => `@page { size: ${widthMm}mm ${heightMm}mm; margin: 0; }`;
+
+/**
+ * The faces a sheet's text is set in, which the library's `sheetFaces` lists, as the files this site
+ * serves them from. A PNG's sheet carries them, since a browser drawing an SVG loads no fonts for it.
+ */
+export const sheetFontFiles: readonly { family: string; weight: number; file: string }[] = [
+	{ family: "Geist", weight: 400, file: "fonts/geist-sans-latin-400-normal.woff2" },
+	{ family: "Geist", weight: 500, file: "fonts/geist-sans-latin-500-normal.woff2" },
+	{ family: "Geist Mono", weight: 400, file: "fonts/geist-mono-latin-400-normal.woff2" },
+	{ family: "Geist Mono", weight: 500, file: "fonts/geist-mono-latin-500-normal.woff2" },
+];

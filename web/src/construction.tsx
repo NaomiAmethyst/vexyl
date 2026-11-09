@@ -4,10 +4,12 @@
 // The Construction view: the flag's construction sheet, as it downloads and prints, with how it's drawn.
 
 import { useEffect, useState } from "preact/hooks";
+import type { SheetFont } from "vexyl";
 import { refLabel } from "./address.js";
-import { download, fileStem, Logo, Seg, Spinner, useAck, useApp } from "./common.js";
+import { download, downloadBlob, fileStem, Logo, Seg, Spinner, useAck, useApp } from "./common.js";
 import { engine } from "./engine.js";
-import { pageRule, sheetOptions, type SheetPrefs } from "./sheet.js";
+import { cappedNote, pngForPaper, svgToPng } from "./png.js";
+import { pageRule, sheetFontFiles, sheetOptions, type SheetPrefs } from "./sheet.js";
 import { app } from "./store.js";
 
 interface Shown {
@@ -37,6 +39,21 @@ function setPageSize(widthMm: number, heightMm: number): void {
 	}
 }
 
+let fontsLoading: Promise<SheetFont[]> | null = null;
+
+/** The sheet's fonts, from this site, read once. They're the files the page's own styles already loaded. */
+function sheetFonts(): Promise<SheetFont[]> {
+	fontsLoading ??= Promise.all(sheetFontFiles.map(async ({ family, weight, file }) => {
+		const r = await fetch(new URL(file, document.baseURI).href, { credentials: "omit", referrerPolicy: "no-referrer" });
+		if (!r.ok) {
+			throw new Error("The sheet's fonts couldn't be read, so it can't be a PNG.");
+		}
+		return { family, weight, woff2: new Uint8Array(await r.arrayBuffer()) };
+	}));
+	fontsLoading.catch(() => { fontsLoading = null; });
+	return fontsLoading;
+}
+
 function clearPageSize(): void {
 	if (pageSheet !== null) {
 		document.adoptedStyleSheets = document.adoptedStyleSheets.filter((x) => x !== pageSheet);
@@ -54,13 +71,15 @@ export function ConstructionPage(): preact.JSX.Element {
 	const path = ref?.kind === "github" ? ref.path : ref !== undefined ? refLabel(ref) : undefined;
 	const name = app.displayName();
 	const valid = s.lastValid;
+	const options = sheetOptions(prefs, path, s.tier);
+	const drawn = JSON.stringify(options);
 	useEffect(() => {
 		if (valid === null) {
 			return undefined;
 		}
 		let live = true;
 		setBusy(true);
-		void engine.ask({ kind: "construction", slot: "main", options: sheetOptions(prefs, path, s.tier) }).then((r) => {
+		void engine.ask({ kind: "construction", slot: "main", options }).then((r) => {
 			if (!live) {
 				return;
 			}
@@ -85,9 +104,26 @@ export function ConstructionPage(): preact.JSX.Element {
 			}
 		});
 		return () => { live = false; };
-	}, [valid, prefs, path, s.tier]);
+	}, [valid, drawn]);
 	useEffect(() => clearPageSize, []);
 	const stem = fileStem(ref !== undefined ? refLabel(ref).replace(/\.kdl$/, "") : name);
+	const png = shown !== null ? pngForPaper(shown.widthMm, shown.heightMm, prefs.dpi) : null;
+	const downloadPng = async (): Promise<void> => {
+		if (png === null) {
+			return;
+		}
+		try {
+			const r = await engine.ask({ kind: "construction", slot: "main", options: { ...options, fonts: await sheetFonts() } });
+			if (r.svg === undefined) {
+				setAck(r.refused ?? "This sheet can't be drawn.");
+				return;
+			}
+			downloadBlob(`${stem}-construction.png`, await svgToPng(r.svg, png));
+			setAck(png.capped ? `Downloaded the PNG, at ${png.width} × ${png.height}, the most a browser can draw.` : "Downloaded the PNG.");
+		} catch (e) {
+			setAck((e as Error).message);
+		}
+	};
 	const ratio = shown !== null ? `${shown.widthMm} / ${shown.heightMm}` : "297 / 210";
 	return (
 		<>
@@ -140,6 +176,8 @@ export function ConstructionPage(): preact.JSX.Element {
 						<section class="card" aria-labelledby="sheet-paper">
 							<h2 id="sheet-paper" class="nx-label card-head">Paper</h2>
 							<Seg label="Paper" class="wrap" value={prefs.paper} options={[["a4", "A4"], ["letter", "Letter"], ["fit", "Fit the flag"]]} onPick={(v) => { app.setSheet({ paper: v as SheetPrefs["paper"] }); }} />
+							<Seg label="PNG resolution" value={String(prefs.dpi)} options={[["150", "150 dpi"], ["300", "300 dpi"], ["600", "600 dpi"]]} onPick={(v) => { app.setSheet({ dpi: Number(v) as SheetPrefs["dpi"] }); }} />
+							{png !== null ? <p class={`nx-note${png.capped ? " png-capped" : ""}`} aria-live="polite">{png.capped ? cappedNote(png) : `The PNG is ${png.width} × ${png.height} pixels.`}</p> : null}
 							<div class="sheet-actions">
 								<button type="button" class="nx-btn" disabled={shown === null} onClick={() => {
 									if (shown !== null) {
@@ -147,6 +185,7 @@ export function ConstructionPage(): preact.JSX.Element {
 										setAck("Downloaded the sheet.");
 									}
 								}}>Download SVG</button>
+								<button type="button" class="nx-ghost" disabled={shown === null} onClick={() => { void downloadPng(); }}>Download PNG</button>
 								<button type="button" class="nx-ghost" disabled={shown === null} onClick={() => {
 									if (shown !== null) {
 										setPageSize(shown.widthMm, shown.heightMm);
