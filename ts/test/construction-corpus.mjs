@@ -15,7 +15,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { parse } from "../dist/index.js";
-import { constructionSheet } from "../dist/construction.js";
+import { constructionSheet, labelOverlap } from "../dist/construction.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = isMainThread ? process.argv.slice(2) : workerData.args;
@@ -64,7 +64,7 @@ export function collisions(sheet) {
 			out.push(`crosses the flag's edge: ${a.text}`);
 		}
 		for (let j = i + 1; j < labels.length; j++) {
-			if (overlap(a, labels[j]) > 0.5) {
+			if (labelOverlap(a, labels[j]) > 0.5) {
 				out.push(`overlap: ${a.text} | ${labels[j].text}`);
 			}
 		}

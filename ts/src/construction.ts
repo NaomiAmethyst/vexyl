@@ -9,9 +9,10 @@ import {
 	compare, decimal, exactOf, fraction, half, minus, over, placesOf, plus, same, sum, times, toNumber, zero, type Fraction,
 } from "./exact.js";
 import { resolve } from "./adapt.js";
+import { axis } from "./geometry.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Repeat, Shape } from "./types.js";
+import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Repeat, Shape } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -92,6 +93,53 @@ export interface Box {
 export interface LabelBox extends Box {
 	text: string;
 	onFlag: boolean;
+	/** For text set at a slant, the corners of its own box, which the box above holds. */
+	corners?: { x: number; y: number }[];
+}
+
+/** The corners of a label, in order around it. */
+const cornersOf = (b: LabelBox): { x: number; y: number }[] => b.corners ?? [{ x: b.x0, y: b.y0 }, { x: b.x1, y: b.y0 }, { x: b.x1, y: b.y1 }, { x: b.x0, y: b.y1 }];
+
+/** The area two labels share, slanted ones by their own boxes, so that labels that only touch share none. */
+export function labelOverlap(a: LabelBox, b: LabelBox): number {
+	if (a.corners === undefined && b.corners === undefined) {
+		return Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+	}
+	if (Math.min(a.x1, b.x1) <= Math.max(a.x0, b.x0) || Math.min(a.y1, b.y1) <= Math.max(a.y0, b.y0)) {
+		return 0;
+	}
+	// Clips one convex box by each side of the other, and measures what's left.
+	let poly = cornersOf(a);
+	const clip = cornersOf(b);
+	const turn = Math.sign(area(clip));
+	for (let i = 0; i < clip.length && poly.length > 0; i++) {
+		const p = clip[i]!;
+		const q = clip[(i + 1) % clip.length]!;
+		const side = (v: { x: number; y: number }): number => turn * ((q.x - p.x) * (v.y - p.y) - (q.y - p.y) * (v.x - p.x));
+		const out: { x: number; y: number }[] = [];
+		poly.forEach((v, j) => {
+			const w = poly[(j + 1) % poly.length]!;
+			const [sv, sw] = [side(v), side(w)];
+			if (sv >= 0) {
+				out.push(v);
+			}
+			if ((sv >= 0) !== (sw >= 0)) {
+				const k = sv / (sv - sw);
+				out.push({ x: v.x + (w.x - v.x) * k, y: v.y + (w.y - v.y) * k });
+			}
+		});
+		poly = out;
+	}
+	return Math.abs(area(poly));
+}
+
+function area(poly: readonly { x: number; y: number }[]): number {
+	let sum = 0;
+	poly.forEach((p, i) => {
+		const q = poly[(i + 1) % poly.length]!;
+		sum += p.x * q.y - q.x * p.y;
+	});
+	return sum / 2;
 }
 
 /** Draws a flag's construction sheet, as a standalone SVG document. */
@@ -331,6 +379,22 @@ interface DetailDim {
 	a: Vec;
 	b: Vec;
 	text: (t: Format) => string;
+	/** Left out if its label has no room, as the caption says it too. */
+	optional?: boolean;
+}
+
+/**
+ * A row of dimensions along a slanting axis, drawn over the flag: places along the axis of a frame
+ * from its origin, which `frame` maps to the flag's, and one dimension across the axis at its end.
+ */
+interface FlagRow {
+	frame: Affine;
+	stops: Fraction[];
+	/** How far across the axis what it measures reaches, which the row is drawn beyond. */
+	reach: number;
+	across: { at: number; from: Fraction; to: Fraction };
+	/** What the notes say instead, if its labels have no room. */
+	fallback: (t: Format) => string;
 }
 
 /**
@@ -361,6 +425,11 @@ interface Measured {
 	charges: ChargeMark[];
 	saltires: SaltireMark[];
 	marks: FlagMark[];
+	rows: FlagRow[];
+	/** Construction lines on the flag, such as a slanting axis, in grid units. */
+	guides: Vec[][];
+	/** Whether anything is measured along a slanting axis, which the notes then say. */
+	slanting: boolean;
 	details: Detail[];
 	notes: ((t: Format) => string)[];
 	unmeasured: Map<string, number>;
@@ -417,13 +486,16 @@ const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), 
  * border, and `flag` the file's own, whose other forms the notes point to.
  */
 function measure(flag: Flag, shown: Flag | null, form: SheetForm): Measured {
-	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
+	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], rows: [], guides: [], slanting: false, details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
 	if (shown === null) {
 		skip(m, `the ${form.variant} variant, which has ${flag.variants[form.variant!]?.ratio !== undefined ? "a proportion of its own by the flag’s adapt rules" : "a proportion of its own"}`);
 		return m;
 	}
 	const root: Frame = { x: zero, y: zero, w: exactOf(shown.fly), h: exactOf(shown.hoist) };
 	walk(shown.layers, root, m);
+	if (m.slanting) {
+		m.notes.push(() => "Sizes along a slanting axis are measured along it, and across it square to it.");
+	}
 	if (m.extra > 0) {
 		skip(m, `${m.extra} more ${m.extra === 1 ? "charge" : "charges"}, past the first ${mostCharges}`);
 	}
@@ -527,7 +599,7 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 				break;
 			case "emblem":
 				if (l.along !== undefined || l.rotate !== 0) {
-					skip(m, l.along !== undefined ? `the emblem along the ${l.along === "bend" ? "bend" : l.along === "bend-sinister" ? "bend sinister" : l.along}` : "the turned emblem");
+					emblemRows(l, f, m);
 				} else {
 					// An emblem that's only moved is a frame the sheet can measure in, from its origin.
 					const origin = l.at !== undefined ? { x: plus(f.x, exactOf(l.at.fly)), y: plus(f.y, exactOf(l.at.hoist)) } : { x: plus(f.x, half(f.w)), y: plus(f.y, half(f.h)) };
@@ -556,9 +628,278 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 	}
 }
 
+const axisWords = (along: string): string => (along === "bend-sinister" ? "bend sinister" : along);
+
+/** A slanting layer's frame: its center, and the directions along its axis and across it, square to it. */
+function slant(f: Frame, along: Axis | undefined, rotate: number): { c: Vec; dir: Vec; normal: Vec } {
+	const r = { w: toNumber(f.w), h: toNumber(f.h) };
+	const { dir, normal } = axis(r, along, rotate);
+	return { c: { x: toNumber(f.x) + r.w / 2, y: toNumber(f.y) + r.h / 2 }, dir, normal };
+}
+
+/** The part of a line through a point that's within a region, for a construction line. */
+function lineIn(p: Vec, dir: Vec, f: Frame): Vec[] {
+	const [x0, y0, x1, y1] = [toNumber(f.x), toNumber(f.y), toNumber(f.x) + toNumber(f.w), toNumber(f.y) + toNumber(f.h)];
+	let lo = -Infinity;
+	let hi = Infinity;
+	for (const [d, q, a, b] of [[dir.x, p.x, x0, x1], [dir.y, p.y, y0, y1]] as const) {
+		if (Math.abs(d) < 1e-12) {
+			continue;
+		}
+		const [t0, t1] = [(a - q) / d, (b - q) / d];
+		lo = Math.max(lo, Math.min(t0, t1));
+		hi = Math.min(hi, Math.max(t0, t1));
+	}
+	return hi > lo ? [{ x: p.x + dir.x * lo, y: p.y + dir.y * lo }, { x: p.x + dir.x * hi, y: p.y + dir.y * hi }] : [];
+}
+
+/**
+ * Bars along a bend, or turned: their widths are shares of the width across them all, which runs
+ * corner to corner and is seldom a grid size, so the notes give the shares, exactly as the file does.
+ */
+function slantBars(l: BarsLayer, f: Frame, m: Measured): void {
+	const what = l.rotate !== 0 ? `turned ${l.rotate}° from the ${axisWords(l.along)}` : `along the ${axisWords(l.along)}`;
+	const { c, dir } = slant(f, l.along, l.rotate);
+	m.guides.push(lineIn(c, dir, f));
+	const shares = l.ratio.map((r) => decimal(exactOf(r), placesOf(exactOf(r)) ?? 4)).join(" : ");
+	m.notes.push(() => `The ${l.colors.length} bars ${what} share the width across them, square to their axis, as ${shares}, from the one ${l.rotate === 0 && l.along === "bend-sinister" ? "nearest the upper hoist" : "listed first"}.`);
+	if (l.edge !== undefined) {
+		skip(m, `the ${l.edge.kind} edges between the bars`);
+	}
+}
+
+/** A band along a bend, or turned: its width, measured across it on the flag, and how far it's moved off center. */
+function slantBand(l: BandLayer, f: Frame, m: Measured): void {
+	const name = describe(l);
+	const { c, dir, normal } = slant(f, l.along, l.rotate);
+	const offset = exactOf(l.offset);
+	const centre = { x: c.x + normal.x * l.offset, y: c.y + normal.y * l.offset };
+	m.guides.push(lineIn(centre, dir, f));
+	if (l.rotate !== 0) {
+		m.notes.push(() => `The ${name} is turned ${l.rotate}° from the ${axisWords(l.along)}, clockwise about the center.`);
+	} else {
+		m.notes.push(() => `The ${name} runs along the ${axisWords(l.along)}, from corner to corner.`);
+	}
+	if (offset.n !== 0n) {
+		m.notes.push((t) => `The ${name}’s center line is ${t(offset)} from the center, square to it.`);
+	}
+	const width = exactOf(l.width);
+	const reach = Math.min(toNumber(f.w), toNumber(f.h)) * 0.3;
+	const at = { x: centre.x + dir.x * reach, y: centre.y + dir.y * reach };
+	m.marks.push({
+		text: (t) => t(width),
+		fallback: (text) => `The ${name} is ${text} wide, square to its axis.`,
+		options: (p, tw, th) => {
+			const ends = [-1, 1].map((k) => p.at({ x: at.x + (normal.x * k * l.width) / 2, y: at.y + (normal.y * k * l.width) / 2 }));
+			const along = p.way(dir);
+			const tick = (q: Vec): Vec[] => [{ x: q.x - along.x * 5, y: q.y - along.y * 5 }, { x: q.x + along.x * 5, y: q.y + along.y * 5 }];
+			const out = [-1, 1].map((k) => p.way({ x: normal.x * k, y: normal.y * k }));
+			const spots = [6, 14, 28].flatMap((g) => [spotAt(ends[1]!, out[1]!, tw, th, g), spotAt(ends[0]!, out[0]!, tw, th, g)]);
+			return [{ solid: [[ends[0]!, ends[1]!], tick(ends[0]!), tick(ends[1]!)], dashed: [], spots }];
+		},
+	});
+	if (l.fimbriate !== undefined) {
+		skip(m, `the ${name}’s fimbriation`);
+	}
+}
+
+/** What an emblem's charge covers in its frame, exactly, or null for a shape whose reach isn't a size the file gives. */
+function halfSize(s: Shape): XY | null {
+	if (s.rotate !== 0) {
+		return null;
+	}
+	switch (s.kind) {
+		case "disc":
+		case "ring":
+			return { x: exactOf(s.radius), y: exactOf(s.radius) };
+		case "rect":
+		case "ellipse":
+			return { x: half(exactOf(s.fly)), y: half(exactOf(s.hoist)) };
+		case "lozenge":
+			return s.fly !== undefined && s.hoist !== undefined ? { x: half(exactOf(s.fly)), y: half(exactOf(s.hoist)) } : null;
+		default:
+			return null;
+	}
+}
+
+/** Where a charge's copies are, in its frame, exactly, or null for a repeat that isn't a line. */
+function copiesOf(l: ChargeLayer): XY[] | null {
+	const s = l.shape;
+	const firsts = (s.ats ?? [s.at ?? null]).map((p) => (p === null ? { x: zero, y: zero } : point(p)));
+	if (l.repeat === undefined) {
+		return firsts;
+	}
+	const rep = l.repeat;
+	if (rep.kind !== "line") {
+		return null;
+	}
+	const step = { x: exactOf(rep.fly), y: exactOf(rep.hoist) };
+	return firsts.flatMap((p) => Array.from({ length: rep.count }, (_, i) => ({ x: plus(p.x, times(step.x, fraction(BigInt(i)))), y: plus(p.y, times(step.y, fraction(BigInt(i)))) })));
+}
+
+/**
+ * An emblem along a bend, or turned: what's in it is measured in its own frame, along its axis from
+ * its origin, on a row drawn slanting over the flag, with the axis as a construction line. The
+ * outermost group is measured across too, and the first repeated charge in it has a detail.
+ */
+function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
+	const name = l.along !== undefined ? `emblem along the ${axisWords(l.along)}` : "turned emblem";
+	const origin = l.at !== undefined ? { x: plus(f.x, exactOf(l.at.fly)), y: plus(f.y, exactOf(l.at.hoist)) } : { x: plus(f.x, half(f.w)), y: plus(f.y, half(f.h)) };
+	const o = vec(origin);
+	const { dir } = slant(f, l.along ?? "fly", l.rotate);
+	const frame: Affine = [dir.x, dir.y, -dir.y, dir.x, o.x, o.y];
+	m.guides.push(lineIn(o, dir, f));
+	if (l.at !== undefined) {
+		m.charges.push({ x: origin.x, y: origin.y, at: o, reach: { x: 0, y: 0 }, name: `${name}’s origin` });
+	}
+	// What each charge covers, along the axis and across it.
+	const covers: { x0: Fraction; x1: Fraction; y0: Fraction; y1: Fraction }[] = [];
+	let detail: { c: ChargeLayer; copies: XY[]; size: XY } | null = null;
+	const breaks: Fraction[] = [];
+	for (const c of l.charges) {
+		if (c.clip !== undefined) {
+			skip(m, `the clip on the ${describe(c)}`);
+		}
+		const size = halfSize(c.shape);
+		const copies = copiesOf(c);
+		if (size === null || copies === null) {
+			skip(m, `the ${describe(c)} in the ${name}`);
+			continue;
+		}
+		if (c.fimbriate !== undefined) {
+			skip(m, `the ${describe(c)}’s fimbriation`);
+		}
+		// A charge's copies are one group, as a trigram's bars are, which the detail measures one by one.
+		const lo = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) <= 0 ? a : b));
+		const hi = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) >= 0 ? a : b));
+		covers.push({ x0: minus(lo(copies.map((p) => p.x)), size.x), x1: plus(hi(copies.map((p) => p.x)), size.x), y0: minus(lo(copies.map((p) => p.y)), size.y), y1: plus(hi(copies.map((p) => p.y)), size.y) });
+		if (c.repeat?.kind === "line" && copies.length > 1 && (detail === null || (detail.c.cuts.length === 0 && c.cuts.length > 0))) {
+			detail = { c, copies, size };
+		}
+		// A level rect cut across a charge is a break in it, as long as the rect is; anything else isn't measured.
+		for (const cut of c.cuts) {
+			if (cut.kind === "rect" && cut.rotate === 0) {
+				const long = exactOf(cut.hoist);
+				if (!breaks.some((b) => same(b, long))) {
+					breaks.push(long);
+				}
+			} else {
+				skip(m, `the cut in the ${describe(c)}`);
+			}
+		}
+	}
+	if (breaks.length > 0) {
+		m.notes.push((t) => `The cuts in the ${name} are breaks across the charges, ${breaks.map(t).join(" or ")} long.`);
+	}
+	if (covers.length === 0) {
+		return;
+	}
+	// The groups along the axis, where what's in the emblem overlaps or touches.
+	covers.sort((a, b) => compare(a.x0, b.x0));
+	const groups: typeof covers = [];
+	for (const c of covers) {
+		const last = groups.at(-1);
+		if (last !== undefined && compare(c.x0, last.x1) <= 0) {
+			last.x1 = compare(c.x1, last.x1) > 0 ? c.x1 : last.x1;
+			last.y0 = compare(c.y0, last.y0) < 0 ? c.y0 : last.y0;
+			last.y1 = compare(c.y1, last.y1) > 0 ? c.y1 : last.y1;
+		} else {
+			groups.push({ ...c });
+		}
+	}
+	// From the origin outward, each group's near and far ends: one way if the emblem is the same both ways.
+	const ends = (sign: 1 | -1): Fraction[] => {
+		const out: Fraction[] = [zero];
+		for (const g of sign === 1 ? groups : [...groups].reverse()) {
+			for (const e of sign === 1 ? [g.x0, g.x1] : [g.x1, g.x0]) {
+				const d = sign === 1 ? e : minus(zero, e);
+				if (compare(d, out.at(-1)!) > 0) {
+					out.push(d);
+				}
+			}
+		}
+		return out;
+	};
+	const ahead = ends(1);
+	const behind = ends(-1);
+	const symmetric = ahead.length === behind.length && ahead.every((x, i) => same(x, behind[i]!));
+	const stops = symmetric || behind.length < 2 ? ahead : ahead.length < 2 ? behind.map((x) => minus(zero, x)).reverse() : [...behind.slice(1).map((x) => minus(zero, x)).reverse(), ...ahead];
+	if (stops.length < 2) {
+		return;
+	}
+	const outer = compare(stops.at(-1)!, zero) > 0 ? groups.at(-1)! : groups[0]!;
+	const reach = Math.max(...groups.map((g) => Math.max(Math.abs(toNumber(g.y0)), Math.abs(toNumber(g.y1)))));
+	const across = { at: toNumber(compare(stops.at(-1)!, zero) > 0 ? outer.x1 : outer.x0), from: outer.y0, to: outer.y1 };
+	m.rows.push({
+		frame,
+		stops,
+		reach,
+		across,
+		fallback: (t) => {
+			const steps = stops.slice(1).map((s, i) => t(minus(s, stops[i]!))).join(", ");
+			return `Along the ${name}’s axis, from ${symmetric ? "its origin, and the same the other way" : "end to end"}: ${steps}, and ${t(minus(across.to, across.from))} across at the end.`;
+		},
+	});
+	m.slanting = true;
+	if (detail !== null) {
+		emblemDetail(detail.c, detail.copies, detail.size, frame, name, m);
+	}
+}
+
+/** The detail of a repeated charge in an emblem's frame: its copies' widths and the gaps between them, its length, and any break a cut makes. */
+function emblemDetail(c: ChargeLayer, copies: XY[], size: XY, frame: Affine, emblem: string, m: Measured): void {
+	const shown = copies.slice(0, 3);
+	const xs = shown.flatMap((p) => [minus(p.x, size.x), plus(p.x, size.x)]).sort(compare).filter((v, i, all) => i === 0 || !same(v, all[i - 1]!));
+	const ys = [minus(shown[0]!.y, size.y), plus(shown[0]!.y, size.y)];
+	const dims: DetailDim[] = [];
+	const y0 = toNumber(ys[0]!);
+	const x0 = toNumber(xs[0]!);
+	for (let i = 0; i + 1 < xs.length; i++) {
+		const [a, b] = [xs[i]!, xs[i + 1]!];
+		dims.push({ a: { x: toNumber(a), y: y0 }, b: { x: toNumber(b), y: y0 }, text: (t) => t(minus(b, a)), optional: xs.length > 2 });
+	}
+	if (xs.length > 2) {
+		const [a, b] = [xs[0]!, xs.at(-1)!];
+		dims.push({ a: { x: toNumber(a), y: y0 }, b: { x: toNumber(b), y: y0 }, text: (t) => t(minus(b, a)) });
+	}
+	dims.push({ a: { x: x0, y: y0 }, b: { x: x0, y: toNumber(ys[1]!) }, text: (t) => t(minus(ys[1]!, ys[0]!)) });
+	// A cut across the first copy is a break in it, as long as the cut is.
+	const cut = c.cuts[0];
+	let broken: Fraction | null = null;
+	if (cut !== undefined && cut.kind === "rect" && cut.rotate === 0 && cut.at !== undefined) {
+		const ch = half(exactOf(cut.hoist));
+		const cy = exactOf(cut.at.hoist);
+		const [b0, b1] = [minus(cy, ch), plus(cy, ch)];
+		if (compare(b0, ys[0]!) > 0 && compare(b1, ys[1]!) < 0) {
+			broken = exactOf(cut.hoist);
+			const x = toNumber(xs.at(-1)!);
+			for (const [a, b] of [[ys[0]!, b0], [b0, b1], [b1, ys[1]!]] as const) {
+				dims.push({ a: { x, y: toNumber(a) }, b: { x, y: toNumber(b) }, text: (t) => t(minus(b, a)), optional: true });
+			}
+		}
+	}
+	const pad = toNumber(minus(ys[1]!, ys[0]!)) * 0.08;
+	const width = exactOf((c.shape as { fly?: number }).fly ?? 0);
+	const gap = shown.length > 1 ? minus(minus(shown[1]!.x, shown[0]!.x), times(size.x, fraction(2n))) : null;
+	const name = plural(2, named(c.color, kindWords[c.shape.kind] ?? c.shape.kind));
+	m.details.push({
+		title: name,
+		frame,
+		level: true,
+		window: { x0: x0 - pad, y0: y0 - pad, x1: toNumber(xs.at(-1)!) + pad, y1: toNumber(ys[1]!) + pad },
+		copies: [],
+		dims,
+		caption: (t) => `One group of ${name} in the ${emblem}, turned level: each ${t(width)} by ${t(minus(ys[1]!, ys[0]!))}${gap !== null && compare(gap, zero) > 0 ? `, ${t(gap)} apart` : ""}${broken !== null ? `, broken by a gap ${t(broken)} long` : ""}.`,
+	});
+}
+
 function bars(l: BarsLayer, f: Frame, m: Measured): void {
-	if ((l.along !== "fly" && l.along !== "hoist") || l.rotate !== 0 || l.fixed !== undefined) {
-		skip(m, l.rotate !== 0 ? "the turned bars" : `the bars along the ${l.along === "bend-sinister" ? "bend sinister" : l.along}`);
+	if (l.fixed !== undefined) {
+		skip(m, "the bars, which adapting moved");
+		return;
+	}
+	if ((l.along !== "fly" && l.along !== "hoist") || l.rotate !== 0) {
+		slantBars(l, f, m);
 		return;
 	}
 	const ratio = l.ratio.map(exactOf);
@@ -577,8 +918,12 @@ function bars(l: BarsLayer, f: Frame, m: Measured): void {
 }
 
 function band(l: BandLayer, f: Frame, m: Measured): void {
-	if ((l.along !== "fly" && l.along !== "hoist") || l.rotate !== 0 || l.fixed !== undefined) {
-		skip(m, l.rotate !== 0 ? `the turned ${describe(l)}` : `the ${describe(l)} along the ${l.along === "bend-sinister" ? "bend sinister" : l.along}`);
+	if (l.fixed !== undefined) {
+		skip(m, `the ${describe(l)}, which adapting moved`);
+		return;
+	}
+	if ((l.along !== "fly" && l.along !== "hoist") || l.rotate !== 0) {
+		slantBand(l, f, m);
 		return;
 	}
 	const across = l.along === "fly" ? "hoist" : "fly";
@@ -1540,21 +1885,35 @@ function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => stri
 		const a = apply(p, dm.a);
 		const b = apply(p, dm.b);
 		const flat = Math.abs(a.y - b.y) <= Math.abs(a.x - b.x);
-		return { a, b, level: flat, text: dm.text(t), lo: flat ? Math.min(a.x, b.x) : Math.min(a.y, b.y), hi: flat ? Math.max(a.x, b.x) : Math.max(a.y, b.y) };
+		return { a, b, level: flat, optional: dm.optional === true, text: dm.text(t), lo: flat ? Math.min(a.x, b.x) : Math.min(a.y, b.y), hi: flat ? Math.max(a.x, b.x) : Math.max(a.y, b.y) };
 	});
 	// Rows are worked out at the scale of the grid, and then the picture is as large as their room allows.
-	const across = dims.filter((x) => x.level);
-	const down = dims.filter((x) => !x.level);
 	const pitchIn = 20;
-	const tops = detailRows(across);
-	const lefts = detailRows(down);
-	const top = 30 + pitchIn * Math.max(0, ...tops);
-	const left = 34 + pitchIn * Math.max(0, ...lefts);
-	const k = Math.min((width - left - 6) / vw, 180 / vh);
-	for (const x of dims) {
-		if ((x.hi - x.lo) * k < monoWidth(x.text, size) + 6) {
+	let kept = dims;
+	let across = kept;
+	let down = kept;
+	let tops: number[] = [];
+	let lefts: number[] = [];
+	let top = 30;
+	let left = 34;
+	let k = 1;
+	for (;;) {
+		across = kept.filter((x) => x.level);
+		down = kept.filter((x) => !x.level);
+		tops = detailRows(across);
+		lefts = detailRows(down);
+		top = 30 + pitchIn * Math.max(0, ...tops);
+		left = 34 + pitchIn * Math.max(0, ...lefts);
+		k = Math.min((width - left - 6) / vw, 200 / vh);
+		const small = kept.filter((x) => (x.hi - x.lo) * k < monoWidth(x.text, size) + 6);
+		if (small.length === 0) {
+			break;
+		}
+		// What the caption says too can be left out, and anything else that can't be read means no detail.
+		if (small.some((x) => !x.optional)) {
 			return null;
 		}
+		kept = kept.filter((x) => !small.includes(x));
 	}
 	const caption = wrap(words(d.caption(t)), 12, width);
 	const picW = vw * k;
@@ -1908,6 +2267,13 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		}
 		for (const mark of m.marks) {
 			mark.text(f);
+		}
+		for (const row of m.rows) {
+			row.fallback(f);
+		}
+		for (const d of m.details) {
+			d.caption(f);
+			d.dims.forEach((x) => x.text(f));
 		}
 		for (const n of m.notes) {
 			n(f);
@@ -2321,6 +2687,12 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		halo.push(d);
 		onFlag.push(`<path d="${d}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
 	}
+	// Construction lines, such as a slanting axis, under everything else drawn on the flag.
+	const guides = showSizes ? m.guides.filter((g) => g.length > 1).map((g) => pathOf(g.map(place.at))) : [];
+	if (guides.length > 0) {
+		o.add(`<path d="${guides.join("")}" fill="none" stroke="${theme.halo}" stroke-width="2" stroke-opacity="0.5"/>`);
+		o.add(`<path d="${guides.join("")}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>`);
+	}
 	if (halo.length > 0) {
 		o.add(`<path d="${halo.join("")}" fill="none" stroke="${theme.halo}" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>`);
 	}
@@ -2338,6 +2710,10 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 			}
 			o.text((b.x0 + b.x1) / 2, b.y1 - 3.5, plan.text, `font-family="${monoFamily}" font-size="12" fill="${theme.label}" text-anchor="middle"`, b, inside);
 		}
+	}
+	// Along a slanting row, a label is haloed instead, since a chip would have to slant too.
+	for (const l of charges.slanted) {
+		o.text(l.c.x, l.c.y + 4.2, l.text, `font-family="${monoFamily}" font-size="12" fill="${theme.onFlag}" stroke="${theme.halo}" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(${num(l.deg)} ${num(l.c.x)} ${num(l.c.y)})"`, l.box, true);
 	}
 
 	// The notes under the drawing.
@@ -2447,6 +2823,8 @@ interface ChargePlan {
 	dims: string[];
 	/** Construction lines drawn on the flag, dashed. */
 	dashed: string[];
+	/** Labels set at a slant, along rows over the flag. */
+	slanted: SlantLabel[];
 	/** Sizes with nowhere to go on the drawing, for the notes. */
 	fallbacks: string[];
 }
@@ -2467,7 +2845,7 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 			taken.push({ x0: q.x - 6, y0: q.y - 6, x1: q.x + 6, y1: q.y + 6 });
 		}
 	}
-	const plan: ChargePlan = { labels: [], dims: [], dashed: [], fallbacks: [] };
+	const plan: ChargePlan = { labels: [], dims: [], dashed: [], slanted: [], fallbacks: [] };
 	if (!sizes) {
 		return plan;
 	}
@@ -2574,5 +2952,91 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 		plan.dashed.push(...got.o.dashed.map(pathOf));
 		plan.labels.push({ cx: (got.box.x0 + got.box.x1) / 2, cy: (got.box.y0 + got.box.y1) / 2, text, box: got.box });
 	}
+	for (const row of m.rows) {
+		const got = planRow(row, place, t, taken, flag);
+		if (got === null) {
+			plan.fallbacks.push(row.fallback(t));
+			continue;
+		}
+		taken.push(...got.labels.map((l) => l.box));
+		plan.dims.push(...got.solid);
+		plan.dashed.push(...got.dashed);
+		plan.slanted.push(...got.labels);
+	}
 	return plan;
+}
+
+/** A label set at a slant, along a row over the flag: its center, its angle, and its box. */
+interface SlantLabel {
+	text: string;
+	c: Vec;
+	deg: number;
+	box: LabelBox;
+}
+
+/**
+ * Places a slanting row over the flag, on whichever side of its axis has room: its line, its ticks
+ * and its labels, turned to read along it the right way up. It's null if any label has no room.
+ */
+function planRow(row: FlagRow, p: Placing, t: Format, taken: readonly Box[], flag: Box): { solid: string[]; dashed: string[]; labels: SlantLabel[] } | null {
+	const s = p.s;
+	const at = (x: number, y: number): Vec => p.at(apply(row.frame, { x, y }));
+	const way = (v: Vec): Vec => p.way(turnVec(row.frame, v));
+	const within = (b: Box): boolean => b.x0 >= flag.x0 && b.x1 <= flag.x1 && b.y0 >= flag.y0 && b.y1 <= flag.y1;
+	/** A label centered on a point, reading along a direction, turned so that it's never upside down. */
+	const slanted = (text: string, c: Vec, d: Vec): SlantLabel => {
+		let deg = (Math.atan2(d.y, d.x) * 180) / Math.PI;
+		if (deg > 90.001) {
+			deg -= 180;
+		} else if (deg <= -90) {
+			deg += 180;
+		}
+		const rad = (deg * Math.PI) / 180;
+		const u = { x: Math.cos(rad), y: Math.sin(rad) };
+		const up = { x: Math.sin(rad), y: -Math.cos(rad) };
+		const w = monoWidth(text, 12) / 2 + 1;
+		const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => ({ x: c.x + u.x * w * a! + up.x * 7 * b!, y: c.y + u.y * w * a! + up.y * 7 * b! }));
+		const box: LabelBox = { x0: Math.min(...corners.map((q) => q.x)), y0: Math.min(...corners.map((q) => q.y)), x1: Math.max(...corners.map((q) => q.x)), y1: Math.max(...corners.map((q) => q.y)), text, onFlag: true, corners };
+		return { text, c, deg, box };
+	};
+	const end = compare(row.stops.at(-1)!, zero) > 0 ? 1 : -1;
+	// Above the axis on the sheet first, where a reader looks for it.
+	const sides = way({ x: 0, y: -1 }).y <= 0 ? [-1, 1] : [1, -1];
+	for (const side of sides) {
+		const off = row.reach + 16 / s;
+		const xs = row.stops.map(toNumber);
+		const line = xs.map((x) => at(x, side * off));
+		const along = way({ x: 1, y: 0 });
+		const out = way({ x: 0, y: side });
+		const labels: SlantLabel[] = [];
+		let ok = true;
+		for (let i = 0; i + 1 < line.length && ok; i++) {
+			const [a, b] = [line[i]!, line[i + 1]!];
+			const text = t(minus(row.stops[i + 1]!, row.stops[i]!));
+			if (monoWidth(text, 12) + 8 > Math.hypot(b.x - a.x, b.y - a.y)) {
+				ok = false;
+				break;
+			}
+			labels.push(slanted(text, { x: (a.x + b.x) / 2 + out.x * 10, y: (a.y + b.y) / 2 + out.y * 10 }, along));
+		}
+		// Across the outermost group, just beyond its end.
+		const ax = row.across.at + (end * 16) / s;
+		const [a0, a1] = [at(ax, toNumber(row.across.from)), at(ax, toNumber(row.across.to))];
+		const acrossText = t(minus(row.across.to, row.across.from));
+		const beyond = way({ x: end, y: 0 });
+		if (ok && monoWidth(acrossText, 12) + 8 <= Math.hypot(a1.x - a0.x, a1.y - a0.y)) {
+			labels.push(slanted(acrossText, { x: (a0.x + a1.x) / 2 + beyond.x * 10, y: (a0.y + a1.y) / 2 + beyond.y * 10 }, { x: a1.x - a0.x, y: a1.y - a0.y }));
+		} else {
+			ok = false;
+		}
+		ok &&= labels.every((l, i) => within(l.box) && !taken.some((b) => hits(b, l.box)) && labels.slice(i + 1).every((o) => labelOverlap(l.box, o.box) === 0));
+		if (!ok) {
+			continue;
+		}
+		const tick = (q: Vec, d: Vec): string => `M${num(q.x - d.x * 5)} ${num(q.y - d.y * 5)}L${num(q.x + d.x * 5)} ${num(q.y + d.y * 5)}`;
+		const solid = [pathOf([line[0]!, line.at(-1)!]), ...line.map((q) => tick(q, out)), pathOf([a0, a1]), tick(a0, beyond), tick(a1, beyond)];
+		const dashed = [...xs.map((x) => pathOf([at(x, 0), at(x, side * (off - 5 / s))])), pathOf([at(row.across.at, toNumber(row.across.from)), a0]), pathOf([at(row.across.at, toNumber(row.across.to)), a1])];
+		return { solid, dashed, labels };
+	}
+	return null;
 }

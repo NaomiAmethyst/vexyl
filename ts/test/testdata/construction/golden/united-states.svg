@@ -117,7 +117,7 @@
 <text x="40" y="656.671363" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The vertical variant has a sheet of its own.</text>
 <text x="40" y="676.671363" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the triangle fold.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">DETAIL: WHITE STARS</text>
-<svg x="866.519685" y="184" width="203.118739" height="180" viewBox="0 0 2.167187 1.92052" overflow="hidden">
+<svg x="866.519685" y="184" width="210" height="186.098044" viewBox="0 0 2.167187 1.92052" overflow="hidden">
   <title>United States</title>
   <clipPath id="vx-5f0b97351a9de993-cs-d0-flag1">
     <polygon points="0,0 24.7,0 24.7,13 0,13"/>
@@ -194,38 +194,38 @@
     </g>
   </g>
 </svg>
-<rect x="866.519685" y="184" width="203.118739" height="180" fill="none" stroke="#c9c6d2" stroke-width="1"/>
-<text x="905.102985" y="168" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">9.88/12</text>
-<text x="982.269586" y="168" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">9.88/12</text>
-<text x="850.519685" y="216.803616" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 850.519685 216.803616)">0.7</text>
-<text x="850.519685" y="282.410847" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 850.519685 282.410847)">0.7</text>
-<path d="M866.519685 182V175M943.686286 182V175M943.686286 182V175M1020.852886 182V175M864.519685 184H857.519685M864.519685 249.607231H857.519685M864.519685 249.607231H857.519685M864.519685 315.214463H857.519685" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
-<path d="M866.519685 172H943.686286M866.519685 167V177M943.686286 167V177M943.686286 172H1020.852886M943.686286 167V177M1020.852886 167V177M854.519685 184V249.607231M849.519685 184H859.519685M849.519685 249.607231H859.519685M854.519685 249.607231V315.214463M849.519685 249.607231H859.519685M849.519685 315.214463H859.519685" fill="none" stroke="#2a2833" stroke-width="1"/>
-<circle cx="943.686286" cy="249.607231" r="37.527336" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
-<circle cx="943.686286" cy="249.607231" r="37.527336" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
-<circle cx="1020.852886" cy="315.214463" r="37.527336" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
-<circle cx="1020.852886" cy="315.214463" r="37.527336" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
-<text x="832.519685" y="386" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The grid’s corner, enlarged: its rows are</text>
-<text x="832.519685" y="402" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">0.7 apart and its columns 9.88/12, and so</text>
-<text x="832.519685" y="418" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">are its margins. Each is r 0.4004.</text>
-<text x="832.519685" y="447" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
-<circle cx="841.519685" cy="467" r="9" fill="#b31942"/>
-<text x="860.519685" y="470" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Red</text>
-<text x="888.164385" y="470" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#b31942</text>
-<text x="860.519685" y="485" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">Pantone 193 C</text>
-<text x="860.519685" y="500" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
-<circle cx="841.519685" cy="518" r="8.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
-<text x="860.519685" y="521" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">White</text>
-<text x="898.674885" y="521" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#ffffff</text>
-<text x="860.519685" y="536" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">CMYK 0 0 0 0</text>
-<circle cx="841.519685" cy="554" r="9" fill="#0a3161"/>
-<text x="860.519685" y="557" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Blue</text>
-<text x="891.421485" y="557" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#0a3161</text>
-<text x="860.519685" y="572" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">Pantone 282 C</text>
-<text x="860.519685" y="587" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
-<text x="832.519685" y="623" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAWS</text>
-<text x="832.519685" y="645" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#1c1b22">Executive Order 10834</text>
-<text x="832.519685" y="668" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#1c1b22">United States Flag Code, 4 U.S.C. 1, 2 and 7</text>
+<rect x="866.519685" y="184" width="210" height="186.098044" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<text x="906.410111" y="168" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">9.88/12</text>
+<text x="986.190964" y="168" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">9.88/12</text>
+<text x="850.519685" y="217.914937" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 850.519685 217.914937)">0.7</text>
+<text x="850.519685" y="285.744812" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 850.519685 285.744812)">0.7</text>
+<path d="M866.519685 182V175M946.300538 182V175M946.300538 182V175M1026.08139 182V175M864.519685 184H857.519685M864.519685 251.829875H857.519685M864.519685 251.829875H857.519685M864.519685 319.659749H857.519685" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M866.519685 172H946.300538M866.519685 167V177M946.300538 167V177M946.300538 172H1026.08139M946.300538 167V177M1026.08139 167V177M854.519685 184V251.829875M849.519685 184H859.519685M849.519685 251.829875H859.519685M854.519685 251.829875V319.659749M849.519685 251.829875H859.519685M849.519685 319.659749H859.519685" fill="none" stroke="#2a2833" stroke-width="1"/>
+<circle cx="946.300538" cy="251.829875" r="38.798688" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="946.300538" cy="251.829875" r="38.798688" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="1026.08139" cy="319.659749" r="38.798688" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="1026.08139" cy="319.659749" r="38.798688" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="832.519685" y="392.098044" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The grid’s corner, enlarged: its rows are</text>
+<text x="832.519685" y="408.098044" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">0.7 apart and its columns 9.88/12, and so</text>
+<text x="832.519685" y="424.098044" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">are its margins. Each is r 0.4004.</text>
+<text x="832.519685" y="453.098044" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="841.519685" cy="473.098044" r="9" fill="#b31942"/>
+<text x="860.519685" y="476.098044" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Red</text>
+<text x="888.164385" y="476.098044" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#b31942</text>
+<text x="860.519685" y="491.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">Pantone 193 C</text>
+<text x="860.519685" y="506.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
+<circle cx="841.519685" cy="524.098044" r="8.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="860.519685" y="527.098044" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">White</text>
+<text x="898.674885" y="527.098044" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#ffffff</text>
+<text x="860.519685" y="542.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">CMYK 0 0 0 0</text>
+<circle cx="841.519685" cy="560.098044" r="9" fill="#0a3161"/>
+<text x="860.519685" y="563.098044" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="891.421485" y="563.098044" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#0a3161</text>
+<text x="860.519685" y="578.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">Pantone 282 C</text>
+<text x="860.519685" y="593.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
+<text x="832.519685" y="629.098044" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAWS</text>
+<text x="832.519685" y="651.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#1c1b22">Executive Order 10834</text>
+<text x="832.519685" y="674.098044" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#1c1b22">United States Flag Code, 4 U.S.C. 1, 2 and 7</text>
 <path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
 <text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. A ~ marks a size rounded to four places. The white star’s center is marked +.</text>
 <text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/united-states.kdl · Vexyl 1</text>

@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { constructionSheet, gridText, hoistText, mmText, proportionText, type ConstructionOptions } from "../src/construction.js";
+import { constructionSheet, gridText, hoistText, labelOverlap, mmText, proportionText, type ConstructionOptions, type LabelBox } from "../src/construction.js";
 import { decimal, exactOf, fraction, over, placesOf, plus, readExact, sum, times } from "../src/exact.js";
 import { constructionSvg, parse, sheetFaces, type Flag, type SheetFont } from "../src/index.js";
 import { header, readRepo, root } from "./helpers.js";
@@ -43,7 +43,7 @@ function collisions(flag: Flag, opts: ConstructionOptions): string[] {
 			out.push(`across the flag's edge: ${a.text}`);
 		}
 		for (const b of sheet.labels.slice(i + 1)) {
-			if (overlap(a, b) > 0.5) {
+			if (labelOverlap(a, b) > 0.5) {
 				out.push(`${a.text} on ${b.text}`);
 			}
 		}
@@ -165,7 +165,7 @@ test("what's measured, as the file writes it", () => {
 		assert.ok(sweden.includes(want), want);
 	}
 	const korea = constructionSvg(flagOf("south-korea"));
-	assert.ok(textOf(korea).includes("Not measured on this sheet: the emblem along the bend, the emblem along the bend sinister."));
+	assert.ok(textOf(korea).includes("Not measured on this sheet: the clip on the red disc."));
 	const bahamas = constructionSvg(flagOf("bahamas"));
 	assert.ok(textOf(bahamas).includes("The black pile stands on the hoist from 0 to 3, and reaches 2.6 in from it, to a point."));
 	assert.doesNotMatch(textOf(bahamas), /Not measured/);
@@ -343,6 +343,57 @@ test("a repeated charge's first copies are enlarged in the sidebar, with their s
 	}
 });
 
+test("an emblem along a diagonal is measured along it, over the flag, and its trigram in a detail", () => {
+	const korea = constructionSheet(flagOf("south-korea"), {});
+	const slanted = korea.labels.filter((l) => l.corners !== undefined);
+	// Along the bend: the taegeuk's radius 24, the gap of 12 to the trigram, and the trigram's 16, which is 24 long.
+	for (const want of ["24", "12", "16"]) {
+		assert.ok(slanted.some((l) => l.text === want && l.onFlag), want);
+	}
+	assert.ok(slanted.filter((l) => l.text === "24").length >= 2, "the radius, and a trigram's length");
+	// Each label reads along its row, never upside down.
+	for (const m of korea.svg.matchAll(/transform="rotate\((-?[0-9.]+) [^"]*\)"[^>]*>([^<]*)</g)) {
+		const deg = Number(m[1]);
+		assert.ok(deg >= -90 && deg <= 90, `${m[2]} at ${deg}°`);
+	}
+	// The detail: one broken trigram, with its bars, gaps and break.
+	const side = sidebarText(korea);
+	assert.ok(side.includes("DETAIL: BLACK RECTS"));
+	for (const want of ["4", "2", "16", "11", "24"]) {
+		assert.ok(side.includes(want), want);
+	}
+	const text = textOf(korea.svg);
+	assert.ok(text.includes("each 4 by 24, 2 apart, broken by a gap 2 long"));
+	assert.ok(text.includes("Sizes along a slanting axis are measured along it, and across it square to it."));
+	assert.match(korea.svg, /stroke-dasharray="5 4"/, "the diagonals, as construction lines");
+	assert.ok(textOf(constructionSvg(flagOf("south-korea"), { units: "hoist" })).includes("each H/24 by H/4, H/48 apart, broken by a gap H/48 long"), "too narrow to label at this size, but in the caption");
+	for (const opts of [{}, { theme: "dark" }, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "letter" }, { paper: "fit", grid: true }, { form: { side: "reverse" } }] as ConstructionOptions[]) {
+		assert.deepEqual(collisions(flagOf("south-korea"), opts), [], JSON.stringify(opts));
+	}
+	// A band along a bend, or turned: its width across it, on the flag, and its angle in the notes.
+	const band = constructionSheet(parse(`${header}field a\nband b { along bend-sinister; width 2; offset 1; }\nband a { width 1.5; rotate 20; }\n`), {});
+	assert.ok(band.labels.some((l) => l.text === "2" && l.onFlag) && band.labels.some((l) => l.text === "1.5" && l.onFlag));
+	const bandText = textOf(band.svg);
+	assert.ok(bandText.includes("The b band runs along the bend sinister, from corner to corner.") && bandText.includes("The b band’s center line is 1 from the center, square to it."));
+	assert.ok(bandText.includes("The a band is turned 20° from the fly, clockwise about the center."));
+	// Bars along a bend share a width that's seldom a grid size, so they're given as shares.
+	const bars = textOf(constructionSvg(parse(`${header}bars a b a { along bend; ratio 1 3 1; }\n`)));
+	assert.ok(bars.includes("The 3 bars along the bend share the width across them, square to their axis, as 1 : 3 : 1"));
+	assert.doesNotMatch(bars, /Not measured/);
+});
+
+test("slanting labels are checked by their own boxes", () => {
+	const box = (cx: number, cy: number, deg: number): LabelBox => {
+		const r = (deg * Math.PI) / 180;
+		const corners = [[-10, -3], [10, -3], [10, 3], [-10, 3]].map(([x, y]) => ({ x: cx + x! * Math.cos(r) - y! * Math.sin(r), y: cy + x! * Math.sin(r) + y! * Math.cos(r) }));
+		return { x0: Math.min(...corners.map((c) => c.x)), y0: Math.min(...corners.map((c) => c.y)), x1: Math.max(...corners.map((c) => c.x)), y1: Math.max(...corners.map((c) => c.y)), text: "", onFlag: true, corners };
+	};
+	// Side by side along a 45° row, their upright boxes overlap, but they don't.
+	assert.equal(labelOverlap(box(0, 0, 45), box(15, 15, 45)), 0);
+	assert.ok(labelOverlap(box(0, 0, 45), box(3, 3, 45)) > 50);
+	assert.ok(Math.abs(labelOverlap(box(0, 0, 0), { x0: 0, y0: 0, x1: 20, y1: 20, text: "", onFlag: false }) - 30) < 1e-9);
+});
+
 test("what isn't measured is listed, never left out", () => {
 	const flag = parse(`${header}outline swallowtail { depth 4; }
 field a
@@ -351,7 +402,7 @@ band b { along bend; width 2; }
 charge star b { radius 1; fimbriate a 0.1; cut { disc { radius 0.2; } } }
 `);
 	const out = constructionSvg(flag);
-	assert.ok(textOf(out).includes("Not measured on this sheet: the b band along the bend, the cut in the b star, the b star’s fimbriation, the swallowtail outline."), out);
+	assert.ok(textOf(out).includes("Not measured on this sheet: the cut in the b star, the b star’s fimbriation, the swallowtail outline."), out);
 });
 
 test("chevrons: their apexes on the row across their edge, an apex along it, and an angle at the outermost", () => {

@@ -43,7 +43,7 @@
 <text x="40" y="670.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">A star’s or sun’s size is the circle through its points, shown dashed.</text>
 <text x="40" y="690.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">12 gold stars in a ring of radius 6 around the center marked +, starting at the top.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">DETAIL: GOLD STARS</text>
-<svg x="866.519685" y="184" width="117.209302" height="180" viewBox="12.2 1.7 5.6 8.6" overflow="hidden">
+<svg x="866.519685" y="184" width="130.232558" height="200" viewBox="12.2 1.7 5.6 8.6" overflow="hidden">
   <title>European Union</title>
   <clipPath id="vx-95590b61a2a55570-cs-d0-flag1">
     <polygon points="0,0 27,0 27,18 0,18"/>
@@ -64,32 +64,32 @@
     <polygon points="10.5,2.803848 10.724514,3.494831 11.451057,3.494831 10.863271,3.921882 11.087785,4.612865 10.5,4.185814 9.912215,4.612865 10.136729,3.921882 9.548943,3.494831 10.275486,3.494831" fill="#ffcc00"/>
   </g>
 </svg>
-<rect x="866.519685" y="184" width="117.209302" height="180" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<rect x="866.519685" y="184" width="130.232558" height="200" fill="none" stroke="#c9c6d2" stroke-width="1"/>
 <path d="" fill="none" stroke="#2a2833" stroke-width="1"/>
-<circle cx="893.728987" cy="211.209302" r="20.930233" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
-<circle cx="893.728987" cy="211.209302" r="20.930233" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
-<circle cx="956.519685" cy="228.034019" r="20.930233" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
-<circle cx="956.519685" cy="228.034019" r="20.930233" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
-<path d="M893.728987 336.790698L893.728987 211.209302M889.728987 336.790698L897.728987 336.790698M889.728987 211.209302L897.728987 211.209302M893.728987 296.790698L895.037751 296.812114L896.345113 296.876341L897.649673 296.983309L898.950035 297.132903L900.244806 297.324964L901.5326 297.559286L902.812038 297.835619L904.081749 298.153665L905.340374 298.513084L906.586566 298.913492L907.818989 299.354461L909.036325 299.835516L910.237269 300.356145L911.420535 300.915788L912.584857 301.513847L913.728987 302.149682" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
-<path d="M893.728987 336.790698L893.728987 211.209302M889.728987 336.790698L897.728987 336.790698M889.728987 211.209302L897.728987 211.209302M893.728987 296.790698L895.037751 296.812114L896.345113 296.876341L897.649673 296.983309L898.950035 297.132903L900.244806 297.324964L901.5326 297.559286L902.812038 297.835619L904.081749 298.153665L905.340374 298.513084L906.586566 298.913492L907.818989 299.354461L909.036325 299.835516L910.237269 300.356145L911.420535 300.915788L912.584857 301.513847L913.728987 302.149682" fill="none" stroke="#1c1b22" stroke-width="1"/>
-<rect x="895.5052" y="279.250379" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
-<text x="907.4052" y="289.250379" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">30°</text>
-<rect x="867.928987" y="267.5" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
-<text x="879.828987" y="277.5" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">r 6</text>
-<text x="832.519685" y="386" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The center and the first two of 12 gold</text>
-<text x="832.519685" y="402" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">stars in a ring, 30° apart, 6 from it. Each is</text>
-<text x="832.519685" y="418" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">r 1.</text>
-<text x="832.519685" y="447" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
-<circle cx="845.519685" cy="477" r="13" fill="#003399"/>
-<text x="868.519685" y="478" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
-<text x="903.949085" y="478" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#003399</text>
-<text x="868.519685" y="497" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone Reflex Blue</text>
-<text x="868.519685" y="516" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 100 80 0 0</text>
-<circle cx="845.519685" cy="546" r="13" fill="#ffcc00"/>
-<text x="868.519685" y="547" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
-<text x="904.849985" y="547" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffcc00</text>
-<text x="868.519685" y="566" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone Yellow</text>
-<text x="868.519685" y="585" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 21 100 0</text>
+<circle cx="896.752243" cy="214.232558" r="23.255814" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="896.752243" cy="214.232558" r="23.255814" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="966.519685" cy="232.926688" r="23.255814" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="966.519685" cy="232.926688" r="23.255814" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M896.752243 353.767442L896.752243 214.232558M892.752243 353.767442L900.752243 353.767442M892.752243 214.232558L900.752243 214.232558M896.752243 313.767442L898.061006 313.788858L899.368368 313.853085L900.672929 313.960053L901.973291 314.109647L903.268062 314.301709L904.555856 314.536031L905.835294 314.812363L907.105005 315.130409L908.36363 315.489828L909.609822 315.890237L910.842245 316.331205L912.05958 316.812261L913.260524 317.332889L914.443791 317.892532L915.608113 318.490591L916.752243 319.126426" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M896.752243 353.767442L896.752243 214.232558M892.752243 353.767442L900.752243 353.767442M892.752243 214.232558L900.752243 214.232558M896.752243 313.767442L898.061006 313.788858L899.368368 313.853085L900.672929 313.960053L901.973291 314.109647L903.268062 314.301709L904.555856 314.536031L905.835294 314.812363L907.105005 315.130409L908.36363 315.489828L909.609822 315.890237L910.842245 316.331205L912.05958 316.812261L913.260524 317.332889L914.443791 317.892532L915.608113 318.490591L916.752243 319.126426" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<rect x="898.528455" y="296.227123" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="910.428455" y="306.227123" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">30°</text>
+<rect x="870.952243" y="277.5" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="882.852243" y="287.5" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">r 6</text>
+<text x="832.519685" y="406" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The center and the first two of 12 gold</text>
+<text x="832.519685" y="422" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">stars in a ring, 30° apart, 6 from it. Each is</text>
+<text x="832.519685" y="438" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">r 1.</text>
+<text x="832.519685" y="467" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="497" r="13" fill="#003399"/>
+<text x="868.519685" y="498" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="498" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#003399</text>
+<text x="868.519685" y="517" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone Reflex Blue</text>
+<text x="868.519685" y="536" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 100 80 0 0</text>
+<circle cx="845.519685" cy="566" r="13" fill="#ffcc00"/>
+<text x="868.519685" y="567" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
+<text x="904.849985" y="567" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffcc00</text>
+<text x="868.519685" y="586" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone Yellow</text>
+<text x="868.519685" y="605" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 21 100 0</text>
 <path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
 <text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The gold star’s center is marked +.</text>
 <text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/european-union.kdl · Vexyl 1</text>
