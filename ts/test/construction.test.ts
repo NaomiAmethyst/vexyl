@@ -498,8 +498,10 @@ fold half { over along=fly at=5 move=bottom; }
 fold quarter { over along=fly at=5 move=bottom; over along=hoist at=10 move=fly; }
 `);
 	const out = constructionSvg(flag);
-	assert.ok(textOf(out).includes("Not measured on this sheet: the half fold, the quarter fold."), out);
+	assert.ok(textOf(out).includes("Not measured on this sheet: the half and quarter folds, which are how the flag is folded rather than its design."), out);
 	assert.ok(textOf(out).includes("The b star has a disc cut out of it, drawn dashed."), out);
+	assert.deepEqual(constructionSheet(flag, {}).unmeasured, ["the half and quarter folds, which are how the flag is folded rather than its design"]);
+	assert.deepEqual(constructionSheet(flagOf("chile"), {}).unmeasured, []);
 });
 
 test("chevrons: their apexes on the row across their edge, an apex along it, and an angle at the outermost", () => {
@@ -709,7 +711,13 @@ test("designs: measured in their own frame, at the scale they're drawn at", () =
 	assert.doesNotMatch(textOf(sheet.svg), /Not measured/);
 	assert.ok(constructionSheet(flag, { units: "hoist" }).labels.some((l) => l.text === "0.025H"), "the fimbriation, as a part of the hoist");
 	// One stretched more one way than the other has no one scale, so it says so.
-	assert.ok(textOf(constructionSvg(flag, { form: { variant: "stretched" } })).includes("Not measured on this sheet: the design “badge”, which is stretched to fill its region, more one way than the other."));
+	assert.ok(textOf(constructionSvg(flag, { form: { variant: "stretched" } })).includes("Not measured on this sheet: the design “badge”, which is stretched to fill its region, more one way than the other, so that its circles and slants aren’t the file’s."));
+	// One of boxes stretches truly: a tile of 4 by 4 in a canton 12 by 10, so its rects are 6 by 2.5, a step of 6 along and 5 down.
+	const boxes = constructionSheet(flag, { form: { variant: "boxes" } });
+	assert.ok(boxes.labels.some((l) => l.text === "6 × 2.5" && l.onFlag));
+	assert.ok(textOf(boxes.svg).includes("The design “tile” is drawn on a grid of its own, 4 by 4, stretched to fill 10 by 12, more one way than the other. Its sizes here are the flag’s."));
+	assert.ok(textOf(boxes.svg).includes("each 6 along the fly and 5 down from the one before"));
+	assert.doesNotMatch(textOf(boxes.svg), /Not measured/);
 	for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { form: { side: "reverse" } }] as ConstructionOptions[]) {
 		assert.deepEqual(collisions(flag, opts), [], JSON.stringify(opts));
 		assert.deepEqual(sheetValueProblems(constructionSheet(flag, opts)), [], JSON.stringify(opts));
@@ -777,7 +785,7 @@ test("a crowded sheet still overlaps nothing, and says what it leaves out", () =
 	}
 	const flag = parse(header + layers);
 	assert.deepEqual(collisions(flag, {}), []);
-	assert.ok(constructionSvg(flag).includes("16 more charges, past the first 24"));
+	assert.ok(textOf(constructionSvg(flag)).includes("16 more charges past the first 24, which would crowd the drawing (16 b discs)"));
 });
 
 test("exact numbers", () => {

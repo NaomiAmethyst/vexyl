@@ -90,6 +90,8 @@ export interface Sheet {
 	condensed: boolean;
 	/** Every size and angle the sheet writes, with the exact value it stands for, which tests check its text against. */
 	values: SheetValue[];
+	/** What the sheet lists as not measured on it, each once, however many times it's so. */
+	unmeasured: string[];
 	/** The hoist of the form drawn, which sizes in parts of the hoist are parts of. */
 	hoist: Fraction;
 }
@@ -517,8 +519,8 @@ interface Measured {
 	/** How many palls have been measured, so that one inside another is measured further along. */
 	palls: number;
 	turned: Set<string>;
-	/** Charges past the most a sheet measures. */
-	extra: number;
+	/** Charges past the most a sheet measures, by what they are. */
+	extra: Map<string, number>;
 }
 
 /** The most charges one sheet measures. Past that, the drawing would be more marks than flag. */
@@ -566,7 +568,7 @@ const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), 
  * border, and `flag` the file's own, whose other forms the notes point to.
  */
 function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
-	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], rows: [], guides: [], slanting: false, details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
+	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], rows: [], guides: [], slanting: false, details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: new Map() };
 	const root: Frame = { x: zero, y: zero, w: exactOf(shown.fly), h: exactOf(shown.hoist) };
 	walk(shown.layers, root, m);
 	const ratio = form.variant !== undefined ? flag.variants[form.variant]?.ratio : undefined;
@@ -577,8 +579,12 @@ function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 	if (m.slanting) {
 		m.notes.push(() => "Sizes along a slanting axis are measured along it, and across it square to it.");
 	}
-	if (m.extra > 0) {
-		skip(m, `${m.extra} more ${m.extra === 1 ? "charge" : "charges"}, past the first ${mostCharges}`);
+	const extra = [...m.extra.values()].reduce((a, b) => a + b, 0);
+	if (extra > 0) {
+		// What they are, as many kinds as there's room to say.
+		const kinds = [...m.extra].map(([what, n]) => `${n} ${plural(n, what)}`);
+		const said = kinds.length <= 3 ? kinds.join(", ") : `${kinds.slice(0, 2).join(", ")} and ${kinds.length - 2} other kinds`;
+		skip(m, `${extra} more ${extra === 1 ? "charge" : "charges"} past the first ${mostCharges}, which would crowd the drawing (${said})`);
 	}
 	if (shown.outline !== undefined) {
 		outline(shown.outline, root, m);
@@ -602,8 +608,11 @@ function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 		const text = `${list.charAt(0).toUpperCase()}${list.slice(1)} ${others.length === 1 ? "has a sheet" : "have sheets"} of ${others.length === 1 ? "its" : "their"} own.`;
 		m.notes.push(() => text);
 	}
-	for (const name of Object.keys(flag.folds)) {
-		skip(m, `the ${name} fold`);
+	// A fold is how the flag is folded, not part of its design, so a sheet never measures one.
+	const folds = Object.keys(flag.folds);
+	if (folds.length > 0) {
+		const list = folds.length === 1 ? folds[0]! : `${folds.slice(0, -1).join(", ")} and ${folds.at(-1)!}`;
+		skip(m, `the ${list} ${folds.length === 1 ? "fold, which is" : "folds, which are"} how the flag is folded rather than its design`);
 	}
 	return m;
 }
@@ -1056,22 +1065,62 @@ function design(l: UseLayer, f: Frame, m: Measured): void {
 	}
 	const [fly, hoist] = [exactOf(d.fly), exactOf(d.hoist)];
 	const k = over(f.w, fly);
-	if (!same(k, over(f.h, hoist))) {
-		skip(m, `the ${describe(l)}, which is stretched to fill its region, more one way than the other`);
+	const ky = over(f.h, hoist);
+	if (!same(k, ky)) {
+		// Stretched more one way than the other, which only boxes and places along the edges survive.
+		if (!stretchable(d.layers)) {
+			skip(m, `the ${describe(l)}, which is stretched to fill its region, more one way than the other, so that its circles and slants aren’t the file’s`);
+			return;
+		}
+		m.notes.push((t) => `The ${describe(l)} is drawn on a grid of its own, ${gridText(hoist)} by ${gridText(fly)}, stretched to fill ${t(f.h)} by ${t(f.w)}, more one way than the other. Its sizes here are the flag’s.`);
+		walk(scaledLayers(d.layers, k, ky), f, m);
 		return;
 	}
 	m.notes.push((t) => `The ${describe(l)} is drawn on a grid of its own, ${gridText(hoist)} by ${gridText(fly)}, at ${gridText(k)} times its size, so that it fills ${t(f.h)} by ${t(f.w)}. Its sizes here are the flag’s.`);
-	walk(scaledLayers(d.layers, k), f, m);
+	walk(scaledLayers(d.layers, k, k), f, m);
+}
+
+/** Whether layers are only what stretching keeps true: level boxes, and places along the edges. */
+function stretchable(layers: readonly Layer[]): boolean {
+	return layers.every((l) => {
+		if (l.clip !== undefined || l.cuts.length > 0) {
+			return false;
+		}
+		switch (l.layer) {
+			case "field":
+			case "quarters":
+			case "checks":
+				return true;
+			case "bars":
+				return (l.along === "fly" || l.along === "hoist") && l.rotate === 0 && l.edge === undefined;
+			case "cross":
+				return l.fimbriate === undefined;
+			case "group":
+				return stretchable(l.layers);
+			case "panel":
+				return l.edge === undefined && stretchable(l.layers);
+			case "charge": {
+				const s = l.shape;
+				return (s.kind === "rect" || s.kind === "ellipse" || s.kind === "svg" || (s.kind === "lozenge" && s.fly !== undefined && s.hoist !== undefined)) && s.rotate === 0 && s.hollow === undefined && l.fimbriate === undefined && (l.repeat === undefined || l.repeat.kind === "line");
+			}
+			default:
+				return false;
+		}
+	});
 }
 
 /** What in a layer or shape is a length or a place, which a design's scale applies to: everything but counts, angles and shares. */
 const lengths = new Set(["radius", "inner", "offset", "width", "disc", "gap", "fly", "hoist", "hollow", "lines", "depth", "flat", "junction", "apex", "period", "base", "tip"]);
 const places = new Set(["at", "ats", "vertices", "split"]);
 
-/** Layers at a scale, exactly, as a design with a grid of its own is drawn. */
-function scaledLayers(layers: readonly Layer[], k: Fraction): Layer[] {
-	const scale = (v: number): number => exactNumber(times(exactOf(v), k));
-	const point = (p: Point | null): Point | null => (p === null ? null : { fly: scale(p.fly), hoist: scale(p.hoist) });
+/**
+ * Layers at a scale, exactly, as a design with a grid of its own is drawn: `kx` along the fly and
+ * `ky` down, which are the same unless `stretchable` has said the layers can be stretched.
+ */
+function scaledLayers(layers: readonly Layer[], kx: Fraction, ky: Fraction): Layer[] {
+	const by = (k: Fraction) => (v: number): number => exactNumber(times(exactOf(v), k));
+	const scale = by(kx);
+	const point = (p: Point | null | undefined): Point | null | undefined => (p === null || p === undefined ? p : { fly: by(kx)(p.fly), hoist: by(ky)(p.hoist) });
 	const walkObject = (o: unknown, kind: string | undefined): unknown => {
 		if (Array.isArray(o)) {
 			return o.map((x) => walkObject(x, kind));
@@ -1088,7 +1137,8 @@ function scaledLayers(layers: readonly Layer[], k: Fraction): Layer[] {
 				out[key] = v;
 			} else if (lengths.has(key) || key === "spread") {
 				// A cross's are shares of its region, and the rest are lengths.
-				out[key] = own === "cross" && (key === "fly" || key === "hoist") ? v : Array.isArray(v) ? v.map(scale) : typeof v === "number" || v instanceof Number ? scale(v as number) : walkObject(v, own);
+				const k = key === "hoist" ? by(ky) : scale;
+				out[key] = own === "cross" && (key === "fly" || key === "hoist") ? v : Array.isArray(v) ? v.map(k) : typeof v === "number" || v instanceof Number ? k(v as number) : walkObject(v, own);
 			} else if (key === "box" || key === "embedded" || key === "markup") {
 				out[key] = v;
 			} else if (key === "define") {
@@ -1449,7 +1499,7 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
  */
 function emblemShape(s: Shape, name: string, c: ChargeLayer | undefined, frame: Affine, emblem: string, m: Measured): void {
 	if (m.charges.length >= mostCharges) {
-		m.extra++;
+		m.extra.set(name, (m.extra.get(name) ?? 0) + 1);
 		return;
 	}
 	let p: XY;
@@ -1556,7 +1606,7 @@ function emblemDetail(c: ChargeLayer, copies: XY[], size: XY, frame: Affine, emb
 
 function bars(l: BarsLayer, f: Frame, m: Measured): void {
 	if (l.fixed !== undefined) {
-		skip(m, "the bars, which adapting moved");
+		skip(m, "the turned bars, which adapting to this proportion keeps at their angle, where no fraction says their places");
 		return;
 	}
 	if ((l.along !== "fly" && l.along !== "hoist") || l.rotate !== 0) {
@@ -1580,7 +1630,7 @@ function bars(l: BarsLayer, f: Frame, m: Measured): void {
 
 function band(l: BandLayer, f: Frame, m: Measured): void {
 	if (l.fixed !== undefined) {
-		skip(m, `the ${describe(l)}, which adapting moved`);
+		skip(m, `the turned ${describe(l)}, which adapting to this proportion keeps at its angle, where no fraction says its place`);
 		return;
 	}
 	if ((l.along !== "fly" && l.along !== "hoist") || l.rotate !== 0) {
@@ -1989,7 +2039,7 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 		return;
 	}
 	if (m.charges.length >= mostCharges) {
-		m.extra++;
+		m.extra.set(name, (m.extra.get(name) ?? 0) + 1);
 		return;
 	}
 	/** Measures its fimbriation on the copy at a place, once that's known. */
@@ -3561,7 +3611,7 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 	}
 
 	recording = null;
-	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh }, condensed, hoist: H, values: [...new Map(values.map((v) => [`${v.unit} ${v.text} ${v.exact.n}/${v.exact.d}`, v])).values()] };
+	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh }, condensed, unmeasured: [...m.unmeasured.keys()], hoist: H, values: [...new Map(values.map((v) => [`${v.unit} ${v.text} ${v.exact.n}/${v.exact.d}`, v])).values()] };
 }
 
 /** How far apart the grid's lines are drawn, which is one unit unless that's too many lines. */

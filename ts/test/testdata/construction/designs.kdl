@@ -1,5 +1,6 @@
 // Not a real flag: a design with a grid of its own, scaled up to fill a canton, one with none, used
-// in a panel, and as a variant, one stretched more one way than the other.
+// in a panel, and as variants, one stretched more one way than the other, and one of boxes, which
+// can be.
 vexyl 1
 meta {
   name "Designs"
@@ -22,6 +23,15 @@ define badge hoist=5 fly=6 {
   charge disc red {
     radius 1
     at fly=4.5 hoist=3.5
+  }
+}
+define tile hoist=4 fly=4 {
+  field white
+  charge rect blue {
+    fly 2
+    hoist 1
+    at fly=1 hoist=1
+    repeat line count=2 fly=2 hoist=2
   }
 }
 define spot {
@@ -49,5 +59,13 @@ variant stretched {
     fly 12
     hoist 12
     use badge
+  }
+}
+variant boxes {
+  field red
+  canton {
+    fly 12
+    hoist 10
+    use tile
   }
 }

@@ -2,8 +2,9 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 // Draws a construction sheet for every form of every flag in a vexyl-flags checkout, in each kind of units, and
-// counts the labels that overlap each other, cross the flag's edge or leave the sheet. It needs the
-// library built first, and takes the checkout's path, or finds one beside this repository. It draws
+// counts the labels that overlap each other, cross the flag's edge or leave the sheet, and how often
+// each reason for not measuring something is given. It needs the library built first, and takes the
+// checkout's path, or finds one beside this repository. It draws
 // --jobs flags at once, by default $VEXYL_JOBS or one for each CPU, each in a worker, and reports
 // them in the same order whatever that is.
 //
@@ -105,6 +106,7 @@ function sheetsOf(file) {
 	const crashes = [];
 	const found = [];
 	const condensed = [];
+	const unmeasured = [];
 	let sheets = 0;
 	let count = 0;
 	for (const form of formsOf(flag)) {
@@ -118,6 +120,7 @@ function sheetsOf(file) {
 				continue;
 			}
 			sheets++;
+			unmeasured.push(...sheet.unmeasured);
 			if (sheet.condensed) {
 				condensed.push(`${path}${which === "" ? "" : ` (${which})`} ${run.units}${run.paper === "fit" ? " fit" : ""}`);
 			}
@@ -128,7 +131,7 @@ function sheetsOf(file) {
 			}
 		}
 	}
-	return { skipped: false, path, crashes, sheets, count, found, condensed };
+	return { skipped: false, path, crashes, sheets, count, found, condensed, unmeasured };
 }
 
 /** Each file's sheets, in the files' order, from workers that each take every jobs-th file. */
@@ -156,6 +159,7 @@ async function report() {
 	const kinds = new Map();
 	const worst = [];
 	const condensed = [];
+	const unmeasured = new Map();
 	const started = Date.now();
 	for (const result of await allSheets()) {
 		if (result.skipped) {
@@ -168,6 +172,11 @@ async function report() {
 		}
 		sheets += result.sheets;
 		condensed.push(...result.condensed);
+		for (const what of result.unmeasured) {
+			// The same reason on other flags, whatever their numbers and colours.
+			const reason = what.replace(/\d+/g, "N").replace(/\(.*\)/, "(…)");
+			unmeasured.set(reason, (unmeasured.get(reason) ?? 0) + 1);
+		}
 		for (const { kind } of result.found) {
 			kinds.set(kind, (kinds.get(kind) ?? 0) + 1);
 		}
@@ -186,6 +195,12 @@ async function report() {
 	}
 	for (const [kind, n] of kinds) {
 		console.log(`  ${kind}: ${n}`);
+	}
+	// What sheets list as not measured, most often first, which is where the next work is.
+	const reasons = [...unmeasured].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+	console.log(`${reasons.length} reasons sheets give for something not measured`);
+	for (const [reason, n] of verbose ? reasons : reasons.slice(0, 10)) {
+		console.log(`	${n}	${reason}`);
 	}
 	for (const w of verbose ? worst : worst.slice(0, 10)) {
 		console.log(`${w.count}\t${w.path}`);

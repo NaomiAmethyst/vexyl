@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="203.8mm" height="208.5mm" viewBox="0 0 770 788">
+<svg xmlns="http://www.w3.org/2000/svg" width="203.8mm" height="212.8mm" viewBox="0 0 770 804">
 <title>Germany · hanging: construction sheet</title>
-<rect x="0" y="0" width="770" height="788" fill="#ffffff"/>
+<rect x="0" y="0" width="770" height="804" fill="#ffffff"/>
 <text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
 <text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Germany · hanging</text>
 <text x="730" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">3:5 · grid 3 × 5</text>
@@ -26,7 +26,8 @@
 <text x="352" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">1</text>
 <text x="256" y="120" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">3</text>
 <path d="M86 180V660M80 180H92M80 660H92M112 154H208M112 148V160M208 148V160M208 154H304M208 148V160M304 148V160M304 154H400M304 148V160M400 148V160M112 128H400M112 122V134M400 122V134" fill="none" stroke="#2a2833" stroke-width="1"/>
-<text x="40" y="686" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the storage fold.</text>
+<text x="40" y="686" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the storage fold, which is how the flag is</text>
+<text x="40" y="702" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">folded rather than its design.</text>
 <text x="480" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
 <circle cx="493" cy="171" r="13" fill="#000000"/>
 <text x="516" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Black</text>
@@ -54,7 +55,7 @@
 <text x="480" y="557" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Order on the German Flags of 13</text>
 <text x="480" y="576" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">November 1996, as amended 22</text>
 <text x="480" y="595" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">November 2005, section I no. 1</text>
-<path d="M40 728H730" stroke="#c9c6d2" stroke-width="1"/>
-<text x="40" y="750" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
-<text x="730" y="750" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">Vexyl 1</text>
+<path d="M40 744H730" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="766" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="730" y="766" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">Vexyl 1</text>
 </svg>

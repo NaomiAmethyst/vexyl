@@ -7,15 +7,15 @@
 <path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
 <svg x="148.984252" y="206" width="638.551181" height="425.700787" viewBox="0 0 30 20" overflow="hidden">
   <title>Designs</title>
-  <clipPath id="vx-b96a887075a8ff9c-cs-f-flag1">
+  <clipPath id="vx-705ad76a54e9f745-cs-f-flag1">
     <polygon points="0,0 30,0 30,20 0,20"/>
   </clipPath>
-  <g clip-path="url(#vx-b96a887075a8ff9c-cs-f-flag1)">
+  <g clip-path="url(#vx-705ad76a54e9f745-cs-f-flag1)">
     <polygon points="0,0 30,0 30,20 0,20" fill="#ef4135"/>
-    <clipPath id="vx-b96a887075a8ff9c-cs-f-panel2">
+    <clipPath id="vx-705ad76a54e9f745-cs-f-panel2">
       <polygon points="0,0 12,0 12,10 0,10"/>
     </clipPath>
-    <g transform="translate(0 0)" clip-path="url(#vx-b96a887075a8ff9c-cs-f-panel2)" style="isolation:isolate">
+    <g transform="translate(0 0)" clip-path="url(#vx-705ad76a54e9f745-cs-f-panel2)" style="isolation:isolate">
       <g transform="scale(2 2)">
         <polygon points="0,0 6,0 6,5 0,5" fill="#0055a4"/>
         <polygon points="2,-0.5 3,-0.5 3,5.5 2,5.5" fill="#ef4135" stroke="#ef4135" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
@@ -25,10 +25,10 @@
         <circle cx="4.5" cy="3.5" r="1" fill="#ef4135"/>
       </g>
     </g>
-    <clipPath id="vx-b96a887075a8ff9c-cs-f-panel3">
+    <clipPath id="vx-705ad76a54e9f745-cs-f-panel3">
       <polygon points="0,0 10,0 10,20 0,20"/>
     </clipPath>
-    <g transform="translate(20 0)" clip-path="url(#vx-b96a887075a8ff9c-cs-f-panel3)" style="isolation:isolate">
+    <g transform="translate(20 0)" clip-path="url(#vx-705ad76a54e9f745-cs-f-panel3)" style="isolation:isolate">
       <polygon points="3,2 3.449028,3.381966 4.902113,3.381966 3.726543,4.236068 4.175571,5.618034 3,4.763932 1.824429,5.618034 2.273457,4.236068 1.097887,3.381966 2.550972,3.381966" fill="#ffffff"/>
     </g>
   </g>
@@ -69,7 +69,7 @@
 <text x="206.68189" y="252.070079" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">0.5</text>
 <text x="40" y="657.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">A star’s or sun’s size is the circle through its points, shown dashed.</text>
 <text x="40" y="677.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The design “badge” is drawn on a grid of its own, 5 by 6, at 2 times its size, so that it fills 10 by 12. Its sizes here are the flag’s.</text>
-<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The stretched variant has a sheet of its own.</text>
+<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The stretched variant and the boxes variant have sheets of their own.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
 <circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
 <text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
