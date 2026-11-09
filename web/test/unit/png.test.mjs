@@ -5,9 +5,10 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
+import { crc32, deflateSync } from "node:zlib";
 import { load, loadLibrary } from "./load.mjs";
 
-const { cappedNote, defaultPicture, fitPng, maxArea, maxSide, pngForHeight, pngForPaper, readPicturePrefs, sizedSvg, svgSize } = await load("png");
+const { cappedNote, defaultPicture, fitPng, maxArea, maxSide, pngForHeight, pngForPaper, readPicturePrefs, sizedSvg, svgSize, withResolution } = await load("png");
 const { sheetFontFiles } = await load("sheet");
 
 test("a PNG is the size asked for, in whole pixels, keeping the flag's shape", () => {
@@ -44,6 +45,56 @@ test("a sheet's PNG is its paper at so many dots per inch", () => {
 	const fine = pngForPaper(297, 210, 600);
 	assert.equal(fine.capped, true, "A4 at 600 dpi is 7016 × 4961, which is too many pixels");
 	assert.ok(fine.width * fine.height <= maxArea && fine.width > 4800);
+});
+
+/** A PNG's chunks, as their types and data, each checked against its CRC. */
+function chunks(png) {
+	const out = [];
+	for (let at = 8; at < png.length;) {
+		const length = png.readUInt32BE(at);
+		const body = png.subarray(at + 4, at + 8 + length);
+		assert.equal(png.readUInt32BE(at + 8 + length), crc32(body), "its CRC is right");
+		out.push({ type: body.subarray(0, 4).toString("latin1"), data: body.subarray(4) });
+		at += 12 + length;
+	}
+	return out;
+}
+
+/** A PNG of one transparent pixel, with any chunks given after its header. */
+function tinyPng(extra = []) {
+	const chunk = (type, data) => {
+		const body = Buffer.concat([Buffer.from(type, "latin1"), data]);
+		const length = Buffer.alloc(4);
+		length.writeUInt32BE(data.length);
+		const crc = Buffer.alloc(4);
+		crc.writeUInt32BE(crc32(body));
+		return Buffer.concat([length, body, crc]);
+	};
+	const header = Buffer.from([0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0]);
+	return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", header), ...extra.map(([t, d]) => chunk(t, d)), chunk("IDAT", deflateSync(Buffer.alloc(5))), chunk("IEND", Buffer.alloc(0))]);
+}
+
+test("a sheet's PNG says how big its pixels are, so that it prints on its paper", () => {
+	// A4 at 300 dpi: 3508 pixels across 297 mm is 11811 to the metre, as 300 dpi is.
+	const size = pngForPaper(297, 210, 300);
+	const png = Buffer.from(withResolution(tinyPng(), (size.width * 1000) / 297, (size.height * 1000) / 210));
+	const list = chunks(png);
+	assert.deepEqual(list.map((c) => c.type), ["IHDR", "pHYs", "IDAT", "IEND"], "just after the header, before the pixels");
+	const phys = list[1].data;
+	assert.equal(phys.length, 9);
+	assert.equal(phys.readUInt32BE(0), 11811);
+	assert.equal(phys.readUInt32BE(4), 11810);
+	assert.equal(phys[8], 1, "in metres");
+	assert.ok(Math.abs((phys.readUInt32BE(0) * 0.0254) - 300) < 0.01);
+	// One there already is replaced, not repeated, and the rest is kept as it was.
+	const old = tinyPng([["pHYs", Buffer.from([0, 0, 0, 1, 0, 0, 0, 1, 0])], ["tEXt", Buffer.from("Software\0x", "latin1")]]);
+	const again = chunks(Buffer.from(withResolution(old, 5906, 5906)));
+	assert.deepEqual(again.map((c) => c.type), ["IHDR", "pHYs", "tEXt", "IDAT", "IEND"]);
+	assert.equal(again[1].data.readUInt32BE(4), 5906);
+	assert.deepEqual(again[2].data, Buffer.from("Software\0x", "latin1"));
+	// What isn't a PNG is left alone.
+	const text = new TextEncoder().encode("not a picture at all, but long enough to look at");
+	assert.equal(withResolution(text, 1, 1), text);
 });
 
 test("an SVG's size is read from its root, and it's given the size it's drawn at", () => {

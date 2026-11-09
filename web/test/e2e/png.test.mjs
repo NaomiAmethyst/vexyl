@@ -48,6 +48,17 @@ function pngSize(bytes) {
 	return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
 }
 
+/** A PNG's pixels to the metre, across and down, from its pHYs chunk, or null if it has none. */
+function pngResolution(bytes) {
+	for (let at = 8; at < bytes.length; at += 12 + bytes.readUInt32BE(at)) {
+		if (bytes.subarray(at + 4, at + 8).toString("latin1") === "pHYs") {
+			assert.equal(bytes[at + 16], 1, "in metres");
+			return { x: bytes.readUInt32BE(at + 8), y: bytes.readUInt32BE(at + 12) };
+		}
+	}
+	return null;
+}
+
 /** Some of a PNG's pixels, as [r, g, b, a], at shares of its width and height, decoded by drawing it on a blank page. */
 async function pixels(context, bytes, points) {
 	const blank = await context.newPage();
@@ -89,6 +100,7 @@ test("Advanced downloads the flag as a PNG at a height, shaped flags staying tra
 	const png = await downloaded(p, () => dialog.getByRole("button", { name: "Download PNG" }).click());
 	assert.equal(png.name, "nepal.png");
 	assert.deepEqual(pngSize(png.bytes), { width: 492, height: 600 });
+	assert.equal(pngResolution(png.bytes), null, "a flag has no size on paper");
 	const [corner, crimson, border] = await pixels(context, png.bytes, [[0.97, 0.03], [0.55, 0.9], [0.015, 0.5]]);
 	assert.equal(corner[3], 0, "outside the pennants is transparent");
 	near(crimson, hex("#dc143c"), "the field");
@@ -182,6 +194,7 @@ test("a construction sheet downloads as a PNG at 300 dpi for its paper, with its
 	const png = await downloaded(p, () => p.getByRole("button", { name: "Download PNG" }).click());
 	assert.equal(png.name, "chile-construction.png");
 	assert.deepEqual(pngSize(png.bytes), { width: 3508, height: 2480 });
+	assert.deepEqual(pngResolution(png.bytes), { x: 11811, y: 11810 }, "300 dpi, so that it prints on A4");
 	const [paper] = await pixels(context, png.bytes, [[0.005, 0.005]]);
 	near(paper, hex("#0c0b11"), "a dark sheet, as on screen");
 	const used = await p.evaluate(async (n) => Promise.all(globalThis.__svgs.slice(n).map((b) => b.text())), before);
@@ -199,6 +212,7 @@ test("a construction sheet downloads as a PNG at 300 dpi for its paper, with its
 	await p.waitForFunction(() => document.querySelector(".sheet-frame")?.style.aspectRatio.startsWith("279.4"));
 	const letter = await downloaded(p, () => p.getByRole("button", { name: "Download PNG" }).click());
 	assert.deepEqual(pngSize(letter.bytes), { width: 1650, height: 1275 });
+	assert.deepEqual(pngResolution(letter.bytes), { x: 5906, y: 5906 });
 	await p.getByRole("radiogroup", { name: "Paper" }).getByRole("radio", { name: "A4" }).click();
 	await p.getByRole("radiogroup", { name: "PNG resolution" }).getByRole("radio", { name: "600 dpi" }).click();
 	const note = p.locator(".sheet-options .png-capped");
@@ -207,6 +221,7 @@ test("a construction sheet downloads as a PNG at 300 dpi for its paper, with its
 	await p.waitForFunction(() => document.querySelector(".sheet-frame")?.style.aspectRatio.startsWith("297"));
 	const fine = await downloaded(p, () => p.getByRole("button", { name: "Download PNG" }).click());
 	assert.deepEqual(pngSize(fine.bytes), { width: Number(told[1]), height: Number(told[2]) });
+	assert.equal(pngResolution(fine.bytes).x, Math.round((Number(told[1]) * 1000) / 297), "what it was drawn at, which is less than asked");
 	assert.equal((await p.evaluate(() => JSON.parse(localStorage.getItem("vexyl.construction")))).dpi, 600);
 	assert.deepEqual(errors, []);
 	await context.close();

@@ -53,8 +53,64 @@ export function sizedSvg(svg: string, width: number, height: number): string {
 	return svg.replace(/<svg\b[^>]*>/, (tag) => tag.replace(/\swidth="[^"]*"/, ` width="${width}"`).replace(/\sheight="[^"]*"/, ` height="${height}"`));
 }
 
-/** Draws an SVG as a PNG, `size` big, which `fitPng` has already brought within what a browser can draw. */
-export async function svgToPng(svg: string, size: PngSize): Promise<Blob> {
+const crcTable = Array.from({ length: 256 }, (_, n) => {
+	let c = n;
+	for (let k = 0; k < 8; k++) {
+		c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+	}
+	return c >>> 0;
+});
+
+function crc32(bytes: Uint8Array): number {
+	let c = 0xffffffff;
+	for (const b of bytes) {
+		c = crcTable[(c ^ b) & 255]! ^ (c >>> 8);
+	}
+	return (c ^ 0xffffffff) >>> 0;
+}
+
+/**
+ * Says in a PNG how big its pixels are, as a `pHYs` chunk of so many pixels per metre each way,
+ * just after its header, in place of any it had. Anything that isn't a PNG is given back as it was.
+ */
+export function withResolution(png: Uint8Array, xPerMetre: number, yPerMetre: number): Uint8Array {
+	const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
+	const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+	if (png.length < 33 || signature.some((b, i) => png[i] !== b) || view.getUint32(12) !== 0x49484452) {
+		return png;
+	}
+	const chunk = new Uint8Array(21);
+	const out = new DataView(chunk.buffer);
+	out.setUint32(0, 9);
+	chunk.set([0x70, 0x48, 0x59, 0x73], 4);
+	out.setUint32(8, Math.round(xPerMetre));
+	out.setUint32(12, Math.round(yPerMetre));
+	// The unit is the metre.
+	chunk[16] = 1;
+	out.setUint32(17, crc32(chunk.subarray(4, 17)));
+	const parts: Uint8Array[] = [png.subarray(0, 33), chunk];
+	for (let at = 33; at + 12 <= png.length;) {
+		const length = view.getUint32(at);
+		const end = Math.min(png.length, at + 12 + length);
+		if (view.getUint32(at + 4) !== 0x70485973) {
+			parts.push(png.subarray(at, end));
+		}
+		at = end;
+	}
+	const joined = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+	let at = 0;
+	for (const p of parts) {
+		joined.set(p, at);
+		at += p.length;
+	}
+	return joined;
+}
+
+/**
+ * Draws an SVG as a PNG, `size` big, which `fitPng` has already brought within what a browser can
+ * draw. A sheet's PNG gives its `paper`'s size, in millimetres, so that it prints at that size.
+ */
+export async function svgToPng(svg: string, size: PngSize, paper?: { widthMm: number; heightMm: number }): Promise<Blob> {
 	const url = URL.createObjectURL(new Blob([sizedSvg(svg, size.width, size.height)], { type: "image/svg+xml" }));
 	try {
 		const img = new Image();
@@ -68,7 +124,7 @@ export async function svgToPng(svg: string, size: PngSize): Promise<Blob> {
 			throw new Error("This browser couldn't make a picture that size.");
 		}
 		g.drawImage(img, 0, 0, size.width, size.height);
-		return await new Promise<Blob>((done, fail) => {
+		const blob = await new Promise<Blob>((done, fail) => {
 			canvas.toBlob((b) => {
 				if (b === null) {
 					fail(new Error("This browser couldn't make a picture that size."));
@@ -77,6 +133,12 @@ export async function svgToPng(svg: string, size: PngSize): Promise<Blob> {
 				}
 			}, "image/png");
 		});
+		if (paper === undefined) {
+			return blob;
+		}
+		// From the pixels there are, which is fewer than asked for if they had to be.
+		const bytes = withResolution(new Uint8Array(await blob.arrayBuffer()), (size.width * 1000) / paper.widthMm, (size.height * 1000) / paper.heightMm);
+		return new Blob([bytes as Uint8Array<ArrayBuffer>], { type: "image/png" });
 	} finally {
 		URL.revokeObjectURL(url);
 	}

@@ -122,7 +122,7 @@ export function ConstructionPage(): preact.JSX.Element {
 				setAck(r.refused ?? "This sheet can't be drawn.");
 				return;
 			}
-			downloadBlob(`${stem}-construction.png`, await svgToPng(r.svg, png));
+			downloadBlob(`${stem}-construction.png`, await svgToPng(r.svg, png, { widthMm: shown!.widthMm, heightMm: shown!.heightMm }));
 			setAck(png.capped ? `Downloaded the PNG, at ${png.width} × ${png.height}, the most a browser can draw.` : "Downloaded the PNG.");
 		} catch (e) {
 			setAck((e as Error).message);
