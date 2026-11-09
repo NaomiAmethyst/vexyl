@@ -51,8 +51,11 @@ export function kdlFiles(dir) {
 	});
 }
 
-/** The folders of hand-written flags in a vexyl-flags checkout beside this one, one per family. */
+/** Where the vexyl-flags checkout is: $VEXYL_FLAGS, or beside this repository. */
+export const flagsCheckout = () => process.env.VEXYL_FLAGS ?? resolve(web, "../../vexyl-flags");
+
+/** The folders of hand-written flags in the vexyl-flags checkout, one per family. */
 export function handWrittenDirs() {
-	const root = resolve(web, "../../vexyl-flags/flags");
+	const root = join(flagsCheckout(), "flags");
 	return existsSync(root) ? readdirSync(root).map((f) => join(root, f)).filter((p) => statSync(p).isDirectory()) : [];
 }

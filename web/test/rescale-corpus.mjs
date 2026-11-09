@@ -7,7 +7,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { load, loadLibrary, handWrittenDirs } from "./unit/load.mjs";
+import { flagsCheckout, load, loadLibrary, handWrittenDirs } from "./unit/load.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const out = process.argv[2];
@@ -17,7 +17,7 @@ mkdirSync(out, { recursive: true });
 const handWritten = handWrittenDirs();
 // Without the hand-written flags this would pass having rescaled only the suite's few.
 if (handWritten.length === 0) {
-	console.error(`no hand-written flags in ${resolve(repo, "../vexyl-flags/flags")}`);
+	console.error(`no hand-written flags in ${join(flagsCheckout(), "flags")}`);
 	process.exit(2);
 }
 const dirs = [join(repo, "conformance/valid"), ...handWritten].filter(existsSync);
