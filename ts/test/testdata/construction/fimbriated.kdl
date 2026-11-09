@@ -1,0 +1,55 @@
+// Not a real flag: a fimbriation on each kind of thing that takes one, and a border inside it.
+vexyl 1
+meta {
+  name "Fimbriations"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+  gold "#f2c300"
+}
+proportion hoist=40 fly=60
+border gold 0.5
+
+field blue
+chevrons red {
+  from hoist
+  depth 14
+  fimbriate white 0.6
+}
+band gold {
+  width 4
+  offset 10
+  fimbriate white 0.7
+}
+pall red {
+  from fly
+  width 3
+  fimbriate white 0.8
+}
+charge disc red {
+  radius 3
+  at fly=30 hoist=8
+  fimbriate white 0.9
+}
+charge path gold {
+  d "M0 0H4V4Z"
+  box "0 0 4 4"
+  fly 4
+  at fly=45 hoist=32
+  fimbriate white 0.4
+}
+
+variant saltire {
+  saltire white {
+    width 4
+    fimbriate red 1
+  }
+  band gold {
+    along bend
+    width 2
+    fimbriate red 0.5
+  }
+}

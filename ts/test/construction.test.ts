@@ -496,7 +496,7 @@ band b { along bend; width 2; }
 charge star b { radius 1; fimbriate a 0.1; cut { disc { radius 0.2; } } }
 `);
 	const out = constructionSvg(flag);
-	assert.ok(textOf(out).includes("Not measured on this sheet: the cut in the b star, the b star’s fimbriation."), out);
+	assert.ok(textOf(out).includes("Not measured on this sheet: the cut in the b star."), out);
 });
 
 test("chevrons: their apexes on the row across their edge, an apex along it, and an angle at the outermost", () => {
@@ -593,6 +593,36 @@ test("outlines: where a named form is cut, along the edges, and a polygon's corn
 	}
 	golden("outlines.svg", tapered.svg);
 	golden("norway-state.svg", norway.svg);
+});
+
+test("fimbriations and borders: each one's width, once, across it", () => {
+	// Norway's state flag: its cross's white edge, 1 wide, on the flag.
+	const norway = constructionSheet(flagOf("norway-state"), {});
+	assert.ok(norway.labels.some((l) => l.text === "1" && l.onFlag));
+	// Nepal's blue border, outside its outline, and signal flag A's black one, inside its.
+	assert.ok(constructionSheet(flagOf("nepal"), {}).labels.some((l) => l.text === "2.5823" && l.onFlag));
+	assert.ok(constructionSheet(flagOf("ics-alfa"), {}).labels.some((l) => l.text === "2.5" && l.onFlag));
+	// New Zealand's stars, each edged in white, 0.5 wide.
+	assert.equal(constructionSheet(flagOf("new-zealand"), {}).labels.filter((l) => l.text === "0.5" && l.onFlag).length, 3);
+	// A chevron, a band, a pall, a disc and a path, and a border inside; and a saltire and a band along the bend.
+	const flag = flagOf("fimbriated");
+	const sheet = constructionSheet(flag, {});
+	for (const want of ["0.5", "0.6", "0.7", "0.8", "0.9"]) {
+		assert.ok(sheet.labels.some((l) => l.text === want && l.onFlag), want);
+	}
+	assert.ok(textOf(sheet.svg).includes("The gold path is fimbriated white, 0.4 wide."), "a shape with no side to measure across is given in the notes");
+	const saltire = constructionSheet(flag, { form: { variant: "saltire" } });
+	assert.ok(saltire.labels.some((l) => l.text === "1" && l.onFlag) && saltire.labels.filter((l) => l.text === "0.5" && l.onFlag).length === 2);
+	for (const name of ["norway-state", "nepal", "ics-alfa", "new-zealand", "guyana", "fimbriated"]) {
+		assert.doesNotMatch(textOf(constructionSvg(flagOf(name))), /Not measured[^.]*(fimbriation|border)/, name);
+	}
+	for (const form of [{}, { variant: "saltire" }, { side: "reverse" }] as ConstructionOptions["form"][]) {
+		for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { theme: "dark" }] as ConstructionOptions[]) {
+			assert.deepEqual(collisions(flag, { ...opts, form }), [], `${JSON.stringify(form)} ${JSON.stringify(opts)}`);
+		}
+	}
+	golden("fimbriated.svg", sheet.svg);
+	golden("nepal.svg", constructionSvg(flagOf("nepal")));
 });
 
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {

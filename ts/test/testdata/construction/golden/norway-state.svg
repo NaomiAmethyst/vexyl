@@ -5,7 +5,7 @@
 <text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Norway (state and war flag)</text>
 <text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">16:27 · grid 16 × 27</text>
 <path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
-<svg x="112" y="204.437154" width="686.519685" height="406.82648" viewBox="0 0 27 16" overflow="hidden">
+<svg x="112" y="214.437154" width="686.519685" height="406.82648" viewBox="0 0 27 16" overflow="hidden">
   <title>Norway (state and war flag)</title>
   <clipPath id="vx-be819aa41e3caf9c-cs-f-flag1">
     <polygon points="0,0 27,0 16,6 27,8 16,10 27,16 0,16"/>
@@ -18,25 +18,30 @@
     <polygon points="0,7 27,7 27,9 0,9" fill="#002569"/>
   </g>
 </svg>
-<rect x="112" y="204.437154" width="686.519685" height="406.82648" fill="none" stroke="#c9c6d2" stroke-width="1"/>
-<path d="M112 199.437154V146.437154M289.986585 199.437154V172.437154M340.839895 199.437154V172.437154M518.82648 199.437154V172.437154M798.519685 199.437154V146.437154M107 204.437154H54M107 356.997084H80M107 382.423739H80M107 433.277049H80M107 458.703704H80M107 611.263634H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
-<text x="200.993293" y="170.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">7</text>
-<text x="315.41324" y="170.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
-<text x="429.833188" y="170.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">7</text>
-<text x="658.673083" y="170.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">11</text>
-<text x="455.259843" y="144.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">27</text>
-<text x="78" y="280.717119" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 280.717119)">6</text>
-<text x="78" y="369.710411" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 369.710411)">1</text>
-<text x="78" y="407.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 407.850394)">2</text>
-<text x="78" y="445.990376" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 445.990376)">1</text>
-<text x="78" y="534.983669" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 534.983669)">6</text>
-<text x="52" y="407.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 407.850394)">16</text>
-<path d="M518.82648 407.850394L798.519685 407.850394" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
-<path d="M518.82648 407.850394L798.519685 407.850394" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>
-<path d="M112 178.437154H289.986585M112 172.437154V184.437154M289.986585 172.437154V184.437154M289.986585 178.437154H340.839895M289.986585 172.437154V184.437154M340.839895 172.437154V184.437154M340.839895 178.437154H518.82648M340.839895 172.437154V184.437154M518.82648 172.437154V184.437154M518.82648 178.437154H798.519685M518.82648 172.437154V184.437154M798.519685 172.437154V184.437154M112 152.437154H798.519685M112 146.437154V158.437154M798.519685 146.437154V158.437154M86 204.437154V356.997084M80 204.437154H92M80 356.997084H92M86 356.997084V382.423739M80 356.997084H92M80 382.423739H92M86 382.423739V433.277049M80 382.423739H92M80 433.277049H92M86 433.277049V458.703704M80 433.277049H92M80 458.703704H92M86 458.703704V611.263634M80 458.703704H92M80 611.263634H92M60 204.437154V611.263634M54 204.437154H66M54 611.263634H66" fill="none" stroke="#2a2833" stroke-width="1"/>
-<text x="40" y="637.263634" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The fly is cut 11 in, to two notches 4 apart either side of the middle line, and the tongue between them comes to a point at the</text>
-<text x="40" y="653.263634" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">middle of the fly.</text>
-<text x="40" y="673.263634" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the blue cross’s fimbriation.</text>
+<rect x="112" y="214.437154" width="686.519685" height="406.82648" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 209.437154V156.437154M289.986585 209.437154V182.437154M340.839895 209.437154V182.437154M518.82648 209.437154V182.437154M798.519685 209.437154V156.437154M107 214.437154H54M107 366.997084H80M107 392.423739H80M107 443.277049H80M107 468.703704H80M107 621.263634H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="200.993293" y="180.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">7</text>
+<text x="315.41324" y="180.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="429.833188" y="180.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">7</text>
+<text x="658.673083" y="180.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">11</text>
+<text x="455.259843" y="154.437154" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">27</text>
+<text x="78" y="290.717119" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 290.717119)">6</text>
+<text x="78" y="379.710411" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 379.710411)">1</text>
+<text x="78" y="417.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 417.850394)">2</text>
+<text x="78" y="455.990376" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 455.990376)">1</text>
+<text x="78" y="544.983669" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 544.983669)">6</text>
+<text x="52" y="417.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 417.850394)">16</text>
+<path d="M518.82648 417.850394L798.519685 417.850394" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+<path d="M518.82648 417.850394L798.519685 417.850394" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>
+<path d="M289.986585 303.430446L264.55993 303.430446M289.986585 308.430446L289.986585 298.430446M264.55993 308.430446L264.55993 298.430446" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M289.986585 303.430446L264.55993 303.430446" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M289.986585 308.430446L289.986585 298.430446" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M264.55993 308.430446L264.55993 298.430446" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M112 188.437154H289.986585M112 182.437154V194.437154M289.986585 182.437154V194.437154M289.986585 188.437154H340.839895M289.986585 182.437154V194.437154M340.839895 182.437154V194.437154M340.839895 188.437154H518.82648M340.839895 182.437154V194.437154M518.82648 182.437154V194.437154M518.82648 188.437154H798.519685M518.82648 182.437154V194.437154M798.519685 182.437154V194.437154M112 162.437154H798.519685M112 156.437154V168.437154M798.519685 156.437154V168.437154M86 214.437154V366.997084M80 214.437154H92M80 366.997084H92M86 366.997084V392.423739M80 366.997084H92M80 392.423739H92M86 392.423739V443.277049M80 392.423739H92M80 443.277049H92M86 443.277049V468.703704M80 443.277049H92M80 468.703704H92M86 468.703704V621.263634M80 468.703704H92M80 621.263634H92M60 214.437154V621.263634M54 214.437154H66M54 621.263634H66" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="249.35993" y="296.430446" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="254.95993" y="306.930446" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">1</text>
+<text x="40" y="647.263634" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The fly is cut 11 in, to two notches 4 apart either side of the middle line, and the tongue between them comes to a point at the</text>
+<text x="40" y="663.263634" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">middle of the fly.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
 <circle cx="845.519685" cy="171" r="13" fill="#e62d23"/>
 <text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>

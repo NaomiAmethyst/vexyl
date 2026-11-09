@@ -10,7 +10,8 @@ import {
 } from "./exact.js";
 import { withRatioExactly } from "./adapt-exact.js";
 import { resolve } from "./adapt.js";
-import { axis } from "./geometry.js";
+import { axis, rotate, shapeGeom } from "./geometry.js";
+import { outlinePoints } from "./shapes.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
 import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, Repeat, Shape, ShapedEdge } from "./types.js";
@@ -576,7 +577,7 @@ function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 		outline(shown.outline, root, m);
 	}
 	if (shown.border !== undefined) {
-		skip(m, "the border");
+		border(shown, m);
 	}
 	// The other forms that have sheets of their own, and those that don't yet.
 	const others: string[] = [];
@@ -673,6 +674,88 @@ function outline(o: Outline, f: Frame, m: Measured): void {
 	}
 }
 
+/** The middles of a polygon's sides, longest first, each with the way out of it there, square to it. */
+function sidesOf(poly: readonly Vec[]): { at: Vec; out: Vec }[] {
+	const turn = Math.sign(area(poly));
+	if (turn === 0) {
+		return [];
+	}
+	const out = poly.map((p, i) => {
+		const q = poly[(i + 1) % poly.length]!;
+		const len = Math.hypot(q.x - p.x, q.y - p.y);
+		return { at: { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }, out: { x: (turn * (q.y - p.y)) / len, y: (turn * -(q.x - p.x)) / len }, len };
+	}).filter((x) => x.len > 1e-9);
+	// Longest first, and of sides as long, the first.
+	return out.map((x, i) => ({ ...x, i })).sort((x, y) => (Math.abs(y.len - x.len) > 1e-9 ? y.len - x.len : x.i - y.i)).map(({ at, out }) => ({ at, out }));
+}
+
+const longestSide = (poly: readonly Vec[]): { at: Vec; out: Vec } | null => sidesOf(poly)[0] ?? null;
+
+/**
+ * A fimbriation's width, measured once, across it at a clear spot: `at` is a point on the edge of
+ * what it edges, in grid units, and `out` the way out of that, which the fimbriation lies along.
+ */
+function fimbriation(m: Measured, name: string, fim: { color: string; width: number }, at: Vec | null, out: Vec | null): void {
+	const width = exactOf(fim.width);
+	const said = (text: string): string => `The ${name} is fimbriated ${colorWord(fim.color)}, ${text} wide.`;
+	if (at === null || out === null) {
+		m.notes.push((t) => said(t(width)));
+		return;
+	}
+	lineMark(m, at, { x: at.x + out.x * fim.width, y: at.y + out.y * fim.width }, (t) => t(width), said, "beyond");
+}
+
+/** A border's width, across it, inside the outline or outside it. */
+function border(shown: Flag, m: Measured): void {
+	const b = shown.border!;
+	const w = exactOf(b.width);
+	const inside = b.side === "inside";
+	const said = (text: string): string => `The border is ${colorWord(b.color)}, ${text} wide, ${inside ? "inside" : "outside"} the flag’s ${shown.outline !== undefined ? "outline" : "edge"}.`;
+	const poly = shown.outline === undefined ? [{ x: 0, y: 0 }, { x: shown.fly, y: 0 }, { x: shown.fly, y: shown.hoist }, { x: 0, y: shown.hoist }] : outlinePoints(shown.outline, shown.fly, shown.hoist);
+	const sides = poly !== null ? sidesOf(poly) : [];
+	if (sides.length === 0) {
+		m.notes.push((t) => said(t(w)));
+		return;
+	}
+	// At the middle of the outline's longest side, or of another if that has no room.
+	const k = (inside ? -1 : 1) * b.width;
+	const [first, ...rest] = sides.map((x): [Vec, Vec] => [x.at, { x: x.at.x + x.out.x * k, y: x.at.y + x.out.y * k }]);
+	lineMark(m, first![0], first![1], (t) => t(w), said, "beyond", [], rest);
+}
+
+/** Where to measure a charge's fimbriation, in the frame its shape is placed in, or nulls for a shape with no straight side or circle to measure from. */
+function chargeEdge(s: Shape, at: Vec): { at: Vec | null; out: Vec | null } {
+	const turn = (v: Vec): Vec => rotate(v, s.rotate);
+	const place = (p: Vec, out: Vec): { at: Vec; out: Vec } => {
+		const q = turn(p);
+		return { at: { x: at.x + q.x, y: at.y + q.y }, out: turn(out) };
+	};
+	const diagonal = { x: Math.SQRT1_2, y: -Math.SQRT1_2 };
+	switch (s.kind) {
+		case "disc":
+		case "ring":
+			return place({ x: diagonal.x * s.radius, y: diagonal.y * s.radius }, diagonal);
+		case "rect":
+		case "ellipse":
+			return place({ x: s.fly / 2, y: 0 }, { x: 1, y: 0 });
+		case "polygon": {
+			const side = longestSide(s.vertices.map((v) => ({ x: at.x + v.fly, y: at.y + v.hoist })));
+			return side !== null ? side : { at: null, out: null };
+		}
+		case "lozenge":
+		case "star":
+		case "triangle":
+		case "plus":
+		case "cardioid": {
+			const geom = shapeGeom(s, at, 0);
+			const side = geom.poly !== undefined ? longestSide(geom.poly) : null;
+			return side !== null ? side : { at: null, out: null };
+		}
+		default:
+			return { at: null, out: null };
+	}
+}
+
 function skip(m: Measured, what: string): void {
 	m.unmeasured.set(what, (m.unmeasured.get(what) ?? 0) + 1);
 }
@@ -718,7 +801,10 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 					m.saltires.push({ frame: f, width: exactOf(l.width), name: describe(l) });
 				}
 				if (l.fimbriate !== undefined) {
-					skip(m, `the ${describe(l)}’s fimbriation`);
+					// On the arm toward the upper fly, three tenths of the way out, where the width isn't measured.
+					const { c, dir, normal } = slant(f, "bend-sinister", 0);
+					const len = Math.hypot(toNumber(f.w), toNumber(f.h));
+					fimbriation(m, describe(l), l.fimbriate, { x: c.x + dir.x * len * 0.3 + (normal.x * l.width) / 2, y: c.y + dir.y * len * 0.3 + (normal.y * l.width) / 2 }, normal);
 				}
 				break;
 			case "quarters":
@@ -798,14 +884,14 @@ function lineIn(p: Vec, dir: Vec, f: Frame): Vec[] {
 /**
  * A straight dimension on the flag between two of its points, in grid units, with ticks square to
  * it, and its label past either end or beside its middle, on the side of the flag's direction
- * `prefer` first if it's one. `dashed` are construction lines drawn with it. It's left for the
- * notes if its label has no room.
+ * `prefer` first if it's one. `dashed` are construction lines drawn with it, and `others` are other
+ * places it could be measured, in order. It's left for the notes if its label has no room.
  */
-function lineMark(m: Measured, a: Vec, b: Vec, text: (t: Format) => string, fallback: (text: string) => string, prefer: "beyond" | Vec, dashed: Vec[][] = []): void {
+function lineMark(m: Measured, a: Vec, b: Vec, text: (t: Format) => string, fallback: (text: string) => string, prefer: "beyond" | Vec, dashed: Vec[][] = [], others: [Vec, Vec][] = []): void {
 	m.marks.push({
 		text,
 		fallback,
-		options: (p, tw, th) => {
+		options: (p, tw, th) => [[a, b] as [Vec, Vec], ...others].flatMap(([a, b]): MarkOption[] => {
 			const [pa, pb] = [p.at(a), p.at(b)];
 			const len = Math.hypot(pb.x - pa.x, pb.y - pa.y);
 			if (!(len > 1e-9)) {
@@ -825,7 +911,7 @@ function lineMark(m: Measured, a: Vec, b: Vec, text: (t: Format) => string, fall
 			const beyond = (g: number): Box[] => [spotAt(pb, d, tw, th, g), spotAt(pa, { x: -d.x, y: -d.y }, tw, th, g)];
 			const spots = [6, 14, 28].flatMap((g) => (prefer === "beyond" ? [...beyond(g), ...beside(g)] : [...beside(g), ...beyond(g)]));
 			return [{ solid: [[pa, pb], tick(pa), tick(pb)], dashed: dashed.map((l) => l.map(p.at)), spots }];
-		},
+		}),
 	});
 }
 
@@ -946,7 +1032,8 @@ function slantBand(l: BandLayer, f: Frame, m: Measured): void {
 		},
 	});
 	if (l.fimbriate !== undefined) {
-		skip(m, `the ${name}’s fimbriation`);
+		// As far the other way along it as its width is measured, on its side away from the center line.
+		fimbriation(m, name, l.fimbriate, { x: centre.x - dir.x * reach + (normal.x * l.width) / 2, y: centre.y - dir.y * reach + (normal.y * l.width) / 2 }, normal);
 	}
 }
 
@@ -1007,14 +1094,17 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
 		if (c.clip !== undefined) {
 			skip(m, `the clip on the ${describe(c)}`);
 		}
+		if (c.fimbriate !== undefined) {
+			// Measured on the first copy, in the emblem's frame, and drawn where that is on the flag.
+			const first = c.shape.ats?.[0] ?? c.shape.at;
+			const edge = chargeEdge(c.shape, first !== undefined && first !== null ? { x: first.fly, y: first.hoist } : { x: 0, y: 0 });
+			fimbriation(m, describe(c), c.fimbriate, edge.at !== null ? apply(frame, edge.at) : null, edge.out !== null ? turnVec(frame, edge.out) : null);
+		}
 		const size = halfSize(c.shape);
 		const copies = copiesOf(c);
 		if (size === null || copies === null) {
 			skip(m, `the ${describe(c)} in the ${name}`);
 			continue;
-		}
-		if (c.fimbriate !== undefined) {
-			skip(m, `the ${describe(c)}’s fimbriation`);
 		}
 		// A charge's copies are one group, as a trigram's bars are, which the detail measures one by one.
 		const lo = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) <= 0 ? a : b));
@@ -1179,7 +1269,10 @@ function band(l: BandLayer, f: Frame, m: Measured): void {
 	part(m, across, minus(middle, half(width)));
 	part(m, across, plus(middle, half(width)));
 	if (l.fimbriate !== undefined) {
-		skip(m, `the ${describe(l)}’s fimbriation`);
+		// On its upper or hoist side, three quarters of the way along it.
+		const edge = toNumber(minus(middle, half(width)));
+		const at = l.along === "fly" ? { x: toNumber(f.x) + toNumber(f.w) * 0.75, y: edge } : { x: edge, y: toNumber(f.y) + toNumber(f.h) * 0.75 };
+		fimbriation(m, describe(l), l.fimbriate, at, l.along === "fly" ? { x: 0, y: -1 } : { x: -1, y: 0 });
 	}
 }
 
@@ -1193,7 +1286,12 @@ function cross(l: CrossLayer, f: Frame, m: Measured): void {
 	arm(l.fly, f.x, f.w, "fly");
 	arm(l.hoist, f.y, f.h, "hoist");
 	if (l.fimbriate !== undefined) {
-		skip(m, `the ${describe(l)}’s fimbriation`);
+		// On the hoist side of the upright arm, halfway down to the level one.
+		const [a, w, b] = l.fly.map(exactOf) as [Fraction, Fraction, Fraction];
+		const x = toNumber(plus(f.x, times(f.w, over(a, plus(plus(a, w), b)))));
+		const [c, h, d] = l.hoist.map(exactOf) as [Fraction, Fraction, Fraction];
+		const y = toNumber(f.y) + toNumber(times(f.h, over(c, plus(plus(c, h), d)))) / 2;
+		fimbriation(m, describe(l), l.fimbriate, { x, y }, { x: -1, y: 0 });
 	}
 }
 
@@ -1261,7 +1359,14 @@ function chevrons(l: ChevronsLayer, f: Frame, m: Measured): void {
 		part(m, e.along, coord(apex, e.along));
 	}
 	if (l.fimbriate !== undefined) {
-		skip(m, `the ${name}’s fimbriation`);
+		// Across the outermost chevron's arm, a little way from its apex toward the edge's end.
+		const len = toNumber(e.length);
+		const d = toNumber(depth);
+		const slope = l.angle !== undefined ? 1 / Math.tan((l.angle * Math.PI) / 180) : d / (len / 2);
+		const q = Math.min(len / 4, d / (2 * slope));
+		const tip = vec(apex);
+		const n = Math.hypot(1, slope);
+		fimbriation(m, name, l.fimbriate, { x: tip.x - e.u.x * slope * q + e.v.x * q, y: tip.y - e.u.y * slope * q + e.v.y * q }, { x: (e.u.x + e.v.x * slope) / n, y: (e.u.y + e.v.y * slope) / n });
 	}
 	const edge = l.from === "hoist" || l.from === "fly" ? `the ${l.from}` : `the ${l.from} edge`;
 	if (l.angle === undefined) {
@@ -1370,6 +1475,30 @@ function pall(name: string, s: PallShape, f: Frame, m: Measured): void {
 			return [{ solid, dashed: [], spots }];
 		},
 	});
+}
+
+/** Where to measure a pile's fimbriation: across the middle of its side from the start of its base. */
+function pileEdge(s: PileShape, f: Frame): { at: Vec; out: Vec } {
+	const e = edgeOf(s.from, f);
+	const a = s.base !== undefined ? s.base[0] : 0;
+	const b = s.base !== undefined ? s.base[1] : toNumber(e.length);
+	const [inward, lo] = s.tip !== undefined ? [s.tip[1], s.tip[0]] : [s.depth ?? 0, (a + b) / 2 - (s.flat ?? 0) / 2];
+	const n = Math.hypot(lo - a, inward);
+	const corner = vec(e.place(zero, zero));
+	const [i, al] = [inward / 2, (a + lo) / 2];
+	const [ni, na] = [(lo - a) / n, -inward / n];
+	return { at: { x: corner.x + e.u.x * i + e.v.x * al, y: corner.y + e.u.y * i + e.v.y * al }, out: { x: e.u.x * ni + e.v.x * na, y: e.u.y * ni + e.v.y * na } };
+}
+
+/** Where to measure a pall's fimbriation: across its stem, halfway from the junction to the far side. */
+function pallEdge(s: PallShape, f: Frame): { at: Vec; out: Vec } {
+	const e = edgeOf(s.from, f);
+	const len = toNumber(e.length);
+	const far = s.from === "top" || s.from === "bottom" ? toNumber(f.h) : toNumber(f.w);
+	const junction = s.junction !== undefined && s.junction !== 0 ? s.junction : len / 2;
+	const corner = vec(e.place(zero, zero));
+	const [i, al] = [(junction + far) / 2, len / 2 + s.width / 2];
+	return { at: { x: corner.x + e.u.x * i + e.v.x * al, y: corner.y + e.u.y * i + e.v.y * al }, out: e.v };
 }
 
 /** Where a panel is, exactly, as `panelRect` draws it, with the region its layers use. */
@@ -1514,8 +1643,9 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 		} else {
 			pall(name, s, region, m);
 		}
-		if (l.fimbriate !== undefined) {
-			skip(m, `the ${name}’s fimbriation`);
+		if (l.fimbriate !== undefined && region !== null) {
+			const edge = s.kind === "pile" ? pileEdge(s, region) : pallEdge(s, region);
+			fimbriation(m, name, l.fimbriate, edge.at, edge.out);
 		}
 		return;
 	}
@@ -1523,9 +1653,15 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 		m.extra++;
 		return;
 	}
-	if (l.fimbriate !== undefined) {
-		skip(m, `the ${name}’s fimbriation`);
-	}
+	/** Measures its fimbriation on the copy at a place, once that's known. */
+	const fimbriated = (copy: Vec): void => {
+		if (l.fimbriate === undefined) {
+			return;
+		}
+		const sized = s.kind === "lozenge" && region !== null ? { ...s, fly: s.fly ?? toNumber(region.w), hoist: s.hoist ?? toNumber(region.h) } : s;
+		const edge = chargeEdge(sized, s.kind === "polygon" ? vec(base) : copy);
+		fimbriation(m, name, l.fimbriate, edge.at, edge.out);
+	};
 	if (s.rotate !== 0 && s.kind !== "polygon") {
 		m.turned.add(`The ${name} is turned ${s.rotate}°.`);
 	}
@@ -1540,6 +1676,7 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 		const x = plus(lo(xs), half(w));
 		const y = plus(lo(ys), half(h));
 		m.charges.push({ x, y, at: { x: toNumber(x), y: toNumber(y) }, reach: { x: toNumber(w) / 2, y: toNumber(h) / 2 }, size: (t) => `box ${t(w)} × ${t(h)}`, name });
+		fimbriated({ x: 0, y: 0 });
 		return;
 	}
 	const { size, reach, circle } = sizeOf(s, region);
@@ -1603,6 +1740,7 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 		m.details.push(detail);
 	}
 	m.charges.push({ x: mark.x, y: mark.y, at: copy, reach, ...(circle !== undefined ? { circle } : {}), ...(size !== undefined ? { size } : {}), name });
+	fimbriated(copy);
 }
 
 type XY = { x: Fraction; y: Fraction };
