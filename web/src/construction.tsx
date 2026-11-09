@@ -9,7 +9,7 @@ import { refLabel } from "./address.js";
 import { download, downloadBlob, fileStem, Logo, Seg, Spinner, useAck, useApp } from "./common.js";
 import { engine } from "./engine.js";
 import { cappedNote, pngForPaper, svgToPng } from "./png.js";
-import { pageRule, sheetFontFiles, sheetOptions, type SheetPrefs } from "./sheet.js";
+import { pageRule, sheetFontFiles, sheetForms, sheetOptions, type SheetPrefs } from "./sheet.js";
 import { app } from "./store.js";
 
 interface Shown {
@@ -71,7 +71,11 @@ export function ConstructionPage(): preact.JSX.Element {
 	const path = ref?.kind === "github" ? ref.path : ref !== undefined ? refLabel(ref) : undefined;
 	const name = app.displayName();
 	const valid = s.lastValid;
-	const options = sheetOptions(prefs, path, s.tier);
+	const variants = Object.keys((valid?.model?.["variant"] ?? {}) as Record<string, unknown>);
+	const forms = sheetForms(variants);
+	// A form this flag doesn't have, kept from another flag, shows the flag itself.
+	const form = forms.some(([id]) => id === prefs.form) ? prefs.form : "flag";
+	const options = sheetOptions({ ...prefs, form }, path, s.tier, variants);
 	const drawn = JSON.stringify(options);
 	useEffect(() => {
 		if (valid === null) {
@@ -106,7 +110,7 @@ export function ConstructionPage(): preact.JSX.Element {
 		return () => { live = false; };
 	}, [valid, drawn]);
 	useEffect(() => clearPageSize, []);
-	const stem = fileStem(ref !== undefined ? refLabel(ref).replace(/\.kdl$/, "") : name);
+	const stem = fileStem(ref !== undefined ? refLabel(ref).replace(/\.kdl$/, "") : name) + (form === "flag" ? "" : `-${fileStem(form.replace(/^variant:/, ""))}`);
 	const png = shown !== null ? pngForPaper(shown.widthMm, shown.heightMm, prefs.dpi) : null;
 	const downloadPng = async (): Promise<void> => {
 		if (png === null) {
@@ -144,6 +148,11 @@ export function ConstructionPage(): preact.JSX.Element {
 				</div>
 				<div class="sheet-layout">
 					<aside class="sheet-options" aria-label="Sheet options">
+						<section class="card" aria-labelledby="sheet-form">
+							<h2 id="sheet-form" class="nx-label card-head">Form</h2>
+							<Seg label="Form" class="wrap" value={form} options={forms} onPick={(v) => { app.setSheet({ form: v }); }} />
+							<p class="nx-note">{form === "reverse" ? "The back, as someone behind the flag sees it." : form === "flag" ? "The flag as the file draws it." : "This variant, turned as it turns, and measured as the flag is."}</p>
+						</section>
 						<section class="card" aria-labelledby="sheet-units">
 							<h2 id="sheet-units" class="nx-label card-head">Sizes in</h2>
 							<Seg label="Sizes in" value={prefs.units} options={[["grid", "Grid"], ["hoist", "Hoist"], ["mm", "mm"]]} onPick={(v) => { app.setSheet({ units: v as SheetPrefs["units"] }); }} />

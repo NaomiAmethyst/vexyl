@@ -92,6 +92,28 @@ test("units and the sheet's look switch, and are remembered", async () => {
 	await context.close();
 });
 
+test("the sheet is drawn for any form the gallery lists, and the choice is remembered", async () => {
+	const { p, context, errors } = await chile();
+	let shown = await sheetShown(p);
+	const forms = await p.getByRole("radiogroup", { name: "Form" }).getByRole("radio").allTextContents();
+	assert.deepEqual(forms, ["Flag", "Reverse", "Vertical"]);
+	await pick(p, "Form", "Vertical");
+	shown = await sheetShown(p, shown.src);
+	assert.ok(shown.text.includes(">Chile · vertical<"), "the header names the form");
+	await pick(p, "Form", "Reverse");
+	shown = await sheetShown(p, shown.src);
+	assert.ok(shown.text.includes(">Chile · reverse<"));
+	const kept = await p.evaluate(() => JSON.parse(localStorage.getItem("vexyl.construction")));
+	assert.equal(kept.form, "reverse");
+	await p.reload();
+	const again = await sheetShown(p);
+	assert.ok(again.text.includes(">Chile · reverse<"));
+	await pick(p, "Form", "Flag");
+	await sheetShown(p, again.src);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
 test("the SVG it downloads parses, and printing is set up for the sheet's paper", async () => {
 	const { p, context, errors } = await chile();
 	const [file] = await Promise.all([p.waitForEvent("download"), p.getByRole("button", { name: "Download SVG" }).click()]);
