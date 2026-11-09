@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
-// Draws a construction sheet for every flag in a vexyl-flags checkout, in each kind of units, and
+// Draws a construction sheet for every form of every flag in a vexyl-flags checkout, in each kind of units, and
 // counts the labels that overlap each other, cross the flag's edge or leave the sheet. It needs the
 // library built first, and takes the checkout's path, or finds one beside this repository. It draws
 // --jobs flags at once, by default $VEXYL_JOBS or one for each CPU, each in a worker, and reports
@@ -80,6 +80,15 @@ if (files.length === 0) {
 }
 const runs = [{ units: "grid" }, { units: "hoist" }, { units: "mm", hoistMm: 1000 }, { units: "grid", paper: "fit", theme: "dark", grid: true }];
 
+/** Every form of a flag: the flag, its reverse, and each variant, from the front and from behind. */
+function formsOf(flag) {
+	const forms = [{}, { side: "reverse" }];
+	for (const variant of Object.keys(flag.variants)) {
+		forms.push({ variant }, { variant, side: "reverse" });
+	}
+	return forms;
+}
+
 /** Draws every sheet of one file, and says what went wrong with them. */
 function sheetsOf(file) {
 	let flag;
@@ -95,19 +104,22 @@ function sheetsOf(file) {
 	const found = [];
 	let sheets = 0;
 	let count = 0;
-	for (const run of runs) {
-		let sheet;
-		try {
-			sheet = constructionSheet(flag, { ...run, path, ...(tiers.has(name) ? { tier: tiers.get(name) } : {}) });
-		} catch (e) {
-			crashes.push(`CRASH ${path} ${JSON.stringify(run)}: ${e.stack}`);
-			continue;
-		}
-		sheets++;
-		const list = collisions(sheet);
-		count += list.length;
-		for (const c of list) {
-			found.push({ kind: c.slice(0, c.indexOf(":")), text: `${run.units}${run.paper === "fit" ? " fit" : ""}: ${c}` });
+	for (const form of formsOf(flag)) {
+		const which = [form.variant, form.side].filter((x) => x !== undefined).join(" ");
+		for (const run of runs) {
+			let sheet;
+			try {
+				sheet = constructionSheet(flag, { ...run, form, path, ...(tiers.has(name) ? { tier: tiers.get(name) } : {}) });
+			} catch (e) {
+				crashes.push(`CRASH ${path} ${JSON.stringify({ ...run, form })}: ${e.stack}`);
+				continue;
+			}
+			sheets++;
+			const list = collisions(sheet);
+			count += list.length;
+			for (const c of list) {
+				found.push({ kind: c.slice(0, c.indexOf(":")), text: `${which === "" ? "" : `${which}, `}${run.units}${run.paper === "fit" ? " fit" : ""}: ${c}` });
+			}
 		}
 	}
 	return { skipped: false, path, crashes, sheets, count, found };

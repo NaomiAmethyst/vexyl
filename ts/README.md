@@ -30,6 +30,13 @@ const sheet = constructionSvg(flag, { units: "hoist", theme: "paper", paper: "a4
 const forMaking = constructionSvg(flag, { units: "mm", hoistMm: 1500, path: "flags/country/chile.kdl" });
 ```
 
+`form` draws another form of the flag, named as `svg` names them: `{ side: "reverse" }` for its back,
+or `{ variant: "vertical" }` for a variant, turned as the variant turns it, with every mark turned too:
+
+```ts
+const hanging = constructionSvg(flag, { form: { variant: "vertical", side: "reverse" } });
+```
+
 A sheet's text is set in Geist and Geist Mono. A browser drawing an SVG as an image loads no fonts for it,
 so for a PNG pass the faces in `sheetFaces` as WOFF2 files, and the sheet carries the ones it uses as
 `data:` URLs. The library holds no fonts itself:

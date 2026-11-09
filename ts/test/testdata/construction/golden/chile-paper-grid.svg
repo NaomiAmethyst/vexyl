@@ -41,7 +41,7 @@
 <rect x="228.086614" y="377.807087" width="40" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
 <text x="248.086614" y="388.307087" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 0.5</text>
 <text x="40" y="675.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">A star’s or sun’s size is the circle through its points, shown dashed.</text>
-<text x="40" y="695.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the vertical variant.</text>
+<text x="40" y="695.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The vertical variant has a sheet of its own.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
 <circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
 <text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>

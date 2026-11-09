@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Chile · vertical: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Chile · vertical</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 4 × 6</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="313.026247" y="206" width="310.467192" height="465.700787" viewBox="0 0 4 6" overflow="hidden">
+  <title>Chile</title>
+  <g transform="matrix(0 1 1 0 0 0)">
+    <clipPath id="vx-5ab43f5f15936159-cs-f-flag1">
+      <polygon points="0,0 6,0 6,4 0,4"/>
+    </clipPath>
+    <g clip-path="url(#vx-5ab43f5f15936159-cs-f-flag1)">
+      <polygon points="0,0 6,0 6,4 0,4" fill="#ffffff"/>
+      <polygon points="0,2 6,2 6,4 0,4" fill="#da291c"/>
+      <clipPath id="vx-5ab43f5f15936159-cs-f-panel2">
+        <polygon points="0,0 2,0 2,2 0,2"/>
+      </clipPath>
+      <g transform="translate(0 0)" clip-path="url(#vx-5ab43f5f15936159-cs-f-panel2)" style="isolation:isolate">
+        <polygon points="0,0 2,0 2,2 0,2" fill="#0033a0"/>
+        <polygon points="1,0.5 1.112257,0.845492 1.475528,0.845492 1.181636,1.059017 1.293893,1.404508 1,1.190983 0.706107,1.404508 0.818364,1.059017 0.524472,0.845492 0.887743,0.845492" fill="#ffffff"/>
+      </g>
+    </g>
+  </g>
+</svg>
+<rect x="313.026247" y="206" width="310.467192" height="465.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M308.026247 206H229.026247M308.026247 283.616798H281.026247M308.026247 361.233596H255.026247M308.026247 671.700787H229.026247M313.026247 201V122M390.643045 201V174M468.259843 201V148M623.493438 201V122" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="279.026247" y="244.808399" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 279.026247 244.808399)">1</text>
+<text x="253.026247" y="283.616798" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 253.026247 283.616798)">2</text>
+<text x="253.026247" y="516.467192" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 253.026247 516.467192)">4</text>
+<text x="227.026247" y="438.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 227.026247 438.850394)">6</text>
+<text x="351.834646" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">1</text>
+<text x="390.643045" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="545.87664" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="468.259843" y="120" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">4</text>
+<path d="M313.026247 283.616798H382.643045M390.643045 206V275.616798M384.643045 283.616798H396.643045M390.643045 277.616798V289.616798" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<circle cx="390.643045" cy="283.616798" r="38.808399" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="390.643045" cy="283.616798" r="38.808399" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M313.026247 283.616798H382.643045M390.643045 206V275.616798" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M384.643045 283.616798H396.643045M390.643045 277.616798V289.616798" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M287.026247 206V283.616798M281.026247 206H293.026247M281.026247 283.616798H293.026247M261.026247 206V361.233596M255.026247 206H267.026247M255.026247 361.233596H267.026247M261.026247 361.233596V671.700787M255.026247 361.233596H267.026247M255.026247 671.700787H267.026247M235.026247 206V671.700787M229.026247 206H241.026247M229.026247 671.700787H241.026247M313.026247 180H390.643045M313.026247 174V186M390.643045 174V186M313.026247 154H468.259843M313.026247 148V160M468.259843 148V160M468.259843 154H623.493438M468.259843 148V160M623.493438 148V160M313.026247 128H623.493438M313.026247 122V134M623.493438 122V134" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="370.643045" y="326.425197" width="40" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="390.643045" y="336.925197" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 0.5</text>
+<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">A star’s or sun’s size is the circle through its points, shown dashed.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="209" r="13" fill="#da291c"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#da291c</text>
+<text x="868.519685" y="229" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 485 C</text>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 6 94 96 0</text>
+<circle cx="845.519685" cy="278" r="13" fill="#0033a0"/>
+<text x="868.519685" y="279" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="279" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#0033a0</text>
+<text x="868.519685" y="298" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 286 C</text>
+<text x="868.519685" y="317" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 100 83 2 0</text>
+<text x="868.519685" y="336" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">“azul turqui” in Law No. 2597</text>
+<text x="832.519685" y="374" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAWS</text>
+<text x="832.519685" y="404" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Law No. 2597 of 11 January 1912, fixing</text>
+<text x="832.519685" y="423" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">the colors of the flag of the Republic</text>
+<text x="832.519685" y="442" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">of Chile and of the Presidential Sash,</text>
+<text x="832.519685" y="461" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Article 1</text>
+<text x="832.519685" y="488" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Supreme Decree No. 1534 of 18</text>
+<text x="832.519685" y="507" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">October 1967, determining the national</text>
+<text x="832.519685" y="526" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">emblems and regulating their use,</text>
+<text x="832.519685" y="545" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Articles 1 and 3</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The white star’s center is marked +.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/country/chile.kdl · Vexyl 1</text>
+</svg>

@@ -1,0 +1,54 @@
+// Not a real flag: a canton with a crescent and a star off its middle, turned every way there is.
+vexyl 1
+meta {
+  name "Turns"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  red "#c8102e"
+  blue "#012169"
+}
+proportion hoist=10 fly=16
+
+bars red white red {
+  ratio 1 2 1
+}
+canton {
+  fly 7
+  hoist 5
+  field blue
+  charge crescent white {
+    radius 1.5
+    inner 1.2
+    offset 0.6
+    at fly=2.5 hoist=2
+  }
+  charge star white {
+    radius 0.8
+    at fly=5 hoist=3
+  }
+}
+variant rotate {
+  from rotate
+}
+variant counter {
+  from counter-rotate
+}
+variant half {
+  from half-turn
+}
+variant transpose {
+  from transpose
+  upright
+}
+variant anti {
+  from anti-transpose
+}
+variant invert {
+  from invert
+}
+variant mirror {
+  from mirror
+  upright
+}

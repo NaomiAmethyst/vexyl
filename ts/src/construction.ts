@@ -8,6 +8,7 @@
 import {
 	compare, decimal, exactOf, fraction, half, minus, over, placesOf, plus, same, sum, times, toNumber, zero, type Fraction,
 } from "./exact.js";
+import { resolve } from "./adapt.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
 import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Shape } from "./types.js";
@@ -34,6 +35,11 @@ export interface ConstructionOptions {
 	path?: string;
 	/** The file's evidence tier, for the footer. */
 	tier?: string;
+	/**
+	 * Which form of the flag to draw, named as `svg` names them: one of its variants, and its
+	 * obverse or reverse. By default, the flag's obverse.
+	 */
+	form?: SheetForm;
 	/** Starts every ID in the output, as for `svg`. */
 	idPrefix?: string;
 	/**
@@ -41,6 +47,12 @@ export interface ConstructionOptions {
 	 * an SVG as an image won't. Only the faces the sheet's text is set in are kept; see `sheetFaces`.
 	 */
 	fonts?: readonly SheetFont[];
+}
+
+/** A form of a flag, as `svg`'s options name it. */
+export interface SheetForm {
+	variant?: string;
+	side?: "obverse" | "reverse";
 }
 
 /** A face of a font, as a WOFF2 file, which the caller supplies, since this library holds none. */
@@ -372,24 +384,46 @@ function describe(l: Layer): string {
 
 const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), y: exactOf(p.hoist) });
 
-function measure(flag: Flag): Measured {
+/**
+ * Measures a form of a flag: `shown` is the flag as that form has it, with its layers, outline and
+ * border, and `flag` the file's own, whose other forms the notes point to.
+ */
+function measure(flag: Flag, shown: Flag | null, form: SheetForm): Measured {
 	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
-	const root: Frame = { x: zero, y: zero, w: exactOf(flag.fly), h: exactOf(flag.hoist) };
-	walk(flag.layers, root, m);
+	if (shown === null) {
+		skip(m, `the ${form.variant} variant, which has ${flag.variants[form.variant!]?.ratio !== undefined ? "a proportion of its own by the flag’s adapt rules" : "a proportion of its own"}`);
+		return m;
+	}
+	const root: Frame = { x: zero, y: zero, w: exactOf(shown.fly), h: exactOf(shown.hoist) };
+	walk(shown.layers, root, m);
 	if (m.extra > 0) {
 		skip(m, `${m.extra} more ${m.extra === 1 ? "charge" : "charges"}, past the first ${mostCharges}`);
 	}
-	if (flag.outline !== undefined) {
-		skip(m, `the ${flag.outline.kind === "polygon" || flag.outline.kind === "path" ? "shaped" : flag.outline.kind} outline`);
+	if (shown.outline !== undefined) {
+		skip(m, `the ${shown.outline.kind === "polygon" || shown.outline.kind === "path" ? "shaped" : shown.outline.kind} outline`);
 	}
-	if (flag.border !== undefined) {
+	if (shown.border !== undefined) {
 		skip(m, "the border");
 	}
-	if (flag.reverse !== undefined) {
-		skip(m, "the reverse");
+	// The other forms that have sheets of their own, and those that don't yet.
+	const others: string[] = [];
+	if (flag.reverse !== undefined && form.side !== "reverse") {
+		others.push("the reverse");
 	}
-	for (const name of Object.keys(flag.variants)) {
-		skip(m, `the ${name} variant`);
+	for (const [name, v] of Object.entries(flag.variants)) {
+		if (name === form.variant) {
+			continue;
+		}
+		if (v.ratio !== undefined || v.fly !== undefined) {
+			skip(m, `the ${name} variant`);
+		} else {
+			others.push(`the ${name} variant`);
+		}
+	}
+	if (others.length > 0) {
+		const list = others.length === 1 ? others[0]! : `${others.slice(0, -1).join(", ")} and ${others.at(-1)!}`;
+		const text = `${list.charAt(0).toUpperCase()}${list.slice(1)} ${others.length === 1 ? "has a sheet" : "have sheets"} of ${others.length === 1 ? "its" : "their"} own.`;
+		m.notes.push(() => text);
 	}
 	for (const name of Object.keys(flag.folds)) {
 		skip(m, `the ${name} fold`);
@@ -1145,29 +1179,63 @@ interface RowText {
 	box: Box;
 }
 
-function rowTexts(l: SideLayout, top: boolean, fx: number, fy: number): RowText[] {
+/** A side of the flag on the sheet, which a row of dimensions runs along. */
+type Side = "top" | "bottom" | "left" | "right";
+
+const across90 = (side: Side): boolean => side === "left" || side === "right";
+
+/** Where a row's line is, `at` out from a side of the flag. */
+function rowLine(side: Side, at: number, flag: Box): number {
+	switch (side) {
+		case "top":
+			return flag.y0 - at;
+		case "bottom":
+			return flag.y1 + at;
+		case "left":
+			return flag.x0 - at;
+		case "right":
+			return flag.x1 + at;
+	}
+}
+
+/** A row's labels, on the far side of its line from the flag, and turned to read along a side row. */
+function rowTexts(l: SideLayout, side: Side, flag: Box): RowText[] {
 	const out: RowText[] = [];
 	for (const p of l.chains) {
-		const at = l.rows[p.row]!.at;
+		const at = rowLine(side, l.rows[p.row]!.at, flag);
 		const mid = (p.lo + p.hi) / 2;
-		if (top) {
-			const y = fy - at;
-			out.push({ text: p.text, x: mid, y: y - 8, attrs: 'text-anchor="middle"', box: { x0: p.lo, y0: y - 18, x1: p.hi, y1: y - 5 } });
-		} else {
-			const x = fx - at;
-			out.push({ text: p.text, x: x - 8, y: mid, attrs: `text-anchor="middle" transform="rotate(-90 ${num(x - 8)} ${num(mid)})"`, box: { x0: x - 18, y0: p.lo, x1: x - 5, y1: p.hi } });
+		switch (side) {
+			case "top":
+				out.push({ text: p.text, x: mid, y: at - 8, attrs: 'text-anchor="middle"', box: { x0: p.lo, y0: at - 18, x1: p.hi, y1: at - 5 } });
+				break;
+			case "bottom":
+				out.push({ text: p.text, x: mid, y: at + 15, attrs: 'text-anchor="middle"', box: { x0: p.lo, y0: at + 5, x1: p.hi, y1: at + 18 } });
+				break;
+			case "left":
+				out.push({ text: p.text, x: at - 8, y: mid, attrs: `text-anchor="middle" transform="rotate(-90 ${num(at - 8)} ${num(mid)})"`, box: { x0: at - 18, y0: p.lo, x1: at - 5, y1: p.hi } });
+				break;
+			case "right":
+				out.push({ text: p.text, x: at + 15, y: mid, attrs: `text-anchor="middle" transform="rotate(-90 ${num(at + 15)} ${num(mid)})"`, box: { x0: at + 5, y0: p.lo, x1: at + 18, y1: p.hi } });
+				break;
 		}
 	}
 	for (const o of l.ords) {
-		const at = l.rows[o.row]!.at;
+		const at = rowLine(side, l.rows[o.row]!.at, flag);
 		const len = monoWidth(o.text, labelSize);
-		if (top) {
-			const y = fy - at;
-			const bx = o.c + 4.5;
-			out.push({ text: o.text, x: bx, y: y - 14, attrs: `transform="rotate(-90 ${num(bx)} ${num(y - 14)})"`, box: { x0: o.c - 5.5, y0: y - 14 - len, x1: o.c + 7.5, y1: y - 14 } });
-		} else {
-			const x = fx - at;
-			out.push({ text: o.text, x: x - 14, y: o.c + 4.5, attrs: 'text-anchor="end"', box: { x0: x - 14 - len, y0: o.c - 5.5, x1: x - 14, y1: o.c + 7.5 } });
+		const bx = o.c + 4.5;
+		switch (side) {
+			case "top":
+				out.push({ text: o.text, x: bx, y: at - 14, attrs: `transform="rotate(-90 ${num(bx)} ${num(at - 14)})"`, box: { x0: o.c - 5.5, y0: at - 14 - len, x1: o.c + 7.5, y1: at - 14 } });
+				break;
+			case "bottom":
+				out.push({ text: o.text, x: bx, y: at + 14, attrs: `text-anchor="end" transform="rotate(-90 ${num(bx)} ${num(at + 14)})"`, box: { x0: o.c - 5.5, y0: at + 14, x1: o.c + 7.5, y1: at + 14 + len } });
+				break;
+			case "left":
+				out.push({ text: o.text, x: at - 14, y: bx, attrs: 'text-anchor="end"', box: { x0: at - 14 - len, y0: o.c - 5.5, x1: at - 14, y1: o.c + 7.5 } });
+				break;
+			case "right":
+				out.push({ text: o.text, x: at + 14, y: bx, attrs: "", box: { x0: at + 14, y0: o.c - 5.5, x1: at + 14 + len, y1: o.c + 7.5 } });
+				break;
 		}
 	}
 	return out;
@@ -1390,6 +1458,67 @@ function sidebarItems(flag: Flag, theme: Theme, opts: { colors: boolean }, look:
 
 const heightOf = (items: readonly SidebarItem[]): number => items.reduce((a, i) => a + i.height, 0);
 
+/** An affine map, as SVG's matrix(a b c d e f) writes one. */
+type Affine = [number, number, number, number, number, number];
+
+const identity: Affine = [1, 0, 0, 1, 0, 0];
+
+/** The map that applies `inner`, then `outer`. */
+const compose = (outer: Affine, inner: Affine): Affine => {
+	const [a, b, c, d, e, f] = outer;
+	const [p, q, r, s, t, u] = inner;
+	return [a * p + c * q, b * p + d * q, a * r + c * s, b * r + d * s, a * t + c * u + e, b * t + d * u + f];
+};
+
+const apply = (m: Affine, v: Vec): Vec => ({ x: m[0] * v.x + m[2] * v.y + m[4], y: m[1] * v.x + m[3] * v.y + m[5] });
+const turnVec = (m: Affine, v: Vec): Vec => ({ x: m[0] * v.x + m[2] * v.y, y: m[1] * v.x + m[3] * v.y });
+
+/** A form of the flag as the sheet draws it. */
+interface FormView {
+	/** The flag as the form has it, in its own frame, before any turn. */
+	flag: Flag;
+	/** Whether it can be measured: not yet, for a form with a proportion of its own. */
+	measured: boolean;
+	/** The form as the library draws it. */
+	drawn: string;
+	/** From the flag's own frame to the drawing's, as the library turns it. */
+	map: Affine;
+	/** Whether the turn swaps the flag's width and height. */
+	sideways: boolean;
+	/** Whether charges are kept the right way up as it turns. */
+	upright: boolean;
+	/** What the header calls it, after the flag's name, if it isn't the flag itself. */
+	label: string;
+}
+
+/**
+ * Works out a form of the flag: what it has, and how the library turns it, which is read from the
+ * drawing itself, so that every mark on the sheet turns just as the flag does.
+ */
+function formView(flag: Flag, form: SheetForm, idPrefix?: string): FormView {
+	const opts = { ...form, ...(idPrefix !== undefined ? { idPrefix } : {}) };
+	const resolved = resolve(flag, form);
+	const drawn = svg(flag, opts);
+	let map = identity;
+	const turn = /\n {2}<g transform="((?:matrix\([^)]*\) ?)+)">\n/.exec(drawn);
+	if (turn !== null) {
+		for (const m of turn[1]!.matchAll(/matrix\(([^)]*)\)/g)) {
+			map = compose(map, m[1]!.split(" ").map(Number) as Affine);
+		}
+	}
+	const variant = form.variant !== undefined ? flag.variants[form.variant] : undefined;
+	const label = [form.variant, form.side === "reverse" ? "reverse" : undefined].filter((x) => x !== undefined).join(" · ");
+	return {
+		flag: resolved.flag,
+		measured: variant === undefined || (variant.ratio === undefined && variant.fly === undefined),
+		drawn,
+		map,
+		sideways: Math.abs(map[0]) < 0.5,
+		upright: resolved.upright,
+		label,
+	};
+}
+
 /** Lays out a sheet, and draws it. */
 export function constructionSheet(flag: Flag, options: ConstructionOptions = {}): Sheet {
 	const units = options.units ?? "grid";
@@ -1404,10 +1533,19 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	}
 	const hoistMm = exactOf(options.hoistMm ?? 1000);
 	const prefix = options.idPrefix ?? `${flag.idPrefix}cs-`;
-	const H = exactOf(flag.hoist);
-	const F = exactOf(flag.fly);
+	const form: SheetForm = {};
+	if (options.form?.variant !== undefined) {
+		form.variant = options.form.variant;
+	}
+	if (options.form?.side === "reverse") {
+		form.side = "reverse";
+	}
+	const view = formView(flag, form, `${prefix}f-`);
+	const H = exactOf(view.flag.hoist);
+	const F = exactOf(view.flag.fly);
 	const t = formatFor(units, H, hoistMm);
-	const m = measure(flag);
+	const m = measure(flag, view.measured ? view.flag : null, form);
+	const measured = view.measured;
 
 	// Whether any size has to be rounded, which the footer then says, worked out by writing them all.
 	const rounded = ((): boolean => {
@@ -1448,7 +1586,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	const unitNote = (units === "grid" ? "Sizes in grid units, as the file gives them." : units === "hoist" ? "Sizes as parts of the hoist, H." : `Sizes in millimetres for a hoist of ${decimal(hoistMm, 3)} mm, to the nearest 0.1 mm, or 0.01 mm under 10 mm.`) + (rounded && units !== "mm" ? " A ~ marks a size rounded to four places." : "") + marked;
 	const footRight = [options.path, options.tier !== undefined ? `tier ${options.tier}` : undefined, `Vexyl ${flag.version}`].filter((x): x is string => x !== undefined && x !== "").join(" · ");
 
-	const name = flag.meta.name;
+	const name = view.label !== "" ? `${flag.meta.name} · ${view.label}` : flag.meta.name;
 	const unitsTail = units === "hoist" ? ` · H = ${gridText(H)}` : units === "mm" ? ` · H = ${decimal(hoistMm, 3)} mm` : "";
 	const headRight = `${proportionText(H, F)} · grid ${gridText(H)} × ${gridText(F)}${unitsTail}`;
 
@@ -1534,83 +1672,100 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		s: number;
 		fx: number;
 		fy: number;
-		top: SideLayout;
-		side: SideLayout;
+		/** The rows along the fly and along the hoist, on whichever sides of the drawing the form puts them. */
+		rows: Record<"fly" | "hoist", SideLayout>;
 		notes: string[][];
 		notesY: number;
 		right: number;
 		bottom: number;
 	}
 
-	const segsFor = (s: number, fx: number, fy: number): { top: Seg[]; side: Seg[]; topOrd: Record<0 | 1, OrdinatePoint[]>; sideOrd: Record<0 | 1, OrdinatePoint[]> } => {
-		const top: Seg[] = [];
-		const side: Seg[] = [];
-		const topOrd: Record<0 | 1, OrdinatePoint[]> = { 0: [], 1: [] };
-		const sideOrd: Record<0 | 1, OrdinatePoint[]> = { 0: [], 1: [] };
-		const add = (list: Seg[], along: "fly" | "hoist", cat: 0 | 1 | 2, a: Fraction, b: Fraction): void => {
+	// The form's turn puts each row on a side of the drawing: the one its side of the flag turns to.
+	const map = view.map;
+	const sideOf = (v: Vec): Side => (Math.abs(v.x) > Math.abs(v.y) ? (v.x < 0 ? "left" : "right") : v.y < 0 ? "top" : "bottom");
+	const sides: Record<"fly" | "hoist", Side> = { fly: sideOf(turnVec(map, { x: 0, y: -1 })), hoist: sideOf(turnVec(map, { x: -1, y: 0 })) };
+
+	const segsFor = (s: number, fx: number, fy: number): { segs: Record<"fly" | "hoist", Seg[]>; ords: Record<"fly" | "hoist", Record<0 | 1, OrdinatePoint[]>> } => {
+		const segs: Record<"fly" | "hoist", Seg[]> = { fly: [], hoist: [] };
+		const ords: Record<"fly" | "hoist", Record<0 | 1, OrdinatePoint[]>> = { fly: { 0: [], 1: [] }, hoist: { 0: [], 1: [] } };
+		/** Where a place along an axis of the flag is, along the side of the drawing its row is on. */
+		const at = (along: "fly" | "hoist", v: Fraction): number => {
+			const d = apply(map, along === "fly" ? { x: toNumber(v), y: 0 } : { x: 0, y: toNumber(v) });
+			return across90(sides[along]) ? fy + d.y * s : fx + d.x * s;
+		};
+		const add = (along: "fly" | "hoist", cat: 0 | 1 | 2, a: Fraction, b: Fraction): void => {
 			if (compare(a, b) >= 0) {
 				return;
 			}
-			const origin = along === "fly" ? fx : fy;
-			list.push({ a: origin + toNumber(a) * s, b: origin + toNumber(b) * s, text: t(minus(b, a)), cat, ends: [toNumber(a), toNumber(b)] });
+			const [pa, pb] = [at(along, a), at(along, b)];
+			segs[along].push({ a: Math.min(pa, pb), b: Math.max(pa, pb), text: t(minus(b, a)), cat, ends: pa <= pb ? [toNumber(a), toNumber(b)] : [toNumber(b), toNumber(a)] });
 		};
-		const chain = (list: Seg[], ords: Record<0 | 1, OrdinatePoint[]>, along: "fly" | "hoist", cat: 0 | 1, points: Fraction[], end: Fraction | null): void => {
+		const chain = (along: "fly" | "hoist", cat: 0 | 1, points: Fraction[], end: Fraction | null): void => {
 			const sorted = [...points].sort(compare).filter((p, i, all) => (i === 0 || !same(p, all[i - 1]!)) && compare(p, zero) > 0 && (end === null || compare(p, end) < 0));
 			const stops = [zero, ...sorted, ...(end !== null ? [end] : [])];
 			for (let i = 0; i + 1 < stops.length; i++) {
-				add(list, along, cat, stops[i]!, stops[i + 1]!);
+				add(along, cat, stops[i]!, stops[i + 1]!);
 			}
-			const origin = along === "fly" ? fx : fy;
-			ords[cat] = stops.map((p) => ({ p: origin + toNumber(p) * s, text: t(p), end: toNumber(p) }));
+			ords[along][cat] = stops.map((p) => ({ p: at(along, p), text: t(p), end: toNumber(p) }));
 		};
 		if (showPositions) {
-			chain(top, topOrd, "fly", 0, m.charges.filter((c) => compare(c.x, F) <= 0).map((c) => c.x), null);
-			chain(side, sideOrd, "hoist", 0, m.charges.filter((c) => compare(c.y, H) <= 0).map((c) => c.y), null);
+			chain("fly", 0, m.charges.filter((c) => compare(c.x, F) <= 0).map((c) => c.x), null);
+			chain("hoist", 0, m.charges.filter((c) => compare(c.y, H) <= 0).map((c) => c.y), null);
 		}
-		if (showSizes) {
+		if (showSizes && measured) {
 			if (m.flyParts.some((p) => compare(p, zero) > 0 && compare(p, F) < 0)) {
-				chain(top, topOrd, "fly", 1, m.flyParts, F);
+				chain("fly", 1, m.flyParts, F);
 			}
 			if (m.hoistParts.some((p) => compare(p, zero) > 0 && compare(p, H) < 0)) {
-				chain(side, sideOrd, "hoist", 1, m.hoistParts, H);
+				chain("hoist", 1, m.hoistParts, H);
 			}
-			add(top, "fly", 2, zero, F);
-			add(side, "hoist", 2, zero, H);
+			add("fly", 2, zero, F);
+			add("hoist", 2, zero, H);
 		}
-		return { top, side, topOrd, sideOrd };
+		return { segs, ords };
 	};
 
 	const fl = toNumber(F);
 	const ho = toNumber(H);
+	// The drawing's own width and height, which a turn can swap.
+	const dw = view.sideways ? ho : fl;
+	const dh = view.sideways ? fl : ho;
 
 	const layDrawing = (box: Box, fixedScale: number | null, fallbacks: readonly string[]): Drawing => {
-		let topExtent = showSizes ? rowGap + pitch + 20 : showPositions ? rowGap + 20 : 10;
-		let sideExtent = topExtent;
+		const first = showSizes ? rowGap + pitch + 20 : showPositions ? rowGap + 20 : 10;
+		const ext: Record<Side, number> = { top: 0, bottom: 0, left: 0, right: 0 };
+		ext[sides.fly] = first;
+		ext[sides.hoist] = first;
 		let result: Drawing | null = null;
 		let dropped = 0;
 		for (let pass = 0; pass < 8; pass++) {
 			const room = fixedScale === null ? Math.max(3, Math.floor(((box.y1 - box.y0) * 0.24) / 16)) : 40;
 			const notes = notesFor(fallbacks, Math.max(box.x1 - box.x0, 300), dropped, room);
 			const nh = notesHeight(notes);
-			const availW = box.x1 - box.x0 - sideExtent - 14;
-			const availH = box.y1 - box.y0 - topExtent - nh - 8;
-			const s = fixedScale ?? Math.max(0.01, Math.min(availW / fl, availH / ho));
-			const spareW = fixedScale === null ? Math.max(0, availW - fl * s) : 0;
-			const spareH = fixedScale === null ? Math.max(0, availH - ho * s) : 0;
-			const fx = box.x0 + sideExtent + spareW / 2;
-			const fy = box.y0 + topExtent + spareH / 2;
-			const segs = segsFor(s, fx, fy);
-			const top = laySide(segs.top, segs.topOrd, box.x0, box.x1);
-			const side = laySide(segs.side, segs.sideOrd, box.y0, fy + ho * s + 14);
-			const right = Math.max(fx + fl * s, ...rowTexts(top, true, fx, fy).map((r) => r.box.x1));
-			result = { s, fx, fy, top, side, notes, notesY: fy + ho * s + 26, right, bottom: fy + ho * s + nh + 12 };
-			const lost = top.dropped + side.dropped;
-			if (top.extent <= topExtent + 0.01 && side.extent <= sideExtent + 0.01 && lost <= dropped) {
+			const availW = box.x1 - box.x0 - ext.left - ext.right - 14;
+			const availH = box.y1 - box.y0 - ext.top - ext.bottom - nh - 8;
+			const s = fixedScale ?? Math.max(0.01, Math.min(availW / dw, availH / dh));
+			const spareW = fixedScale === null ? Math.max(0, availW - dw * s) : 0;
+			const spareH = fixedScale === null ? Math.max(0, availH - dh * s) : 0;
+			const fx = box.x0 + ext.left + spareW / 2;
+			const fy = box.y0 + ext.top + spareH / 2;
+			const { segs, ords } = segsFor(s, fx, fy);
+			const lay = (along: "fly" | "hoist"): SideLayout => (across90(sides[along]) ? laySide(segs[along], ords[along], Math.max(box.y0, fy - 14), fy + dh * s + 14) : laySide(segs[along], ords[along], box.x0, box.x1));
+			const rows = { fly: lay("fly"), hoist: lay("hoist") };
+			const flagBox = { x0: fx, y0: fy, x1: fx + dw * s, y1: fy + dh * s };
+			const texts = (along: "fly" | "hoist"): RowText[] => rowTexts(rows[along], sides[along], flagBox);
+			const all = [...texts("fly"), ...texts("hoist")];
+			const right = Math.max(fx + dw * s, ...all.map((r) => r.box.x1));
+			// Rows under the drawing push its notes down.
+			const below = Math.max(0, ...(["fly", "hoist"] as const).filter((a) => sides[a] === "bottom").flatMap((a) => texts(a)).map((r) => r.box.y1 - flagBox.y1));
+			result = { s, fx, fy, rows, notes, notesY: fy + dh * s + below + 26, right, bottom: fy + dh * s + below + nh + 12 };
+			const lost = rows.fly.dropped + rows.hoist.dropped;
+			if (rows.fly.extent <= ext[sides.fly] + 0.01 && rows.hoist.extent <= ext[sides.hoist] + 0.01 && lost <= dropped) {
 				break;
 			}
 			dropped = Math.max(dropped, lost);
-			topExtent = Math.max(topExtent, top.extent);
-			sideExtent = Math.max(sideExtent, side.extent);
+			ext[sides.fly] = Math.max(ext[sides.fly], rows.fly.extent);
+			ext[sides.hoist] = Math.max(ext[sides.hoist], rows.hoist.extent);
 		}
 		return result!;
 	};
@@ -1623,9 +1778,9 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	let fallbacks: string[] = [];
 	for (let attempt = 0; ; attempt++) {
 		if (fit) {
-			const s = Math.min(1000 / fl, 480 / ho);
+			const s = Math.min(1000 / dw, 480 / dh);
 			const probe = layDrawing({ x0: margin.side, y0: bodyTop + 8, x1: 1e6, y1: 1e6 }, s, fallbacks);
-			const drawRight = Math.max(probe.right, probe.fx + fl * s) + 12;
+			const drawRight = Math.max(probe.right, probe.fx + dw * s) + 12;
 			const width = Math.max(drawRight - margin.side, 420);
 			drawing = layDrawing({ x0: margin.side, y0: bodyTop + 8, x1: margin.side + width, y1: 1e6 }, s, fallbacks);
 			side = sideItemsFor(1e6);
@@ -1644,9 +1799,24 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 			sideX = W - margin.side - sidebarWidth;
 			drawing = layDrawing({ x0: margin.side, y0: bodyTop + 8, x1: hasSide ? sideX - 20 : W - margin.side, y1: bodyBottom }, null, fallbacks);
 		}
-		const flagBox = { x0: drawing.fx, y0: drawing.fy, x1: drawing.fx + fl * drawing.s, y1: drawing.fy + ho * drawing.s };
+		const flagBox = { x0: drawing.fx, y0: drawing.fy, x1: drawing.fx + dw * drawing.s, y1: drawing.fy + dh * drawing.s };
 		const area = { x0: margin.side, y0: bodyTop, x1: fit || heightOf(side) > 0 ? sideX - 20 : W - margin.side, y1: drawing.notesY - 16 };
-		charges = planCharges(m, drawing, flagBox, area, t, showSizes, showPositions);
+		const taken = [...rowTexts(drawing.rows.fly, sides.fly, flagBox), ...rowTexts(drawing.rows.hoist, sides.hoist, flagBox)].map((r) => r.box);
+		// A label off the flag stays out of the rows below it and beside it, whose lines it would cross.
+		for (const a of ["fly", "hoist"] as const) {
+			const rows = drawing.rows[a].rows;
+			const out = rows.length === 0 ? 0 : rows.at(-1)!.at + 6;
+			if (sides[a] === "bottom") {
+				taken.push({ x0: flagBox.x0, y0: flagBox.y1 + 4, x1: flagBox.x1, y1: flagBox.y1 + out });
+			} else if (sides[a] === "right") {
+				taken.push({ x0: flagBox.x1 + 4, y0: flagBox.y0, x1: flagBox.x1 + out, y1: flagBox.y1 });
+			} else if (sides[a] === "top") {
+				taken.push({ x0: flagBox.x0, y0: flagBox.y0 - out, x1: flagBox.x1, y1: flagBox.y0 - 4 });
+			} else {
+				taken.push({ x0: flagBox.x0 - out, y0: flagBox.y0, x1: flagBox.x0 - 4, y1: flagBox.y1 });
+			}
+		}
+		charges = planCharges(m, placingFor(map, drawing.s, drawing.fx, drawing.fy), view.sideways && !view.upright, taken, flagBox, area, t, showSizes, showPositions);
 		if (charges.fallbacks.length === 0 || attempt > 0) {
 			break;
 		}
@@ -1655,8 +1825,10 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 
 	const o = new Out();
 	const { s, fx, fy } = drawing;
-	const fw = fl * s;
-	const fh = ho * s;
+	const fw = dw * s;
+	const fh = dh * s;
+	const place = placingFor(map, s, fx, fy);
+	const flagBox = { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh };
 		// A paper's size is given as it's known, and a fitted sheet's to a tenth of a millimetre.
 	const mmW = fit ? Math.ceil((W / pxPerMm) * 10) / 10 : papers[paper as "a4" | "letter"][0];
 	const mmH = fit ? Math.ceil((Hpx / pxPerMm) * 10) / 10 : papers[paper as "a4" | "letter"][1];
@@ -1681,7 +1853,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	o.add(`<path d="M${num(margin.side)} 90H${num(W - margin.side)}" stroke="${theme.rule}" stroke-width="1.5"/>`);
 
 	// The flag, as the library draws it.
-	const drawn = svg(flag, { idPrefix: `${prefix}f-` });
+	const drawn = view.drawn;
 	const vb = /viewBox="([^"]*)"/.exec(drawn)![1]!.split(" ").map(Number) as [number, number, number, number];
 	const body = drawn.replace(/^<svg [^>]*>\n?/, "").replace(/<\/svg>\n?$/, "");
 	o.add(`<svg x="${num(fx + vb[0] * s)}" y="${num(fy + vb[1] * s)}" width="${num(vb[2] * s)}" height="${num(vb[3] * s)}" viewBox="${vb.map(num).join(" ")}" overflow="hidden">`);
@@ -1690,7 +1862,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	o.add(`<rect x="${num(fx)}" y="${num(fy)}" width="${num(fw)}" height="${num(fh)}" fill="none" ${stroke(theme.outline)} stroke-width="1"/>`);
 
 	if (showGrid) {
-		drawGrid(o, theme, fl, ho, s, fx, fy);
+		drawGrid(o, theme, fl, ho, place);
 	}
 
 	// Extension lines, from the flag's edge to the furthest row that uses each place.
@@ -1713,11 +1885,28 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		}
 		return out;
 	};
-	for (const { at, dist } of furthest(drawing.top).values()) {
-		ext.push(`M${num(at)} ${num(fy - 5)}V${num(fy - dist - tick)}`);
-	}
-	for (const { at, dist } of furthest(drawing.side).values()) {
-		ext.push(`M${num(fx - 5)} ${num(at)}H${num(fx - dist - tick)}`);
+	/** A line across a row, at a place along it, from `d0` to `d1` out from the flag's edge. */
+	const crossing = (side: Side, at: number, d0: number, d1: number): string => {
+		switch (side) {
+			case "top":
+				return `M${num(at)} ${num(fy - d0)}V${num(fy - d1)}`;
+			case "bottom":
+				return `M${num(at)} ${num(fy + fh + d0)}V${num(fy + fh + d1)}`;
+			case "left":
+				return `M${num(fx - d0)} ${num(at)}H${num(fx - d1)}`;
+			case "right":
+				return `M${num(fx + fw + d0)} ${num(at)}H${num(fx + fw + d1)}`;
+		}
+	};
+	/** A row's own line, `d` out from the flag's edge, between two places along it. */
+	const rowPath = (side: Side, d: number, from: number, to: number): string => {
+		const line = rowLine(side, d, flagBox);
+		return across90(side) ? `M${num(line)} ${num(from)}V${num(to)}` : `M${num(from)} ${num(line)}H${num(to)}`;
+	};
+	for (const a of ["fly", "hoist"] as const) {
+		for (const { at, dist } of furthest(drawing.rows[a]).values()) {
+			ext.push(crossing(sides[a], at, 5, dist + tick));
+		}
 	}
 	if (ext.length > 0) {
 		o.add(`<path d="${ext.join("")}" fill="none" ${stroke(theme.ext)} stroke-width="0.8" stroke-dasharray="3 3"/>`);
@@ -1726,18 +1915,12 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	// The dimensions themselves, with their labels.
 	const dims: string[] = [];
 	const label = `font-family="${monoFamily}" font-size="${labelSize}" fill="${theme.label}" stroke="${theme.paper}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"`;
-	for (const [l, top] of [[drawing.top, true], [drawing.side, false]] as const) {
+	for (const a of ["fly", "hoist"] as const) {
+		const l = drawing.rows[a];
+		const sd = sides[a];
 		for (const p of l.chains) {
 			const d = l.rows[p.row]!.at;
-			const from = Math.min(p.a, p.lo);
-			const to = Math.max(p.b, p.hi);
-			if (top) {
-				const y = fy - d;
-				dims.push(`M${num(from)} ${num(y)}H${num(to)}M${num(p.a)} ${num(y - tick)}V${num(y + tick)}M${num(p.b)} ${num(y - tick)}V${num(y + tick)}`);
-			} else {
-				const x = fx - d;
-				dims.push(`M${num(x)} ${num(from)}V${num(to)}M${num(x - tick)} ${num(p.a)}H${num(x + tick)}M${num(x - tick)} ${num(p.b)}H${num(x + tick)}`);
-			}
+			dims.push(`${rowPath(sd, d, Math.min(p.a, p.lo), Math.max(p.b, p.hi))}${crossing(sd, p.a, d + tick, d - tick)}${crossing(sd, p.b, d + tick, d - tick)}`);
 		}
 		// Ordinates: a line from the edge, a tick at each place, and a leader out to its label.
 		for (let r = 0; r < l.rows.length; r++) {
@@ -1746,23 +1929,13 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 				continue;
 			}
 			const d = l.rows[r]!.at;
-			const lo = Math.min(...ords.map((x) => x.p));
-			const hi = Math.max(...ords.map((x) => x.p));
-			if (top) {
-				const y = fy - d;
-				dims.push(`M${num(lo)} ${num(y)}H${num(hi)}`);
-				for (const x of ords) {
-					dims.push(`M${num(x.p)} ${num(y + tick / 2)}V${num(y - tick)}L${num(x.c)} ${num(y - 12)}`);
-				}
-			} else {
-				const x0 = fx - d;
-				dims.push(`M${num(x0)} ${num(lo)}V${num(hi)}`);
-				for (const x of ords) {
-					dims.push(`M${num(x0 + tick / 2)} ${num(x.p)}H${num(x0 - tick)}L${num(x0 - 12)} ${num(x.c)}`);
-				}
+			dims.push(rowPath(sd, d, Math.min(...ords.map((x) => x.p)), Math.max(...ords.map((x) => x.p))));
+			for (const x of ords) {
+				const end = across90(sd) ? { x: rowLine(sd, d + 12, flagBox), y: x.c } : { x: x.c, y: rowLine(sd, d + 12, flagBox) };
+				dims.push(`${crossing(sd, x.p, d - tick / 2, d + tick)}L${num(end.x)} ${num(end.y)}`);
 			}
 		}
-		for (const r of rowTexts(l, top, fx, fy)) {
+		for (const r of rowTexts(l, sd, flagBox)) {
 			o.text(r.x, r.y, r.text, `${label} ${r.attrs}`, r.box);
 		}
 	}
@@ -1772,12 +1945,18 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	const halo: string[] = [];
 	if (showPositions) {
 		for (const c of m.charges) {
-			const cx = fx + toNumber(c.x) * s;
-			const cy = fy + toNumber(c.y) * s;
-			const lines = `M${num(cx)} ${num(fy)}V${num(cy - 8)}M${num(fx)} ${num(cy)}H${num(cx - 8)}`;
+			const x = toNumber(c.x);
+			const y = toNumber(c.y);
+			const at = place.at({ x, y });
+			// From the top and the hoist, wherever the turn puts them, to just short of the center.
+			const short = (q: Vec): Vec => {
+				const len = Math.hypot(at.x - q.x, at.y - q.y);
+				return len <= 8 ? q : { x: at.x + ((q.x - at.x) * 8) / len, y: at.y + ((q.y - at.y) * 8) / len };
+			};
+			const lines = [place.at({ x, y: 0 }), place.at({ x: 0, y })].map((q) => straight(q, short(q))).join("");
 			onFlag.push(`<path d="${lines}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
 			halo.push(lines);
-			const plusMark = `M${num(cx - 6)} ${num(cy)}H${num(cx + 6)}M${num(cx)} ${num(cy - 6)}V${num(cy + 6)}`;
+			const plusMark = `M${num(at.x - 6)} ${num(at.y)}H${num(at.x + 6)}M${num(at.x)} ${num(at.y - 6)}V${num(at.y + 6)}`;
 			halo.push(plusMark);
 			onFlag.push(`<path d="${plusMark}" stroke="${theme.onFlag}" stroke-width="1.5"/>`);
 		}
@@ -1868,19 +2047,46 @@ function gridStep(fl: number, ho: number): number {
 	return 10000;
 }
 
-function drawGrid(o: Out, theme: Theme, fl: number, ho: number, s: number, fx: number, fy: number): void {
+/** A line from one point to another, as path data, which is shorter for one that's level or upright. */
+function straight(a: Vec, b: Vec): string {
+	if (Math.abs(a.x - b.x) < 1e-9) {
+		return `M${num(a.x)} ${num(a.y)}V${num(b.y)}`;
+	}
+	if (Math.abs(a.y - b.y) < 1e-9) {
+		return `M${num(a.x)} ${num(a.y)}H${num(b.x)}`;
+	}
+	return pathOf([a, b]);
+}
+
+function drawGrid(o: Out, theme: Theme, fl: number, ho: number, p: Placing): void {
 	const step = gridStep(fl, ho);
 	const d: string[] = [];
 	for (let x = step; x < fl - 1e-9; x += step) {
-		d.push(`M${num(fx + x * s)} ${num(fy)}V${num(fy + ho * s)}`);
+		d.push(straight(p.at({ x, y: 0 }), p.at({ x, y: ho })));
 	}
 	for (let y = step; y < ho - 1e-9; y += step) {
-		d.push(`M${num(fx)} ${num(fy + y * s)}H${num(fx + fl * s)}`);
+		d.push(straight(p.at({ x: 0, y }), p.at({ x: fl, y })));
 	}
 	if (d.length > 0) {
 		o.add(`<path d="${d.join("")}" fill="none" stroke="${theme.halo}" stroke-width="1.6" stroke-opacity="0.35"/>`);
 		o.add(`<path d="${d.join("")}" fill="none" stroke="${theme.onFlag}" stroke-width="0.5" stroke-opacity="0.55"/>`);
 	}
+}
+
+/** How a form's flag is placed on the sheet: turned by `map`, at a scale of `s`, from (`fx`, `fy`). */
+function placingFor(map: Affine, s: number, fx: number, fy: number): Placing {
+	return {
+		at: (q) => {
+			const d = apply(map, q);
+			return { x: fx + d.x * s, y: fy + d.y * s };
+		},
+		way: (v) => {
+			const d = turnVec(map, v);
+			const l = Math.hypot(d.x, d.y);
+			return { x: d.x / l, y: d.y / l };
+		},
+		s,
+	};
 }
 
 // --- Charges' labels --------------------------------------------------------------------------
@@ -1908,16 +2114,16 @@ const hits = (a: Box, b: Box, gap = 2): boolean => a.x0 < b.x1 + gap && b.x0 < a
 
 /**
  * Finds a place for each charge's size, on the flag if it can, beside the copy it measures, and
- * clear of every other label. What can't go anywhere goes in the notes instead.
+ * clear of every other label. What can't go anywhere goes in the notes instead. `swap` says that
+ * the form's turn has turned charges a quarter turn, so that each reaches across where it reached down.
  */
-function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: SideLayout; side: SideLayout }, flag: Box, area: Box, t: Format, sizes: boolean, positions: boolean): ChargePlan {
-	const { s, fx, fy } = d;
-	const taken: Box[] = [...rowTexts(d.top, true, fx, fy), ...rowTexts(d.side, false, fx, fy)].map((r) => r.box);
+function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: readonly Box[], flag: Box, area: Box, t: Format, sizes: boolean, positions: boolean): ChargePlan {
+	const s = place.s;
+	const taken: Box[] = [...rowBoxes];
 	if (positions) {
 		for (const c of m.charges) {
-			const cx = fx + toNumber(c.x) * s;
-			const cy = fy + toNumber(c.y) * s;
-			taken.push({ x0: cx - 6, y0: cy - 6, x1: cx + 6, y1: cy + 6 });
+			const q = place.at({ x: toNumber(c.x), y: toNumber(c.y) });
+			taken.push({ x0: q.x - 6, y0: q.y - 6, x1: q.x + 6, y1: q.y + 6 });
 		}
 	}
 	const plan: ChargePlan = { labels: [], dims: [], dashed: [], fallbacks: [] };
@@ -1942,8 +2148,7 @@ function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: S
 	};
 	const h = 14;
 	for (const c of m.charges) {
-		const cx = fx + c.at.x * s;
-		const cy = fy + c.at.y * s;
+		const { x: cx, y: cy } = place.at(c.at);
 		const out: ChargeLabel = { cx, cy };
 		if (c.circle !== undefined) {
 			out.circle = c.circle * s;
@@ -1951,8 +2156,8 @@ function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: S
 		if (c.size !== undefined) {
 			const text = c.size(t);
 			const w = monoWidth(text, 12);
-			const rx = Math.max(c.reach.x * s, 2);
-			const ry = Math.max(c.reach.y * s, 2);
+			const rx = Math.max((swap ? c.reach.y : c.reach.x) * s, 2);
+			const ry = Math.max((swap ? c.reach.x : c.reach.y) * s, 2);
 			const line = (x0: number, y0: number, x1: number, y1: number, g: number): string | undefined => (g > 6 ? `M${num(x0)} ${num(y0)}L${num(x1)} ${num(y1)}` : undefined);
 			const at = (g: number): { box: Box; leader?: string }[] => [
 				{ box: { x0: cx - w / 2, y0: cy + ry + g, x1: cx + w / 2, y1: cy + ry + g + h }, leader: line(cx, cy + ry, cx, cy + ry + g, g) },
@@ -1974,14 +2179,14 @@ function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: S
 		plan.labels.push(out);
 	}
 	for (const sal of m.saltires) {
-		const x = fx + toNumber(sal.frame.x) * s;
-		const y = fy + toNumber(sal.frame.y) * s;
-		const w = toNumber(sal.frame.w) * s;
-		const hh = toNumber(sal.frame.h) * s;
+		// Across the arm along the bend, three tenths of the way from the center to its corner.
+		const w = toNumber(sal.frame.w);
+		const hh = toNumber(sal.frame.h);
 		const len = Math.hypot(w, hh);
-		const dir = { x: w / len, y: hh / len };
-		const n = { x: -dir.y, y: dir.x };
-		const p = { x: x + w / 2 + dir.x * len * 0.3, y: y + hh / 2 + dir.y * len * 0.3 };
+		const along = { x: w / len, y: hh / len };
+		const p = place.at({ x: toNumber(sal.frame.x) + w / 2 + along.x * len * 0.3, y: toNumber(sal.frame.y) + hh / 2 + along.y * len * 0.3 });
+		const dir = place.way(along);
+		const n = place.way({ x: -along.y, y: along.x });
 		const half = (toNumber(sal.width) * s) / 2;
 		const a = { x: p.x - n.x * half, y: p.y - n.y * half };
 		const b = { x: p.x + n.x * half, y: p.y + n.y * half };
@@ -2003,14 +2208,6 @@ function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: S
 		plan.dims.push(`M${num(a.x)} ${num(a.y)}L${num(b.x)} ${num(b.y)}${ticks(a)}${ticks(b)}`);
 		plan.labels.push({ cx: p.x, cy: p.y, text, box: got.box });
 	}
-	const place: Placing = {
-		at: (q) => ({ x: fx + q.x * s, y: fy + q.y * s }),
-		way: (v) => {
-			const l = Math.hypot(v.x, v.y);
-			return { x: v.x / l, y: v.y / l };
-		},
-		s,
-	};
 	for (const mark of m.marks) {
 		const text = mark.text(t);
 		const options = mark.options(place, monoWidth(text, 12), h);

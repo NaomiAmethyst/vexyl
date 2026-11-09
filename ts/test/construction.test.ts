@@ -151,7 +151,7 @@ test("papers, and the units they're given in", () => {
 
 test("what's measured, as the file writes it", () => {
 	const chile = constructionSvg(flagOf("chile"));
-	for (const want of [">6<", ">2<", ">4<", ">1<", ">r 0.5<", ">2:3 · grid 4 × 6<", "the vertical variant"]) {
+	for (const want of [">6<", ">2<", ">4<", ">1<", ">r 0.5<", ">2:3 · grid 4 × 6<", "The vertical variant has a sheet of its own."]) {
 		assert.ok(chile.includes(want), want);
 	}
 	const us = constructionSvg(flagOf("united-states"));
@@ -238,6 +238,69 @@ test("palls: their junction and stem along the rows, and their arms' width acros
 	// With no room for the width on the flag, it goes in the notes.
 	const tiny = constructionSvg(parse(`${header.replace("hoist=10 fly=20", "hoist=1 fly=30")}pall a { width 0.1; }\n`));
 	assert.ok(textOf(tiny).includes("The a pall’s arms are 0.1 wide, measured across them.") || tiny.includes(">0.1<"));
+});
+
+/** Which sides of the flag the labels with some text are on, with "on" for any over it. */
+function sideOfLabel(sheet: ReturnType<typeof constructionSheet>, text: string): string {
+	const f = sheet.flag;
+	const sides = sheet.labels.filter((l) => l.text === text).map((l) => (l.y1 <= f.y0 ? "top" : l.y0 >= f.y1 ? "bottom" : l.x1 <= f.x0 ? "left" : l.x0 >= f.x1 ? "right" : "on"));
+	assert.ok(sides.length > 0, `no label ${text}`);
+	return [...new Set(sides)].sort().join(" ");
+}
+test("golden sheets of other forms: turned, from behind, and upright", () => {
+	const chile = flagOf("chile");
+	golden("chile-vertical.svg", constructionSvg(chile, { form: { variant: "vertical" }, path: "flags/country/chile.kdl" }));
+	golden("chile-reverse.svg", constructionSvg(chile, { form: { side: "reverse" }, units: "hoist" }));
+	golden("chile-vertical-reverse-dark.svg", constructionSvg(chile, { form: { variant: "vertical", side: "reverse" }, theme: "dark" }));
+	golden("united-states-vertical.svg", constructionSvg(flagOf("united-states"), { form: { variant: "vertical" } }));
+	golden("germany-hanging.svg", constructionSvg(flagOf("germany"), { form: { variant: "hanging" }, paper: "fit" }));
+});
+
+test("a turned form is measured in the flag's own frame, and its rows turn with it", () => {
+	const chile = flagOf("chile");
+	// As it hangs, the hoist runs along the top, so the fly's 6 is down the left and the hoist's 4 across the top.
+	const vertical = constructionSheet(chile, { form: { variant: "vertical" } });
+	assert.equal(sideOfLabel(vertical, "6"), "left");
+	assert.equal(sideOfLabel(vertical, "4"), "left top", "the hoist, and a part of the fly");
+	assert.ok(vertical.svg.includes(">Chile · vertical<") && vertical.svg.includes("<title>Chile · vertical: construction sheet</title>"));
+	assert.ok(vertical.flag.y1 - vertical.flag.y0 > vertical.flag.x1 - vertical.flag.x0, "it's drawn tall");
+	// From behind, the hoist is on the right, and its row with it.
+	const back = constructionSheet(chile, { form: { side: "reverse" } });
+	assert.equal(sideOfLabel(back, "6"), "top");
+	assert.equal(sideOfLabel(back, "4"), "right top");
+	assert.ok(back.svg.includes(">Chile · reverse<"));
+	// Every turn the format has, with the rows on the sides the flag's top and hoist turn to.
+	const turns = flagOf("turns");
+	const want: Record<string, [string, string]> = {
+		rotate: ["right", "top"], counter: ["left", "bottom"], half: ["bottom", "right"], transpose: ["left", "top"], anti: ["right", "bottom"], invert: ["bottom", "left"], mirror: ["top", "right"],
+	};
+	for (const [variant, [fly, hoist]] of Object.entries(want)) {
+		for (const side of ["obverse", "reverse"] as const) {
+			const sheet = constructionSheet(turns, { form: { variant, side } });
+			if (side === "obverse") {
+				assert.equal(sideOfLabel(sheet, "16"), fly, `${variant}: the fly`);
+				assert.equal(sideOfLabel(sheet, "10"), hoist, `${variant}: the hoist`);
+			}
+			assert.ok(sheet.labels.some((l) => l.text === "r 0.8"), `${variant} ${side}: the star's size`);
+			for (const opts of [{}, { units: "hoist" }, { paper: "fit", grid: true }] as ConstructionOptions[]) {
+				assert.deepEqual(collisions(turns, { ...opts, form: { variant, side } }), [], `${variant} ${side} ${JSON.stringify(opts)}`);
+			}
+		}
+	}
+	// A charge's centre mark is where the library draws it: the star in the turned flag's frame.
+	const rotated = constructionSheet(turns, { form: { variant: "rotate" } });
+	const f = rotated.flag;
+	const scale = (f.x1 - f.x0) / 10;
+	// The star is 5 along the fly and 3 down; turned clockwise, that's 10 - 3 across and 5 down.
+	assert.ok(rotated.svg.includes(`M${(f.x0 + 7 * scale - 6).toFixed(6).replace(/\.?0+$/, "")} `), "its + is at the turned place");
+	assert.throws(() => constructionSvg(chile, { form: { variant: "none-such" } }), /no variant/);
+});
+
+test("a form with a proportion of its own isn't measured yet, and says so", () => {
+	const guyana = flagOf("guyana");
+	const sea = constructionSvg(guyana, { form: { variant: "sea" } });
+	assert.ok(textOf(sea).includes("Not measured on this sheet: the sea variant, which has a proportion of its own."));
+	assert.ok(textOf(constructionSvg(guyana)).includes("the sea variant"));
 });
 
 test("what isn't measured is listed, never left out", () => {
