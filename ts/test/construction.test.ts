@@ -167,7 +167,7 @@ test("what's measured, as the file writes it", () => {
 		assert.ok(sweden.includes(want), want);
 	}
 	const korea = constructionSvg(flagOf("south-korea"));
-	assert.ok(textOf(korea).includes("Not measured on this sheet: the clip on the red disc."));
+	assert.ok(textOf(korea).includes("The red disc keeps only what’s inside its clip, a rect, drawn dashed.") && !textOf(korea).includes("Not measured"));
 	const bahamas = constructionSvg(flagOf("bahamas"));
 	assert.ok(textOf(bahamas).includes("The black pile stands on the hoist from 0 to 3, and reaches 2.6 in from it, to a point."));
 	assert.doesNotMatch(textOf(bahamas), /Not measured/);
@@ -738,6 +738,36 @@ test("turned chevrons: their apexes along their own center line, and their angle
 		}
 	}
 	golden("chevrons-turned.svg", sheet.svg);
+});
+
+test("shapes in a slanting emblem: each one's place along its axis and across it, and its size", () => {
+	const flag = flagOf("emblem-shapes");
+	const sheet = constructionSheet(flag, {});
+	for (const want of ["r 4", "r 1", "6 × 3", "r 3 · disc 1.5", "box 4 × 4"]) {
+		assert.ok(sheet.labels.some((l) => l.text === want && l.onFlag), want);
+	}
+	// The star 20 back along the axis, the rect 18 along and 4 across, the polygon's box 6 back and 8 across.
+	const slanted = sheet.labels.filter((l) => l.corners !== undefined).map((l) => l.text);
+	for (const want of ["20", "18", "4", "6", "8"]) {
+		assert.ok(slanted.includes(want), want);
+	}
+	const text = textOf(sheet.svg);
+	for (const want of ["6 white discs in a ring of radius 5 around the center marked +, starting at the top of the frame of the emblem along the bend.", "The white disc is at the origin of the emblem along the bend.", "The red rect is turned 30° within the emblem along the bend."]) {
+		assert.ok(text.includes(want), want);
+	}
+	assert.doesNotMatch(text, /Not measured/);
+	// Their places are along the axis, so none is written along the flag's edges, where only the whole is.
+	assert.deepEqual(sheet.labels.filter((l) => !l.onFlag && /^[0-9.~]+$/.test(l.text)).map((l) => l.text).sort(), ["40", "60"]);
+	const turned = constructionSheet(flag, { form: { variant: "turned" } });
+	assert.ok(turned.labels.some((l) => l.text === "r 6") && turned.labels.some((l) => l.text === "r 2"));
+	assert.ok(textOf(turned.svg).includes("The white star has a disc cut out of it, drawn dashed.") && !textOf(turned.svg).includes("Not measured"));
+	for (const form of [{}, { variant: "turned" }, { side: "reverse" }] as ConstructionOptions["form"][]) {
+		for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { theme: "dark" }] as ConstructionOptions[]) {
+			assert.deepEqual(collisions(flag, { ...opts, form }), [], `${JSON.stringify(form)} ${JSON.stringify(opts)}`);
+			assert.deepEqual(sheetValueProblems(constructionSheet(flag, { ...opts, form })), [], `${JSON.stringify(form)} ${JSON.stringify(opts)}`);
+		}
+	}
+	golden("emblem-shapes.svg", sheet.svg);
 });
 
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {

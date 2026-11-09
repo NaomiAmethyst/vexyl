@@ -409,6 +409,11 @@ interface ChargeMark {
 	name: string;
 	/** Says it's a point that something comes from, such as rays, rather than a charge. */
 	point?: boolean;
+	/**
+	 * Says it's measured in a slanting frame of its own, and not from the flag's edges, so that `x`
+	 * and `y` are only where it's drawn.
+	 */
+	free?: boolean;
 }
 
 interface SaltireMark {
@@ -1333,9 +1338,17 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
 	const covers: { x0: Fraction; x1: Fraction; y0: Fraction; y1: Fraction }[] = [];
 	let detail: { c: ChargeLayer; copies: XY[]; size: XY } | null = null;
 	const breaks: Fraction[] = [];
+	// A clip or cut is a shape in the emblem's frame, measured as one, with its outline drawn dashed.
+	const cutout = (c: ChargeLayer, s: Shape, clip: boolean): void => {
+		const kind = kindWords[s.kind] ?? s.kind;
+		const a = /^[aeiou]/.test(kind) ? "an" : "a";
+		m.notes.push(() => (clip ? `The ${describe(c)} keeps only what’s inside its clip, ${a} ${kind}, drawn dashed.` : `The ${describe(c)} has ${a} ${kind} cut out of it, drawn dashed${c.repeat !== undefined || (c.shape.ats?.length ?? 0) > 1 ? ", and so does each of its copies" : ""}.`));
+		emblemShape(s, `${clip ? "clip on" : "cut in"} the ${describe(c)}`, undefined, frame, name, m);
+		m.guides.push(...outlineOf(s, { x: zero, y: zero }, { x: zero, y: zero }, null).map((g) => g.map((q) => apply(frame, q))));
+	};
 	for (const c of l.charges) {
 		if (c.clip !== undefined) {
-			skip(m, `the clip on the ${describe(c)}`);
+			cutout(c, c.clip, true);
 		}
 		if (c.fimbriate !== undefined) {
 			// Measured on the first copy, in the emblem's frame, and drawn where that is on the flag.
@@ -1346,7 +1359,10 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
 		const size = halfSize(c.shape);
 		const copies = copiesOf(c);
 		if (size === null || copies === null) {
-			skip(m, `the ${describe(c)} in the ${name}`);
+			emblemShape(c.shape, describe(c), c, frame, name, m);
+			for (const cut of c.cuts) {
+				cutout(c, cut, false);
+			}
 			continue;
 		}
 		// A charge's copies are one group, as a trigram's bars are, which the detail measures one by one.
@@ -1364,7 +1380,7 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
 					breaks.push(long);
 				}
 			} else {
-				skip(m, `the cut in the ${describe(c)}`);
+				cutout(c, cut, false);
 			}
 		}
 	}
@@ -1424,6 +1440,71 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
 	if (detail !== null) {
 		emblemDetail(detail.c, detail.copies, detail.size, frame, name, m);
 	}
+}
+
+/**
+ * A shape in a slanting emblem that isn't one of its groups, such as a star, a sun, a ring, a turned
+ * shape or a ring of copies, or a clip or cut: its center marked +, its size beside it, and where it
+ * is in the emblem's frame, along the axis from the origin and across it, on a row of its own.
+ */
+function emblemShape(s: Shape, name: string, c: ChargeLayer | undefined, frame: Affine, emblem: string, m: Measured): void {
+	if (m.charges.length >= mostCharges) {
+		m.extra++;
+		return;
+	}
+	let p: XY;
+	let size: ((t: Format) => string) | undefined;
+	let reach: { x: number; y: number };
+	let circle: number | undefined;
+	if (s.kind === "polygon") {
+		const xs = s.vertices.map((v) => exactOf(v.fly));
+		const ys = s.vertices.map((v) => exactOf(v.hoist));
+		const lo = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) <= 0 ? a : b));
+		const hi = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) >= 0 ? a : b));
+		const [w, h] = [minus(hi(xs), lo(xs)), minus(hi(ys), lo(ys))];
+		p = { x: plus(lo(xs), half(w)), y: plus(lo(ys), half(h)) };
+		size = (t) => `box ${t(w)} × ${t(h)}`;
+		reach = { x: toNumber(w) / 2, y: toNumber(h) / 2 };
+	} else {
+		const first = s.ats?.[0] ?? s.at;
+		p = first !== undefined && first !== null ? point(first) : { x: zero, y: zero };
+		({ size, reach, circle } = sizeOf(s, null));
+	}
+	// Its reach in the flag's directions, which the frame turns, so as far as it reaches any way.
+	const d = Math.hypot(reach.x, reach.y);
+	const at = apply(frame, vec(p));
+	m.charges.push({ x: exactOf(at.x), y: exactOf(at.y), at, reach: { x: d, y: d }, ...(circle !== undefined ? { circle } : {}), ...(size !== undefined ? { size } : {}), name, free: true });
+	if (circle !== undefined) {
+		m.circles = true;
+	}
+	if (s.rotate !== 0 && s.kind !== "polygon") {
+		m.turned.add(`The ${name} is turned ${s.rotate}° within the ${emblem}.`);
+	}
+	const rep = c?.repeat;
+	if (c !== undefined && rep !== undefined && rep.kind !== "grid") {
+		const many = `${rep.count} ${plural(rep.count, named(c.color, kindWords[s.kind] ?? s.kind))}`;
+		const radius = rep.kind !== "line" ? exactOf(rep.radius) : zero;
+		const turn = rep.kind !== "line" && rep.turn ? ", turned with it" : "";
+		m.notes.push((t) => rep.kind === "ring" ? `${many} in a ring of radius ${t(radius)} around the center marked +, starting at the top of the frame of the ${emblem}${turn}.` : rep.kind === "arc" ? `${many} on an arc of radius ${t(radius)} around the center marked +, from ${rep.from}° to ${rep.to}° clockwise from the top of the frame of the ${emblem}${turn}.` : `${many} in a line, each ${t(exactOf(rep.fly))} along the axis of the ${emblem} and ${t(exactOf(rep.hoist))} across it from the one before. The first is measured.`);
+	}
+	if ((s.ats?.length ?? 0) > 1) {
+		m.notes.push(() => `${s.ats!.length} ${plural(s.ats!.length, named(c?.color, kindWords[s.kind] ?? s.kind))} at the places the file lists in the ${emblem}, of which the first is measured.`);
+	}
+	// Where it is: along the axis from the origin, and across it there.
+	if (p.x.n === 0n && p.y.n === 0n) {
+		m.notes.push(() => `The ${name} is at the origin of the ${emblem}.`);
+		return;
+	}
+	const stops = compare(p.x, zero) < 0 ? [p.x, zero] : [zero, p.x];
+	const [y0, y1] = compare(p.y, zero) < 0 ? [p.y, zero] : [zero, p.y];
+	m.rows.push({
+		frame,
+		stops: p.x.n === 0n ? [zero] : stops,
+		reach: 0,
+		...(p.y.n !== 0n ? { across: { at: toNumber(p.x), from: y0, to: y1 } } : {}),
+		fallback: (t) => `The ${name} is ${t(p.x)} along the axis of the ${emblem} from its origin, and ${t(p.y)} across it, as the file gives them.`,
+	});
+	m.slanting = true;
 }
 
 /** The detail of a repeated charge in an emblem's frame: its copies' widths and the gaps between them, its length, and any break a cut makes. */
@@ -2931,8 +3012,9 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 				}
 			});
 		};
-		chain([...m.flyParts, ...m.charges.map((c) => c.x)], F);
-		chain([...m.hoistParts, ...m.charges.map((c) => c.y)], H);
+		const edged = m.charges.filter((c) => c.free !== true);
+		chain([...m.flyParts, ...edged.map((c) => c.x)], F);
+		chain([...m.hoistParts, ...edged.map((c) => c.y)], H);
 		for (const c of m.charges) {
 			c.size?.(f);
 		}
@@ -3125,8 +3207,8 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 			ords[along][cat] = stops.map((p) => ({ p: at(along, p), text: t(p), end: toNumber(p) }));
 		};
 		if (showPositions) {
-			chain("fly", 0, m.charges.filter((c) => compare(c.x, F) <= 0).map((c) => c.x), null);
-			chain("hoist", 0, m.charges.filter((c) => compare(c.y, H) <= 0).map((c) => c.y), null);
+			chain("fly", 0, m.charges.filter((c) => c.free !== true && compare(c.x, F) <= 0).map((c) => c.x), null);
+			chain("hoist", 0, m.charges.filter((c) => c.free !== true && compare(c.y, H) <= 0).map((c) => c.y), null);
 		}
 		if (showSizes) {
 			if (m.flyParts.some((p) => compare(p, zero) > 0 && compare(p, F) < 0)) {
@@ -3375,9 +3457,12 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 				const len = Math.hypot(at.x - q.x, at.y - q.y);
 				return len <= 8 ? q : { x: at.x + ((q.x - at.x) * 8) / len, y: at.y + ((q.y - at.y) * 8) / len };
 			};
-			const lines = [place.at({ x, y: 0 }), place.at({ x: 0, y })].map((q) => straight(q, short(q))).join("");
-			onFlag.push(`<path d="${lines}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
-			halo.push(lines);
+			// One measured in a slanting frame has its row instead.
+			if (c.free !== true) {
+				const lines = [place.at({ x, y: 0 }), place.at({ x: 0, y })].map((q) => straight(q, short(q))).join("");
+				onFlag.push(`<path d="${lines}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
+				halo.push(lines);
+			}
 			const plusMark = `M${num(at.x - 6)} ${num(at.y)}H${num(at.x + 6)}M${num(at.x)} ${num(at.y - 6)}V${num(at.y + 6)}`;
 			halo.push(plusMark);
 			onFlag.push(`<path d="${plusMark}" stroke="${theme.onFlag}" stroke-width="1.5"/>`);

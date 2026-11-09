@@ -1,0 +1,61 @@
+// Not a real flag: an emblem along the bend holding shapes that aren't level boxes, a star, a ring
+// of discs, a turned rect, a sun and a polygon, and a turned emblem with a cut star.
+vexyl 1
+meta {
+  name "Shapes in an emblem"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+  gold "#f2c300"
+}
+proportion hoist=40 fly=60
+
+field blue
+emblem {
+  along bend
+  charge star gold {
+    radius 4
+    at fly=-20 hoist=0
+  }
+  charge disc white {
+    radius 1
+    repeat ring count=6 radius=5
+  }
+  charge rect red {
+    fly 6
+    hoist 3
+    rotate 30
+    at fly=18 hoist=4
+  }
+  charge sun gold {
+    radius 3
+    disc 1.5
+    at fly=10 hoist=-8
+  }
+  charge polygon white {
+    point fly=-8 hoist=6
+    point fly=-4 hoist=6
+    point fly=-6 hoist=10
+  }
+}
+
+variant turned {
+  field blue
+  emblem {
+    at fly=20 hoist=20
+    rotate 15
+    charge star white {
+      radius 6
+      at fly=10 hoist=0
+      cut {
+        disc {
+          radius 2
+          at fly=10 hoist=0
+        }
+      }
+    }
+  }
+}

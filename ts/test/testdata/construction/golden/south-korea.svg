@@ -64,9 +64,13 @@
 <path d="M251.484252 175V148M659.035433 175V148M246.484252 180H219.484252M246.484252 451.700787H219.484252" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
 <text x="455.259843" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">144</text>
 <text x="217.484252" y="315.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 217.484252 315.850394)">96</text>
-<path d="M251.484252 180L659.035433 451.700787M251.484252 451.700787L659.035433 180" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
-<path d="M251.484252 180L659.035433 451.700787M251.484252 451.700787L659.035433 180" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>
-<path d="M501.813166 246.020409L624.267056 327.656336M499.039665 250.18066L504.586667 241.860157M555.556845 287.85878L561.103847 279.538278M583.815435 306.69784L589.362437 298.377338M621.493555 331.816587L627.040557 323.496084M609.865597 378.102934L572.187477 434.620114M605.705346 375.329433L614.025849 380.876435M568.027226 431.846613L576.347729 437.393615M427.545579 274.278999L549.999469 192.643072M430.31908 278.43925L424.772078 270.118748M515.09485 221.92207L509.547848 213.601567M552.77297 196.803324L547.225968 188.482821M572.187477 197.080674L609.865597 253.597854M568.027226 199.854175L576.347729 194.307173M605.705346 256.371355L614.025849 250.824353M455.259843 315.850394L499.039665 250.18066M511.777023 353.528514L555.556845 287.85878M540.035613 372.367574L583.815435 306.69784M577.713733 397.48632L621.493555 331.816587M596.552793 369.22773L609.865597 378.102934M558.874673 425.74491L572.187477 434.620114M455.259843 315.850394L430.31908 278.43925M540.035613 259.333214L515.09485 221.92207M577.713733 234.214467L552.77297 196.803324M558.874673 205.955877L572.187477 197.080674M596.552793 262.473057L609.865597 253.597854" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M251.484252 180L659.035433 451.700787M436.420783 221.655094L549.455143 297.011334L511.777023 353.528514L398.742662 278.172274L436.420783 221.655094M251.484252 451.700787L659.035433 180" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+<path d="M251.484252 180L659.035433 451.700787M436.420783 221.655094L549.455143 297.011334L511.777023 353.528514L398.742662 278.172274L436.420783 221.655094M251.484252 451.700787L659.035433 180" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>
+<path d="M468.098903 287.591804H480.098903M474.098903 281.591804V293.591804M460.786098 278.716601L441.947038 306.975191M464.946349 281.490102L456.625846 275.9431M446.107289 309.748692L437.786786 304.20169M501.813166 246.020409L624.267056 327.656336M499.039665 250.18066L504.586667 241.860157M555.556845 287.85878L561.103847 279.538278M583.815435 306.69784L589.362437 298.377338M621.493555 331.816587L627.040557 323.496084M609.865597 378.102934L572.187477 434.620114M605.705346 375.329433L614.025849 380.876435M568.027226 431.846613L576.347729 437.393615M427.545579 274.278999L549.999469 192.643072M430.31908 278.43925L424.772078 270.118748M515.09485 221.92207L509.547848 213.601567M552.77297 196.803324L547.225968 188.482821M572.187477 197.080674L609.865597 253.597854M568.027226 199.854175L576.347729 194.307173M605.705346 256.371355L614.025849 250.824353M474.098903 287.591804L460.786098 278.716601M455.259843 315.850394L441.947038 306.975191M455.259843 315.850394L499.039665 250.18066M511.777023 353.528514L555.556845 287.85878M540.035613 372.367574L583.815435 306.69784M577.713733 397.48632L621.493555 331.816587M596.552793 369.22773L609.865597 378.102934M558.874673 425.74491L572.187477 434.620114M455.259843 315.850394L430.31908 278.43925M540.035613 259.333214L515.09485 221.92207M577.713733 234.214467L552.77297 196.803324M558.874673 205.955877L572.187477 197.080674M596.552793 262.473057L609.865597 253.597854" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M468.098903 287.591804H480.098903M474.098903 281.591804V293.591804" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M460.786098 278.716601L441.947038 306.975191" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M464.946349 281.490102L456.625846 275.9431" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M446.107289 309.748692L437.786786 304.20169" fill="none" stroke="#1c1b22" stroke-width="1"/>
 <path d="M501.813166 246.020409L624.267056 327.656336" fill="none" stroke="#1c1b22" stroke-width="1"/>
 <path d="M499.039665 250.18066L504.586667 241.860157" fill="none" stroke="#1c1b22" stroke-width="1"/>
 <path d="M555.556845 287.85878L561.103847 279.538278" fill="none" stroke="#1c1b22" stroke-width="1"/>
@@ -82,6 +86,8 @@
 <path d="M572.187477 197.080674L609.865597 253.597854" fill="none" stroke="#1c1b22" stroke-width="1"/>
 <path d="M568.027226 199.854175L576.347729 194.307173" fill="none" stroke="#1c1b22" stroke-width="1"/>
 <path d="M605.705346 256.371355L614.025849 250.824353" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M474.098903 287.591804L460.786098 278.716601" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M455.259843 315.850394L441.947038 306.975191" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
 <path d="M455.259843 315.850394L499.039665 250.18066" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
 <path d="M511.777023 353.528514L555.556845 287.85878" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
 <path d="M540.035613 372.367574L583.815435 306.69784" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
@@ -94,6 +100,9 @@
 <path d="M558.874673 205.955877L572.187477 197.080674" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
 <path d="M596.552793 262.473057L609.865597 253.597854" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
 <path d="M251.484252 154H659.035433M251.484252 148V160M659.035433 148V160M225.484252 180V451.700787M219.484252 180H231.484252M219.484252 451.700787H231.484252" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="446.898903" y="367.534482" width="54.4" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="474.098903" y="378.034482" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">48 × 24</text>
+<text x="443.046065" y="291.498894" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-56.309932 443.046065 287.298894)">12</text>
 <text x="535.618758" y="260.738966" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(33.690068 535.618758 256.538966)">24</text>
 <text x="578.006643" y="288.997556" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(33.690068 578.006643 284.797556)">12</text>
 <text x="610.974998" y="310.976459" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(33.690068 610.974998 306.776459)">16</text>
@@ -101,11 +110,11 @@
 <text x="464.386462" y="241.899906" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-33.690068 464.386462 237.699906)">36</text>
 <text x="525.613407" y="201.081943" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-33.690068 525.613407 196.881943)">16</text>
 <text x="599.34704" y="223.992262" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(56.309932 599.34704 219.792262)">24</text>
-<text x="40" y="477.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The cuts in the emblem along the bend are breaks across the charges, 2 long.</text>
-<text x="40" y="497.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The cuts in the emblem along the bend sinister are breaks across the charges, 2</text>
-<text x="40" y="513.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">long.</text>
-<text x="40" y="533.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">Sizes along a slanting axis are measured along it, and across it square to it.</text>
-<text x="40" y="553.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the clip on the red disc.</text>
+<text x="40" y="477.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The red disc keeps only what’s inside its clip, a rect, drawn dashed.</text>
+<text x="40" y="497.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The cuts in the emblem along the bend are breaks across the charges, 2 long.</text>
+<text x="40" y="517.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The cuts in the emblem along the bend sinister are breaks across the charges, 2</text>
+<text x="40" y="533.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">long.</text>
+<text x="40" y="553.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">Sizes along a slanting axis are measured along it, and across it square to it.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
 <circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
 <text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
@@ -205,6 +214,6 @@
 <text x="562.519685" y="671.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">along the bend, turned level: each 4 by</text>
 <text x="562.519685" y="687.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">24, 2 apart, broken by a gap 2 long.</text>
 <path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
-<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The clip on the red disc’s center is marked +.</text>
 <text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/south-korea.kdl · Vexyl 1</text>
 </svg>
