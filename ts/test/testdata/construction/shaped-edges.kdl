@@ -1,0 +1,31 @@
+// Not a real flag: wavy edges between bars, a zigzag one along the bend, and a fly panel's wave.
+vexyl 1
+meta {
+  name "Shaped edges"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+  gold "#f2c300"
+}
+proportion hoist=20 fly=30
+
+bars blue white blue {
+  ratio 2 1 2
+  edge wavy depth=1.5 period=6
+}
+panel {
+  side fly
+  width 6
+  edge wavy depth=2 count=4
+  field gold
+}
+
+variant bend {
+  bars white red {
+    along bend
+    edge zigzag depth=2 count=7
+  }
+}

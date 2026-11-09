@@ -13,7 +13,7 @@ import { resolve } from "./adapt.js";
 import { axis } from "./geometry.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Repeat, Shape } from "./types.js";
+import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Repeat, Shape, ShapedEdge } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -723,6 +723,111 @@ function lineIn(p: Vec, dir: Vec, f: Frame): Vec[] {
 }
 
 /**
+ * A straight dimension on the flag between two of its points, in grid units, with ticks square to
+ * it, and its label past either end or beside its middle, on the side of the flag's direction
+ * `prefer` first if it's one. `dashed` are construction lines drawn with it. It's left for the
+ * notes if its label has no room.
+ */
+function lineMark(m: Measured, a: Vec, b: Vec, text: (t: Format) => string, fallback: (text: string) => string, prefer: "beyond" | Vec, dashed: Vec[][] = []): void {
+	m.marks.push({
+		text,
+		fallback,
+		options: (p, tw, th) => {
+			const [pa, pb] = [p.at(a), p.at(b)];
+			const len = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+			if (!(len > 1e-9)) {
+				return [];
+			}
+			const d = { x: (pb.x - pa.x) / len, y: (pb.y - pa.y) / len };
+			let n = { x: -d.y, y: d.x };
+			if (prefer !== "beyond") {
+				const w = p.way(prefer);
+				if (w.x * n.x + w.y * n.y < 0) {
+					n = { x: -n.x, y: -n.y };
+				}
+			}
+			const tick = (q: Vec): Vec[] => [{ x: q.x - n.x * 5, y: q.y - n.y * 5 }, { x: q.x + n.x * 5, y: q.y + n.y * 5 }];
+			const mid = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
+			const beside = (g: number): Box[] => [spotAt(mid, n, tw, th, g), spotAt(mid, { x: -n.x, y: -n.y }, tw, th, g)];
+			const beyond = (g: number): Box[] => [spotAt(pb, d, tw, th, g), spotAt(pa, { x: -d.x, y: -d.y }, tw, th, g)];
+			const spots = [6, 14, 28].flatMap((g) => (prefer === "beyond" ? [...beyond(g), ...beside(g)] : [...beside(g), ...beyond(g)]));
+			return [{ solid: [[pa, pb], tick(pa), tick(pb)], dashed: dashed.map((l) => l.map(p.at)), spots }];
+		},
+	});
+}
+
+/**
+ * A shaped edge: one period near its middle, on the flag, with its depth across it from extreme to
+ * extreme, and its period along it, between two of the extremes on the side it starts on, and the
+ * notes say how many periods there are and where it starts. `at` gives the point `s` along the edge
+ * and `off` across it, toward its positive side, from where a straight edge would be, in grid
+ * units. `span` is the edge's length exactly, or null if it's a diagonal's, which no fraction says.
+ */
+function shapedEdge(m: Measured, e: ShapedEdge, what: string, span: Fraction | null, length: number, at: (s: number, off: number) => Vec, start: string, side: string): void {
+	const depth = exactOf(e.depth);
+	const counted = e.count !== undefined && e.count > 0;
+	const period = counted ? (span !== null ? over(span, fraction(BigInt(e.count!))) : null) : exactOf(e.period ?? 0);
+	const p = period !== null ? toNumber(period) : length / e.count!;
+	const d = e.depth / 2;
+	const how = e.kind === "zigzag" ? `with a point toward ${side}` : `at its middle, heading away from ${side}`;
+	const along = (t: Format): string => (span !== null ? `its ${t(span)}` : "the diagonal");
+	m.notes.push((t) => `The ${what} is centered on where a straight edge would be, and ${counted ? `has ${e.count} periods along ${along(t)}` : `repeats along ${along(t)}`}. It starts at ${start}, ${how}.`);
+	// The extremes on the side it starts on are at the start of each period for a zigzag, and a
+	// quarter of one before it for a wave. The period measured is the middle one of those that fit.
+	const phase = e.kind === "zigzag" ? 0 : 0.75 * p;
+	const fit = Math.floor((length - phase - p) / p + 1e-9);
+	if (!(p > 0) || fit < 0) {
+		m.notes.push((t) => `The ${what} is ${t(depth)} deep, from one extreme to the other.`);
+		return;
+	}
+	const sa = phase + Math.floor(fit / 2) * p;
+	const guides = [-d, d].map((off) => [at(sa, off), at(sa + p, off)]);
+	lineMark(m, at(sa + p / 2, -d), at(sa + p / 2, d), (t) => t(depth), (text) => `The ${what} is ${text} deep, from one extreme to the other.`, "beyond", guides);
+	if (period !== null) {
+		// Its label away from the edge, where the depth isn't.
+		const away = { x: at(sa, -d - 1).x - at(sa, -d).x, y: at(sa, -d - 1).y - at(sa, -d).y };
+		lineMark(m, at(sa, -d), at(sa + p, -d), (t) => t(period), (text) => `Each period of the ${what} is ${text} long.`, away);
+	} else {
+		m.notes.push(() => `Its period is the diagonal’s length divided by ${e.count}.`);
+	}
+}
+
+/** A shaped edge between bars, measured on the first of them, and the rest are the same. */
+function barsEdge(l: BarsLayer, f: Frame, m: Measured): void {
+	const e = l.edge!;
+	const r = { w: toNumber(f.w), h: toNumber(f.h) };
+	const { dir, normal } = axis(r, l.along, l.rotate);
+	const c = { x: toNumber(f.x) + r.w / 2, y: toNumber(f.y) + r.h / 2 };
+	const offsets = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => ((x! * r.w) / 2) * normal.x + ((y! * r.h) / 2) * normal.y);
+	const lo = Math.min(...offsets);
+	const hi = Math.max(...offsets);
+	const total = l.ratio.reduce((a, b) => a + b, 0);
+	const t = lo + ((hi - lo) * l.ratio[0]!) / total;
+	const span = l.along === "fly" ? f.w : l.along === "hoist" ? f.h : null;
+	const length = span !== null ? toNumber(span) : Math.hypot(r.w, r.h);
+	const at = (s: number, off: number): Vec => ({ x: c.x - (dir.x * length) / 2 + dir.x * s + normal.x * (t + off), y: c.y - (dir.y * length) / 2 + dir.y * s + normal.y * (t + off) });
+	const ends: Record<Axis, string> = { fly: "the hoist", hoist: "the top", bend: "the upper hoist corner", "bend-sinister": "the lower hoist corner" };
+	const begins = l.rotate !== 0 ? `its first end, which is ${ends[l.along]} before the bars are turned` : ends[l.along];
+	const name = l.colors.length > 2 ? `${e.kind} edge between the first two bars, and each of the others,` : `${e.kind} edge between the bars`;
+	shapedEdge(m, e, name, span, length, at, begins, "the bar listed before it");
+}
+
+/** A side panel's shaped edge, along its inner side. */
+function panelEdgeMark(p: PanelLayer, f: Frame, m: Measured): void {
+	const e = p.edge!;
+	const width = toNumber(exactOf(p.width ?? 0));
+	const [x0, y0, w, h] = [toNumber(f.x), toNumber(f.y), toNumber(f.w), toNumber(f.h)];
+	const ways: Record<EdgeName, { span: Fraction; at: (s: number, off: number) => Vec; start: string }> = {
+		hoist: { span: f.h, at: (s, off) => ({ x: x0 + width + off, y: y0 + s }), start: "the top" },
+		fly: { span: f.h, at: (s, off) => ({ x: x0 + w - width - off, y: y0 + s }), start: "the top" },
+		top: { span: f.w, at: (s, off) => ({ x: x0 + s, y: y0 + width + off }), start: "the hoist" },
+		bottom: { span: f.w, at: (s, off) => ({ x: x0 + s, y: y0 + h - width - off }), start: "the hoist" },
+	};
+	const way = ways[p.side!];
+	shapedEdge(m, e, `${e.kind} edge of the ${describe(p)}`, way.span, toNumber(way.span), way.at, way.start, `the ${describe(p)}`);
+}
+
+/**
  * Bars along a bend, or turned: their widths are shares of the width across them all, which runs
  * corner to corner and is seldom a grid size, so the notes give the shares, exactly as the file does.
  */
@@ -733,7 +838,7 @@ function slantBars(l: BarsLayer, f: Frame, m: Measured): void {
 	const shares = l.ratio.map((r) => decimal(exactOf(r), placesOf(exactOf(r)) ?? 4)).join(" : ");
 	m.notes.push(() => `The ${l.colors.length} bars ${what} share the width across them, square to their axis, as ${shares}, from the one ${l.rotate === 0 && l.along === "bend-sinister" ? "nearest the upper hoist" : "listed first"}.`);
 	if (l.edge !== undefined) {
-		skip(m, `the ${l.edge.kind} edges between the bars`);
+		barsEdge(l, f, m);
 	}
 }
 
@@ -982,7 +1087,7 @@ function bars(l: BarsLayer, f: Frame, m: Measured): void {
 		part(m, across, plus(start, times(span, over(run, total))));
 	}
 	if (l.edge !== undefined) {
-		skip(m, `the ${l.edge.kind} edges between the bars`);
+		barsEdge(l, f, m);
 	}
 }
 
@@ -1243,7 +1348,7 @@ function panel(p: PanelLayer, f: Frame, m: Measured): void {
 	part(m, "hoist", drawn.y);
 	part(m, "hoist", plus(drawn.y, drawn.h));
 	if (p.edge !== undefined) {
-		skip(m, `the ${p.edge.kind} edge of the ${describe(p)}`);
+		panelEdgeMark(p, f, m);
 	}
 	walk(p.layers, region, m);
 }

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Shaped edges: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Shaped edges</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 20 × 30</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="140.484252" y="180" width="629.551181" height="419.700787" viewBox="0 0 30 20" overflow="hidden">
+  <title>Shaped edges</title>
+  <clipPath id="vx-4280885a2d9652fa-cs-f-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-4280885a2d9652fa-cs-f-flag1)">
+    <polygon points="-21.055513,-2.5 51.055513,-2.5 51.055513,22.5 -21.055513,22.5" fill="#0055a4"/>
+    <polygon points="-21.055513,8 0,8 0.25,8.194114 0.5,8.375 0.75,8.53033 1,8.649519 1.25,8.724444 1.5,8.75 1.75,8.724444 2,8.649519 2.25,8.53033 2.5,8.375 2.75,8.194114 3,8 3.25,7.805886 3.5,7.625 3.75,7.46967 4,7.350481 4.25,7.275556 4.5,7.25 4.75,7.275556 5,7.350481 5.25,7.46967 5.5,7.625 5.75,7.805886 6,8 6.25,8.194114 6.5,8.375 6.75,8.53033 7,8.649519 7.25,8.724444 7.5,8.75 7.75,8.724444 8,8.649519 8.25,8.53033 8.5,8.375 8.75,8.194114 9,8 9.25,7.805886 9.5,7.625 9.75,7.46967 10,7.350481 10.25,7.275556 10.5,7.25 10.75,7.275556 11,7.350481 11.25,7.46967 11.5,7.625 11.75,7.805886 12,8 12.25,8.194114 12.5,8.375 12.75,8.53033 13,8.649519 13.25,8.724444 13.5,8.75 13.75,8.724444 14,8.649519 14.25,8.53033 14.5,8.375 14.75,8.194114 15,8 15.25,7.805886 15.5,7.625 15.75,7.46967 16,7.350481 16.25,7.275556 16.5,7.25 16.75,7.275556 17,7.350481 17.25,7.46967 17.5,7.625 17.75,7.805886 18,8 18.25,8.194114 18.5,8.375 18.75,8.53033 19,8.649519 19.25,8.724444 19.5,8.75 19.75,8.724444 20,8.649519 20.25,8.53033 20.5,8.375 20.75,8.194114 21,8 21.25,7.805886 21.5,7.625 21.75,7.46967 22,7.350481 22.25,7.275556 22.5,7.25 22.75,7.275556 23,7.350481 23.25,7.46967 23.5,7.625 23.75,7.805886 24,8 24.25,8.194114 24.5,8.375 24.75,8.53033 25,8.649519 25.25,8.724444 25.5,8.75 25.75,8.724444 26,8.649519 26.25,8.53033 26.5,8.375 26.75,8.194114 27,8 27.25,7.805886 27.5,7.625 27.75,7.46967 28,7.350481 28.25,7.275556 28.5,7.25 28.75,7.275556 29,7.350481 29.25,7.46967 29.5,7.625 29.75,7.805886 30,8 51.055513,8 51.055513,22.5 -21.055513,22.5" fill="#ffffff"/>
+    <polygon points="-21.055513,12 0,12 0.25,12.194114 0.5,12.375 0.75,12.53033 1,12.649519 1.25,12.724444 1.5,12.75 1.75,12.724444 2,12.649519 2.25,12.53033 2.5,12.375 2.75,12.194114 3,12 3.25,11.805886 3.5,11.625 3.75,11.46967 4,11.350481 4.25,11.275556 4.5,11.25 4.75,11.275556 5,11.350481 5.25,11.46967 5.5,11.625 5.75,11.805886 6,12 6.25,12.194114 6.5,12.375 6.75,12.53033 7,12.649519 7.25,12.724444 7.5,12.75 7.75,12.724444 8,12.649519 8.25,12.53033 8.5,12.375 8.75,12.194114 9,12 9.25,11.805886 9.5,11.625 9.75,11.46967 10,11.350481 10.25,11.275556 10.5,11.25 10.75,11.275556 11,11.350481 11.25,11.46967 11.5,11.625 11.75,11.805886 12,12 12.25,12.194114 12.5,12.375 12.75,12.53033 13,12.649519 13.25,12.724444 13.5,12.75 13.75,12.724444 14,12.649519 14.25,12.53033 14.5,12.375 14.75,12.194114 15,12 15.25,11.805886 15.5,11.625 15.75,11.46967 16,11.350481 16.25,11.275556 16.5,11.25 16.75,11.275556 17,11.350481 17.25,11.46967 17.5,11.625 17.75,11.805886 18,12 18.25,12.194114 18.5,12.375 18.75,12.53033 19,12.649519 19.25,12.724444 19.5,12.75 19.75,12.724444 20,12.649519 20.25,12.53033 20.5,12.375 20.75,12.194114 21,12 21.25,11.805886 21.5,11.625 21.75,11.46967 22,11.350481 22.25,11.275556 22.5,11.25 22.75,11.275556 23,11.350481 23.25,11.46967 23.5,11.625 23.75,11.805886 24,12 24.25,12.194114 24.5,12.375 24.75,12.53033 25,12.649519 25.25,12.724444 25.5,12.75 25.75,12.724444 26,12.649519 26.25,12.53033 26.5,12.375 26.75,12.194114 27,12 27.25,11.805886 27.5,11.625 27.75,11.46967 28,11.350481 28.25,11.275556 28.5,11.25 28.75,11.275556 29,11.350481 29.25,11.46967 29.5,11.625 29.75,11.805886 30,12 51.055513,12 51.055513,22.5 -21.055513,22.5" fill="#0055a4"/>
+    <clipPath id="vx-4280885a2d9652fa-cs-f-panel2">
+      <polygon points="7,0 1,0 0.741181,0.208333 0.5,0.416667 0.292893,0.625 0.133975,0.833333 0.034074,1.041667 0,1.25 0.034074,1.458333 0.133975,1.666667 0.292893,1.875 0.5,2.083333 0.741181,2.291667 1,2.5 1.258819,2.708333 1.5,2.916667 1.707107,3.125 1.866025,3.333333 1.965926,3.541667 2,3.75 1.965926,3.958333 1.866025,4.166667 1.707107,4.375 1.5,4.583333 1.258819,4.791667 1,5 0.741181,5.208333 0.5,5.416667 0.292893,5.625 0.133975,5.833333 0.034074,6.041667 0,6.25 0.034074,6.458333 0.133975,6.666667 0.292893,6.875 0.5,7.083333 0.741181,7.291667 1,7.5 1.258819,7.708333 1.5,7.916667 1.707107,8.125 1.866025,8.333333 1.965926,8.541667 2,8.75 1.965926,8.958333 1.866025,9.166667 1.707107,9.375 1.5,9.583333 1.258819,9.791667 1,10 0.741181,10.208333 0.5,10.416667 0.292893,10.625 0.133975,10.833333 0.034074,11.041667 0,11.25 0.034074,11.458333 0.133975,11.666667 0.292893,11.875 0.5,12.083333 0.741181,12.291667 1,12.5 1.258819,12.708333 1.5,12.916667 1.707107,13.125 1.866025,13.333333 1.965926,13.541667 2,13.75 1.965926,13.958333 1.866025,14.166667 1.707107,14.375 1.5,14.583333 1.258819,14.791667 1,15 0.741181,15.208333 0.5,15.416667 0.292893,15.625 0.133975,15.833333 0.034074,16.041667 0,16.25 0.034074,16.458333 0.133975,16.666667 0.292893,16.875 0.5,17.083333 0.741181,17.291667 1,17.5 1.258819,17.708333 1.5,17.916667 1.707107,18.125 1.866025,18.333333 1.965926,18.541667 2,18.75 1.965926,18.958333 1.866025,19.166667 1.707107,19.375 1.5,19.583333 1.258819,19.791667 1,20 7,20"/>
+    </clipPath>
+    <g transform="translate(23 0)" clip-path="url(#vx-4280885a2d9652fa-cs-f-panel2)" style="isolation:isolate">
+      <polygon points="0,0 7,0 7,20 0,20" fill="#f2c300"/>
+    </g>
+  </g>
+</svg>
+<rect x="140.484252" y="180" width="629.551181" height="419.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M140.484252 175V122M644.125197 175V148M770.035433 175V122M135.484252 180H82.484252M135.484252 347.880315H108.484252M135.484252 431.820472H108.484252M135.484252 599.700787H82.484252" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="392.304724" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">24</text>
+<text x="707.080315" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">6</text>
+<text x="455.259843" y="120" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">30</text>
+<text x="106.484252" y="263.940157" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 106.484252 263.940157)">8</text>
+<text x="106.484252" y="389.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 106.484252 389.850394)">4</text>
+<text x="106.484252" y="515.76063" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 106.484252 515.76063)">8</text>
+<text x="80.484252" y="389.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 80.484252 389.850394)">20</text>
+<path d="M423.782283 332.141535L423.782283 363.619094M428.782283 332.141535L418.782283 332.141535M428.782283 363.619094L418.782283 363.619094M360.827165 332.141535L486.737402 332.141535M360.827165 337.141535L360.827165 327.141535M486.737402 337.141535L486.737402 327.141535M665.110236 416.081693L623.140157 416.081693M665.110236 421.081693L665.110236 411.081693M623.140157 421.081693L623.140157 411.081693M665.110236 363.619094L665.110236 468.544291M660.110236 363.619094L670.110236 363.619094M660.110236 468.544291L670.110236 468.544291M360.827165 332.141535L486.737402 332.141535M360.827165 363.619094L486.737402 363.619094M665.110236 363.619094L665.110236 468.544291M623.140157 363.619094L623.140157 468.544291" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M423.782283 332.141535L423.782283 363.619094" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M428.782283 332.141535L418.782283 332.141535" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M428.782283 363.619094L418.782283 363.619094" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M360.827165 332.141535L486.737402 332.141535" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M360.827165 337.141535L360.827165 327.141535" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M486.737402 337.141535L486.737402 327.141535" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M665.110236 416.081693L623.140157 416.081693" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M665.110236 421.081693L665.110236 411.081693" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M623.140157 421.081693L623.140157 411.081693" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M665.110236 363.619094L665.110236 468.544291" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M660.110236 363.619094L670.110236 363.619094" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M660.110236 468.544291L670.110236 468.544291" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M360.827165 332.141535L486.737402 332.141535" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M360.827165 363.619094L486.737402 363.619094" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M665.110236 363.619094L665.110236 468.544291" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M623.140157 363.619094L623.140157 468.544291" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M140.484252 154H644.125197M140.484252 148V160M644.125197 148V160M644.125197 154H770.035433M644.125197 148V160M770.035433 148V160M140.484252 128H770.035433M140.484252 122V134M770.035433 122V134M114.484252 180V347.880315M108.484252 180H120.484252M108.484252 347.880315H120.484252M114.484252 347.880315V431.820472M108.484252 347.880315H120.484252M108.484252 431.820472H120.484252M114.484252 431.820472V599.700787M108.484252 431.820472H120.484252M108.484252 599.700787H120.484252M88.484252 180V599.700787M82.484252 180H94.484252M82.484252 599.700787H94.484252" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="410.982283" y="369.619094" width="25.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="423.782283" y="380.119094" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">1.5</text>
+<rect x="418.182283" y="312.141535" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="423.782283" y="322.641535" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">6</text>
+<rect x="607.940157" y="409.081693" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="613.540157" y="419.581693" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">2</text>
+<rect x="669.110236" y="409.081693" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="674.710236" y="419.581693" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">5</text>
+<text x="40" y="625.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The wavy edge between the first two bars, and each of the others, is centered on where a straight edge would be, and repeats</text>
+<text x="40" y="641.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">along its 30. It starts at the hoist, at its middle, heading away from the bar listed before it.</text>
+<text x="40" y="661.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The wavy edge of the panel is centered on where a straight edge would be, and has 4 periods along its 20. It starts at the top, at</text>
+<text x="40" y="677.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">its middle, heading away from the panel.</text>
+<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The bend variant has a sheet of its own.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="209" r="13" fill="#0055a4"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#0055a4</text>
+<circle cx="845.519685" cy="247" r="13" fill="#ef4135"/>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="248" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ef4135</text>
+<circle cx="845.519685" cy="285" r="13" fill="#f2c300"/>
+<text x="868.519685" y="286" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
+<text x="904.849985" y="286" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#f2c300</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">ts/test/testdata/construction/shaped-edges.kdl · Vexyl 1</text>
+</svg>

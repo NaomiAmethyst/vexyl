@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Shaped edges · bend: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Shaped edges · bend</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 20 × 30</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="128.484252" y="180" width="653.551181" height="435.700787" viewBox="0 0 30 20" overflow="hidden">
+  <title>Shaped edges</title>
+  <clipPath id="vx-4280885a2d9652fa-cs-f-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-4280885a2d9652fa-cs-f-flag1)">
+    <polygon points="-25.89487,6.342305 34.10513,46.342305 55.89487,13.657695 -4.10513,-26.342305" fill="#ffffff"/>
+    <polygon points="-15.5547,-9.16795 -0.5547,0.83205 2.697557,0.596521 3.731014,3.689193 6.983272,3.453664 8.016728,6.546336 11.268986,6.310807 12.302443,9.403479 15.5547,9.16795 16.588157,12.260622 19.840414,12.025093 20.873871,15.117765 24.126129,14.882235 25.159586,17.974907 28.411843,17.739378 29.4453,20.83205 44.4453,30.83205 55.89487,13.657695 -4.10513,-26.342305" fill="#ef4135"/>
+  </g>
+</svg>
+<rect x="128.484252" y="180" width="653.551181" height="435.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M128.484252 175V148M782.035433 175V148M123.484252 180H96.484252M123.484252 615.700787H96.484252" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="455.259843" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">30</text>
+<text x="94.484252" y="397.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 94.484252 397.850394)">20</text>
+<path d="M128.484252 180L782.035433 615.700787" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+<path d="M128.484252 180L782.035433 615.700787" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>
+<path d="M443.175677 415.976642L467.344008 379.724145M439.015425 413.203141L447.335928 418.750143M463.183757 376.950644L471.50426 382.497646M396.49345 384.855157L489.857904 447.098127M420.661781 348.60266L514.026235 410.84563" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M443.175677 415.976642L467.344008 379.724145" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M439.015425 413.203141L447.335928 418.750143" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M463.183757 376.950644L471.50426 382.497646" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M396.49345 384.855157L489.857904 447.098127" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M420.661781 348.60266L514.026235 410.84563" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M128.484252 154H782.035433M128.484252 148V160M782.035433 148V160M102.484252 180V615.700787M96.484252 180H108.484252M96.484252 615.700787H108.484252" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="469.410671" y="361.224151" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="475.010671" y="371.724151" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">2</text>
+<text x="40" y="641.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The 2 bars along the bend share the width across them, square to their axis, as 1 : 1, from the one listed first.</text>
+<text x="40" y="661.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The zigzag edge between the bars is centered on where a straight edge would be, and has 7 periods along the diagonal. It starts at</text>
+<text x="40" y="677.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">the upper hoist corner, with a point toward the bar listed before it.</text>
+<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">Its period is the diagonal’s length divided by 7.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="209" r="13" fill="#0055a4"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#0055a4</text>
+<circle cx="845.519685" cy="247" r="13" fill="#ef4135"/>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="248" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ef4135</text>
+<circle cx="845.519685" cy="285" r="13" fill="#f2c300"/>
+<text x="868.519685" y="286" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
+<text x="904.849985" y="286" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#f2c300</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">Vexyl 1</text>
+</svg>

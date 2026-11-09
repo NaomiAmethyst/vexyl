@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Bahrain: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Bahrain</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">3:5 · grid 12 × 20</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="112" y="211.894488" width="686.519685" height="411.911811" viewBox="0 0 20 12" overflow="hidden">
+  <title>Bahrain</title>
+  <clipPath id="vx-391460629578c187-cs-f-flag1">
+    <polygon points="0,0 20,0 20,12 0,12"/>
+  </clipPath>
+  <g clip-path="url(#vx-391460629578c187-cs-f-flag1)">
+    <polygon points="0,0 20,0 20,12 0,12" fill="#da291c"/>
+    <clipPath id="vx-391460629578c187-cs-f-panel2">
+      <polygon points="0,0 5,0 8,1.2 5,2.4 8,3.6 5,4.8 8,6 5,7.2 8,8.4 5,9.6 8,10.8 5,12 0,12"/>
+    </clipPath>
+    <g transform="translate(0 0)" clip-path="url(#vx-391460629578c187-cs-f-panel2)" style="isolation:isolate">
+      <polygon points="0,0 8,0 8,12 0,12" fill="#ffffff"/>
+    </g>
+  </g>
+</svg>
+<rect x="112" y="211.894488" width="686.519685" height="411.911811" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 206.894488V153.894488M335.118898 206.894488V179.894488M798.519685 206.894488V153.894488M107 211.894488H80M107 623.806299H80" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="223.559449" y="177.894488" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">6.5</text>
+<text x="566.819291" y="177.894488" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">13.5</text>
+<text x="455.259843" y="151.894488" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">20</text>
+<text x="78" y="417.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 417.850394)">12</text>
+<path d="M283.629921 417.850394L386.607874 417.850394M283.629921 412.850394L283.629921 422.850394M386.607874 412.850394L386.607874 422.850394M283.629921 376.659213L283.629921 459.041575M288.629921 376.659213L278.629921 376.659213M288.629921 459.041575L278.629921 459.041575M283.629921 376.659213L283.629921 459.041575M386.607874 376.659213L386.607874 459.041575" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M283.629921 417.850394L386.607874 417.850394" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M283.629921 412.850394L283.629921 422.850394" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M386.607874 412.850394L386.607874 422.850394" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M283.629921 376.659213L283.629921 459.041575" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M288.629921 376.659213L278.629921 376.659213" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M288.629921 459.041575L278.629921 459.041575" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M283.629921 376.659213L283.629921 459.041575" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M386.607874 376.659213L386.607874 459.041575" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M112 185.894488H335.118898M112 179.894488V191.894488M335.118898 179.894488V191.894488M335.118898 185.894488H798.519685M335.118898 179.894488V191.894488M798.519685 179.894488V191.894488M112 159.894488H798.519685M112 153.894488V165.894488M798.519685 153.894488V165.894488M86 211.894488V623.806299M80 211.894488H92M80 623.806299H92" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="390.607874" y="410.850394" width="11.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="396.207874" y="421.350394" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">3</text>
+<rect x="254.029921" y="410.850394" width="25.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="266.829921" y="421.350394" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">2.4</text>
+<text x="40" y="649.806299" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The zigzag edge of the panel is centered on where a straight edge would be, and has 5 periods along its 12. It starts at the top,</text>
+<text x="40" y="665.806299" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">with a point toward the panel.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="209" r="13" fill="#da291c"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#da291c</text>
+<text x="868.519685" y="229" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 485 C</text>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 95 100 0</text>
+<text x="832.519685" y="286" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAW</text>
+<text x="832.519685" y="316" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Decree-Law No. 4 of 2002 on the flag</text>
+<text x="832.519685" y="335" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">of the Kingdom of Bahrain</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/bahrain.kdl · Vexyl 1</text>
+</svg>

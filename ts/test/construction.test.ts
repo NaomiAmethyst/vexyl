@@ -56,7 +56,7 @@ function collisions(flag: Flag, opts: ConstructionOptions): string[] {
 /** A sheet's text, with its wrapped lines run together. */
 const textOf = (out: string): string => [...out.matchAll(/>([^<]*)<\/text>/g)].map((m) => m[1]).join(" ");
 
-const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom", "guyana", "kuwait", "pile-tip", "european-union", "venezuela"];
+const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom", "guyana", "kuwait", "pile-tip", "european-union", "venezuela", "bahrain", "shaped-edges"];
 
 test("golden sheets, Chile in both themes and every kind of unit", () => {
 	const chile = flagOf("chile");
@@ -526,6 +526,35 @@ test("chevrons: their apexes on the row across their edge, an apex along it, and
 		for (const opts of [{}, { units: "hoist" }, { paper: "fit", grid: true }] as ConstructionOptions[]) {
 			assert.deepEqual(collisions(flagOf(name), opts), [], `${name} ${JSON.stringify(opts)}`);
 		}
+	}
+});
+
+test("shaped edges: their depth across a period near the middle, the period along it, and where they start", () => {
+	// Bahrain's zigzag: 3 deep, in 5 periods of 12/5 down the hoist panel's side, measured on the middle one.
+	const bahrain = constructionSheet(flagOf("bahrain"), {});
+	assert.ok(bahrain.labels.some((l) => l.text === "3" && l.onFlag) && bahrain.labels.some((l) => l.text === "2.4" && l.onFlag));
+	const text = textOf(bahrain.svg);
+	assert.ok(text.includes("The zigzag edge of the panel is centered on where a straight edge would be, and has 5 periods along its 12. It starts at the top, with a point toward the panel."), text);
+	assert.doesNotMatch(text, /Not measured/);
+	// Waves between bars and on a fly panel, and a zigzag along the bend, whose period is the diagonal's.
+	const edges = flagOf("shaped-edges");
+	const waves = constructionSheet(edges, {});
+	for (const want of ["1.5", "6", "2", "5"]) {
+		assert.ok(waves.labels.some((l) => l.text === want && l.onFlag), want);
+	}
+	const wavesText = textOf(waves.svg);
+	assert.ok(wavesText.includes("The wavy edge between the first two bars, and each of the others, is centered on where a straight edge would be, and repeats along its 30. It starts at the hoist, at its middle, heading away from the bar listed before it."));
+	assert.ok(wavesText.includes("has 4 periods along its 20. It starts at the top, at its middle, heading away from the panel."));
+	const bend = constructionSheet(edges, { form: { variant: "bend" } });
+	assert.ok(bend.labels.some((l) => l.text === "2" && l.onFlag));
+	assert.ok(textOf(bend.svg).includes("has 7 periods along the diagonal. It starts at the upper hoist corner, with a point toward the bar listed before it. Its period is the diagonal’s length divided by 7."));
+	assert.ok(constructionSheet(edges, { units: "hoist" }).labels.some((l) => l.text === "0.075H"), "the bars' depth, as a part of the hoist");
+	for (const name of ["bahrain", "shaped-edges"]) {
+		assert.doesNotMatch(textOf(constructionSvg(flagOf(name))), /Not measured/, name);
+	}
+	golden("shaped-edges-bend.svg", bend.svg);
+	for (const opts of [{}, { units: "hoist" }, { paper: "fit", grid: true }, { theme: "dark" }] as ConstructionOptions[]) {
+		assert.deepEqual(collisions(edges, { ...opts, form: { variant: "bend" } }), [], JSON.stringify(opts));
 	}
 });
 
