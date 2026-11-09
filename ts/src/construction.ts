@@ -11,7 +11,7 @@ import {
 import { resolve } from "./adapt.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Shape } from "./types.js";
+import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Repeat, Shape } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -326,6 +326,33 @@ interface FlagMark {
 	fallback: (text: string) => string;
 }
 
+/** A straight dimension in a detail, between two points of its frame, with its label. */
+interface DetailDim {
+	a: Vec;
+	b: Vec;
+	text: (t: Format) => string;
+}
+
+/**
+ * Part of the flag enlarged in the sidebar, as a repeated charge's first copies are, with what's
+ * measured there. Its points are in a frame of its own, such as an emblem's, which `frame` maps to the flag's.
+ */
+interface Detail {
+	title: string;
+	frame: Affine;
+	/** What's shown, in its frame. */
+	window: Box;
+	/** The copies whose circle is shown dashed, if they have one. */
+	copies: Vec[];
+	circle?: number;
+	dims: DetailDim[];
+	radius?: { centre: Vec; to: Vec; text: (t: Format) => string };
+	angle?: { centre: Vec; from: Vec; to: Vec; text: string };
+	caption: (t: Format) => string;
+	/** Turns the drawing so that its frame's fly runs level, as a diagonal emblem's is shown. */
+	level?: boolean;
+}
+
 interface Measured {
 	fly: Set<string>;
 	hoist: Set<string>;
@@ -334,6 +361,7 @@ interface Measured {
 	charges: ChargeMark[];
 	saltires: SaltireMark[];
 	marks: FlagMark[];
+	details: Detail[];
 	notes: ((t: Format) => string)[];
 	unmeasured: Map<string, number>;
 	circles: boolean;
@@ -389,7 +417,7 @@ const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), 
  * border, and `flag` the file's own, whose other forms the notes point to.
  */
 function measure(flag: Flag, shown: Flag | null, form: SheetForm): Measured {
-	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
+	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
 	if (shown === null) {
 		skip(m, `the ${form.variant} variant, which has ${flag.variants[form.variant!]?.ratio !== undefined ? "a proportion of its own by the flag’s adapt rules" : "a proportion of its own"}`);
 		return m;
@@ -977,7 +1005,132 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 	if (circle !== undefined) {
 		m.circles = true;
 	}
+	const ats = s.ats !== undefined && s.ats.length > 1 ? s.ats.slice(0, 3).map(at) : null;
+	const detail = repeatDetail(plural(2, named(l.color, kind)), rep, ats, mark, region, reach, circle, size);
+	if (detail !== null) {
+		m.details.push(detail);
+	}
 	m.charges.push({ x: mark.x, y: mark.y, at: copy, reach, ...(circle !== undefined ? { circle } : {}), ...(size !== undefined ? { size } : {}), name });
+}
+
+type XY = { x: Fraction; y: Fraction };
+
+/** Chains of dimensions along the fly and down, through the places some copies are at, from `start` if it's given. */
+function chainsThrough(points: readonly XY[], start: XY | null, label: (along: "fly" | "hoist", step: Fraction) => (t: Format) => string): DetailDim[] {
+	const out: DetailDim[] = [];
+	for (const along of ["fly", "hoist"] as const) {
+		const stops = [...(start !== null ? [start] : []), ...points].map((p) => coord(p, along)).sort(compare).filter((v, i, all) => i === 0 || !same(v, all[i - 1]!));
+		if (stops.length < 2) {
+			continue;
+		}
+		// The other coordinate, where the chain is measured from: the least, which is nearest the top or the hoist.
+		const level = points.map((p) => toNumber(coord(p, across(along)))).reduce((a, b) => Math.min(a, b));
+		const from = start !== null ? toNumber(coord(start, across(along))) : level;
+		for (let i = 0; i + 1 < stops.length; i++) {
+			const [a, b] = [toNumber(stops[i]!), toNumber(stops[i + 1]!)];
+			const text = label(along, minus(stops[i + 1]!, stops[i]!));
+			out.push(along === "fly" ? { a: { x: a, y: from }, b: { x: b, y: from }, text } : { a: { x: from, y: a }, b: { x: from, y: b }, text });
+		}
+	}
+	return out;
+}
+
+/**
+ * The detail of a repeated charge, for the sidebar: its first copies, the steps between them, and,
+ * for a ring or an arc, its radius and the angle between copies. A grid's steps are from the
+ * region's corner, as its margins are a step too.
+ */
+function repeatDetail(name: string, rep: Repeat | undefined, ats: XY[] | null, first: XY, region: Frame | null, reach: { x: number; y: number }, circle: number | undefined, size: ((t: Format) => string) | undefined): Detail | null {
+	if ((rep === undefined && ats === null) || (reach.x <= 0 && reach.y <= 0)) {
+		return null;
+	}
+	const sizeText = (t: Format): string => (size !== undefined ? ` Each is ${size(t)}.` : "");
+	const plain = (_: "fly" | "hoist", step: Fraction) => (t: Format): string => t(step);
+	let copies: XY[];
+	let dims: DetailDim[] = [];
+	let corner: XY | null = null;
+	let caption: (t: Format) => string;
+	const detail: Partial<Detail> = {};
+	if (rep === undefined) {
+		copies = ats!;
+		dims = chainsThrough(copies, null, plain);
+		caption = (t) => `The first ${copies.length} of the ${name}, and the steps between them.${sizeText(t)}`;
+	} else {
+		switch (rep.kind) {
+			case "grid": {
+				const f = region!;
+				const cols = Math.min(rep.columns, 2);
+				const rows = Math.min(rep.rows, 2);
+				const dx = over(f.w, fraction(BigInt(rep.columns + 1)));
+				const dy = over(f.h, fraction(BigInt(rep.rows + 1)));
+				copies = [];
+				for (let r = 1; r <= rows; r++) {
+					for (let c = 1; c <= cols; c++) {
+						if (!(rep.stagger && (r + c) % 2 === 1)) {
+							copies.push({ x: plus(f.x, times(dx, fraction(BigInt(c)))), y: plus(f.y, times(dy, fraction(BigInt(r)))) });
+						}
+					}
+				}
+				corner = { x: f.x, y: f.y };
+				// A step a decimal can't say is said as the share of the region it is, as laws do.
+				const exactly = (along: "fly" | "hoist", step: Fraction) => (t: Format): string => {
+					const text = t(step);
+					return text.startsWith("~") ? `${t(along === "fly" ? f.w : f.h)}/${along === "fly" ? rep.columns + 1 : rep.rows + 1}` : text;
+				};
+				const allAt = [...copies, ...(rows > 1 ? [{ x: plus(f.x, dx), y: plus(f.y, times(dy, fraction(2n))) }] : []), ...(cols > 1 ? [{ x: plus(f.x, times(dx, fraction(2n))), y: plus(f.y, dy) }] : [])];
+				dims = chainsThrough(allAt, corner, exactly);
+				caption = (t) => `The grid’s corner, enlarged: its rows are ${exactly("hoist", dy)(t)} apart and its columns ${exactly("fly", dx)(t)}, and so are its margins.${sizeText(t)}`;
+				break;
+			}
+			case "line": {
+				const step = { x: exactOf(rep.fly), y: exactOf(rep.hoist) };
+				copies = Array.from({ length: Math.min(rep.count, 3) }, (_, i) => ({ x: plus(first.x, times(step.x, fraction(BigInt(i)))), y: plus(first.y, times(step.y, fraction(BigInt(i)))) }));
+				dims = chainsThrough(copies, null, plain);
+				caption = (t) => `The first ${copies.length} of ${rep.count} ${name} in a line, and the steps between them.${sizeText(t)}`;
+				break;
+			}
+			case "ring":
+			case "arc": {
+				const from = rep.kind === "arc" ? exactOf(rep.from) : zero;
+				const span = rep.kind === "arc" ? (() => {
+					const d = minus(exactOf(rep.to), from);
+					return compare(d, zero) > 0 ? d : plus(d, fraction(360n));
+				})() : fraction(360n);
+				const step = over(span, fraction(BigInt(rep.kind === "arc" ? rep.count - 1 : rep.count)));
+				const r = rep.radius;
+				const toward = (deg: number): Vec => ({ x: Math.sin((deg * Math.PI) / 180), y: -Math.cos((deg * Math.PI) / 180) });
+				const c = vec(first);
+				const a0 = toNumber(from);
+				const a1 = a0 + toNumber(step);
+				const p0 = { x: c.x + toward(a0).x * r, y: c.y + toward(a0).y * r };
+				const p1 = { x: c.x + toward(a1).x * r, y: c.y + toward(a1).y * r };
+				const radius = exactOf(rep.radius);
+				const places = placesOf(step);
+				const stepText = places !== null && places <= 4 ? `${decimal(step, places)}°` : `${decimal(span, placesOf(span) ?? 4)}°/${rep.kind === "arc" ? rep.count - 1 : rep.count}`;
+				detail.radius = { centre: c, to: p0, text: (t) => `r ${t(radius)}` };
+				detail.angle = { centre: c, from: toward(a0), to: toward(a1), text: stepText };
+				const pts = [c, p0, p1];
+				const pad = Math.max(reach.x, reach.y) * 1.3;
+				detail.window = { x0: Math.min(...pts.map((p) => p.x)) - pad, y0: Math.min(...pts.map((p) => p.y)) - pad, x1: Math.max(...pts.map((p) => p.x)) + pad, y1: Math.max(...pts.map((p) => p.y)) + pad };
+				copies = [];
+				detail.copies = [p0, p1];
+				caption = (t) => `The center and the first two of ${rep.count} ${name} ${rep.kind === "ring" ? "in a ring" : "on an arc"}, ${stepText} apart, ${t(radius)} from it.${sizeText(t)}`;
+				break;
+			}
+		}
+	}
+	const shown = detail.copies ?? copies.map(vec);
+	if (detail.window === undefined) {
+		const pad = Math.max(reach.x, reach.y) * 1.3;
+		const xs = [...shown.map((p) => p.x), ...(corner !== null ? [toNumber(corner.x) + pad] : [])];
+		const ys = [...shown.map((p) => p.y), ...(corner !== null ? [toNumber(corner.y) + pad] : [])];
+		detail.window = { x0: Math.min(...xs) - pad, y0: Math.min(...ys) - pad, x1: Math.max(...xs) + pad, y1: Math.max(...ys) + pad };
+		if (corner !== null) {
+			detail.window.x0 = toNumber(corner.x);
+			detail.window.y0 = toNumber(corner.y);
+		}
+	}
+	return { ...detail, title: name, frame: identity, window: detail.window, copies: shown, dims, caption, ...(circle !== undefined ? { circle } : {}) } as Detail;
 }
 
 // --- Laying out -------------------------------------------------------------------------------
@@ -1336,14 +1489,195 @@ const looks: SidebarLook[] = [
 	{ size: 10, line: 13, swatch: 12, gap: 3, refs: 0, laws: false },
 ];
 
-function sidebarItems(flag: Flag, theme: Theme, opts: { colors: boolean }, look: SidebarLook, width: number, prefix: string, room: number): SidebarItem[] {
-	const items: SidebarItem[] = [];
-	const heading = (text: string): SidebarItem => ({
-		height: 16 + look.gap,
+function sidebarHeading(text: string, theme: Theme, gap: number): SidebarItem {
+	return {
+		height: 16 + gap,
 		draw: (o, x, y) => {
 			o.text(x, y + 11, text.toUpperCase(), `font-family="${monoFamily}" font-size="11" font-weight="500" letter-spacing="0.88" fill="${theme.muted}"`, { x0: x, y0: y, x1: x + monoWidth(text, 11) + 0.88 * text.length, y1: y + 14 });
 		},
+	};
+}
+
+/** Gives dimensions rows, nearest the picture first, so that a row is a chain whose dimensions only meet at their ends. */
+function detailRows(spans: readonly { lo: number; hi: number }[]): number[] {
+	const rows: { lo: number; hi: number }[][] = [];
+	return spans.map((s) => {
+		let r = rows.findIndex((row) => row.every((x) => s.hi <= x.lo + 0.01 || x.hi <= s.lo + 0.01));
+		if (r < 0) {
+			r = rows.length;
+			rows.push([]);
+		}
+		rows[r]!.push(s);
+		return r;
 	});
+}
+
+/**
+ * A detail as items of the sidebar: its heading, then the picture, enlarged as far as it fits,
+ * with its dimensions above and beside it, and its caption. It's null if a label can't be read at
+ * any size that fits, and the notes then say what it would have.
+ */
+function detailItems(d: Detail, map: Affine, picture: (idPrefix: string) => string, idPrefix: string, theme: Theme, t: Format, width: number): SidebarItem[] | null {
+	let level: Affine = identity;
+	let p = compose(map, d.frame);
+	if (d.level === true) {
+		const v = turnVec(p, { x: 1, y: 0 });
+		const a = -Math.atan2(v.y, v.x);
+		level = [Math.cos(a), Math.sin(a), -Math.sin(a), Math.cos(a), 0, 0];
+		p = compose(level, p);
+	}
+	const w = d.window;
+	const corners = [{ x: w.x0, y: w.y0 }, { x: w.x1, y: w.y0 }, { x: w.x0, y: w.y1 }, { x: w.x1, y: w.y1 }].map((q) => apply(p, q));
+	const vx = Math.min(...corners.map((q) => q.x));
+	const vy = Math.min(...corners.map((q) => q.y));
+	const vw = Math.max(...corners.map((q) => q.x)) - vx;
+	const vh = Math.max(...corners.map((q) => q.y)) - vy;
+	if (!(vw > 0 && vh > 0)) {
+		return null;
+	}
+	const size = 11;
+	const dims = d.dims.map((dm) => {
+		const a = apply(p, dm.a);
+		const b = apply(p, dm.b);
+		const flat = Math.abs(a.y - b.y) <= Math.abs(a.x - b.x);
+		return { a, b, level: flat, text: dm.text(t), lo: flat ? Math.min(a.x, b.x) : Math.min(a.y, b.y), hi: flat ? Math.max(a.x, b.x) : Math.max(a.y, b.y) };
+	});
+	// Rows are worked out at the scale of the grid, and then the picture is as large as their room allows.
+	const across = dims.filter((x) => x.level);
+	const down = dims.filter((x) => !x.level);
+	const pitchIn = 20;
+	const tops = detailRows(across);
+	const lefts = detailRows(down);
+	const top = 30 + pitchIn * Math.max(0, ...tops);
+	const left = 34 + pitchIn * Math.max(0, ...lefts);
+	const k = Math.min((width - left - 6) / vw, 180 / vh);
+	for (const x of dims) {
+		if ((x.hi - x.lo) * k < monoWidth(x.text, size) + 6) {
+			return null;
+		}
+	}
+	const caption = wrap(words(d.caption(t)), 12, width);
+	const picW = vw * k;
+	const picH = vh * k;
+	const drawn = picture(idPrefix);
+	const vb = `${num(vx)} ${num(vy)} ${num(vw)} ${num(vh)}`;
+	const body = drawn.replace(/^<svg [^>]*>\n?/, "").replace(/<\/svg>\n?$/, "").replace(/\n$/, "");
+	const item: SidebarItem = {
+		height: top + picH + 10 + caption.length * 16 + 14,
+		draw: (o, x, y) => {
+			const px0 = x + left;
+			const py0 = y + top;
+			const at = (q: Vec): Vec => ({ x: px0 + (q.x - vx) * k, y: py0 + (q.y - vy) * k });
+			const atLocal = (q: Vec): Vec => at(apply(p, q));
+			o.add(`<svg x="${num(px0)}" y="${num(py0)}" width="${num(picW)}" height="${num(picH)}" viewBox="${vb}" overflow="hidden">`);
+			o.add(level === identity ? body : `<g transform="matrix(${level.map(num).join(" ")})">\n${body}\n</g>`);
+			o.add("</svg>");
+			o.add(`<rect x="${num(px0)}" y="${num(py0)}" width="${num(picW)}" height="${num(picH)}" fill="none" ${stroke(theme.outline)} stroke-width="1"/>`);
+			const ext: string[] = [];
+			const lines: string[] = [];
+			const onPicture: string[] = [];
+			const label = `font-family="${monoFamily}" font-size="${size}" fill="${theme.label}" stroke="${theme.paper}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"`;
+			across.forEach((dm, i) => {
+				const ry = py0 - 12 - pitchIn * tops[i]!;
+				const [a, b] = [at(dm.a), at(dm.b)];
+				lines.push(`M${num(a.x)} ${num(ry)}H${num(b.x)}M${num(a.x)} ${num(ry - 5)}V${num(ry + 5)}M${num(b.x)} ${num(ry - 5)}V${num(ry + 5)}`);
+				for (const q of [a, b]) {
+					if (q.y > ry + 7) {
+						ext.push(`M${num(q.x)} ${num(q.y - 2)}V${num(ry + 3)}`);
+					}
+				}
+				const mid = (a.x + b.x) / 2;
+				const tw = monoWidth(dm.text, size);
+				o.text(mid, ry - 4, dm.text, `${label} text-anchor="middle"`, { x0: mid - tw / 2, y0: ry - 14, x1: mid + tw / 2, y1: ry - 3 });
+			});
+			down.forEach((dm, i) => {
+				const rx = px0 - 12 - pitchIn * lefts[i]!;
+				const [a, b] = [at(dm.a), at(dm.b)];
+				lines.push(`M${num(rx)} ${num(a.y)}V${num(b.y)}M${num(rx - 5)} ${num(a.y)}H${num(rx + 5)}M${num(rx - 5)} ${num(b.y)}H${num(rx + 5)}`);
+				for (const q of [a, b]) {
+					if (q.x > rx + 7) {
+						ext.push(`M${num(q.x - 2)} ${num(q.y)}H${num(rx + 3)}`);
+					}
+				}
+				const mid = (a.y + b.y) / 2;
+				const tw = monoWidth(dm.text, size);
+				o.text(rx - 4, mid, dm.text, `${label} text-anchor="middle" transform="rotate(-90 ${num(rx - 4)} ${num(mid)})"`, { x0: rx - 14, y0: mid - tw / 2, x1: rx - 3, y1: mid + tw / 2 });
+			});
+			if (d.circle !== undefined) {
+				for (const c of d.copies) {
+					const q = atLocal(c);
+					onPicture.push(`<circle cx="${num(q.x)}" cy="${num(q.y)}" r="${num(d.circle * k)}" fill="none" stroke="${theme.halo}" stroke-width="2.5" stroke-opacity="0.6"/>`, `<circle cx="${num(q.x)}" cy="${num(q.y)}" r="${num(d.circle * k)}" fill="none" stroke="${theme.onFlag}" stroke-width="1" stroke-dasharray="4 3"/>`);
+				}
+			}
+			const chips: { text: string; box: Box }[] = [];
+			const halo: string[] = [];
+			if (d.radius !== undefined && d.angle !== undefined) {
+				const c = atLocal(d.radius.centre);
+				const e = atLocal(d.radius.to);
+				const len = Math.hypot(e.x - c.x, e.y - c.y);
+				const u = { x: (e.x - c.x) / len, y: (e.y - c.y) / len };
+				const n = { x: -u.y, y: u.x };
+				// The angle's arc, from the first copy's direction to the next one's, clockwise on the flag.
+				const from = Math.atan2(d.angle.from.y, d.angle.from.x);
+				let to = Math.atan2(d.angle.to.y, d.angle.to.x);
+				while (to <= from) {
+					to += 2 * Math.PI;
+				}
+				const ra = Math.min(len * 0.45, 40) / k;
+				const arc = Array.from({ length: 17 }, (_, i) => {
+					const a = from + ((to - from) * i) / 16;
+					return atLocal({ x: d.radius!.centre.x + Math.cos(a) * ra, y: d.radius!.centre.y + Math.sin(a) * ra });
+				});
+				const ticks = (q: Vec): string => `M${num(q.x - n.x * 4)} ${num(q.y - n.y * 4)}L${num(q.x + n.x * 4)} ${num(q.y + n.y * 4)}`;
+				halo.push(`M${num(c.x)} ${num(c.y)}L${num(e.x)} ${num(e.y)}${ticks(c)}${ticks(e)}`, pathOf(arc));
+				// The radius's label on the side away from the angle, and the angle's beyond its arc.
+				const mid = arc[8]!;
+				const out = { x: mid.x - c.x, y: mid.y - c.y };
+				const ol = Math.hypot(out.x, out.y);
+				const side = n.x * out.x + n.y * out.y > 0 ? -1 : 1;
+				const rText = d.radius.text(t);
+				const aText = d.angle.text;
+				// The angle's label first, and then the radius's wherever it's clear of it. Either is in the
+				// caption as well, so one with no room is left to it.
+				const picture = { x0: px0, y0: py0, x1: px0 + picW, y1: py0 + picH };
+				const inside = (b: Box): boolean => b.x0 >= picture.x0 && b.x1 <= picture.x1 && b.y0 >= picture.y0 && b.y1 <= picture.y1;
+				const angleSpot = [4, 16, 30].map((g) => spotAt(mid, { x: out.x / ol, y: out.y / ol }, monoWidth(aText, size), 13, g)).find(inside);
+				if (angleSpot !== undefined) {
+					chips.push({ text: aText, box: angleSpot });
+				}
+				const radiusSpot = [0.5, 0.3, 0.7, 0.15, 0.85].flatMap((f) => [4, 14].flatMap((g) => [side, -side].map((sd) => spotAt({ x: c.x + (e.x - c.x) * f, y: c.y + (e.y - c.y) * f }, { x: n.x * sd, y: n.y * sd }, monoWidth(rText, size), 13, g))))
+					.find((b) => inside(b) && (angleSpot === undefined || !hits(b, angleSpot, 3)));
+				if (radiusSpot !== undefined) {
+					chips.push({ text: rText, box: radiusSpot });
+				}
+			}
+			if (ext.length > 0) {
+				o.add(`<path d="${ext.join("")}" fill="none" ${stroke(theme.ext)} stroke-width="0.8" stroke-dasharray="3 3"/>`);
+			}
+			o.add(`<path d="${lines.join("")}" fill="none" stroke="${theme.dim}" stroke-width="1"/>`);
+			o.lines.push(...onPicture);
+			if (halo.length > 0) {
+				o.add(`<path d="${halo.join("")}" fill="none" stroke="${theme.halo}" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>`);
+				o.add(`<path d="${halo.join("")}" fill="none" stroke="${theme.onFlag}" stroke-width="1"/>`);
+			}
+			for (const chip of chips) {
+				const b = chip.box;
+				o.add(`<rect x="${num(b.x0 - 2)}" y="${num(b.y0)}" width="${num(b.x1 - b.x0 + 4)}" height="${num(b.y1 - b.y0)}" rx="3" fill="${theme.paper}" fill-opacity="0.88"/>`);
+				o.text((b.x0 + b.x1) / 2, b.y1 - 3, chip.text, `font-family="${monoFamily}" font-size="${size}" fill="${theme.label}" text-anchor="middle"`, b);
+			}
+			let cy = py0 + picH + 10 + 12;
+			for (const line of caption) {
+				o.text(x, cy, line, `font-family="${sansFamily}" font-size="12" fill="${theme.ink2}"`, { x0: x, y0: cy - 10, x1: x + sansWidth(line, 12), y1: cy + 3 });
+				cy += 16;
+			}
+		},
+	};
+	return [sidebarHeading(`Detail: ${d.title}`, theme, 8), item];
+}
+
+function sidebarItems(flag: Flag, theme: Theme, opts: { colors: boolean }, look: SidebarLook, width: number, prefix: string, room: number): SidebarItem[] {
+	const items: SidebarItem[] = [];
+	const heading = (text: string): SidebarItem => sidebarHeading(text, theme, look.gap);
 	const names = [...Object.keys(flag.palette), ...Object.keys(flag.gradients)];
 	if (opts.colors && names.length > 0) {
 		const colorItems: SidebarItem[] = [];
@@ -1657,11 +1991,18 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	};
 
 	const bodyTop = 100;
+	// Details of repeated charges, at most two, before the colours. Fewer are shown if the sidebar has no room.
+	const details = showSizes && measured
+		? m.details.map((d, i) => detailItems(d, view.map, (idPrefix) => svg(flag, { ...form, idPrefix }), `${prefix}d${i}-`, theme, t, sidebarWidth)).filter((x): x is SidebarItem[] => x !== null).slice(0, 2)
+		: [];
 	const sideItemsFor = (room: number): SidebarItem[] => {
-		for (const look of looks) {
-			const items = sidebarItems(flag, theme, { colors: showColors }, look, sidebarWidth, prefix, room);
-			if (heightOf(items) <= room || look === looks[looks.length - 1]) {
-				return items;
+		for (let n = details.length; n >= 0; n--) {
+			const extra = details.slice(0, n).flat();
+			for (const look of looks) {
+				const items = [...extra, ...sidebarItems(flag, theme, { colors: showColors }, look, sidebarWidth, prefix, room - heightOf(extra))];
+				if (heightOf(items) <= room || (n === 0 && look === looks[looks.length - 1])) {
+					return items;
+				}
 			}
 		}
 		return [];

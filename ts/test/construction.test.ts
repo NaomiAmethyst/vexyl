@@ -54,7 +54,7 @@ function collisions(flag: Flag, opts: ConstructionOptions): string[] {
 /** A sheet's text, with its wrapped lines run together. */
 const textOf = (out: string): string => [...out.matchAll(/>([^<]*)<\/text>/g)].map((m) => m[1]).join(" ");
 
-const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom", "guyana", "kuwait", "pile-tip"];
+const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom", "guyana", "kuwait", "pile-tip", "european-union", "venezuela"];
 
 test("golden sheets, Chile in both themes and every kind of unit", () => {
 	const chile = flagOf("chile");
@@ -301,6 +301,46 @@ test("a form with a proportion of its own isn't measured yet, and says so", () =
 	const sea = constructionSvg(guyana, { form: { variant: "sea" } });
 	assert.ok(textOf(sea).includes("Not measured on this sheet: the sea variant, which has a proportion of its own."));
 	assert.ok(textOf(constructionSvg(guyana)).includes("the sea variant"));
+});
+
+/** The text set in a sheet's sidebar, which starts right of the drawing. */
+const sidebarText = (sheet: ReturnType<typeof constructionSheet>): string[] => sheet.labels.filter((l) => l.x0 > sheet.flag.x1 + 10).map((l) => l.text);
+
+test("a repeated charge's first copies are enlarged in the sidebar, with their steps exactly", () => {
+	// The US's stars: the grid's corner, with steps of 0.7 down and 9.88/12 along, which no decimal says.
+	const us = constructionSheet(flagOf("united-states"), {});
+	const side = sidebarText(us);
+	assert.ok(side.includes("DETAIL: WHITE STARS"));
+	assert.equal(side.filter((x) => x === "9.88/12").length, 2, "the margin and a column");
+	assert.equal(side.filter((x) => x === "0.7").length, 2, "the margin and a row");
+	assert.ok(textOf(us.svg).includes("its rows are 0.7 apart and its columns 9.88/12, and so are its margins. Each is r 0.4004."));
+	assert.ok(sidebarText(constructionSheet(flagOf("united-states"), { units: "hoist" })).includes("19H/300"), "hoists say it exactly anyway");
+	// Hung vertically, the corner turns with the flag: the columns' steps run down.
+	const vertical = constructionSheet(flagOf("united-states"), { form: { variant: "vertical" } });
+	const steps = vertical.labels.filter((l) => l.text === "9.88/12");
+	assert.equal(steps.length, 2);
+	assert.ok(steps.every((l) => l.y1 - l.y0 > l.x1 - l.x0), "set down the side");
+	// The EU's ring: its radius, and 30° between stars.
+	const eu = sidebarText(constructionSheet(flagOf("european-union"), {}));
+	assert.ok(eu.includes("30°") && eu.includes("r 6"));
+	// Venezuela's arc, from -66.5° to 66.5° with 8 stars: 19° apart.
+	assert.ok(textOf(constructionSvg(flagOf("venezuela"))).includes("19° apart, 36.72 from it"));
+	// Bosnia's line: 125 along and 125 down each time.
+	assert.equal(sidebarText(constructionSheet(flagOf("bosnia-and-herzegovina"), {})).filter((x) => x === "125").length, 4);
+	// Several places: the steps between the first few.
+	const ats = parse(`${header}field a\ncharge disc b { radius 0.5; at fly=2 hoist=2; at fly=5 hoist=2; at fly=6.5 hoist=4; }\n`);
+	const atsSide = sidebarText(constructionSheet(ats, {}));
+	for (const want of ["3", "1.5", "2"]) {
+		assert.ok(atsSide.includes(want), want);
+	}
+	// An arc whose step no decimal says is given as its span over its steps.
+	const sevenths = parse(`${header}field a\ncharge star b { radius 0.4; repeat ring count=7 radius=3; }\n`);
+	assert.ok(textOf(constructionSvg(sevenths)).includes("360°/7 apart"));
+	for (const name of ["united-states", "european-union", "venezuela", "bosnia-and-herzegovina"]) {
+		for (const opts of [{}, { theme: "dark" }, { units: "mm", hoistMm: 900 }, { paper: "letter" }, { paper: "fit" }, { form: { side: "reverse" } }] as ConstructionOptions[]) {
+			assert.deepEqual(collisions(flagOf(name), opts), [], `${name} ${JSON.stringify(opts)}`);
+		}
+	}
 });
 
 test("what isn't measured is listed, never left out", () => {

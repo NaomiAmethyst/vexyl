@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Venezuela: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Venezuela</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 120 × 180</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="138" y="195.677165" width="660.519685" height="440.346457" viewBox="0 0 180 120" overflow="hidden">
+  <title>Venezuela</title>
+  <clipPath id="vx-1279581d6d4d864b-cs-f-flag1">
+    <polygon points="0,0 180,0 180,120 0,120"/>
+  </clipPath>
+  <g clip-path="url(#vx-1279581d6d4d864b-cs-f-flag1)">
+    <polygon points="0,0 180,0 180,120 0,120" fill="#ffce00"/>
+    <polygon points="0,40 180,40 180,120 0,120" fill="#0035ad"/>
+    <polygon points="0,80 180,80 180,120 0,120" fill="#d21034"/>
+    <polygon points="51.596012,69.108427 55.349408,69.469837 56.852994,66.011828 57.669134,69.693202 61.42253,70.054613 58.173537,71.968416 58.989678,75.64979 56.165549,73.151211 52.916556,75.065014 54.420141,71.607005" fill="#ffffff"/>
+    <polygon points="59.130707,57.506014 62.561948,59.069721 65.109434,56.289629 64.682572,60.036145 68.113814,61.599852 64.418757,62.35162 63.991896,66.098137 62.135087,62.816238 58.44003,63.568006 60.987516,60.787913" fill="#ffffff"/>
+    <polygon points="70.032276,48.988775 72.767486,51.584392 76.081291,49.785143 74.457938,53.188571 77.193148,55.784188 73.454652,55.292006 71.831299,58.695434 71.144134,54.98782 67.405637,54.495638 70.719442,52.696389" fill="#ffffff"/>
+    <polygon points="83.112855,44.48477 84.853996,47.829472 88.573038,47.207117 85.930081,49.896611 87.671222,53.241312 84.296643,51.558809 81.653685,54.248302 82.211038,50.518965 78.83646,48.836462 82.555502,48.214108" fill="#ffffff"/>
+    <polygon points="96.947145,44.48477 97.504498,48.214108 101.22354,48.836462 97.848962,50.518965 98.406315,54.248302 95.763357,51.558809 92.388778,53.241312 94.129919,49.896611 91.486962,47.207117 95.206004,47.829472" fill="#ffffff"/>
+    <polygon points="110.027724,48.988775 109.340558,52.696389 112.654363,54.495638 108.915866,54.98782 108.228701,58.695434 106.605348,55.292006 102.866852,55.784188 105.602062,53.188571 103.978709,49.785143 107.292514,51.584392" fill="#ffffff"/>
+    <polygon points="120.929293,57.506014 119.072484,60.787913 121.61997,63.568006 117.924913,62.816238 116.068104,66.098137 115.641243,62.35162 111.946186,61.599852 115.377428,60.036145 114.950566,56.289629 117.498052,59.069721" fill="#ffffff"/>
+    <polygon points="128.463988,69.108427 125.639859,71.607005 127.143444,75.065014 123.894451,73.151211 121.070322,75.64979 121.886463,71.968416 118.63747,70.054613 122.390866,69.693202 123.207006,66.011828 124.710592,69.469837" fill="#ffffff"/>
+  </g>
+</svg>
+<rect x="138" y="195.677165" width="660.519685" height="440.346457" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M138 190.677165V137.677165M468.369929 190.677165V163.677165M798.519685 190.677165V137.677165M133 195.677165H54M133 510.598273H106M133 342.459318H80M133 489.24147H80M133 636.023622H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="303.184965" y="161.677165" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">90.03</text>
+<text x="468.259843" y="135.677165" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">180</text>
+<text x="104" y="353.137719" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 104 353.137719)">85.82</text>
+<text x="78" y="269.068241" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 269.068241)">40</text>
+<text x="78" y="415.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 415.850394)">40</text>
+<text x="78" y="562.632546" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 562.632546)">40</text>
+<text x="52" y="415.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 415.850394)">120</text>
+<path d="M468.369929 195.677165V502.598273M138 510.598273H460.369929M462.369929 510.598273H474.369929M468.369929 504.598273V516.598273" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<circle cx="344.799738" cy="456.868425" r="19.044984" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="344.799738" cy="456.868425" r="19.044984" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M468.369929 195.677165V502.598273M138 510.598273H460.369929" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M462.369929 510.598273H474.369929M468.369929 504.598273V516.598273" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M138 169.677165H468.369929M138 163.677165V175.677165M468.369929 163.677165V175.677165M138 143.677165H798.519685M138 137.677165V149.677165M798.519685 137.677165V149.677165M112 195.677165V510.598273M106 195.677165H118M106 510.598273H118M86 195.677165V342.459318M80 195.677165H92M80 342.459318H92M86 342.459318V489.24147M80 342.459318H92M80 489.24147H92M86 489.24147V636.023622M80 489.24147H92M80 636.023622H92M60 195.677165V636.023622M54 195.677165H66M54 636.023622H66" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="321.199738" y="479.913409" width="47.2" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="344.799738" y="490.413409" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 5.19</text>
+<text x="40" y="662.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">A star’s or sun’s size is the circle through its points, shown dashed.</text>
+<text x="40" y="682.023622" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">8 white stars on an arc of radius 36.72 around the center marked +, from -66.5° to 66.5° clockwise from the top, turned with it.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">DETAIL: WHITE STARS</text>
+<svg x="866.519685" y="184" width="210" height="170.523982" viewBox="49.608554 54.265328 47.168446 38.301672" overflow="hidden">
+  <title>Venezuela</title>
+  <clipPath id="vx-1279581d6d4d864b-cs-d0-flag1">
+    <polygon points="0,0 180,0 180,120 0,120"/>
+  </clipPath>
+  <g clip-path="url(#vx-1279581d6d4d864b-cs-d0-flag1)">
+    <polygon points="0,0 180,0 180,120 0,120" fill="#ffce00"/>
+    <polygon points="0,40 180,40 180,120 0,120" fill="#0035ad"/>
+    <polygon points="0,80 180,80 180,120 0,120" fill="#d21034"/>
+    <polygon points="51.596012,69.108427 55.349408,69.469837 56.852994,66.011828 57.669134,69.693202 61.42253,70.054613 58.173537,71.968416 58.989678,75.64979 56.165549,73.151211 52.916556,75.065014 54.420141,71.607005" fill="#ffffff"/>
+    <polygon points="59.130707,57.506014 62.561948,59.069721 65.109434,56.289629 64.682572,60.036145 68.113814,61.599852 64.418757,62.35162 63.991896,66.098137 62.135087,62.816238 58.44003,63.568006 60.987516,60.787913" fill="#ffffff"/>
+    <polygon points="70.032276,48.988775 72.767486,51.584392 76.081291,49.785143 74.457938,53.188571 77.193148,55.784188 73.454652,55.292006 71.831299,58.695434 71.144134,54.98782 67.405637,54.495638 70.719442,52.696389" fill="#ffffff"/>
+    <polygon points="83.112855,44.48477 84.853996,47.829472 88.573038,47.207117 85.930081,49.896611 87.671222,53.241312 84.296643,51.558809 81.653685,54.248302 82.211038,50.518965 78.83646,48.836462 82.555502,48.214108" fill="#ffffff"/>
+    <polygon points="96.947145,44.48477 97.504498,48.214108 101.22354,48.836462 97.848962,50.518965 98.406315,54.248302 95.763357,51.558809 92.388778,53.241312 94.129919,49.896611 91.486962,47.207117 95.206004,47.829472" fill="#ffffff"/>
+    <polygon points="110.027724,48.988775 109.340558,52.696389 112.654363,54.495638 108.915866,54.98782 108.228701,58.695434 106.605348,55.292006 102.866852,55.784188 105.602062,53.188571 103.978709,49.785143 107.292514,51.584392" fill="#ffffff"/>
+    <polygon points="120.929293,57.506014 119.072484,60.787913 121.61997,63.568006 117.924913,62.816238 116.068104,66.098137 115.641243,62.35162 111.946186,61.599852 115.377428,60.036145 114.950566,56.289629 117.498052,59.069721" fill="#ffffff"/>
+    <polygon points="128.463988,69.108427 125.639859,71.607005 127.143444,75.065014 123.894451,73.151211 121.070322,75.64979 121.886463,71.968416 118.63747,70.054613 122.390866,69.693202 123.207006,66.011828 124.710592,69.469837" fill="#ffffff"/>
+  </g>
+</svg>
+<rect x="866.519685" y="184" width="210" height="170.523982" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="" fill="none" stroke="#2a2833" stroke-width="1"/>
+<circle cx="896.558199" cy="259.297104" r="23.106549" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="896.558199" cy="259.297104" r="23.106549" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="925.949471" cy="214.038514" r="23.106549" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+<circle cx="925.949471" cy="214.038514" r="23.106549" fill="none" stroke="#1c1b22" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M1046.481172 324.485468L896.558199 259.297104M1044.886175 328.153708L1048.076168 320.817228M894.963202 262.965345L898.153195 255.628864M1009.798769 308.535505L1010.137199 307.778714L1010.49124 307.029099L1010.860741 306.286981L1011.245542 305.552681L1011.645478 304.826514L1012.060378 304.108791L1012.490063 303.39982L1012.934349 302.699907L1013.393044 302.009351L1013.865952 301.32845L1014.35287 300.657496L1014.853589 299.996777L1015.367892 299.346577L1015.89556 298.707175L1016.436367 298.078846L1016.990078 297.46186" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M1046.481172 324.485468L896.558199 259.297104M1044.886175 328.153708L1048.076168 320.817228M894.963202 262.965345L898.153195 255.628864M1009.798769 308.535505L1010.137199 307.778714L1010.49124 307.029099L1010.860741 306.286981L1011.245542 305.552681L1011.645478 304.826514L1012.060378 304.108791L1012.490063 303.39982L1012.934349 302.699907L1013.393044 302.009351L1013.865952 301.32845L1014.35287 300.657496L1014.853589 299.996777L1015.367892 299.346577L1015.89556 298.707175L1016.436367 298.078846L1016.990078 297.46186" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<rect x="987.747297" y="287.571195" width="23.8" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="999.647297" y="297.571195" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">19°</text>
+<rect x="954.0645" y="267.809416" width="50.2" height="13" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="979.1645" y="277.809416" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" text-anchor="middle">r 36.72</text>
+<text x="832.519685" y="376.523982" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The center and the first two of 8 white</text>
+<text x="832.519685" y="392.523982" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">stars on an arc, 19° apart, 36.72 from it.</text>
+<text x="832.519685" y="408.523982" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Each is r 5.19.</text>
+<text x="832.519685" y="437.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="840.519685" cy="454.523982" r="8" fill="#ffce00"/>
+<text x="858.519685" y="458.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Yellow</text>
+<text x="902.126485" y="458.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#ffce00</text>
+<text x="858.519685" y="472.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
+<circle cx="840.519685" cy="486.523982" r="8" fill="#0035ad"/>
+<text x="858.519685" y="490.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="889.421485" y="490.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#0035ad</text>
+<text x="858.519685" y="504.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
+<circle cx="840.519685" cy="518.523982" r="8" fill="#d21034"/>
+<text x="858.519685" y="522.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">Red</text>
+<text x="886.164385" y="522.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#d21034</text>
+<text x="858.519685" y="536.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#3b3947">and 2 more values in the file</text>
+<circle cx="840.519685" cy="550.523982" r="7.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="858.519685" y="554.523982" font-family="Geist, system-ui, sans-serif" font-size="11" font-weight="500" fill="#1c1b22">White</text>
+<text x="896.674885" y="554.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#3b3947">#ffffff</text>
+<text x="832.519685" y="591.523982" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAW</text>
+<text x="832.519685" y="611.523982" font-family="Geist, system-ui, sans-serif" font-size="11" fill="#1c1b22">1 law, named in the file</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The white star’s center is marked +.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/venezuela.kdl · Vexyl 1</text>
+</svg>
