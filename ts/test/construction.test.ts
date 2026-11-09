@@ -496,7 +496,7 @@ band b { along bend; width 2; }
 charge star b { radius 1; fimbriate a 0.1; cut { disc { radius 0.2; } } }
 `);
 	const out = constructionSvg(flag);
-	assert.ok(textOf(out).includes("Not measured on this sheet: the cut in the b star, the b star’s fimbriation, the swallowtail outline."), out);
+	assert.ok(textOf(out).includes("Not measured on this sheet: the cut in the b star, the b star’s fimbriation."), out);
 });
 
 test("chevrons: their apexes on the row across their edge, an apex along it, and an angle at the outermost", () => {
@@ -556,6 +556,43 @@ test("shaped edges: their depth across a period near the middle, the period alon
 	for (const opts of [{}, { units: "hoist" }, { paper: "fit", grid: true }, { theme: "dark" }] as ConstructionOptions[]) {
 		assert.deepEqual(collisions(edges, { ...opts, form: { variant: "bend" } }), [], JSON.stringify(opts));
 	}
+});
+
+test("outlines: where a named form is cut, along the edges, and a polygon's corners", () => {
+	// Signal flag A's swallowtail is 150 deep, from the middle of the fly.
+	const alfa = constructionSheet(flagOf("ics-alfa"), {});
+	assert.ok(alfa.labels.some((l) => l.text === "150") && alfa.labels.some((l) => l.text === "300"));
+	assert.ok(textOf(alfa.svg).includes("The swallowtail is cut 150 in from the fly, to a point on the middle line, and its tails end at the fly’s corners."));
+	assert.doesNotMatch(textOf(alfa.svg), /Not measured[^.]*outline/);
+	// Norway's state flag: notches 11 in from the fly, 6 from the top and the bottom, so 4 apart.
+	const norway = constructionSheet(flagOf("norway-state"), {});
+	for (const want of ["11", "6", "1"]) {
+		assert.ok(norway.labels.some((l) => l.text === want), want);
+	}
+	assert.ok(textOf(norway.svg).includes("The fly is cut 11 in, to two notches 4 apart either side of the middle line, and the tongue between them comes to a point at the middle of the fly."));
+	// Nepal's polygon: its inner corner, 17.5736 along and 37.5736 down.
+	const nepal = constructionSheet(flagOf("nepal"), {});
+	assert.ok(nepal.labels.some((l) => l.text === "17.5736") && nepal.labels.some((l) => l.text === "37.5736"));
+	assert.ok(textOf(nepal.svg).includes("The outline is the polygon through the 5 corners the file lists, each at places marked along the edges."));
+	// A tapered swallowtail, pennants with an end and with a point, a path, and a polygon of many corners.
+	const flag = flagOf("outlines");
+	const tapered = constructionSheet(flag, {});
+	assert.ok(tapered.labels.some((l) => l.text === "2.5") && tapered.labels.some((l) => l.text === "22"));
+	assert.ok(textOf(tapered.svg).includes("its tails end 2.5 in from the fly’s corners, along it."));
+	const pennant = constructionSheet(flag, { form: { variant: "pennant" }, units: "hoist" });
+	assert.ok(pennant.labels.some((l) => l.text === "0.35H"), "from the top to the end");
+	assert.ok(textOf(pennant.svg).includes("The pennant narrows from the whole hoist to an end 3H/10 wide at the fly, on the middle line."));
+	assert.ok(textOf(constructionSvg(flag, { form: { variant: "point" } })).includes("The pennant narrows from the whole hoist to a point at the middle of the fly."));
+	assert.ok(textOf(constructionSvg(flag, { form: { variant: "curved" } })).includes("The outline is the file’s path, stretched from its box, 40 by 30 from (0, 0) in its own units, to the flag’s grid, 30 by 20."));
+	assert.ok(textOf(constructionSvg(flag, { form: { variant: "saw" } })).includes("The outline is the polygon through the 14 corners the file lists, which reaches each edge of the grid."));
+	for (const variant of [undefined, "pennant", "point", "curved", "saw"]) {
+		assert.doesNotMatch(textOf(constructionSvg(flag, variant !== undefined ? { form: { variant } } : {})), /Not measured/, variant);
+		for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }] as ConstructionOptions[]) {
+			assert.deepEqual(collisions(flag, { ...opts, ...(variant !== undefined ? { form: { variant } } : {}) }), [], `${variant} ${JSON.stringify(opts)}`);
+		}
+	}
+	golden("outlines.svg", tapered.svg);
+	golden("norway-state.svg", norway.svg);
 });
 
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {

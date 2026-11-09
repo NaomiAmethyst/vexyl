@@ -13,7 +13,7 @@ import { resolve } from "./adapt.js";
 import { axis } from "./geometry.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Repeat, Shape, ShapedEdge } from "./types.js";
+import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, Repeat, Shape, ShapedEdge } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -573,7 +573,7 @@ function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 		skip(m, `${m.extra} more ${m.extra === 1 ? "charge" : "charges"}, past the first ${mostCharges}`);
 	}
 	if (shown.outline !== undefined) {
-		skip(m, `the ${shown.outline.kind === "polygon" || shown.outline.kind === "path" ? "shaped" : shown.outline.kind} outline`);
+		outline(shown.outline, root, m);
 	}
 	if (shown.border !== undefined) {
 		skip(m, "the border");
@@ -598,6 +598,79 @@ function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 		skip(m, `the ${name} fold`);
 	}
 	return m;
+}
+
+/** The most corners of a polygon outline whose places are each marked; past that, only its box is. */
+const mostCorners = 12;
+
+/**
+ * A flag's outline: the places its named forms are cut to, along the edges, with what they are in
+ * the notes, or a polygon's corners, or for a path, how it's fitted to the grid.
+ */
+function outline(o: Outline, f: Frame, m: Measured): void {
+	const middle = half(f.h);
+	switch (o.kind) {
+		case "swallowtail": {
+			const depth = exactOf(o.depth);
+			const taper = exactOf(o.taper ?? 0);
+			part(m, "fly", minus(f.w, depth));
+			m.guides.push([vec({ x: minus(f.w, depth), y: middle }), vec({ x: f.w, y: middle })]);
+			if (taper.n !== 0n) {
+				part(m, "hoist", taper);
+				part(m, "hoist", minus(f.h, taper));
+			}
+			m.notes.push((t) => `The swallowtail is cut ${t(depth)} in from the fly, to a point on the middle line, and its tails end ${taper.n === 0n ? "at the fly’s corners" : `${t(taper)} in from the fly’s corners, along it`}.`);
+			return;
+		}
+		case "tongued": {
+			const depth = exactOf(o.depth);
+			const tongue = exactOf(o.tongue);
+			const a = half(minus(f.h, tongue));
+			part(m, "fly", minus(f.w, depth));
+			part(m, "hoist", a);
+			part(m, "hoist", minus(f.h, a));
+			m.guides.push([vec({ x: minus(f.w, depth), y: middle }), vec({ x: f.w, y: middle })]);
+			m.notes.push((t) => `The fly is cut ${t(depth)} in, to two notches ${t(tongue)} apart either side of the middle line, and the tongue between them comes to a point at the middle of the fly.`);
+			return;
+		}
+		case "pennant": {
+			const tip = exactOf(o.tip ?? 0);
+			if (tip.n === 0n) {
+				m.notes.push(() => "The pennant narrows from the whole hoist to a point at the middle of the fly.");
+				return;
+			}
+			const a = half(minus(f.h, tip));
+			part(m, "hoist", a);
+			part(m, "hoist", minus(f.h, a));
+			m.notes.push((t) => `The pennant narrows from the whole hoist to an end ${t(tip)} wide at the fly, on the middle line.`);
+			return;
+		}
+		case "polygon": {
+			const xs = o.vertices.map((v) => exactOf(v.fly));
+			const ys = o.vertices.map((v) => exactOf(v.hoist));
+			const corners = new Set(o.vertices.map((v) => `${v.fly} ${v.hoist}`)).size;
+			if (corners <= mostCorners) {
+				xs.forEach((x) => part(m, "fly", x));
+				ys.forEach((y) => part(m, "hoist", y));
+				m.notes.push(() => `The outline is the polygon through the ${corners} corners the file lists, each at places marked along the edges.`);
+				return;
+			}
+			const lo = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) <= 0 ? a : b));
+			const hi = (list: Fraction[]): Fraction => list.reduce((a, b) => (compare(a, b) >= 0 ? a : b));
+			for (const [along, list] of [["fly", xs], ["hoist", ys]] as const) {
+				part(m, along, lo(list));
+				part(m, along, hi(list));
+			}
+			const whole = same(lo(xs), zero) && same(lo(ys), zero) && same(hi(xs), f.w) && same(hi(ys), f.h);
+			m.notes.push(() => `The outline is the polygon through the ${corners} corners the file lists, ${whole ? "which reaches each edge of the grid" : "within the box marked along the edges"}.`);
+			return;
+		}
+		case "path": {
+			const [x, y, w, h] = o.box.map(exactOf) as [Fraction, Fraction, Fraction, Fraction];
+			m.notes.push((t) => `The outline is the file’s path, stretched from its box, ${gridText(w)} by ${gridText(h)} from (${gridText(x)}, ${gridText(y)}) in its own units, to the flag’s grid, ${t(f.w)} by ${t(f.h)}.`);
+			return;
+		}
+	}
 }
 
 function skip(m: Measured, what: string): void {

@@ -1,0 +1,55 @@
+// Not a real flag: a tapered swallowtail, and as variants, a pennant with an end, one with a point,
+// a curved outline, and a polygon with more corners than a sheet marks one by one.
+vexyl 1
+meta {
+  name "Outlines"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+}
+proportion hoist=20 fly=30
+outline swallowtail {
+  depth 8
+  taper 2.5
+}
+
+field blue
+band white {
+  width 4
+}
+
+variant pennant {
+  outline pennant {
+    tip 6
+  }
+}
+variant point {
+  outline pennant
+}
+variant curved {
+  outline {
+    path "M0 0H40Q30 15 40 30H0Z" box="0 0 40 30"
+  }
+}
+variant saw {
+  outline {
+    polygon {
+      point fly=0 hoist=0
+      point fly=30 hoist=0
+      point fly=26 hoist=2.5
+      point fly=30 hoist=5
+      point fly=26 hoist=7.5
+      point fly=30 hoist=10
+      point fly=26 hoist=12.5
+      point fly=30 hoist=15
+      point fly=26 hoist=17.5
+      point fly=30 hoist=20
+      point fly=0 hoist=20
+      point fly=1 hoist=15
+      point fly=0 hoist=10
+      point fly=1 hoist=5
+    }
+  }
+}
