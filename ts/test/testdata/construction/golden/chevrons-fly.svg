@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Chevrons from the fly: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Chevrons from the fly</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">1:2 · grid 12 × 24</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="112" y="271.220472" width="686.519685" height="343.259843" viewBox="0 0 24 12" overflow="hidden">
+  <title>Chevrons from the fly</title>
+  <clipPath id="vx-a8ce9b1e778b89fe-cs-f-flag1">
+    <polygon points="0,0 24,0 24,12 0,12"/>
+  </clipPath>
+  <g clip-path="url(#vx-a8ce9b1e778b89fe-cs-f-flag1)">
+    <polygon points="0,0 24,0 24,12 0,12" fill="#ffffff"/>
+    <polygon points="24,12 24,0 18.195498,0 14,5 19.873697,12" fill="#00843d"/>
+    <polygon points="24,0.232986 20,5 24,9.767014" fill="#ffcd00"/>
+    <polygon points="24,2.616493 22,5 24,7.383507" fill="#000000"/>
+  </g>
+</svg>
+<rect x="112" y="271.220472" width="686.519685" height="343.259843" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 266.220472V213.220472M512.469816 266.220472V239.220472M684.099738 266.220472V239.220472M741.309711 266.220472V239.220472M798.519685 266.220472V213.220472M107 271.220472H54M107 414.245407H80M107 614.480315H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="312.234908" y="237.220472" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">14</text>
+<text x="598.284777" y="237.220472" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">6</text>
+<text x="712.704724" y="237.220472" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="769.914698" y="237.220472" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="455.259843" y="211.220472" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">24</text>
+<text x="78" y="342.73294" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 342.73294)">5</text>
+<text x="78" y="514.362861" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 514.362861)">7</text>
+<text x="52" y="442.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 442.850394)">12</text>
+<path d="M546.469816 414.245407L546.379951 416.715778L546.110832 419.17309L545.663881 421.604354L545.04146 423.996717L544.24686 426.337533L543.284281 428.614428L542.158812 430.815366L540.876402 432.928712L539.44383 434.943295L537.868669 436.848466L536.159245 438.634154L534.324595 440.290918M512.469816 414.245407L798.519685 414.245407" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M546.469816 414.245407L546.379951 416.715778L546.110832 419.17309L545.663881 421.604354L545.04146 423.996717L544.24686 426.337533L543.284281 428.614428L542.158812 430.815366L540.876402 432.928712L539.44383 434.943295L537.868669 436.848466L536.159245 438.634154L534.324595 440.290918" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M512.469816 414.245407L798.519685 414.245407" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M112 245.220472H512.469816M112 239.220472V251.220472M512.469816 239.220472V251.220472M512.469816 245.220472H684.099738M512.469816 239.220472V251.220472M684.099738 239.220472V251.220472M684.099738 245.220472H741.309711M684.099738 239.220472V251.220472M741.309711 239.220472V251.220472M741.309711 245.220472H798.519685M741.309711 239.220472V251.220472M798.519685 239.220472V251.220472M112 219.220472H798.519685M112 213.220472V225.220472M798.519685 213.220472V225.220472M86 271.220472V414.245407M80 271.220472H92M80 414.245407H92M86 414.245407V614.480315M80 414.245407H92M80 614.480315H92M60 271.220472V614.480315M54 271.220472H66M54 614.480315H66" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="547.474336" y="429.537021" width="25.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="560.274336" y="440.037021" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">50°</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="209" r="13" fill="#00843d"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Green</text>
+<text x="913.722485" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#00843d</text>
+<circle cx="845.519685" cy="247" r="13" fill="#ffcd00"/>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
+<text x="904.849985" y="248" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffcd00</text>
+<circle cx="845.519685" cy="285" r="13" fill="#000000"/>
+<text x="868.519685" y="286" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Black</text>
+<text x="912.139085" y="286" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#000000</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">ts/test/testdata/construction/chevrons-fly.kdl · Vexyl 1</text>
+</svg>

@@ -1,0 +1,21 @@
+// Not a real flag: two chevrons from the bottom, at an angle, nearer the hoist than the middle.
+vexyl 1
+meta {
+  name "Chevrons from the bottom"
+  license "Apache-2.0"
+}
+palette {
+  blue "#003893"
+  white "#ffffff"
+  red "#ce1126"
+}
+proportion hoist=2 fly=3
+
+field blue
+chevrons red white {
+  from bottom
+  depth 1.2
+  ratio 2 1
+  apex 1.25
+  angle 40
+}

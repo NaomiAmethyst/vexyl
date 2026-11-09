@@ -54,7 +54,7 @@ function collisions(flag: Flag, opts: ConstructionOptions): string[] {
 /** A sheet's text, with its wrapped lines run together. */
 const textOf = (out: string): string => [...out.matchAll(/>([^<]*)<\/text>/g)].map((m) => m[1]).join(" ");
 
-const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea"];
+const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom"];
 
 test("golden sheets, Chile in both themes and every kind of unit", () => {
 	const chile = flagOf("chile");
@@ -213,7 +213,37 @@ band b { along bend; width 2; }
 charge star b { radius 1; fimbriate a 0.1; cut { disc { radius 0.2; } } }
 `);
 	const out = constructionSvg(flag);
-	assert.ok(textOf(out).includes("Not measured on this sheet: the chevrons, the b band along the bend, the cut in the b star, the b star’s fimbriation, the swallowtail outline."), out);
+	assert.ok(textOf(out).includes("Not measured on this sheet: the b band along the bend, the cut in the b star, the b star’s fimbriation, the swallowtail outline."), out);
+});
+
+test("chevrons: their apexes on the row across their edge, an apex along it, and an angle at the outermost", () => {
+	// Czechia's, from the hoist, whose arms meet its corners.
+	const czechia = constructionSheet(flagOf("czech-republic"), {});
+	assert.ok(czechia.labels.some((l) => l.text === "1.5") && czechia.labels.some((l) => l.text === "3"));
+	assert.ok(textOf(constructionSvg(flagOf("czech-republic"))).includes("The outermost arms of the blue chevron meet the corners of the hoist."));
+	// South Africa's black chevron gives its angle, and the gold one doesn't.
+	const za = constructionSheet(flagOf("south-africa"), {});
+	assert.ok(za.labels.some((l) => l.text === "33.6901°" && l.onFlag));
+	assert.ok(za.labels.some((l) => l.text === "26.9722") && za.labels.some((l) => l.text === "18.0278"), "the black apex, then the gold one");
+	// From the fly, off the middle: 10 deep in shares 1 1 3 from the fly, so apexes at 22, 20 and 14 from the hoist, and 5 down.
+	const fly = constructionSheet(flagOf("chevrons-fly"), {});
+	for (const want of ["14", "6", "2", "5", "7", "50°"]) {
+		assert.ok(fly.labels.some((l) => l.text === want), want);
+	}
+	// From the top, the apexes are on the row down the hoist side.
+	const top = constructionSvg(flagOf("chevrons-top"));
+	assert.ok(top.includes(">12<") && top.includes(">8<") && textOf(top).includes("meet the corners of the top edge"));
+	// From the bottom: 1.2 deep in shares 2 1, so apexes 0.8 and 1.2 up from the bottom, 1.25 from the hoist.
+	const bottom = constructionSheet(flagOf("chevrons-bottom"), { units: "hoist" });
+	for (const want of ["2H/5", "H/5", "5H/8", "7H/8", "40°"]) {
+		assert.ok(bottom.labels.some((l) => l.text === want), want);
+	}
+	for (const name of ["czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom"]) {
+		assert.doesNotMatch(textOf(constructionSvg(flagOf(name))), /Not measured[^.]*chevron/, name);
+		for (const opts of [{}, { units: "hoist" }, { paper: "fit", grid: true }] as ConstructionOptions[]) {
+			assert.deepEqual(collisions(flagOf(name), opts), [], `${name} ${JSON.stringify(opts)}`);
+		}
+	}
 });
 
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {

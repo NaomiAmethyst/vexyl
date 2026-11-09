@@ -1,0 +1,22 @@
+// Not a real flag: chevrons from the fly, off the middle, at an angle, in shares of their depth.
+vexyl 1
+meta {
+  name "Chevrons from the fly"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  green "#00843d"
+  gold "#ffcd00"
+  black "#000000"
+}
+proportion hoist=12 fly=24
+
+field white
+chevrons black gold green {
+  from fly
+  depth 10
+  ratio 1 1 3
+  apex 5
+  angle 50
+}

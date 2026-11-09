@@ -1,0 +1,17 @@
+// Not a real flag: one chevron from the top, whose arms meet the top corners.
+vexyl 1
+meta {
+  name "A chevron from the top"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  red "#c8102e"
+}
+proportion hoist=20 fly=30
+
+field white
+chevrons red {
+  from top
+  depth 12
+}

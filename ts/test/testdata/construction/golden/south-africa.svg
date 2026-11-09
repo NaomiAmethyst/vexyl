@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>South Africa: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">South Africa</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 60 × 90</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="112" y="187.010499" width="686.519685" height="457.67979" viewBox="0 0 90 60" overflow="hidden">
+  <title>South Africa</title>
+  <clipPath id="vx-5ca6bdf1ba1a91ab-cs-f-flag1">
+    <polygon points="0,0 90,0 90,60 0,60"/>
+  </clipPath>
+  <g clip-path="url(#vx-5ca6bdf1ba1a91ab-cs-f-flag1)">
+    <polygon points="0,0 90,0 90,60 0,60" fill="#e03c31"/>
+    <polygon points="0,30 90,30 90,60 0,60" fill="#001489"/>
+    <polygon points="-101.094004,-79.414507 48.027756,20 218.166538,20 218.166538,40 48.027756,40 -101.094004,139.414507 -112.188008,122.773501 26.972244,30 -112.188008,-62.773501" fill="#ffffff"/>
+    <polygon points="0,0 45,30 0,60" fill="#ffb81c"/>
+    <polygon points="0,12.018511 26.9722,30 0,47.981489" fill="#000000"/>
+    <polygon points="-96.656402,-71.648704 46.816654,24 210.166538,24 210.166538,36 46.816654,36 -96.656402,131.648704 -103.312805,121.664101 34.183346,30 -103.312805,-61.664101" fill="#007749"/>
+  </g>
+</svg>
+<rect x="112" y="187.010499" width="686.519685" height="457.67979" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 182.010499V129.010499M317.743847 182.010499V155.010499M455.259843 182.010499V155.010499M798.519685 182.010499V129.010499M107 187.010499H54M107 415.850394H80M107 644.690289H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="214.871924" y="153.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">26.9722</text>
+<text x="386.501845" y="153.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">18.0278</text>
+<text x="626.889764" y="153.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">45</text>
+<text x="455.259843" y="127.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">90</text>
+<text x="78" y="301.430446" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 301.430446)">30</text>
+<text x="78" y="530.270341" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 530.270341)">30</text>
+<text x="52" y="415.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 415.850394)">60</text>
+<path d="M283.743847 415.850394L283.784656 417.515736L283.906986 419.177081L284.110543 420.830439L284.394838 422.471843L284.759189 424.097352L285.202721 425.703064L285.72437 427.285124L286.322882 428.839734L286.996822 430.363163L287.744572 431.851753L288.564337 433.301931L289.454148 434.710216M317.743847 415.850394L112 415.850394" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M283.743847 415.850394L283.784656 417.515736L283.906986 419.177081L284.110543 420.830439L284.394838 422.471843L284.759189 424.097352L285.202721 425.703064L285.72437 427.285124L286.322882 428.839734L286.996822 430.363163L287.744572 431.851753L288.564337 433.301931L289.454148 434.710216" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M317.743847 415.850394L112 415.850394" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M112 161.010499H317.743847M112 155.010499V167.010499M317.743847 155.010499V167.010499M317.743847 161.010499H455.259843M317.743847 155.010499V167.010499M455.259843 155.010499V167.010499M455.259843 161.010499H798.519685M455.259843 155.010499V167.010499M798.519685 155.010499V167.010499M112 135.010499H798.519685M112 129.010499V141.010499M798.519685 129.010499V141.010499M86 187.010499V415.850394M80 187.010499H92M80 415.850394H92M86 415.850394V644.690289M80 415.850394H92M80 644.690289H92M60 187.010499V644.690289M54 187.010499H66M54 644.690289H66" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="220.337197" y="429.017285" width="61.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="251.137197" y="439.517285" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">33.6901°</text>
+<text x="40" y="670.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The outermost arms of the gold chevron meet the corners of the hoist.</text>
+<text x="40" y="690.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the white pall, the green pall.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="13" fill="#e03c31"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#e03c31</text>
+<text x="868.519685" y="191" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 179 C</text>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 5 87 82 0</text>
+<text x="868.519685" y="229" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CKS 750 C, chilli red</text>
+<circle cx="845.519685" cy="259" r="13" fill="#001489"/>
+<text x="868.519685" y="260" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="260" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#001489</text>
+<text x="868.519685" y="279" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone Reflex Blue C</text>
+<text x="868.519685" y="298" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 100 91 24 7</text>
+<text x="868.519685" y="317" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CKS 762 C, national flag blue</text>
+<circle cx="845.519685" cy="347" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="348" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="348" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<text x="868.519685" y="367" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CKS 701 C, national flag white</text>
+<circle cx="845.519685" cy="397" r="13" fill="#ffb81c"/>
+<text x="868.519685" y="398" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
+<text x="904.849985" y="398" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffb81c</text>
+<text x="868.519685" y="417" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 1235 C</text>
+<text x="868.519685" y="436" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 32 89 0</text>
+<text x="868.519685" y="455" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CKS 724 C, gold yellow</text>
+<circle cx="845.519685" cy="485" r="13" fill="#000000"/>
+<text x="868.519685" y="486" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Black</text>
+<text x="912.139085" y="486" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#000000</text>
+<text x="868.519685" y="505" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CKS 401 C, blue black</text>
+<circle cx="845.519685" cy="535" r="13" fill="#007749"/>
+<text x="868.519685" y="536" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Green</text>
+<text x="913.722485" y="536" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#007749</text>
+<text x="868.519685" y="555" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone 3415 C</text>
+<text x="868.519685" y="574" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 88 27 83 15</text>
+<text x="868.519685" y="593" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CKS 42 C, spectrum green</text>
+<text x="832.519685" y="631" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">FROM THE LAW</text>
+<text x="832.519685" y="661" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Constitution of the Republic of South</text>
+<text x="832.519685" y="680" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#1c1b22">Africa, 1996, section 5 and Schedule 1</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/south-africa.kdl · Vexyl 1</text>
+</svg>

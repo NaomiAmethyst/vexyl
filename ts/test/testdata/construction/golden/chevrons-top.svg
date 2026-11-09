@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>A chevron from the top: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">A chevron from the top</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 20 × 30</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="112" y="197.010499" width="686.519685" height="457.67979" viewBox="0 0 30 20" overflow="hidden">
+  <title>A chevron from the top</title>
+  <clipPath id="vx-139f0519d33e4e12-cs-f-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-139f0519d33e4e12-cs-f-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#ffffff"/>
+    <polygon points="0,0 0,0 15,12 30,0" fill="#c8102e"/>
+  </g>
+</svg>
+<rect x="112" y="197.010499" width="686.519685" height="457.67979" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 192.010499V165.010499M798.519685 192.010499V165.010499M107 197.010499H54M107 471.618373H80M107 654.690289H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="455.259843" y="163.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">30</text>
+<text x="78" y="334.314436" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 334.314436)">12</text>
+<text x="78" y="563.154331" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 563.154331)">8</text>
+<text x="52" y="425.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 425.850394)">20</text>
+<path d="M112 171.010499H798.519685M112 165.010499V177.010499M798.519685 165.010499V177.010499M86 197.010499V471.618373M80 197.010499H92M80 471.618373H92M86 471.618373V654.690289M80 471.618373H92M80 654.690289H92M60 197.010499V654.690289M54 197.010499H66M54 654.690289H66" fill="none" stroke="#2a2833" stroke-width="1"/>
+<text x="40" y="680.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The outermost arms of the red chevron meet the corners of the top edge.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="209" r="13" fill="#c8102e"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#c8102e</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">ts/test/testdata/construction/chevrons-top.kdl · Vexyl 1</text>
+</svg>

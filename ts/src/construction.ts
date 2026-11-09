@@ -10,7 +10,7 @@ import {
 } from "./exact.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { BandLayer, BarsLayer, ChargeLayer, CrossLayer, Flag, Layer, PanelLayer, Point, Shape } from "./types.js";
+import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PanelLayer, Point, Shape } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -282,6 +282,38 @@ interface SaltireMark {
 	name: string;
 }
 
+/** A point or a direction, in grid units or on the sheet. */
+interface Vec {
+	x: number;
+	y: number;
+}
+
+/** Where the flag is on the sheet: a point's place there, and the way a direction on the flag goes. */
+interface Placing {
+	at: (p: Vec) => Vec;
+	/** A direction on the flag as one on the sheet, of length 1. */
+	way: (v: Vec) => Vec;
+	/** Sheet units to a grid unit. */
+	s: number;
+}
+
+/** One way to draw a mark on the flag: its lines on the sheet, and where its label could go, best first. */
+interface MarkOption {
+	solid: Vec[][];
+	dashed: Vec[][];
+	spots: Box[];
+}
+
+/**
+ * Something measured on the flag itself, such as an angle or the width of a slanting arm, which is
+ * drawn where it is, as a charge's size is. It's left for the notes if its label has no room.
+ */
+interface FlagMark {
+	text: (t: Format) => string;
+	options: (p: Placing, w: number, h: number) => MarkOption[];
+	fallback: (text: string) => string;
+}
+
 interface Measured {
 	fly: Set<string>;
 	hoist: Set<string>;
@@ -289,6 +321,7 @@ interface Measured {
 	hoistParts: Fraction[];
 	charges: ChargeMark[];
 	saltires: SaltireMark[];
+	marks: FlagMark[];
 	notes: ((t: Format) => string)[];
 	unmeasured: Map<string, number>;
 	circles: boolean;
@@ -324,6 +357,8 @@ function describe(l: Layer): string {
 		case "saltire":
 		case "field":
 			return named(l.color, l.layer);
+		case "chevrons":
+			return l.colors.length === 1 ? named(l.colors[0], "chevron") : "chevrons";
 		case "panel":
 			return l.canton === true ? "canton" : "panel";
 		case "use":
@@ -336,7 +371,7 @@ function describe(l: Layer): string {
 const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), y: exactOf(p.hoist) });
 
 function measure(flag: Flag): Measured {
-	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], notes: [], unmeasured: new Map(), circles: false, turned: new Set(), extra: 0 };
+	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], notes: [], unmeasured: new Map(), circles: false, turned: new Set(), extra: 0 };
 	const root: Frame = { x: zero, y: zero, w: exactOf(flag.fly), h: exactOf(flag.hoist) };
 	walk(flag.layers, root, m);
 	if (m.extra > 0) {
@@ -448,6 +483,8 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 				skip(m, `the ${describe(l)}`);
 				break;
 			case "chevrons":
+				chevrons(l, f, m);
+				break;
 			case "rays":
 				skip(m, `the ${l.layer}`);
 				break;
@@ -502,6 +539,101 @@ function cross(l: CrossLayer, f: Frame, m: Measured): void {
 	if (l.fimbriate !== undefined) {
 		skip(m, `the ${describe(l)}’s fimbriation`);
 	}
+}
+
+/**
+ * An edge of a region, as the format places things by one: how long it is, a point some way in
+ * from it and along it, which axis runs along it, and the directions in and along on the flag.
+ */
+interface EdgeFrame {
+	length: Fraction;
+	place: (inward: Fraction, along: Fraction) => { x: Fraction; y: Fraction };
+	along: "fly" | "hoist";
+	u: Vec;
+	v: Vec;
+}
+
+function edgeOf(from: EdgeName, f: Frame): EdgeFrame {
+	switch (from) {
+		case "fly":
+			return { length: f.h, along: "hoist", u: { x: -1, y: 0 }, v: { x: 0, y: 1 }, place: (i, a) => ({ x: minus(plus(f.x, f.w), i), y: plus(f.y, a) }) };
+		case "top":
+			return { length: f.w, along: "fly", u: { x: 0, y: 1 }, v: { x: 1, y: 0 }, place: (i, a) => ({ x: plus(f.x, a), y: plus(f.y, i) }) };
+		case "bottom":
+			return { length: f.w, along: "fly", u: { x: 0, y: -1 }, v: { x: 1, y: 0 }, place: (i, a) => ({ x: plus(f.x, a), y: minus(plus(f.y, f.h), i) }) };
+		default:
+			return { length: f.h, along: "hoist", u: { x: 1, y: 0 }, v: { x: 0, y: 1 }, place: (i, a) => ({ x: plus(f.x, i), y: plus(f.y, a) }) };
+	}
+}
+
+const across = (along: "fly" | "hoist"): "fly" | "hoist" => (along === "fly" ? "hoist" : "fly");
+const coord = (p: { x: Fraction; y: Fraction }, along: "fly" | "hoist"): Fraction => (along === "fly" ? p.x : p.y);
+const vec = (p: { x: Fraction; y: Fraction }): Vec => ({ x: toNumber(p.x), y: toNumber(p.y) });
+const pathOf = (points: readonly Vec[]): string => points.map((q, i) => `${i === 0 ? "M" : "L"}${num(q.x)} ${num(q.y)}`).join("");
+
+/** A label's box `w` by `h`, a gap `g` from a point in a direction on the sheet, centered across it. */
+function spotAt(q: Vec, n: Vec, w: number, h: number, g: number): Box {
+	const reach = g + (Math.abs(n.x) * w + Math.abs(n.y) * h) / 2;
+	const c = { x: q.x + n.x * reach, y: q.y + n.y * reach };
+	return { x0: c.x - w / 2, y0: c.y - h / 2, x1: c.x + w / 2, y1: c.y + h / 2 };
+}
+
+/**
+ * Chevrons: each apex is a place on the row across their edge, so that the chain there gives the
+ * depth and each chevron's share of it, and an `apex` is a place along the edge. An `angle` is
+ * marked at the outermost apex, and without one the arms meet the edge's corners, which the notes say.
+ */
+function chevrons(l: ChevronsLayer, f: Frame, m: Measured): void {
+	const name = describe(l);
+	if (l.rotate !== 0) {
+		skip(m, `the turned ${name}`);
+		return;
+	}
+	const e = edgeOf(l.from, f);
+	const ratio = l.ratio.map(exactOf);
+	const total = sum(ratio);
+	const depth = exactOf(l.depth);
+	const middle = l.apex !== undefined ? exactOf(l.apex) : half(e.length);
+	let run = zero;
+	let apex = e.place(zero, middle);
+	for (const r of ratio) {
+		run = plus(run, r);
+		apex = e.place(times(depth, over(run, total)), middle);
+		part(m, across(e.along), coord(apex, across(e.along)));
+	}
+	if (l.apex !== undefined) {
+		part(m, e.along, coord(apex, e.along));
+	}
+	if (l.fimbriate !== undefined) {
+		skip(m, `the ${name}’s fimbriation`);
+	}
+	const edge = l.from === "hoist" || l.from === "fly" ? `the ${l.from}` : `the ${l.from} edge`;
+	if (l.angle === undefined) {
+		m.notes.push(() => `The outermost arms of the ${name} meet the corners of ${edge}.`);
+		return;
+	}
+	const degrees = l.angle;
+	const theta = (degrees * Math.PI) / 180;
+	const tip = vec(apex);
+	const foot = vec(e.place(zero, middle));
+	const { u, v } = e;
+	m.marks.push({
+		text: () => `${degrees}°`,
+		fallback: (text) => `The outermost arms of the ${name} are at ${text} to the line through their apexes.`,
+		// The angle is between the line back to the edge and an arm, on whichever side has room.
+		options: (p, w, h) => [1, -1].map((side) => {
+			const toward = (a: number): Vec => p.way({ x: -u.x * Math.cos(a) + side * v.x * Math.sin(a), y: -u.y * Math.cos(a) + side * v.y * Math.sin(a) });
+			const at = p.at(tip);
+			const r = 34;
+			const arc = Array.from({ length: 13 }, (_, i) => {
+				const d = toward((theta * i) / 12);
+				return { x: at.x + d.x * r, y: at.y + d.y * r };
+			});
+			const mid = toward(theta / 2);
+			const edgeAt = { x: at.x + mid.x * r, y: at.y + mid.y * r };
+			return { solid: [arc], dashed: [[at, p.at(foot)]], spots: [6, 16, 30].map((g) => spotAt(edgeAt, mid, w, h, g)) };
+		}),
+	});
 }
 
 /** Where a panel is, exactly, as `panelRect` draws it, with the region its layers use. */
@@ -1211,6 +1343,9 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		for (const sal of m.saltires) {
 			f(sal.width);
 		}
+		for (const mark of m.marks) {
+			mark.text(f);
+		}
 		for (const n of m.notes) {
 			n(f);
 		}
@@ -1571,6 +1706,10 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 		halo.push(d);
 		onFlag.push(`<path d="${d}" fill="none" stroke="${theme.onFlag}" stroke-width="1"/>`);
 	}
+	for (const d of charges.dashed) {
+		halo.push(d);
+		onFlag.push(`<path d="${d}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8" stroke-dasharray="3 3"/>`);
+	}
 	if (halo.length > 0) {
 		o.add(`<path d="${halo.join("")}" fill="none" stroke="${theme.halo}" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>`);
 	}
@@ -1668,6 +1807,8 @@ interface ChargePlan {
 	labels: ChargeLabel[];
 	/** Dimension lines drawn on the flag, as path data. */
 	dims: string[];
+	/** Construction lines drawn on the flag, dashed. */
+	dashed: string[];
 	/** Sizes with nowhere to go on the drawing, for the notes. */
 	fallbacks: string[];
 }
@@ -1688,7 +1829,7 @@ function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: S
 			taken.push({ x0: cx - 6, y0: cy - 6, x1: cx + 6, y1: cy + 6 });
 		}
 	}
-	const plan: ChargePlan = { labels: [], dims: [], fallbacks: [] };
+	const plan: ChargePlan = { labels: [], dims: [], dashed: [], fallbacks: [] };
 	if (!sizes) {
 		return plan;
 	}
@@ -1770,6 +1911,39 @@ function planCharges(m: Measured, d: { s: number; fx: number; fy: number; top: S
 		}
 		plan.dims.push(`M${num(a.x)} ${num(a.y)}L${num(b.x)} ${num(b.y)}${ticks(a)}${ticks(b)}`);
 		plan.labels.push({ cx: p.x, cy: p.y, text, box: got.box });
+	}
+	const place: Placing = {
+		at: (q) => ({ x: fx + q.x * s, y: fy + q.y * s }),
+		way: (v) => {
+			const l = Math.hypot(v.x, v.y);
+			return { x: v.x / l, y: v.y / l };
+		},
+		s,
+	};
+	for (const mark of m.marks) {
+		const text = mark.text(t);
+		const options = mark.options(place, monoWidth(text, 12), h);
+		let got: { o: MarkOption; box: Box } | null = null;
+		for (const outside of [false, true]) {
+			for (const o of options) {
+				const box = o.spots.find((b) => (outside ? within(b, area) && !hits(b, flag, 3) : within(b, flag)) && !taken.some((x) => hits(x, b)));
+				if (box !== undefined) {
+					got = { o, box };
+					break;
+				}
+			}
+			if (got !== null) {
+				break;
+			}
+		}
+		if (got === null) {
+			plan.fallbacks.push(mark.fallback(text));
+			continue;
+		}
+		taken.push(got.box);
+		plan.dims.push(...got.o.solid.map(pathOf));
+		plan.dashed.push(...got.o.dashed.map(pathOf));
+		plan.labels.push({ cx: (got.box.x0 + got.box.x1) / 2, cy: (got.box.y0 + got.box.y1) / 2, text, box: got.box });
 	}
 	return plan;
 }
