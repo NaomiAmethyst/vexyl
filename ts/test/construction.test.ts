@@ -54,7 +54,7 @@ function collisions(flag: Flag, opts: ConstructionOptions): string[] {
 /** A sheet's text, with its wrapped lines run together. */
 const textOf = (out: string): string => [...out.matchAll(/>([^<]*)<\/text>/g)].map((m) => m[1]).join(" ");
 
-const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom"];
+const fixtures = ["chile", "germany", "switzerland", "sweden", "jamaica", "bahamas", "united-states", "south-korea", "czech-republic", "south-africa", "chevrons-fly", "chevrons-top", "chevrons-bottom", "guyana", "kuwait", "pile-tip"];
 
 test("golden sheets, Chile in both themes and every kind of unit", () => {
 	const chile = flagOf("chile");
@@ -167,7 +167,8 @@ test("what's measured, as the file writes it", () => {
 	const korea = constructionSvg(flagOf("south-korea"));
 	assert.ok(textOf(korea).includes("Not measured on this sheet: the emblem along the bend, the emblem along the bend sinister."));
 	const bahamas = constructionSvg(flagOf("bahamas"));
-	assert.ok(textOf(bahamas).includes("Not measured on this sheet: the black pile."));
+	assert.ok(textOf(bahamas).includes("The black pile stands on the hoist from 0 to 3, and reaches 2.6 in from it, to a point."));
+	assert.doesNotMatch(textOf(bahamas), /Not measured/);
 	const jamaica = constructionSvg(flagOf("jamaica"), { units: "hoist" });
 	assert.ok(jamaica.includes(">H/6<"), "the saltire's width");
 	const swiss = constructionSvg(flagOf("switzerland"));
@@ -203,6 +204,40 @@ panel { side fly; width 4; charge star a { radius 1; } }
 	assert.ok(out.includes(">16<") && out.includes(">4<"));
 	const sheet = constructionSheet(flag, { units: "grid" });
 	assert.ok(sheet.labels.some((l) => l.text === "8"), "the canton's fly");
+});
+
+test("piles: their base along their edge, and their depth and end or their point", () => {
+	// Guyana's two piles stand on the hoist a little in from its corners, and reach in to points.
+	const guyana = constructionSheet(flagOf("guyana"), {});
+	for (const want of ["1.044", "1.1662", "28.8338", "28.956", "23.0563"]) {
+		assert.ok(guyana.labels.some((l) => l.text === want), want);
+	}
+	assert.ok(textOf(constructionSvg(flagOf("guyana"))).includes("The gold pile stands on the hoist from 1.044 to 28.956, and reaches 46.5199 in from it, to a point."));
+	// Kuwait's is cut flat, 2 wide, 3 in: so 2, 2 and 2 down the hoist, and 3 along the fly.
+	const kuwait = constructionSvg(flagOf("kuwait"));
+	assert.ok(textOf(kuwait).includes("The black pile stands on the hoist from 0 to 6, and reaches 3 in from it, where its end is 2 wide."));
+	assert.ok(kuwait.includes(">3<") && kuwait.includes(">9<"));
+	const tips = constructionSheet(flagOf("pile-tip"), {});
+	// From the top, 4 to 16 along, its point 12 along and 15 down; from the fly, 5 to 15 down, 8 in, at 22.
+	for (const want of ["4", "8", "6", "5", "10"]) {
+		assert.ok(tips.labels.some((l) => l.text === want), want);
+	}
+	const text = textOf(constructionSvg(flagOf("pile-tip")));
+	assert.ok(text.includes("The blue pile stands on the top edge from 4 to 16, with its point 15 in from it and 12 along it."));
+	assert.ok(text.includes("The red pile stands on the fly from 5 to 15, and reaches 8 in from it, to a point. It’s drawn as an outline 0.5 wide."));
+});
+
+test("palls: their junction and stem along the rows, and their arms' width across one", () => {
+	const za = constructionSheet(flagOf("south-africa"), { units: "hoist" });
+	// Arms 20 and 12 wide, a third and a fifth of the hoist, drawn on the flag.
+	assert.ok(za.labels.some((l) => l.text === "H/3" && l.onFlag) && za.labels.some((l) => l.text === "H/5" && l.onFlag));
+	// The junction is 45 in, and the stems' sides 20, 24, 36 and 40 down.
+	const grid = constructionSvg(flagOf("south-africa"));
+	assert.ok(grid.includes(">45<") && grid.includes(">20<") && grid.includes(">4<") && grid.includes(">6<"));
+	assert.doesNotMatch(textOf(grid), /Not measured/);
+	// With no room for the width on the flag, it goes in the notes.
+	const tiny = constructionSvg(parse(`${header.replace("hoist=10 fly=20", "hoist=1 fly=30")}pall a { width 0.1; }\n`));
+	assert.ok(textOf(tiny).includes("The a pall’s arms are 0.1 wide, measured across them.") || tiny.includes(">0.1<"));
 });
 
 test("what isn't measured is listed, never left out", () => {

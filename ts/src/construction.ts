@@ -10,7 +10,7 @@ import {
 } from "./exact.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PanelLayer, Point, Shape } from "./types.js";
+import type { BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, Flag, Layer, PallShape, PanelLayer, PileShape, Point, Shape } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -325,6 +325,8 @@ interface Measured {
 	notes: ((t: Format) => string)[];
 	unmeasured: Map<string, number>;
 	circles: boolean;
+	/** How many palls have been measured, so that one inside another is measured further along. */
+	palls: number;
 	turned: Set<string>;
 	/** Charges past the most a sheet measures. */
 	extra: number;
@@ -371,7 +373,7 @@ function describe(l: Layer): string {
 const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), y: exactOf(p.hoist) });
 
 function measure(flag: Flag): Measured {
-	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], notes: [], unmeasured: new Map(), circles: false, turned: new Set(), extra: 0 };
+	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
 	const root: Frame = { x: zero, y: zero, w: exactOf(flag.fly), h: exactOf(flag.hoist) };
 	walk(flag.layers, root, m);
 	if (m.extra > 0) {
@@ -636,6 +638,86 @@ function chevrons(l: ChevronsLayer, f: Frame, m: Measured): void {
 	});
 }
 
+const edgeName = (from: EdgeName): string => (from === "hoist" || from === "fly" ? `the ${from}` : `the ${from} edge`);
+
+/**
+ * A pile: both ends of its base are places along its edge, and its depth, or its tip, a place
+ * across it. A flat end is two places along the edge, at its depth. The notes say which is which.
+ */
+function pile(name: string, s: PileShape, f: Frame, m: Measured): void {
+	const e = edgeOf(s.from, f);
+	const a = s.base !== undefined ? exactOf(s.base[0]) : zero;
+	const b = s.base !== undefined ? exactOf(s.base[1]) : e.length;
+	part(m, e.along, coord(e.place(zero, a), e.along));
+	part(m, e.along, coord(e.place(zero, b), e.along));
+	const line = s.hollow !== undefined ? exactOf(s.hollow) : undefined;
+	const outline = (t: Format): string => (line !== undefined ? ` It’s drawn as an outline ${t(line)} wide.` : "");
+	if (s.tip !== undefined) {
+		const along = exactOf(s.tip[0]);
+		const inward = exactOf(s.tip[1]);
+		const tip = e.place(inward, along);
+		part(m, e.along, coord(tip, e.along));
+		part(m, across(e.along), coord(tip, across(e.along)));
+		m.notes.push((t) => `The ${name} stands on ${edgeName(s.from)} from ${t(a)} to ${t(b)}, with its point ${t(inward)} in from it and ${t(along)} along it.${outline(t)}`);
+		return;
+	}
+	const depth = exactOf(s.depth ?? 0);
+	const mid = half(plus(a, b));
+	part(m, across(e.along), coord(e.place(depth, mid), across(e.along)));
+	if (s.flat !== undefined && s.flat > 0) {
+		const flat = exactOf(s.flat);
+		part(m, e.along, coord(e.place(depth, minus(mid, half(flat))), e.along));
+		part(m, e.along, coord(e.place(depth, plus(mid, half(flat))), e.along));
+		m.notes.push((t) => `The ${name} stands on ${edgeName(s.from)} from ${t(a)} to ${t(b)}, and reaches ${t(depth)} in from it, where its end is ${t(flat)} wide.${outline(t)}`);
+		return;
+	}
+	m.notes.push((t) => `The ${name} stands on ${edgeName(s.from)} from ${t(a)} to ${t(b)}, and reaches ${t(depth)} in from it, to a point.${outline(t)}`);
+}
+
+/**
+ * A pall: its junction is a place across its edge, and its stem's sides places along it. Its arms
+ * slant, so their width is measured across one, at its middle.
+ */
+function pall(name: string, s: PallShape, f: Frame, m: Measured): void {
+	const e = edgeOf(s.from, f);
+	const width = exactOf(s.width);
+	const mid = half(e.length);
+	const junction = s.junction !== undefined && s.junction !== 0 ? exactOf(s.junction) : mid;
+	part(m, across(e.along), coord(e.place(junction, mid), across(e.along)));
+	part(m, e.along, coord(e.place(junction, minus(mid, half(width))), e.along));
+	part(m, e.along, coord(e.place(junction, plus(mid, half(width))), e.along));
+	if (s.hollow !== undefined) {
+		const line = exactOf(s.hollow);
+		m.notes.push((t) => `The ${name} is drawn as an outline ${t(line)} wide.`);
+	}
+	// The arm from the edge's first corner to the junction, as a direction on the flag and its middle.
+	const { u, v } = e;
+	const j = toNumber(junction);
+	const c = toNumber(mid);
+	const d = { x: u.x * j + v.x * c, y: u.y * j + v.y * c };
+	const length = Math.hypot(d.x, d.y);
+	const dir = { x: d.x / length, y: d.y / length };
+	const normal = { x: -dir.y, y: dir.x };
+	// The middle of the arm, or for a pall inside another, which shares its arm, a little along it.
+	const share = [0.5, 0.68, 0.32, 0.82][m.palls++ % 4]!;
+	const corner = vec(e.place(zero, zero));
+	const centre = { x: corner.x + d.x * share, y: corner.y + d.y * share };
+	const w = toNumber(width);
+	m.marks.push({
+		text: (t) => t(width),
+		fallback: (text) => `The ${name}’s arms are ${text} wide, measured across them.`,
+		options: (p, tw, th) => {
+			const ends = [-1, 1].map((k) => p.at({ x: centre.x + (normal.x * k * w) / 2, y: centre.y + (normal.y * k * w) / 2 }));
+			const along = p.way(dir);
+			const tick = (q: Vec): Vec[] => [{ x: q.x - along.x * 5, y: q.y - along.y * 5 }, { x: q.x + along.x * 5, y: q.y + along.y * 5 }];
+			const solid = [[ends[0]!, ends[1]!], tick(ends[0]!), tick(ends[1]!)];
+			const out = [-1, 1].map((k) => p.way({ x: normal.x * k, y: normal.y * k }));
+			const spots = [6, 14, 28].flatMap((g) => [spotAt(ends[1]!, out[1]!, tw, th, g), spotAt(ends[0]!, out[0]!, tw, th, g)]);
+			return [{ solid, dashed: [], spots }];
+		},
+	});
+}
+
 /** Where a panel is, exactly, as `panelRect` draws it, with the region its layers use. */
 function panelFrames(p: PanelLayer, f: Frame): { drawn: Frame; region: Frame } {
 	const extra = p.edge !== undefined ? half(exactOf(p.edge.depth)) : zero;
@@ -771,7 +853,16 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 	const s = l.shape;
 	const name = describe(l);
 	if (s.kind === "pile" || s.kind === "pall") {
-		skip(m, `the ${name}`);
+		if (region === null) {
+			skip(m, `the ${name}`);
+		} else if (s.kind === "pile") {
+			pile(name, s, region, m);
+		} else {
+			pall(name, s, region, m);
+		}
+		if (l.fimbriate !== undefined) {
+			skip(m, `the ${name}’s fimbriation`);
+		}
 		return;
 	}
 	if (m.charges.length >= mostCharges) {

@@ -1,0 +1,25 @@
+// Not a real flag: a pile from the top with its point off the middle, and one from the fly.
+vexyl 1
+meta {
+  name "Piles with points"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+}
+proportion hoist=20 fly=30
+
+field white
+pile blue {
+  from top
+  base 4 16
+  tip 12 15
+}
+pile red {
+  from fly
+  base 5 15
+  depth 8
+  hollow 0.5
+}

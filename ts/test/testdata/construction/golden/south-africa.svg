@@ -5,7 +5,7 @@
 <text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">South Africa</text>
 <text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 60 × 90</text>
 <path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
-<svg x="112" y="187.010499" width="686.519685" height="457.67979" viewBox="0 0 90 60" overflow="hidden">
+<svg x="112" y="197.010499" width="686.519685" height="457.67979" viewBox="0 0 90 60" overflow="hidden">
   <title>South Africa</title>
   <clipPath id="vx-5ca6bdf1ba1a91ab-cs-f-flag1">
     <polygon points="0,0 90,0 90,60 0,60"/>
@@ -19,23 +19,36 @@
     <polygon points="-96.656402,-71.648704 46.816654,24 210.166538,24 210.166538,36 46.816654,36 -96.656402,131.648704 -103.312805,121.664101 34.183346,30 -103.312805,-61.664101" fill="#007749"/>
   </g>
 </svg>
-<rect x="112" y="187.010499" width="686.519685" height="457.67979" fill="none" stroke="#c9c6d2" stroke-width="1"/>
-<path d="M112 182.010499V129.010499M317.743847 182.010499V155.010499M455.259843 182.010499V155.010499M798.519685 182.010499V129.010499M107 187.010499H54M107 415.850394H80M107 644.690289H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
-<text x="214.871924" y="153.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">26.9722</text>
-<text x="386.501845" y="153.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">18.0278</text>
-<text x="626.889764" y="153.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">45</text>
-<text x="455.259843" y="127.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">90</text>
-<text x="78" y="301.430446" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 301.430446)">30</text>
-<text x="78" y="530.270341" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 530.270341)">30</text>
-<text x="52" y="415.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 415.850394)">60</text>
-<path d="M283.743847 415.850394L283.784656 417.515736L283.906986 419.177081L284.110543 420.830439L284.394838 422.471843L284.759189 424.097352L285.202721 425.703064L285.72437 427.285124L286.322882 428.839734L286.996822 430.363163L287.744572 431.851753L288.564337 433.301931L289.454148 434.710216M317.743847 415.850394L112 415.850394" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
-<path d="M283.743847 415.850394L283.784656 417.515736L283.906986 419.177081L284.110543 420.830439L284.394838 422.471843L284.759189 424.097352L285.202721 425.703064L285.72437 427.285124L286.322882 428.839734L286.996822 430.363163L287.744572 431.851753L288.564337 433.301931L289.454148 434.710216" fill="none" stroke="#1c1b22" stroke-width="1"/>
-<path d="M317.743847 415.850394L112 415.850394" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
-<path d="M112 161.010499H317.743847M112 155.010499V167.010499M317.743847 155.010499V167.010499M317.743847 161.010499H455.259843M317.743847 155.010499V167.010499M455.259843 155.010499V167.010499M455.259843 161.010499H798.519685M455.259843 155.010499V167.010499M798.519685 155.010499V167.010499M112 135.010499H798.519685M112 129.010499V141.010499M798.519685 129.010499V141.010499M86 187.010499V415.850394M80 187.010499H92M80 415.850394H92M86 415.850394V644.690289M80 415.850394H92M80 644.690289H92M60 187.010499V644.690289M54 187.010499H66M54 644.690289H66" fill="none" stroke="#2a2833" stroke-width="1"/>
-<rect x="220.337197" y="429.017285" width="61.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
-<text x="251.137197" y="439.517285" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">33.6901°</text>
-<text x="40" y="670.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The outermost arms of the gold chevron meet the corners of the hoist.</text>
-<text x="40" y="690.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Not measured on this sheet: the white pall, the green pall.</text>
+<rect x="112" y="197.010499" width="686.519685" height="457.67979" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M112 192.010499V139.010499M317.743847 192.010499V165.010499M455.259843 192.010499V165.010499M798.519685 192.010499V139.010499M107 197.010499H54M107 349.570429H80M107 380.082415H80M107 425.850394H80M107 471.618373H80M107 502.130359H80M107 654.690289H54" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="214.871924" y="163.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">26.9722</text>
+<text x="386.501845" y="163.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">18.0278</text>
+<text x="626.889764" y="163.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">45</text>
+<text x="455.259843" y="137.010499" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">90</text>
+<text x="78" y="273.290464" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 273.290464)">20</text>
+<text x="78" y="364.826422" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 364.826422)">4</text>
+<text x="78" y="402.966404" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 402.966404)">6</text>
+<text x="78" y="448.734383" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 448.734383)">6</text>
+<text x="78" y="486.874366" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 486.874366)">4</text>
+<text x="78" y="578.410324" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 78 578.410324)">20</text>
+<text x="52" y="425.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 52 425.850394)">60</text>
+<path d="M325.942433 247.961679L241.31741 374.899214M321.782181 245.188178L330.102684 250.73518M237.157158 372.125713L245.477661 377.672715M283.743847 425.850394L283.784656 427.515736L283.906986 429.177081L284.110543 430.830439L284.394838 432.471843L284.759189 434.097352L285.202721 435.703064L285.72437 437.285124L286.322882 438.839734L286.996822 440.363163L287.744572 441.851753L288.564337 443.301931L289.454148 444.710216M370.8042 314.540367L320.029186 390.702888M366.643948 311.766866L374.964451 317.313868M315.868935 387.929387L324.189437 393.476389M317.743847 425.850394L112 425.850394" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M325.942433 247.961679L241.31741 374.899214" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M321.782181 245.188178L330.102684 250.73518" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M237.157158 372.125713L245.477661 377.672715" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M283.743847 425.850394L283.784656 427.515736L283.906986 429.177081L284.110543 430.830439L284.394838 432.471843L284.759189 434.097352L285.202721 435.703064L285.72437 437.285124L286.322882 438.839734L286.996822 440.363163L287.744572 441.851753L288.564337 443.301931L289.454148 444.710216" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M370.8042 314.540367L320.029186 390.702888" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M366.643948 311.766866L374.964451 317.313868" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M315.868935 387.929387L324.189437 393.476389" fill="none" stroke="#1c1b22" stroke-width="1"/>
+<path d="M317.743847 425.850394L112 425.850394" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M112 171.010499H317.743847M112 165.010499V177.010499M317.743847 165.010499V177.010499M317.743847 171.010499H455.259843M317.743847 165.010499V177.010499M455.259843 165.010499V177.010499M455.259843 171.010499H798.519685M455.259843 165.010499V177.010499M798.519685 165.010499V177.010499M112 145.010499H798.519685M112 139.010499V151.010499M798.519685 139.010499V151.010499M86 197.010499V349.570429M80 197.010499H92M80 349.570429H92M86 349.570429V380.082415M80 349.570429H92M80 380.082415H92M86 380.082415V425.850394M80 380.082415H92M80 425.850394H92M86 425.850394V471.618373M80 425.850394H92M80 471.618373H92M86 471.618373V502.130359M80 471.618373H92M80 502.130359H92M86 502.130359V654.690289M80 502.130359H92M80 654.690289H92M60 197.010499V654.690289M54 197.010499H66M54 654.690289H66" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="223.343055" y="381.060746" width="18.4" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="232.543055" y="391.560746" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">20</text>
+<rect x="220.337197" y="439.017285" width="61.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="251.137197" y="449.517285" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">33.6901°</text>
+<rect x="302.054831" y="396.86442" width="18.4" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="311.254831" y="407.36442" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">12</text>
+<text x="40" y="680.690289" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The outermost arms of the gold chevron meet the corners of the hoist.</text>
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
 <circle cx="845.519685" cy="171" r="13" fill="#e03c31"/>
 <text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
