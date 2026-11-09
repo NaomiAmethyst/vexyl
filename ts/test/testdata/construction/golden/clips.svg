@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Clips and cuts: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Clips and cuts</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">2:3 · grid 20 × 30</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="159.484252" y="180" width="617.551181" height="411.700787" viewBox="0 0 30 20" overflow="hidden">
+  <title>Clips and cuts</title>
+  <clipPath id="vx-f2ceb59281886692-cs-f-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-f2ceb59281886692-cs-f-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#0055a4"/>
+    <mask id="vx-f2ceb59281886692-cs-f-mask2" maskUnits="userSpaceOnUse" x="0" y="0" width="30" height="20">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#fff"/>
+      <circle cx="22" cy="10" r="2" fill="#000"/>
+    </mask>
+    <g mask="url(#vx-f2ceb59281886692-cs-f-mask2)" style="isolation:isolate">
+      <polygon points="0,7 30,7 30,13 0,13" fill="#ffffff"/>
+    </g>
+    <clipPath id="vx-f2ceb59281886692-cs-f-clip3">
+      <polygon points="0,0 12,0 0,8"/>
+    </clipPath>
+    <g clip-path="url(#vx-f2ceb59281886692-cs-f-clip3)" style="isolation:isolate">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#ef4135"/>
+    </g>
+    <mask id="vx-f2ceb59281886692-cs-f-mask4" maskUnits="userSpaceOnUse" x="0" y="0" width="30" height="20">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#fff"/>
+      <path d="M0 0H1V1Z" fill="#000" transform="translate(4 16) scale(1) translate(-0.5 -0.5)"/>
+      <path d="M0 0H1V1Z" fill="#000" transform="translate(5 0) translate(4 16) scale(1) translate(-0.5 -0.5)"/>
+      <path d="M0 0H1V1Z" fill="#000" transform="translate(10 0) translate(4 16) scale(1) translate(-0.5 -0.5)"/>
+    </mask>
+    <g mask="url(#vx-f2ceb59281886692-cs-f-mask4)" style="isolation:isolate">
+      <polygon points="2.5,15 5.5,15 5.5,17 2.5,17" fill="#ffffff"/>
+      <polygon points="7.5,15 10.5,15 10.5,17 7.5,17" fill="#ffffff"/>
+      <polygon points="12.5,15 15.5,15 15.5,17 12.5,17" fill="#ffffff"/>
+    </g>
+    <clipPath id="vx-f2ceb59281886692-cs-f-clip5">
+      <path d="M24 4A2 1 0 1 0 28 4A2 1 0 1 0 24 4Z"/>
+    </clipPath>
+    <g clip-path="url(#vx-f2ceb59281886692-cs-f-clip5)" style="isolation:isolate">
+      <circle cx="26" cy="4" r="2" fill="#ef4135"/>
+    </g>
+  </g>
+</svg>
+<rect x="159.484252" y="180" width="617.551181" height="411.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M159.484252 175V122M241.824409 175V148M282.994488 175V148M612.355118 175V148M694.695276 175V148M777.035433 175V122M154.484252 180H75.484252M154.484252 262.340157H127.484252M154.484252 385.850394H127.484252M154.484252 509.36063H127.484252M154.484252 324.095276H101.484252M154.484252 447.605512H101.484252M154.484252 591.700787H75.484252" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="200.654331" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">4</text>
+<text x="262.409449" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="447.674803" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">16</text>
+<text x="653.525197" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">4</text>
+<text x="468.259843" y="120" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">30</text>
+<text x="125.484252" y="221.170079" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 125.484252 221.170079)">4</text>
+<text x="125.484252" y="324.095276" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 125.484252 324.095276)">6</text>
+<text x="125.484252" y="447.605512" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 125.484252 447.605512)">6</text>
+<text x="99.484252" y="252.047638" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 99.484252 252.047638)">7</text>
+<text x="99.484252" y="385.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 99.484252 385.850394)">6</text>
+<text x="99.484252" y="519.65315" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 99.484252 519.65315)">7</text>
+<text x="73.484252" y="385.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 73.484252 385.850394)">20</text>
+<path d="M653.525197 385.850394L653.172981 391.224167L652.12236 396.505994L650.391311 401.605501L648.009452 406.435433L645.017538 410.91315L641.46676 414.962036L637.417874 418.512813L632.940157 421.504728L628.110225 423.886587L623.010719 425.617636L617.728892 426.668257L612.355118 427.020472L606.981344 426.668257L601.699518 425.617636L596.600011 423.886587L591.770079 421.504728L587.292362 418.512813L583.243476 414.962036L579.692699 410.91315L576.700784 406.435433L574.318925 401.605501L572.587876 396.505994L571.537255 391.224167L571.185039 385.850394L571.537255 380.47662L572.587876 375.194793L574.318925 370.095287L576.700784 365.265354L579.692699 360.787638L583.243476 356.738752L587.292362 353.187974L591.770079 350.19606L596.600011 347.814201L601.699518 346.083151L606.981344 345.032531L612.355118 344.680315L617.728892 345.032531L623.010719 346.083151L628.110225 347.814201L632.940157 350.19606L637.417874 353.187974L641.46676 356.738752L645.017538 360.787638L648.009452 365.265354L650.391311 370.095287L652.12236 375.194793L653.172981 380.47662L653.525197 385.850394M159.484252 180L406.504724 180L159.484252 344.680315L159.484252 180M231.53189 499.06811L252.116929 499.06811L252.116929 519.65315L231.53189 519.65315L231.53189 499.06811M735.865354 262.340157L735.513139 265.027044L734.462518 267.667958L732.731469 270.217711L730.34961 272.632677L727.357695 274.871535L723.806917 276.895978L719.758032 278.671367L715.280315 280.167325L710.450383 281.358254L705.350876 282.223779L700.069049 282.749089L694.695276 282.925197L689.321502 282.749089L684.039675 282.223779L678.940169 281.358254L674.110236 280.167325L669.63252 278.671367L665.583634 276.895978L662.032856 274.871535L659.040942 272.632677L656.659082 270.217711L654.928033 267.667958L653.877413 265.027044L653.525197 262.340157L653.877413 259.653271L654.928033 257.012357L656.659082 254.462604L659.040942 252.047638L662.032856 249.808779L665.583634 247.784337L669.63252 246.008948L674.110236 244.51299L678.940169 243.322061L684.039675 242.456536L689.321502 241.931226L694.695276 241.755118L700.069049 241.931226L705.350876 242.456536L710.450383 243.322061L715.280315 244.51299L719.758032 246.008948L723.806917 247.784337L727.357695 249.808779L730.34961 252.047638L732.731469 254.462604L734.462518 257.012357L735.513139 259.653271L735.865354 262.340157" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+<path d="M653.525197 385.850394L653.172981 391.224167L652.12236 396.505994L650.391311 401.605501L648.009452 406.435433L645.017538 410.91315L641.46676 414.962036L637.417874 418.512813L632.940157 421.504728L628.110225 423.886587L623.010719 425.617636L617.728892 426.668257L612.355118 427.020472L606.981344 426.668257L601.699518 425.617636L596.600011 423.886587L591.770079 421.504728L587.292362 418.512813L583.243476 414.962036L579.692699 410.91315L576.700784 406.435433L574.318925 401.605501L572.587876 396.505994L571.537255 391.224167L571.185039 385.850394L571.537255 380.47662L572.587876 375.194793L574.318925 370.095287L576.700784 365.265354L579.692699 360.787638L583.243476 356.738752L587.292362 353.187974L591.770079 350.19606L596.600011 347.814201L601.699518 346.083151L606.981344 345.032531L612.355118 344.680315L617.728892 345.032531L623.010719 346.083151L628.110225 347.814201L632.940157 350.19606L637.417874 353.187974L641.46676 356.738752L645.017538 360.787638L648.009452 365.265354L650.391311 370.095287L652.12236 375.194793L653.172981 380.47662L653.525197 385.850394M159.484252 180L406.504724 180L159.484252 344.680315L159.484252 180M231.53189 499.06811L252.116929 499.06811L252.116929 519.65315L231.53189 519.65315L231.53189 499.06811M735.865354 262.340157L735.513139 265.027044L734.462518 267.667958L732.731469 270.217711L730.34961 272.632677L727.357695 274.871535L723.806917 276.895978L719.758032 278.671367L715.280315 280.167325L710.450383 281.358254L705.350876 282.223779L700.069049 282.749089L694.695276 282.925197L689.321502 282.749089L684.039675 282.223779L678.940169 281.358254L674.110236 280.167325L669.63252 278.671367L665.583634 276.895978L662.032856 274.871535L659.040942 272.632677L656.659082 270.217711L654.928033 267.667958L653.877413 265.027044L653.525197 262.340157L653.877413 259.653271L654.928033 257.012357L656.659082 254.462604L659.040942 252.047638L662.032856 249.808779L665.583634 247.784337L669.63252 246.008948L674.110236 244.51299L678.940169 243.322061L684.039675 242.456536L689.321502 241.931226L694.695276 241.755118L700.069049 241.931226L705.350876 242.456536L710.450383 243.322061L715.280315 244.51299L719.758032 246.008948L723.806917 247.784337L727.357695 249.808779L730.34961 252.047638L732.731469 254.462604L734.462518 257.012357L735.513139 259.653271L735.865354 262.340157" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="5 4"/>
+<path d="M612.355118 180V377.850394M159.484252 385.850394H604.355118M606.355118 385.850394H618.355118M612.355118 379.850394V391.850394M282.994488 180V254.340157M159.484252 262.340157H274.994488M276.994488 262.340157H288.994488M282.994488 256.340157V268.340157M241.824409 180V501.36063M159.484252 509.36063H233.824409M235.824409 509.36063H247.824409M241.824409 503.36063V515.36063M241.824409 180V501.36063M159.484252 509.36063H233.824409M235.824409 509.36063H247.824409M241.824409 503.36063V515.36063M694.695276 180V254.340157M159.484252 262.340157H686.695276M688.695276 262.340157H700.695276M694.695276 256.340157V268.340157M694.695276 180V254.340157M159.484252 262.340157H686.695276M688.695276 262.340157H700.695276M694.695276 256.340157V268.340157" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M612.355118 180V377.850394M159.484252 385.850394H604.355118" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M606.355118 385.850394H618.355118M612.355118 379.850394V391.850394" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M282.994488 180V254.340157M159.484252 262.340157H274.994488" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M276.994488 262.340157H288.994488M282.994488 256.340157V268.340157" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M241.824409 180V501.36063M159.484252 509.36063H233.824409" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M235.824409 509.36063H247.824409M241.824409 503.36063V515.36063" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M241.824409 180V501.36063M159.484252 509.36063H233.824409" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M235.824409 509.36063H247.824409M241.824409 503.36063V515.36063" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M694.695276 180V254.340157M159.484252 262.340157H686.695276" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M688.695276 262.340157H700.695276M694.695276 256.340157V268.340157" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M694.695276 180V254.340157M159.484252 262.340157H686.695276" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M688.695276 262.340157H700.695276M694.695276 256.340157V268.340157" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M159.484252 154H241.824409M159.484252 148V160M241.824409 148V160M241.824409 154H282.994488M241.824409 148V160M282.994488 148V160M282.994488 154H612.355118M282.994488 148V160M612.355118 148V160M612.355118 154H694.695276M612.355118 148V160M694.695276 148V160M159.484252 128H777.035433M159.484252 122V134M777.035433 122V134M133.484252 180V262.340157M127.484252 180H139.484252M127.484252 262.340157H139.484252M133.484252 262.340157V385.850394M127.484252 262.340157H139.484252M127.484252 385.850394H139.484252M133.484252 385.850394V509.36063M127.484252 385.850394H139.484252M127.484252 509.36063H139.484252M107.484252 180V324.095276M101.484252 180H113.484252M101.484252 324.095276H113.484252M107.484252 324.095276V447.605512M101.484252 324.095276H113.484252M101.484252 447.605512H113.484252M107.484252 447.605512V591.700787M101.484252 447.605512H113.484252M101.484252 591.700787H113.484252M81.484252 180V591.700787M75.484252 180H87.484252M75.484252 591.700787H87.484252" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="599.555118" y="431.020472" width="25.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="612.355118" y="441.520472" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 2</text>
+<rect x="244.994488" y="348.680315" width="76" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="282.994488" y="359.180315" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">box 12 × 8</text>
+<rect x="207.424409" y="523.65315" width="68.8" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="241.824409" y="534.15315" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">box 1 × 1</text>
+<rect x="221.824409" y="470.775591" width="40" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="241.824409" y="481.275591" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">3 × 2</text>
+<rect x="674.695276" y="286.925197" width="40" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="694.695276" y="297.425197" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">4 × 2</text>
+<rect x="681.895276" y="307.510236" width="25.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="694.695276" y="318.010236" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 2</text>
+<text x="40" y="617.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The white band has a disc cut out of it, drawn dashed.</text>
+<text x="40" y="637.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The group keeps only what’s inside its clip, a polygon, drawn dashed.</text>
+<text x="40" y="657.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The white rect has a path cut out of it, drawn dashed, and so does each of its copies.</text>
+<text x="40" y="677.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">3 white rects in a line, each 5 along the fly from the one before. The first is measured.</text>
+<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The red disc keeps only what’s inside its clip, an ellipse, drawn dashed.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">DETAIL: WHITE RECTS</text>
+<svg x="866.519685" y="184" width="210" height="58.920863" viewBox="2.05 14.05 13.9 3.9" overflow="hidden">
+  <title>Clips and cuts</title>
+  <clipPath id="vx-f2ceb59281886692-cs-d0-flag1">
+    <polygon points="0,0 30,0 30,20 0,20"/>
+  </clipPath>
+  <g clip-path="url(#vx-f2ceb59281886692-cs-d0-flag1)">
+    <polygon points="0,0 30,0 30,20 0,20" fill="#0055a4"/>
+    <mask id="vx-f2ceb59281886692-cs-d0-mask2" maskUnits="userSpaceOnUse" x="0" y="0" width="30" height="20">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#fff"/>
+      <circle cx="22" cy="10" r="2" fill="#000"/>
+    </mask>
+    <g mask="url(#vx-f2ceb59281886692-cs-d0-mask2)" style="isolation:isolate">
+      <polygon points="0,7 30,7 30,13 0,13" fill="#ffffff"/>
+    </g>
+    <clipPath id="vx-f2ceb59281886692-cs-d0-clip3">
+      <polygon points="0,0 12,0 0,8"/>
+    </clipPath>
+    <g clip-path="url(#vx-f2ceb59281886692-cs-d0-clip3)" style="isolation:isolate">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#ef4135"/>
+    </g>
+    <mask id="vx-f2ceb59281886692-cs-d0-mask4" maskUnits="userSpaceOnUse" x="0" y="0" width="30" height="20">
+      <polygon points="0,0 30,0 30,20 0,20" fill="#fff"/>
+      <path d="M0 0H1V1Z" fill="#000" transform="translate(4 16) scale(1) translate(-0.5 -0.5)"/>
+      <path d="M0 0H1V1Z" fill="#000" transform="translate(5 0) translate(4 16) scale(1) translate(-0.5 -0.5)"/>
+      <path d="M0 0H1V1Z" fill="#000" transform="translate(10 0) translate(4 16) scale(1) translate(-0.5 -0.5)"/>
+    </mask>
+    <g mask="url(#vx-f2ceb59281886692-cs-d0-mask4)" style="isolation:isolate">
+      <polygon points="2.5,15 5.5,15 5.5,17 2.5,17" fill="#ffffff"/>
+      <polygon points="7.5,15 10.5,15 10.5,17 7.5,17" fill="#ffffff"/>
+      <polygon points="12.5,15 15.5,15 15.5,17 12.5,17" fill="#ffffff"/>
+    </g>
+    <clipPath id="vx-f2ceb59281886692-cs-d0-clip5">
+      <path d="M24 4A2 1 0 1 0 28 4A2 1 0 1 0 24 4Z"/>
+    </clipPath>
+    <g clip-path="url(#vx-f2ceb59281886692-cs-d0-clip5)" style="isolation:isolate">
+      <circle cx="26" cy="4" r="2" fill="#ef4135"/>
+    </g>
+  </g>
+</svg>
+<rect x="866.519685" y="184" width="210" height="58.920863" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<text x="933.749901" y="168" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">5</text>
+<text x="1009.289469" y="168" font-family="Geist Mono, ui-monospace, monospace" font-size="11" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">5</text>
+<path d="M895.980117 211.460432V175M971.519685 211.460432V175M971.519685 211.460432V175M1047.059253 211.460432V175" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M895.980117 172H971.519685M895.980117 167V177M971.519685 167V177M971.519685 172H1047.059253M971.519685 167V177M1047.059253 167V177" fill="none" stroke="#2a2833" stroke-width="1"/>
+<text x="832.519685" y="264.920863" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">The first 3 of 3 white rects in a line, and</text>
+<text x="832.519685" y="280.920863" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">the steps between them. Each is 3 × 2.</text>
+<text x="832.519685" y="319.920863" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="349.920863" r="12.5" fill="#ffffff" stroke="#c9c6d2" stroke-width="1"/>
+<text x="868.519685" y="350.920863" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">White</text>
+<text x="912.521285" y="350.920863" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffffff</text>
+<circle cx="845.519685" cy="387.920863" r="13" fill="#0055a4"/>
+<text x="868.519685" y="388.920863" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="388.920863" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#0055a4</text>
+<circle cx="845.519685" cy="425.920863" r="13" fill="#ef4135"/>
+<text x="868.519685" y="426.920863" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="426.920863" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ef4135</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. Each charge’s center is marked +.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">Vexyl 1</text>
+</svg>

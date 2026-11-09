@@ -1,0 +1,58 @@
+// Not a real flag: clips and cuts of each kind of shape, on a band, a group and repeated charges.
+vexyl 1
+meta {
+  name "Clips and cuts"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+}
+proportion hoist=20 fly=30
+
+field blue
+band white {
+  width 6
+  cut {
+    disc {
+      radius 2
+      at fly=22 hoist=10
+    }
+  }
+}
+group {
+  clip {
+    polygon {
+      point fly=0 hoist=0
+      point fly=12 hoist=0
+      point fly=0 hoist=8
+    }
+  }
+  field red
+}
+charge rect white {
+  fly 3
+  hoist 2
+  at fly=4 hoist=16
+  repeat line count=3 fly=5
+  cut {
+    path {
+      d "M0 0H1V1Z"
+      box "0 0 1 1"
+      fly 1
+      at fly=4 hoist=16
+    }
+  }
+}
+charge disc red {
+  radius 2
+  at fly=26 hoist=4
+  clip {
+    ellipse {
+      fly 4
+      hoist 2
+      at fly=26 hoist=4
+    }
+  }
+}

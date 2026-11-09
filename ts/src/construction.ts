@@ -10,8 +10,8 @@ import {
 } from "./exact.js";
 import { withRatioExactly } from "./adapt-exact.js";
 import { resolve } from "./adapt.js";
-import { axis, rotate, shapeGeom } from "./geometry.js";
-import { outlinePoints, rayFrame } from "./shapes.js";
+import { axis, clipConvex, rotate, shapeGeom } from "./geometry.js";
+import { outlinePoints, pilePoints, rayFrame } from "./shapes.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
 import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, RaysLayer, Repeat, Shape, ShapedEdge } from "./types.js";
@@ -890,18 +890,79 @@ function part(m: Measured, along: "fly" | "hoist", at: Fraction): void {
 	}
 }
 
-function effects(m: Measured, l: Layer): void {
-	if (l.clip !== undefined) {
-		skip(m, `the clip on the ${describe(l)}`);
+/**
+ * A layer's clip and cuts: each shape measured as a charge is, with its outline drawn dashed on the
+ * flag as a construction line. `base` is where their positions are measured from, `center` where
+ * one is that doesn't say, and `region` the region they're in, if it has a size.
+ */
+function effects(m: Measured, l: Layer, base: XY, center: XY, region: Frame | null): void {
+	const owner = describe(l);
+	const copies = l.layer === "charge" && (l.repeat !== undefined || (l.shape.ats?.length ?? 0) > 1);
+	const shapes = [...(l.clip !== undefined ? [{ s: l.clip, clip: true }] : []), ...l.cuts.map((s) => ({ s, clip: false }))];
+	for (const { s, clip } of shapes) {
+		const kind = kindWords[s.kind] ?? s.kind;
+		const name = clip ? `clip on the ${owner}` : `cut in the ${owner}`;
+		if ((s.kind === "pile" || s.kind === "pall") && region === null) {
+			skip(m, `the ${name}, a ${s.kind} in a frame with no size`);
+			continue;
+		}
+		const a = /^[aeiou]/.test(kind) ? "an" : "a";
+		m.notes.push(() => clip ? `The ${owner} keeps only what’s inside its clip, ${a} ${kind}, drawn dashed.` : `The ${owner} has ${a} ${kind} cut out of it, drawn dashed${copies ? ", and so does each of its copies" : ""}.`);
+		charge({ layer: "charge", shape: s, cuts: [], opacity: 1, blend: "normal" }, base, center, region, m, name);
+		m.guides.push(...outlineOf(s, base, center, region));
 	}
-	if (l.cuts.length > 0) {
-		skip(m, `the ${l.cuts.length === 1 ? "cut" : "cuts"} in the ${describe(l)}`);
+}
+
+/** A shape's outline, as construction lines on the flag, or nothing for one that's only curves. */
+function outlineOf(s: Shape, base: XY, center: XY, region: Frame | null): Vec[][] {
+	const b = vec(base);
+	const c = s.at !== undefined ? { x: b.x + s.at.fly, y: b.y + s.at.hoist } : vec(center);
+	const closed = (poly: Vec[]): Vec[][] => (poly.length > 1 ? [[...poly, poly[0]!]] : []);
+	const round = (r: number, rx = r, ry = r): Vec[] => Array.from({ length: 48 }, (_, i) => {
+		const a = (i * Math.PI) / 24;
+		const q = rotate({ x: Math.cos(a) * rx, y: Math.sin(a) * ry }, s.rotate);
+		return { x: c.x + q.x, y: c.y + q.y };
+	});
+	switch (s.kind) {
+		case "pile":
+			if (region === null) {
+				return [];
+			}
+			return closed(clipConvex(pilePoints(s, { w: toNumber(region.w), h: toNumber(region.h) }).map((p) => ({ x: p.fly, y: p.hoist })), { w: toNumber(region.w), h: toNumber(region.h) }).map((p) => ({ x: p.x + toNumber(region.x), y: p.y + toNumber(region.y) })));
+		case "pall":
+			return [];
+		case "polygon":
+			return closed(s.vertices.map((v) => ({ x: b.x + v.fly, y: b.y + v.hoist })));
+		case "disc":
+			return closed(round(s.radius));
+		case "ring":
+			return [...closed(round(s.radius)), ...closed(round(s.inner))];
+		case "ellipse":
+			return closed(round(0, s.fly / 2, s.hoist / 2));
+		case "path":
+		case "svg": {
+			// Its box, as `pathGeom` fits a path into its size.
+			let [w, h] = s.kind === "svg" ? [s.fly, s.hoist] : [s.box[2], s.box[3]];
+			if (s.kind === "path") {
+				const scale = Math.min(s.fly !== undefined && s.fly > 0 ? s.fly / w : Infinity, s.hoist !== undefined && s.hoist > 0 ? s.hoist / h : Infinity);
+				[w, h] = [w * scale, h * scale];
+			}
+			return closed([[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => {
+				const q = rotate({ x: (x! * w) / 2, y: (y! * h) / 2 }, s.rotate);
+				return { x: c.x + q.x, y: c.y + q.y };
+			}));
+		}
+		default: {
+			const sized = s.kind === "lozenge" && region !== null ? { ...s, fly: s.fly ?? toNumber(region.w), hoist: s.hoist ?? toNumber(region.h) } : s;
+			const geom = shapeGeom(sized, c, 0);
+			return geom.poly !== undefined ? closed(geom.poly) : [];
+		}
 	}
 }
 
 function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 	for (const l of layers) {
-		effects(m, l);
+		effects(m, l, { x: f.x, y: f.y }, { x: plus(f.x, half(f.w)), y: plus(f.y, half(f.h)) }, f);
 		switch (l.layer) {
 			case "field":
 				break;
@@ -953,7 +1014,7 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 					// An emblem that's only moved is a frame the sheet can measure in, from its origin.
 					const origin = l.at !== undefined ? { x: plus(f.x, exactOf(l.at.fly)), y: plus(f.y, exactOf(l.at.hoist)) } : { x: plus(f.x, half(f.w)), y: plus(f.y, half(f.h)) };
 					for (const c of l.charges) {
-						effects(m, c);
+						effects(m, c, origin, origin, null);
 						charge(c, origin, origin, null, m);
 					}
 				}
@@ -1753,9 +1814,9 @@ function sizeOf(s: Shape, region: Frame | null): { size?: (t: Format) => string;
  * Measures a charge, or the first of its copies. `base` is where its positions are measured from,
  * and `center` where it is if it doesn't say.
  */
-function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x: Fraction; y: Fraction }, region: Frame | null, m: Measured): void {
+function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x: Fraction; y: Fraction }, region: Frame | null, m: Measured, label?: string): void {
 	const s = l.shape;
-	const name = describe(l);
+	const name = label ?? describe(l);
 	if (s.kind === "pile" || s.kind === "pall") {
 		if (region === null) {
 			skip(m, `the ${name}`);

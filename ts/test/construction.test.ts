@@ -494,9 +494,12 @@ field a
 chevrons b { depth 5; }
 band b { along bend; width 2; }
 charge star b { radius 1; fimbriate a 0.1; cut { disc { radius 0.2; } } }
+fold half { over along=fly at=5 move=bottom; }
+fold quarter { over along=fly at=5 move=bottom; over along=hoist at=10 move=fly; }
 `);
 	const out = constructionSvg(flag);
-	assert.ok(textOf(out).includes("Not measured on this sheet: the cut in the b star."), out);
+	assert.ok(textOf(out).includes("Not measured on this sheet: the half fold, the quarter fold."), out);
+	assert.ok(textOf(out).includes("The b star has a disc cut out of it, drawn dashed."), out);
 });
 
 test("chevrons: their apexes on the row across their edge, an apex along it, and an angle at the outermost", () => {
@@ -660,6 +663,34 @@ test("rays: the point they come from, and each wedge's share, by angle or along 
 	}
 	golden("seychelles.svg", seychelles.svg);
 	golden("rays.svg", turned.svg);
+});
+
+test("clips and cuts: each shape measured as a charge is, with its outline drawn dashed", () => {
+	// Nepal's moon: a disc cut by one of radius 12.8401, 18.7868 down, and a star clipped to a rect.
+	const nepal = constructionSheet(flagOf("nepal"), {});
+	for (const want of ["r 12.8401", "15.4462 × 7.7231"]) {
+		assert.ok(nepal.labels.some((l) => l.text === want && l.onFlag), want);
+	}
+	assert.ok(nepal.labels.some((l) => l.text === "18.7868"), "the cut's center, down the hoist");
+	const nepalText = textOf(nepal.svg);
+	assert.ok(nepalText.includes("The white disc has a disc cut out of it, drawn dashed.") && nepalText.includes("The white star keeps only what’s inside its clip, a rect, drawn dashed."));
+	assert.doesNotMatch(nepalText, /Not measured/);
+	// A cut in a band, a group clipped to a polygon, a path cut from each of a row of copies, and an ellipse's clip.
+	const flag = flagOf("clips");
+	const sheet = constructionSheet(flag, {});
+	for (const want of ["r 2", "box 12 × 8", "box 1 × 1", "4 × 2"]) {
+		assert.ok(sheet.labels.some((l) => l.text === want && l.onFlag), want);
+	}
+	const text = textOf(sheet.svg);
+	for (const want of ["The white band has a disc cut out of it, drawn dashed.", "The group keeps only what’s inside its clip, a polygon, drawn dashed.", "The white rect has a path cut out of it, drawn dashed, and so does each of its copies.", "The red disc keeps only what’s inside its clip, an ellipse, drawn dashed."]) {
+		assert.ok(text.includes(want), want);
+	}
+	assert.doesNotMatch(text, /Not measured/);
+	assert.match(sheet.svg, /stroke-dasharray="5 4"/, "the outlines, as construction lines");
+	for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { form: { side: "reverse" } }, { theme: "dark" }] as ConstructionOptions[]) {
+		assert.deepEqual(collisions(flag, opts), [], JSON.stringify(opts));
+	}
+	golden("clips.svg", sheet.svg);
 });
 
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {
