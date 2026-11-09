@@ -1,0 +1,53 @@
+// Not a real flag: a design with a grid of its own, scaled up to fill a canton, one with none, used
+// in a panel, and as a variant, one stretched more one way than the other.
+vexyl 1
+meta {
+  name "Designs"
+  license "Apache-2.0"
+}
+palette {
+  white "#ffffff"
+  blue "#0055a4"
+  red "#ef4135"
+}
+proportion hoist=20 fly=30
+
+define badge hoist=5 fly=6 {
+  field blue
+  cross white {
+    fly 2 1 3
+    hoist 2 1 2
+    fimbriate red 0.25
+  }
+  charge disc red {
+    radius 1
+    at fly=4.5 hoist=3.5
+  }
+}
+define spot {
+  charge star white {
+    radius 2
+    at fly=3 hoist=4
+  }
+}
+
+field red
+canton {
+  fly 12
+  hoist 10
+  use badge
+}
+panel {
+  side fly
+  width 10
+  use spot
+}
+
+variant stretched {
+  field red
+  canton {
+    fly 12
+    hoist 12
+    use badge
+  }
+}

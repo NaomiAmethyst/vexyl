@@ -693,6 +693,30 @@ test("clips and cuts: each shape measured as a charge is, with its outline drawn
 	golden("clips.svg", sheet.svg);
 });
 
+test("designs: measured in their own frame, at the scale they're drawn at", () => {
+	// New Zealand's union fills its canton at its own size: the cross 6 wide, its fimbriation 2.
+	const nz = constructionSheet(flagOf("new-zealand"), {});
+	assert.ok(nz.labels.some((l) => l.text === "6" && l.onFlag) && nz.labels.some((l) => l.text === "2" && l.onFlag));
+	assert.doesNotMatch(textOf(nz.svg), /Not measured/);
+	// A badge on a grid of 5 by 6, twice its size in a canton: its cross's arms and its disc, on the flag's grid.
+	const flag = flagOf("designs");
+	const sheet = constructionSheet(flag, {});
+	for (const want of ["4", "2", "6", "9", "3", "0.5"]) {
+		assert.ok(sheet.labels.some((l) => l.text === want), want);
+	}
+	assert.equal(sheet.labels.filter((l) => l.text === "r 2" && l.onFlag).length, 2, "the badge's disc, and the star in the panel");
+	assert.ok(textOf(sheet.svg).includes("The design “badge” is drawn on a grid of its own, 5 by 6, at 2 times its size, so that it fills 10 by 12. Its sizes here are the flag’s."));
+	assert.doesNotMatch(textOf(sheet.svg), /Not measured/);
+	assert.ok(constructionSheet(flag, { units: "hoist" }).labels.some((l) => l.text === "0.025H"), "the fimbriation, as a part of the hoist");
+	// One stretched more one way than the other has no one scale, so it says so.
+	assert.ok(textOf(constructionSvg(flag, { form: { variant: "stretched" } })).includes("Not measured on this sheet: the design “badge”, which is stretched to fill its region, more one way than the other."));
+	for (const opts of [{}, { units: "hoist" }, { units: "mm", hoistMm: 900 }, { paper: "fit", grid: true }, { form: { side: "reverse" } }] as ConstructionOptions[]) {
+		assert.deepEqual(collisions(flag, opts), [], JSON.stringify(opts));
+		assert.deepEqual(sheetValueProblems(constructionSheet(flag, opts)), [], JSON.stringify(opts));
+	}
+	golden("designs.svg", sheet.svg);
+});
+
 test("a crowded sheet still overlaps nothing, and says what it leaves out", () => {
 	let layers = "field a\n";
 	for (let i = 0; i < 40; i++) {

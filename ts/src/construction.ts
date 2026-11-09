@@ -6,7 +6,7 @@
 // worked out exactly, and nothing is measured from the drawing.
 
 import {
-	compare, decimal, exactOf, fraction, half, minus, negate, over, placesOf, plus, readExact, same, sum, times, toNumber, zero, type Fraction,
+	compare, decimal, exactNumber, exactOf, fraction, half, minus, negate, over, placesOf, plus, readExact, same, sum, times, toNumber, zero, type Fraction,
 } from "./exact.js";
 import { withRatioExactly } from "./adapt-exact.js";
 import { resolve } from "./adapt.js";
@@ -14,7 +14,7 @@ import { axis, clipConvex, rotate, shapeGeom } from "./geometry.js";
 import { outlinePoints, pilePoints, rayFrame } from "./shapes.js";
 import { svg } from "./svg.js";
 import { esc, num } from "./text.js";
-import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, RaysLayer, Repeat, Shape, ShapedEdge } from "./types.js";
+import type { Axis, BandLayer, BarsLayer, ChargeLayer, ChevronsLayer, CrossLayer, EdgeName, EmblemLayer, Flag, Layer, Outline, PallShape, PanelLayer, PileShape, Point, RaysLayer, Repeat, Shape, ShapedEdge, UseLayer } from "./types.js";
 
 /** What a sheet shows, and how. Every option is optional. */
 export interface ConstructionOptions {
@@ -1026,7 +1026,7 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 				panel(l, f, m);
 				break;
 			case "use":
-				skip(m, `the ${describe(l)}`);
+				design(l, f, m);
 				break;
 			case "chevrons":
 				chevrons(l, f, m);
@@ -1036,6 +1036,67 @@ function walk(layers: readonly Layer[], f: Frame, m: Measured): void {
 				break;
 		}
 	}
+}
+
+/**
+ * A design that's used: measured in its own frame, as a panel's layers are. One with a grid of its
+ * own is scaled to fill its region, and if it's scaled the same both ways, everything in it is
+ * measured at that scale, as sizes on the flag's grid.
+ */
+function design(l: UseLayer, f: Frame, m: Measured): void {
+	const d = l.define;
+	if (d.fly === undefined || d.hoist === undefined) {
+		walk(d.layers, f, m);
+		return;
+	}
+	const [fly, hoist] = [exactOf(d.fly), exactOf(d.hoist)];
+	const k = over(f.w, fly);
+	if (!same(k, over(f.h, hoist))) {
+		skip(m, `the ${describe(l)}, which is stretched to fill its region, more one way than the other`);
+		return;
+	}
+	m.notes.push((t) => `The ${describe(l)} is drawn on a grid of its own, ${gridText(hoist)} by ${gridText(fly)}, at ${gridText(k)} times its size, so that it fills ${t(f.h)} by ${t(f.w)}. Its sizes here are the flag’s.`);
+	walk(scaledLayers(d.layers, k), f, m);
+}
+
+/** What in a layer or shape is a length or a place, which a design's scale applies to: everything but counts, angles and shares. */
+const lengths = new Set(["radius", "inner", "offset", "width", "disc", "gap", "fly", "hoist", "hollow", "lines", "depth", "flat", "junction", "apex", "period", "base", "tip"]);
+const places = new Set(["at", "ats", "vertices", "split"]);
+
+/** Layers at a scale, exactly, as a design with a grid of its own is drawn. */
+function scaledLayers(layers: readonly Layer[], k: Fraction): Layer[] {
+	const scale = (v: number): number => exactNumber(times(exactOf(v), k));
+	const point = (p: Point | null): Point | null => (p === null ? null : { fly: scale(p.fly), hoist: scale(p.hoist) });
+	const walkObject = (o: unknown, kind: string | undefined): unknown => {
+		if (Array.isArray(o)) {
+			return o.map((x) => walkObject(x, kind));
+		}
+		if (o === null || typeof o !== "object" || o instanceof Number) {
+			return o;
+		}
+		const out: Record<string, unknown> = {};
+		const own = (o as { kind?: string; layer?: string }).kind ?? (o as { layer?: string }).layer ?? kind;
+		for (const [key, v] of Object.entries(o)) {
+			if (places.has(key)) {
+				out[key] = Array.isArray(v) ? v.map((p: Point | null) => point(p)) : point(v as Point);
+			} else if (key === "spread" && own === "sun") {
+				out[key] = v;
+			} else if (lengths.has(key) || key === "spread") {
+				// A cross's are shares of its region, and the rest are lengths.
+				out[key] = own === "cross" && (key === "fly" || key === "hoist") ? v : Array.isArray(v) ? v.map(scale) : typeof v === "number" || v instanceof Number ? scale(v as number) : walkObject(v, own);
+			} else if (key === "box" || key === "embedded" || key === "markup") {
+				out[key] = v;
+			} else if (key === "define") {
+				// A design inside it is scaled to its own region if it has a grid, and otherwise is in this one's.
+				const inner = v as UseLayer["define"];
+				out[key] = inner.fly === undefined ? { ...inner, layers: walkObject(inner.layers, undefined) } : inner;
+			} else {
+				out[key] = walkObject(v, key === "repeat" ? "repeat" : own);
+			}
+		}
+		return out;
+	};
+	return walkObject(layers, undefined) as Layer[];
 }
 
 const axisWords = (along: string): string => (along === "bend-sinister" ? "bend sinister" : along);
