@@ -264,3 +264,48 @@ test("a layer moved past several steps by each of them, as one change", () => {
 	const moved = outline(applyOps(layered, ops).text);
 	assert.deepEqual(moved.filter((n) => n.path !== undefined && /^\d+$/.test(n.path)).map((n) => n.name), ["bars", "charge", "canton", "field"]);
 });
+
+/** The file as read, and as read again after some changes, as the page holds them. */
+function readings(text, ...ops) {
+	const was = { text, nodes: outline(text) };
+	const changed = applyOps(text, ops).text;
+	return { was, now: { text: changed, nodes: outline(changed) } };
+}
+
+test("something read before a change is found where the change left it", () => {
+	const bars = (r) => v.findLayer(r.nodes, "1");
+	// Moved, it's found by being the one written that way.
+	let { was, now } = readings(layered, { op: "move", at: [6], delta: 1 });
+	assert.equal(d.relocate(bars(was), was, now).path, "2");
+	// Changed in its place, it's what's there, as nothing around it has moved.
+	({ was, now } = readings(layered, { op: "entries", at: [6], args: [{ v: "b" }, { v: "a" }] }));
+	assert.equal(d.relocate(bars(was), was, now).path, "1");
+	// Changed, and moved too, there's no telling.
+	({ was, now } = readings(layered, { op: "entries", at: [6], args: [{ v: "b" }, { v: "a" }] }, { op: "move", at: [6], delta: 1 }));
+	assert.equal(d.relocate(bars(was), was, now), null);
+	// Gone, it isn't found.
+	({ was, now } = readings(layered, { op: "remove", at: [6] }));
+	assert.equal(d.relocate(bars(was), was, now), null);
+});
+
+test("an edit made from an old reading goes to what it was for, or isn't made", () => {
+	// A quick second Bring forward: made where the stripes were, it's the stripes that move on, not the disc back.
+	let { was, now } = readings(layered, ...d.moveOps(v.findLayer(outline(layered), "1"), d.layerSiblings(v.findLayer(outline(layered), "1"), outline(layered)), 2));
+	const remove = [{ op: "remove", at: [6] }];
+	const out = applyOps(now.text, d.rebaseOps(remove, was, now)).text;
+	assert.ok(!out.includes("bars a b") && out.includes("charge disc b"), out);
+	// Several edits stand as they are while their places mean what they did, and not after something's moved.
+	const two = [{ op: "child", at: [6], name: "ratio", args: [{ v: 1, raw: "1" }, { v: 2, raw: "2" }] }, { op: "child", at: [7], name: "radius", args: [{ v: 4, raw: "4" }] }];
+	({ was, now } = readings(layered, { op: "entries", at: [5], args: [{ v: "b" }] }));
+	assert.equal(d.rebaseOps(two, was, now), two);
+	({ was, now } = readings(layered, { op: "move", at: [6], delta: 1 }));
+	assert.equal(d.rebaseOps(two, was, now), null);
+	// Whether places still mean the same is told by each edit, as only moving, adding or taking away changes them.
+	assert.equal(applyOps(layered, [{ op: "entries", at: [6], args: [{ v: "b" }, { v: "a" }] }]).reshaped, false);
+	assert.equal(applyOps(layered, [{ op: "child", at: [7], name: "radius", args: [{ v: 4, raw: "4" }] }]).reshaped, false);
+	assert.equal(applyOps(layered, [{ op: "child", at: [6], name: "ratio", args: [{ v: 1, raw: "1" }, { v: 2, raw: "2" }] }]).reshaped, true);
+	assert.equal(applyOps(layered, [{ op: "move", at: [6], delta: 1 }]).reshaped, true);
+	// What's named, not placed, needs nothing.
+	const rename = [{ op: "renameColor", from: "a", to: "c" }];
+	assert.equal(d.rebaseOps(rename, was, now), rename);
+});

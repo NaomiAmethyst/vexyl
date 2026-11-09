@@ -586,8 +586,17 @@ export function rescalePreview(text: string, hoist: string): RescalePreview {
 	}
 }
 
-/** Makes changes to a document, giving the new text. Everything it doesn't touch stays byte for byte. */
-export function applyOps(text: string, ops: Op[]): { text?: string; error?: string } {
+/** What's where in a document, by name, at every level, which is what every place an edit names depends on. */
+function shapeOf(list: Document): string {
+	return list.nodes.map((n) => (n.children === null ? n.getName() : `${n.getName()}{${shapeOf(n.children)}}`)).join(" ");
+}
+
+/**
+ * Makes changes to a document, giving the new text. Everything it doesn't touch stays byte for byte.
+ * It also says whether anything was moved, added or taken away, after which a place that an edit was
+ * worked out from may mean something else.
+ */
+export function applyOps(text: string, ops: Op[]): { text?: string; error?: string; reshaped?: boolean } {
 	if (hasMisreadHex(text)) {
 		return { error: "A hexadecimal number right before a semicolon on the same line stops the form changing this file. Put what follows on its own line in Source." };
 	}
@@ -601,10 +610,11 @@ export function applyOps(text: string, ops: Op[]): { text?: string; error?: stri
 		return replaceText(text, ops[0]!);
 	}
 	try {
+		const shape = shapeOf(doc);
 		for (const op of ops) {
 			apply(doc, op);
 		}
-		return { text: format(doc) };
+		return { text: format(doc), reshaped: shapeOf(doc) !== shape };
 	} catch (e) {
 		return { error: (e as Error).message };
 	}

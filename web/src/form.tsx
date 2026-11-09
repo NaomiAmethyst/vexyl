@@ -42,6 +42,13 @@ const edit = (...ops: Op[]): void => {
 	void app.edit(ops);
 };
 
+/** Says why a change couldn't be made, if it couldn't. */
+const told = (error: string | undefined): void => {
+	if (error !== undefined) {
+		app.set({ notice: error });
+	}
+};
+
 function fieldId(label: string, at: readonly number[], extra = ""): string {
 	return `f-${at.join("-")}-${label.replace(/[^A-Za-z0-9]+/g, "-")}${extra}`;
 }
@@ -1264,13 +1271,17 @@ function siblingsOf(node: ONode, nodes: readonly ONode[]): ONode[] {
 	return list.filter((n) => n.path !== undefined && layerTerms[n.name] !== undefined);
 }
 
-/** Moves a layer to another's place among its siblings. */
+/** Moves a layer to another's place among its siblings, as many places on from where it is by the time it's moved. */
 function moveLayer(node: ONode, siblings: readonly ONode[], to: number): void {
-	const ops = moveOps(node, siblings, to);
-	if (ops.length === 0) {
+	const by = to - siblings.indexOf(node);
+	if (siblings.indexOf(node) < 0 || by === 0) {
 		return;
 	}
-	edit(...ops);
+	void app.changeOne(node, (n, now) => {
+		const beside = layerSiblings(n, now);
+		const i = beside.indexOf(n);
+		return i < 0 ? null : { ops: moveOps(n, beside, i + by) };
+	}).then(told);
 	app.hover(null);
 }
 
@@ -1341,13 +1352,16 @@ function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hove
 }
 
 function moveAmongLayers(node: ONode, siblings: readonly ONode[], delta: number): void {
-	const i = siblings.indexOf(node);
-	const other = siblings[i + delta];
-	if (other !== undefined) {
-		const moved = other.at.at(-1)! - node.at.at(-1)!;
-		edit({ op: "move", at: node.at, delta: moved });
-		app.select(null, false);
+	if (siblings[siblings.indexOf(node) + delta] === undefined) {
+		return;
 	}
+	void app.changeOne(node, (n, now) => {
+		const beside = siblingsOf(n, now);
+		const i = beside.indexOf(n);
+		const other = i < 0 ? undefined : beside[i + delta];
+		return other === undefined ? null : { ops: [{ op: "move", at: n.at, delta: other.at.at(-1)! - n.at.at(-1)! }] };
+	}).then(told);
+	app.select(null, false);
 }
 
 /** Above this, SPEC.md section 15 says a grid is asking for trouble. */

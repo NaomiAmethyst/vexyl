@@ -268,7 +268,7 @@ export function SourceEditor(props: { hidden: boolean }): preact.JSX.Element {
 					return;
 				}
 				quiet = true;
-				view.dispatch({ changes: { from, to, insert }, ...(apart === true ? { annotations: isolateHistory.of("full") } : {}) });
+				view.dispatch({ changes: { from, to, insert }, ...(apart !== undefined ? { annotations: isolateHistory.of(apart) } : {}) });
 				quiet = false;
 			},
 			setDoc(text): void {

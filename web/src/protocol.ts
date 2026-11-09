@@ -107,7 +107,7 @@ export type Reply<K extends Request["kind"]> = K extends "analyze"
 		: K extends "construction"
 			? SheetResult
 		: K extends "edit"
-			? { text?: string; error?: string }
+			? { text?: string; error?: string; reshaped?: boolean }
 			: K extends "rescalePreview"
 				? RescalePreview
 				: K extends "shareEncode"

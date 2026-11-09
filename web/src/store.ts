@@ -6,6 +6,7 @@ import { decodePathName } from "vexyl/paths";
 import { openHref, readAddress, refLabel, refText, type Ref } from "./address.js";
 import { claimTab, dropDraft, durable, loadDraft, orphanOf, saveDraft, TabPresence, type Draft } from "./drafts.js";
 import { engine } from "./engine.js";
+import { rebaseOps, relocate, type Reading } from "./flagdrag.js";
 import type { Analysis, ONode, Op, PickNode, RenderResult } from "./protocol.js";
 import { evidenceTiers, fetchRef, type GistFile } from "./remote.js";
 import { savedPicture, savePicture, type PicturePrefs } from "./png.js";
@@ -189,15 +190,39 @@ export interface Gesture {
 	cancel(): Promise<void>;
 }
 
+/**
+ * What an edit sets, if it's a single value, which a box sets again with each key typed in it. Those
+ * are one thing to undo, as typing in Source is; anything else is a thing of its own.
+ */
+function valueKey(ops: readonly Op[]): string | null {
+	const op = ops.length === 1 ? ops[0]! : null;
+	if (op?.op === "entries") {
+		return `entries ${op.at.join(".")} ${op.args !== undefined ? "args" : ""} ${(op.props ?? []).map(([k]) => k).join(" ")}`;
+	}
+	if (op?.op === "child") {
+		return `child ${op.at.join(".")} ${op.name} ${op.nth ?? 0}`;
+	}
+	return null;
+}
+
 /** The least time between one drag's edits. Each one still waits for the one before. */
 const gestureGap = 60;
 
 export interface EditorBridge {
-	/** With `apart`, it's its own step to undo, whatever came just before it. */
-	replace(from: number, to: number, insert: string, apart?: boolean): void;
+	/**
+	 * Makes a change that came from elsewhere. Kept apart in full, it's its own step to undo, whatever
+	 * comes before or after it. Kept apart before, what comes straight after can still join it.
+	 */
+	replace(from: number, to: number, insert: string, apart?: "full" | "before"): void;
 	setDoc(text: string): void;
 	scrollToLine(line: number): void;
 }
+
+/** Where the panel goes after a change: to a path, or to whatever's at a place once it's been read. */
+type Follow = { path: string } | { at: readonly number[] };
+
+/** What's said when what a click was for has changed under it, so that it isn't done to something else. */
+const changedUnder = "That part of the file changed just before, so nothing was done. Look it over and try again.";
 
 export class App {
 	state: State = initial();
@@ -214,7 +239,17 @@ export class App {
 	private renderSeq = 0;
 	private docSeq = 0;
 	private editing: Promise<void> = Promise.resolve();
-	private following: { from: string | null; to: { path: string } | { at: readonly number[] } } | null = null;
+	/** The text that `lastReadable` is a reading of. */
+	private readableText = "";
+	/** The texts the document has lately had, each with whether it left everything where it was in the one before. */
+	private changes: { text: string; kept: boolean }[] = [];
+	/** Whether the text being taken now is from an edit that left everything where it was. */
+	private keeping = false;
+	/** What the last edit set, if it was a single value, for Source's history. */
+	private lastValue: string | null = null;
+	/** Told each time a reading of the document ends, whatever it found. */
+	private reads: (() => void)[] = [];
+	private following: { from: string | null; to: Follow } | null = null;
 	/** The text from before a drag started, while one's going on. Source only hears about it at the end. */
 	private gestureBase: string | null = null;
 
@@ -389,6 +424,8 @@ export class App {
 			saved: shown === (how.draft?.base ?? base), orphan: null,
 		});
 		this.bridge?.setDoc(shown);
+		this.changes = [{ text: shown, kept: false }];
+		this.lastValue = null;
 		this.presence?.tell();
 		this.set({ sameInOtherTab: this.presence?.alsoOpen(key) ?? { tabs: 0, dirty: false } });
 		this.scheduleDraft();
@@ -433,6 +470,11 @@ export class App {
 			return;
 		}
 		this.set({ text, saved: text === this.state.base });
+		this.changes.push({ text, kept: this.keeping });
+		if (this.changes.length > 200) {
+			this.changes.splice(0, 100);
+		}
+		this.lastValue = null;
 		this.presence?.tell();
 		this.scheduleDraft();
 		clearTimeout(this.analyzeTimer);
@@ -474,6 +516,9 @@ export class App {
 		try {
 			const analysis = await engine.ask({ kind: "analyze", slot: "main", text });
 			if (seq === this.docSeq && text === this.state.text) {
+				if (analysis.readable) {
+					this.readableText = text;
+				}
 				this.set({
 					analysis,
 					analyzed: text,
@@ -497,6 +542,52 @@ export class App {
 			this.analyzeAgain = false;
 			void this.analyzeNow();
 		}
+		const waiting = this.reads;
+		this.reads = [];
+		for (const told of waiting) {
+			told();
+		}
+	}
+
+	/** The reading that what's on screen was drawn from, which is what every edit from it is made against, and of which document. */
+	private reading(): (Reading & { seq: number }) | null {
+		const s = this.state;
+		if (s.analysis?.readable === true) {
+			return { text: s.analyzed, nodes: s.analysis.nodes, seq: this.docSeq };
+		}
+		return s.lastReadable !== null ? { text: this.readableText, nodes: s.lastReadable.nodes, seq: this.docSeq } : null;
+	}
+
+	/** Whether everything in the document is where it was when its text was `from`, as nothing since has moved, added or taken anything away. */
+	private keptSince(from: string): boolean {
+		for (let i = this.changes.length - 1; i >= 0; i--) {
+			const c = this.changes[i]!;
+			if (c.text === from) {
+				return true;
+			}
+			if (!c.kept) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/** Reads the document as it now is, at once rather than after a pause, or gives null if it can't be read. */
+	private async readNow(): Promise<Reading | null> {
+		const seq = this.docSeq;
+		while (seq === this.docSeq && this.state.analyzed !== this.state.text) {
+			if (!this.analyzing) {
+				clearTimeout(this.analyzeTimer);
+				void this.analyzeNow();
+			}
+			await new Promise<void>((told) => { this.reads.push(told); });
+			if (this.state.analyzed !== this.state.text && !this.analyzing) {
+				// It couldn't be read, and nothing's going to try again.
+				return null;
+			}
+		}
+		const a = this.state.analysis;
+		return seq === this.docSeq && a?.readable === true ? { text: this.state.analyzed, nodes: a.nodes } : null;
 	}
 
 	displayName(): string {
@@ -654,39 +745,72 @@ export class App {
 		}
 	}
 
-	/** Changes the document through its format-preserving model, one change at a time. */
+	/** Changes the document through its format-preserving model, one change at a time, to what's on screen. */
 	edit(ops: Op[]): Promise<void> {
-		return this.change(ops).then((error) => {
+		const seen = this.reading();
+		return this.queue(async () => {
+			const now = await this.rebased(ops, seen);
+			return now === undefined ? undefined : now === null ? changedUnder : this.apply(now);
+		}).then((error) => {
 			if (error !== undefined) {
 				this.set({ notice: error });
 			}
 		});
 	}
 
-	/** Makes a change, and says why not if it can't be made. */
+	/** Makes a change just as it is, and says why not if it can't be made. A drag's own edits come this way. */
 	change(ops: Op[]): Promise<string | undefined> {
-		const run = this.editing.then(async () => {
-			const before = this.state.text;
-			const done = await engine.ask({ kind: "edit", text: before, ops });
-			if (done.text === undefined) {
-				return done.error ?? "That change couldn't be made.";
-			}
-			if (done.text === before) {
-				return undefined;
-			}
-			const [start, endA, endB] = firstDifference(before, done.text);
-			if (this.gestureBase === null) {
-				this.bridge?.replace(start, endA, done.text.slice(start, endB));
-				this.setText(done.text);
-			} else {
-				this.setText(done.text);
-				clearTimeout(this.analyzeTimer);
-				void this.analyzeNow();
-			}
+		return this.queue(() => this.apply(ops));
+	}
+
+	/** Makes changes one at a time, each once the one before it is done, whether or not that one could be. */
+	private queue(run: () => Promise<string | undefined>): Promise<string | undefined> {
+		const done = this.editing.then(run);
+		this.editing = done.then(() => undefined, () => undefined);
+		return done;
+	}
+
+	/**
+	 * Edits made from what was on screen, for the document as it now is. If it's changed since, by a
+	 * click a moment before that the screen hadn't caught up with, they follow what they were for to
+	 * where it now is, or are null if that can't be told. If another document's been opened since,
+	 * they're for nothing that's here, and they're undefined.
+	 */
+	private async rebased(ops: Op[], seen: (Reading & { seq: number }) | null): Promise<Op[] | null | undefined> {
+		if (seen !== null && seen.seq !== this.docSeq) {
 			return undefined;
-		});
-		this.editing = run.then(() => undefined);
-		return run;
+		}
+		if (seen === null || this.keptSince(seen.text)) {
+			return ops;
+		}
+		const now = await this.readNow();
+		return now === null ? (seen.seq === this.docSeq ? null : undefined) : rebaseOps(ops, seen, now);
+	}
+
+	private async apply(ops: Op[]): Promise<string | undefined> {
+		const before = this.state.text;
+		const done = await engine.ask({ kind: "edit", text: before, ops });
+		if (done.text === undefined) {
+			return done.error ?? "That change couldn't be made.";
+		}
+		if (done.text === before) {
+			return undefined;
+		}
+		const [start, endA, endB] = firstDifference(before, done.text);
+		this.keeping = done.reshaped === false;
+		if (this.gestureBase === null) {
+			// Each click is its own thing to undo, however soon after the last it comes. A box typed in is one.
+			const value = valueKey(ops);
+			this.bridge?.replace(start, endA, done.text.slice(start, endB), value === null ? "full" : value === this.lastValue ? undefined : "before");
+			this.setText(done.text);
+			this.lastValue = value;
+		} else {
+			this.setText(done.text);
+			clearTimeout(this.analyzeTimer);
+			void this.analyzeNow();
+		}
+		this.keeping = false;
+		return undefined;
 	}
 
 	/** Waits for every change asked for so far, such as one a box makes as it loses the focus, to be made. */
@@ -746,7 +870,7 @@ export class App {
 					this.setText(base);
 				} else if (base !== this.state.text) {
 					const [start, endA, endB] = firstDifference(base, this.state.text);
-					this.bridge?.replace(start, endA, this.state.text.slice(start, endB), true);
+					this.bridge?.replace(start, endA, this.state.text.slice(start, endB), "full");
 				}
 			});
 			this.editing = closed;
@@ -790,11 +914,44 @@ export class App {
 	}
 
 	/** Makes a change, then moves the panel and the big view to what it made, once that's been read. */
-	async changeAndFollow(ops: Op[], to: { path: string } | { at: readonly number[] }): Promise<string | undefined> {
+	changeAndFollow(ops: Op[], to: Follow): Promise<string | undefined> {
+		const seen = this.reading();
+		return this.queue(async () => {
+			const now = await this.rebased(ops, seen);
+			if (now === undefined || now === null) {
+				return now === null ? changedUnder : undefined;
+			}
+			return this.applyAndFollow(now, now === ops || "path" in to ? to : null);
+		});
+	}
+
+	/**
+	 * Makes a change to one thing on screen that depends on what's beside it, such as moving it among
+	 * its layers. It's worked out from the document as it is once every change before it has been made
+	 * and read, so a second click that comes before the screen has caught up acts on where the first
+	 * left things, not on where they were.
+	 */
+	changeOne(node: ONode, make: (node: ONode, nodes: readonly ONode[]) => { ops: Op[]; to?: Follow } | null): Promise<string | undefined> {
+		const seen = this.reading();
+		return this.queue(async () => {
+			if (seen === null || seen.seq !== this.docSeq) {
+				return undefined;
+			}
+			const now = this.keptSince(seen.text) ? seen : await this.readNow();
+			const there = now === null ? null : relocate(node, seen, now);
+			if (now === null || there === null) {
+				return seen.seq === this.docSeq ? changedUnder : undefined;
+			}
+			const made = make(there, now.nodes);
+			return made === null || made.ops.length === 0 ? undefined : this.applyAndFollow(made.ops, made.to ?? null);
+		});
+	}
+
+	private async applyAndFollow(ops: Op[], to: Follow | null): Promise<string | undefined> {
 		const from = this.state.selected;
 		const before = this.state.text;
-		const error = await this.change(ops);
-		if (error === undefined && this.state.text !== before) {
+		const error = await this.apply(ops);
+		if (error === undefined && to !== null && this.state.text !== before) {
 			this.following = { from, to };
 		}
 		return error;

@@ -671,18 +671,22 @@ function AlsoList(props: { also: readonly AlsoItem[] }): preact.JSX.Element | nu
 	);
 }
 
-/** Bring forward and Send back, among what's beside it, as Advanced's rows move. What moved stays selected. */
+/**
+ * Bring forward and Send back, among what's beside it, as Advanced's rows move. What moved stays
+ * selected. Each is a step from where it is by the time it's made, so two quick ones move it two places.
+ */
 function LayerOrder(props: { item: Item; nodes: readonly ONode[] }): preact.JSX.Element {
 	const { item, nodes } = props;
 	const siblings = layerSiblings(item.node, nodes);
 	const place = siblings.indexOf(item.node);
-	const move = (to: number): void => {
-		const other = siblings[to];
-		if (place < 0 || other === undefined) {
-			return;
-		}
+	const move = (by: number): void => {
 		app.hover(null);
-		void app.changeAndFollow(moveOps(item.node, siblings, to), { at: [...item.node.at.slice(0, -1), other.at.at(-1)!] }).then((error) => {
+		void app.changeOne(item.node, (node, now) => {
+			const beside = layerSiblings(node, now);
+			const i = beside.indexOf(node);
+			const other = i < 0 ? undefined : beside[i + by];
+			return other === undefined ? null : { ops: moveOps(node, beside, i + by), to: { at: [...node.at.slice(0, -1), other.at.at(-1)!] } };
+		}).then((error) => {
 			if (error !== undefined) {
 				app.set({ notice: error });
 			}
@@ -692,8 +696,8 @@ function LayerOrder(props: { item: Item; nodes: readonly ONode[] }): preact.JSX.
 	const first = place <= 0;
 	return (
 		<>
-			<button type="button" class="nx-ghost small" aria-disabled={last ? "true" : undefined} title={last ? "It's already over everything beside it" : undefined} onClick={() => { if (!last) { move(place + 1); } }}>Bring forward</button>
-			<button type="button" class="nx-ghost small" aria-disabled={first ? "true" : undefined} title={first ? "It's already under everything beside it" : undefined} onClick={() => { if (!first) { move(place - 1); } }}>Send back</button>
+			<button type="button" class="nx-ghost small" aria-disabled={last ? "true" : undefined} title={last ? "It's already over everything beside it" : undefined} onClick={() => { if (!last) { move(1); } }}>Bring forward</button>
+			<button type="button" class="nx-ghost small" aria-disabled={first ? "true" : undefined} title={first ? "It's already under everything beside it" : undefined} onClick={() => { if (!first) { move(-1); } }}>Send back</button>
 		</>
 	);
 }

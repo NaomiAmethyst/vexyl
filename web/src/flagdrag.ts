@@ -542,3 +542,103 @@ export function moveOps(node: ONode, siblings: readonly ONode[], to: number): Op
 	}
 	return ops;
 }
+
+/** The file as it was read once: its text, and its parts as they were in it. */
+export interface Reading {
+	text: string;
+	nodes: readonly ONode[];
+}
+
+function partAt(nodes: readonly ONode[], at: readonly number[]): ONode | undefined {
+	let list = nodes;
+	let node: ONode | undefined;
+	for (const i of at) {
+		node = list[i];
+		if (node === undefined) {
+			return undefined;
+		}
+		list = node.kids;
+	}
+	return node;
+}
+
+/** Whether a place means the same in both: the list it's in, and each list that holds that, has the same kinds of thing in the same order. */
+function samePlace(at: readonly number[], was: readonly ONode[], now: readonly ONode[]): boolean {
+	let a = was;
+	let b = now;
+	for (const i of at) {
+		if (a.length !== b.length || a.some((n, j) => n.name !== b[j]!.name)) {
+			return false;
+		}
+		const next = a[i];
+		if (next === undefined) {
+			return true;
+		}
+		a = next.kids;
+		b = b[i]!.kids;
+	}
+	return true;
+}
+
+/**
+ * Where something read from the file is in a later reading of it. Moved, it's the one thing of its
+ * kind, as deep, written the same way. Changed, it's what's in its place, as long as everything around
+ * it is still in the same order. Otherwise there's no telling, and it's null.
+ */
+export function relocate(node: ONode, was: Reading, now: Reading): ONode | null {
+	if (was.text === now.text) {
+		return partAt(now.nodes, node.at) ?? null;
+	}
+	const own = was.text.slice(node.start, node.end);
+	const alike: ONode[] = [];
+	const visit = (list: readonly ONode[]): void => {
+		for (const n of list) {
+			if (n.at.length === node.at.length) {
+				if (n.name === node.name && now.text.slice(n.start, n.end) === own) {
+					alike.push(n);
+				}
+			} else {
+				visit(n.kids);
+			}
+		}
+	};
+	visit(now.nodes);
+	if (alike.length === 1) {
+		return alike[0]!;
+	}
+	return samePlace(node.at, was.nodes, now.nodes) ? partAt(now.nodes, node.at) ?? null : null;
+}
+
+/** Where an edit acts, if that's by place and not by a name or its own text. */
+function placeOf(op: Op): readonly number[] | null {
+	switch (op.op) {
+		case "add":
+			return op.at === null ? (op.index === undefined ? null : [op.index]) : op.index === undefined ? op.at : [...op.at, op.index];
+		case "entries": case "child": case "dropChild": case "remove": case "move":
+			return op.at;
+		default:
+			return null;
+	}
+}
+
+/**
+ * Edits made from one reading of the file, for a later one. A single edit to one thing follows it to
+ * where it now is. Several only stand if every place they name still means the same. They're given
+ * back as they were if they stand as they were, and they're null if they can't be made to what they
+ * were meant for.
+ */
+export function rebaseOps(ops: Op[], was: Reading, now: Reading): Op[] | null {
+	if (was.text === now.text) {
+		return ops;
+	}
+	const only = ops.length === 1 ? ops[0]! : null;
+	if (only !== null && only.op !== "add" && "at" in only) {
+		const node = partAt(was.nodes, only.at);
+		const there = node === undefined ? null : relocate(node, was, now);
+		if (there === null) {
+			return null;
+		}
+		return there.at.join() === only.at.join() ? ops : [{ ...only, at: [...there.at] }];
+	}
+	return ops.every((op) => { const at = placeOf(op); return at === null || samePlace(at, was.nodes, now.nodes); }) ? ops : null;
+}

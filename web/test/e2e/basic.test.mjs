@@ -793,6 +793,61 @@ test("Bring forward and Send back move a thing among what's beside it, and nothi
 	await context.close();
 });
 
+/** Two clicks, the second too soon after the first for the page to have read what the first did. */
+async function quickly(first, second) {
+	await first.evaluate((a, b) => {
+		globalThis.clickedTwice = false;
+		a.click();
+		setTimeout(() => {
+			b.click();
+			globalThis.clickedTwice = true;
+		}, 30);
+	}, await second.elementHandle());
+	await first.page().waitForFunction(() => globalThis.clickedTwice === true);
+}
+
+test("a second click that comes before the page has caught up acts on where the first left things", async () => {
+	const { p, context, errors } = await opened(stacked);
+	const lines = (t) => t.split("\n").sort();
+	await p.getByText("Each thing is drawn over the ones above it here.").waitFor();
+	await row(p, "Stripes").click();
+	await p.locator(".basic-controls h2", { hasText: "Stripes" }).waitFor();
+	const forward = p.getByRole("button", { name: "Bring forward" });
+	// Two quick Bring forwards move it on twice, not over the star and back again.
+	await quickly(forward, forward);
+	await p.waitForFunction(() => [...document.querySelectorAll(".layer-row .row-label")].map((e) => e.textContent).join() === "Background,Star,Corner block,Circle,Circle,Stripes");
+	const twice = await basicText(p, (t) => t.trimEnd().endsWith("bars a b { ratio 1 2; along hoist; }"));
+	assert.ok(twice.trimEnd().endsWith("bars a b { ratio 1 2; along hoist; }"), twice);
+	assert.deepEqual(lines(twice), lines(stacked), "nothing else in the file changes");
+	await row(p, "Stripes").and(p.locator(".on")).waitFor();
+	// A Remove just after a move takes out what was chosen, not what's taken its place.
+	await quickly(p.getByRole("button", { name: "Send back" }), p.locator(".basic-controls").getByRole("button", { name: "Remove", exact: true }));
+	const removed = await basicText(p, (t) => !t.includes("bars a b"));
+	assert.ok(!removed.includes("bars a b") && removed.includes("charge star b") && removed.includes("canton {"), removed);
+	await p.waitForFunction(() => [...document.querySelectorAll(".layer-row .row-label")].map((e) => e.textContent).join() === "Background,Star,Corner block,Circle,Circle");
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("each click is its own thing to undo, however soon after the last one it comes", async () => {
+	const { p, context, errors } = await opened(stacked);
+	await p.getByText("Each thing is drawn over the ones above it here.").waitFor();
+	await row(p, "Stripes").click();
+	await p.locator(".basic-controls h2", { hasText: "Stripes" }).waitFor();
+	const moved = stacked.replace("bars a b { ratio 1 2; along hoist; }\n\ncharge star b {\n      radius 10\n}\n", "\ncharge star b {\n      radius 10\n}\nbars a b { ratio 1 2; along hoist; }\n");
+	// Forward and straight back again, well within the time that typing is taken together.
+	await quickly(p.getByRole("button", { name: "Bring forward" }), p.getByRole("button", { name: "Send back" }));
+	await p.waitForFunction(() => [...document.querySelectorAll(".layer-row .row-label")].map((e) => e.textContent).join() === "Background,Stripes,Star,Corner block,Circle,Circle");
+	assert.equal(await basicText(p, (t) => t === stacked), stacked);
+	const undo = p.getByRole("button", { name: "Undo", exact: true });
+	await undo.click();
+	assert.equal(await basicText(p, (t) => t === moved), moved, "Undo takes back only the second");
+	await undo.click();
+	assert.equal(await basicText(p, (t) => t === stacked), stacked);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
 test("the strip of other forms shows one in the big view, with no handles, and a way back", async () => {
 	const { p, context, errors } = await opened(`${head}field a\ncharge disc b {\n  radius 6\n}\nvariant vertical {\n  from transpose\n  upright\n}\n`);
 	const strip = p.getByRole("group", { name: "Other forms" });
