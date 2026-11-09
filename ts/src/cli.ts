@@ -5,13 +5,16 @@
 /// <reference types="node" />
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { layerAt, locate, model, parse, shareDecode, shareEncode, svg, svgTree, validate, type Flag, type Options, type SvgElement } from "./index.js";
+import { constructionSvg, layerAt, locate, model, parse, shareDecode, shareEncode, svg, svgTree, validate, type ConstructionOptions, type Flag, type Options, type SvgElement } from "./index.js";
 
 const usage = `usage:
   vexyl render [options] FILE   render a flag to SVG
   vexyl check [-json] FILE...   validate flags, with -json listing one file's problems
   vexyl model FILE              print a flag's parsed model as JSON
   vexyl tree [options] FILE     print a render as a tree of elements, as JSON
+  vexyl construct [options] FILE
+                                draw a flag's construction sheet, with its sizes
+                                marked, as SVG
   vexyl locate [-line N] FILE   print where each layer and part of a document is, as JSON,
                                 or just what's innermost at a line
   vexyl share encode FILE       print a document as a share link's part after its #
@@ -32,6 +35,25 @@ render options:
   -fold-step N    stop the fold after N steps
   -id-prefix TEXT start every ID in the output with this
   -tags           mark each drawn element with the layer that drew it
+
+construct options:
+  -o FILE         write to a file instead of standard output
+  -units UNITS    grid, the default, for grid units as the file gives them;
+                  hoist, for parts of the hoist; or mm, for millimetres
+  -hoist-mm MM    the hoist in millimetres, for -units mm, by default 1000
+  -theme THEME    paper, the default, for black on white, or dark
+  -paper PAPER    a4, the default, or letter, both landscape, or fit, for a
+                  sheet just the size of the drawing
+  -variant NAME   one of the flag's variants, such as vertical or banner
+  -side SIDE      obverse or reverse
+  -no-sizes       leave out the sizes of the flag and its parts
+  -no-positions   leave out where each charge is
+  -no-colors      leave out the colour key
+  -grid           draw the construction grid over the flag
+  -path TEXT      where the file is, such as flags/country/chile.kdl, for the
+                  footer
+  -tier TEXT      the file's evidence tier, for the footer
+  -id-prefix TEXT start every ID in the output with this
 
 FILE can be - for standard input.
 `;
@@ -70,7 +92,8 @@ function parseRatio(text: string): number {
 	return fly / hoist;
 }
 
-function render(args: string[], asTree: boolean): void {
+/** Reads a command's options, up to its files: flags that take a value, and switches that don't. */
+function readOptions(args: string[], flags: ReadonlySet<string>, switches: ReadonlySet<string>): { given: Map<string, string>; files: string[] } {
 	const given = new Map<string, string>();
 	let i = 0;
 	for (; i < args.length; i++) {
@@ -85,11 +108,11 @@ function render(args: string[], asTree: boolean): void {
 		const body = arg.replace(/^--?/, "");
 		const equals = body.indexOf("=");
 		const name = equals < 0 ? body : body.slice(0, equals);
-		if (renderSwitches.has(name) && equals < 0) {
+		if (switches.has(name) && equals < 0) {
 			given.set(name, "");
 			continue;
 		}
-		if (!renderFlags.has(name)) {
+		if (!flags.has(name)) {
 			throw new Error(`unknown flag ${arg}\n${usage}`);
 		}
 		if (equals >= 0) {
@@ -100,7 +123,21 @@ function render(args: string[], asTree: boolean): void {
 			throw new Error(`flag needs an argument: ${arg}\n${usage}`);
 		}
 	}
-	const files = args.slice(i);
+	return { given, files: args.slice(i) };
+}
+
+/** Writes a command's output to the file `-o` names, or to standard output. */
+function emit(given: ReadonlyMap<string, string>, out: string): void {
+	const output = given.get("o");
+	if (output) {
+		writeFileSync(output, out);
+	} else {
+		process.stdout.write(out);
+	}
+}
+
+function render(args: string[], asTree: boolean): void {
+	const { given, files } = readOptions(args, renderFlags, renderSwitches);
 	if (files.length !== 1) {
 		throw new Error(`render needs one file\n${usage}`);
 	}
@@ -152,13 +189,77 @@ function render(args: string[], asTree: boolean): void {
 	if (given.has("tags")) {
 		opts.tags = true;
 	}
-	const out = asTree ? JSON.stringify(treeJson(svgTree(doc, opts))) + "\n" : svg(doc, opts);
-	const output = given.get("o");
-	if (output) {
-		writeFileSync(output, out);
-	} else {
-		process.stdout.write(out);
+	emit(given, asTree ? JSON.stringify(treeJson(svgTree(doc, opts))) + "\n" : svg(doc, opts));
+}
+
+const constructFlags = new Set(["o", "units", "hoist-mm", "theme", "paper", "variant", "side", "path", "tier", "id-prefix"]);
+const constructSwitches = new Set(["no-sizes", "no-positions", "no-colors", "grid"]);
+
+/** An option that's one of a few words, or absent, refusing any other. */
+function oneOf<T extends string>(given: ReadonlyMap<string, string>, name: string, words: readonly T[]): T | undefined {
+	const value = given.get(name);
+	if (value === undefined) {
+		return undefined;
 	}
+	if (!(words as readonly string[]).includes(value)) {
+		throw new Error(`-${name} must be ${words.slice(0, -1).join(", ")} or ${words.at(-1)!}, got "${value}"`);
+	}
+	return value as T;
+}
+
+function construct(args: string[]): void {
+	const { given, files } = readOptions(args, constructFlags, constructSwitches);
+	if (files.length !== 1) {
+		throw new Error(`construct needs one file\n${usage}`);
+	}
+	const doc = load(files[0]!);
+	const opts: ConstructionOptions = {};
+	const units = oneOf(given, "units", ["grid", "hoist", "mm"] as const);
+	if (units !== undefined) {
+		opts.units = units;
+	}
+	const hoistMm = given.get("hoist-mm");
+	if (hoistMm !== undefined) {
+		if (units !== "mm") {
+			throw new Error("-hoist-mm goes with -units mm");
+		}
+		opts.hoistMm = hoistMm === "" ? NaN : Number(hoistMm);
+		if (!(opts.hoistMm > 0 && Number.isFinite(opts.hoistMm))) {
+			throw new Error("-hoist-mm must be positive");
+		}
+	}
+	const theme = oneOf(given, "theme", ["paper", "dark"] as const);
+	if (theme !== undefined) {
+		opts.theme = theme;
+	}
+	const paper = oneOf(given, "paper", ["a4", "letter", "fit"] as const);
+	if (paper !== undefined) {
+		opts.paper = paper;
+	}
+	const variant = given.get("variant");
+	const side = oneOf(given, "side", ["obverse", "reverse"] as const);
+	if (variant || side !== undefined) {
+		opts.form = { ...(variant ? { variant } : {}), ...(side !== undefined ? { side } : {}) };
+	}
+	if (given.has("no-sizes")) {
+		opts.sizes = false;
+	}
+	if (given.has("no-positions")) {
+		opts.positions = false;
+	}
+	if (given.has("no-colors")) {
+		opts.colors = false;
+	}
+	if (given.has("grid")) {
+		opts.grid = true;
+	}
+	for (const [name, key] of [["path", "path"], ["tier", "tier"], ["id-prefix", "idPrefix"]] as const) {
+		const value = given.get(name);
+		if (value) {
+			opts[key] = value;
+		}
+	}
+	emit(given, constructionSvg(doc, opts));
 }
 
 function treeJson(e: SvgElement): unknown {
@@ -172,6 +273,9 @@ function run(args: string[]): void {
 			return;
 		case "tree":
 			render(args.slice(1), true);
+			return;
+		case "construct":
+			construct(args.slice(1));
 			return;
 		case "check": {
 			if (args[1] === "-json") {

@@ -53,9 +53,20 @@ vexyl render -ratio 1:1 -fit pad -align left flags/sweden.kdl
 vexyl check -json flags/sweden.kdl
 vexyl model flags/sweden.kdl
 vexyl tree flags/sweden.kdl
+vexyl construct -o sweden-sheet.svg flags/sweden.kdl
 ```
 
-It takes the same options as the Go command, apart from `info`, which it doesn't have.
+It takes the same options as the Go command, apart from `info`, which it doesn't have, and it has
+`construct`, which the Go command doesn't. That draws a flag's construction sheet, as `constructionSvg` does, to standard output or to
+the file `-o` names. Its options are the library's: `-units` is `grid`, `hoist` or `mm`, with
+`-hoist-mm` for the hoist's size in millimetres; `-theme` is `paper` or `dark`; `-paper` is `a4`,
+`letter` or `fit`; `-variant` and `-side` choose the form; `-no-sizes`, `-no-positions`,
+`-no-colors` and `-grid` say what to show; and `-path` and `-tier` go in the footer:
+
+```sh
+vexyl construct -units mm -hoist-mm 1500 -path flags/country/sweden.kdl -tier A flags/sweden.kdl
+vexyl construct -theme dark -paper fit -variant vertical -side reverse flags/united-states.kdl
+```
 
 ## Development
 
