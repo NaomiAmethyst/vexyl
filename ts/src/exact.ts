@@ -53,11 +53,31 @@ export function readExact(text: string): Fraction | null {
  * digits, so this recovers it exactly, without the double's own binary noise.
  */
 export function exactOf(v: number): Fraction {
+	if ((v as unknown) instanceof Exact) {
+		return (v as unknown as Exact).exact;
+	}
 	if (!Number.isFinite(v)) {
 		throw new RangeError(`${v} isn't a length`);
 	}
 	return readExact(String(v))!;
 }
+
+/**
+ * A number that's been worked out, rather than written, such as a position after adapting to
+ * another proportion, which carries the exact value it stands for. It acts as the nearest double
+ * in arithmetic, and `exactOf` gives the exact value back.
+ */
+export class Exact extends Number {
+	readonly exact: Fraction;
+
+	constructor(exact: Fraction) {
+		super(Number(exact.n) / Number(exact.d));
+		this.exact = exact;
+	}
+}
+
+/** An exact value where a number goes, for a flag whose numbers were worked out. */
+export const exactNumber = (f: Fraction): number => new Exact(f) as unknown as number;
 
 export const plus = (a: Fraction, b: Fraction): Fraction => fraction(a.n * b.d + b.n * a.d, a.d * b.d);
 export const minus = (a: Fraction, b: Fraction): Fraction => fraction(a.n * b.d - b.n * a.d, a.d * b.d);

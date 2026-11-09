@@ -1,0 +1,38 @@
+// Not a real flag: a Nordic cross and a disc that adapt to other proportions, in variants.
+vexyl 1
+meta {
+  name "Adapting"
+  license "Apache-2.0"
+}
+palette {
+  blue "#006aa7"
+  yellow "#fecc00"
+  red "#c8102e"
+}
+proportion hoist=10 fly=16
+
+field blue
+cross yellow {
+  fly 5 2 9
+  hoist 4 2 4
+}
+charge disc red {
+  radius 1
+  at fly=2.5 hoist=2
+}
+adapt {
+  wider extend
+  narrower hoist-scale
+}
+// Longer: the fly end grows, and everything measured from the hoist stays.
+variant long {
+  ratio 2
+}
+// Shorter: the hoist grows instead, to 40/3, and everything down it is spaced out with it.
+variant short {
+  ratio 1.2
+}
+variant hanging {
+  from transpose
+  ratio 2
+}

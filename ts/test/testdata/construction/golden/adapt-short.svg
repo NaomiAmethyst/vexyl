@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 1122.519685 793.700787">
+<title>Adapting · short: construction sheet</title>
+<rect x="0" y="0" width="1122.519685" height="793.700787" fill="#ffffff"/>
+<text x="40" y="49" font-family="Geist Mono, ui-monospace, monospace" font-size="11" letter-spacing="0.88" fill="#55525f">CONSTRUCTION SHEET</text>
+<text x="40" y="80" font-family="Geist, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="-0.28" fill="#1c1b22">Adapting · short</text>
+<text x="1082.519685" y="80" font-family="Geist Mono, ui-monospace, monospace" font-size="13" text-anchor="end" fill="#3b3947">5:6 · grid 40/3 × 16</text>
+<path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
+<svg x="210.43937" y="206" width="515.640945" height="429.700777" viewBox="0 0 16 13.333333" overflow="hidden">
+  <title>Adapting</title>
+  <clipPath id="vx-de3b5121f2fc8f76-cs-f-flag1">
+    <polygon points="0,0 16,0 16,13.333333 0,13.333333"/>
+  </clipPath>
+  <g clip-path="url(#vx-de3b5121f2fc8f76-cs-f-flag1)">
+    <polygon points="0,0 16,0 16,13.333333 0,13.333333" fill="#006aa7"/>
+    <polygon points="5,0 7,0 7,13.333333 5,13.333333" fill="#fecc00"/>
+    <polygon points="0,5.333333 16,5.333333 16,8 0,8" fill="#fecc00"/>
+    <circle cx="2.5" cy="2.666667" r="1" fill="#c8102e"/>
+  </g>
+</svg>
+<rect x="210.43937" y="206" width="515.640945" height="429.700787" fill="none" stroke="#c9c6d2" stroke-width="1"/>
+<path d="M210.43937 201V122M291.008268 201V174M371.577165 201V148M436.032283 201V148M726.080315 201V122M205.43937 206H126.43937M205.43937 291.940157H178.43937M205.43937 377.880315H152.43937M205.43937 463.820472H152.43937M205.43937 635.700787H126.43937" fill="none" stroke="#8d8a99" stroke-width="0.8" stroke-dasharray="3 3"/>
+<text x="250.723819" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2.5</text>
+<text x="291.008268" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">5</text>
+<text x="403.804724" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">2</text>
+<text x="581.056299" y="146" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">9</text>
+<text x="468.259843" y="120" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">16</text>
+<text x="176.43937" y="248.970079" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 176.43937 248.970079)">8/3</text>
+<text x="150.43937" y="291.940157" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 150.43937 291.940157)">16/3</text>
+<text x="150.43937" y="420.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 150.43937 420.850394)">8/3</text>
+<text x="150.43937" y="549.76063" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 150.43937 549.76063)">16/3</text>
+<text x="124.43937" y="420.850394" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#1c1b22" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" text-anchor="middle" transform="rotate(-90 124.43937 420.850394)">40/3</text>
+<path d="M291.008268 206V283.940157M210.43937 291.940157H283.008268M285.008268 291.940157H297.008268M291.008268 285.940157V297.940157" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.7" stroke-linecap="round"/>
+<path d="M291.008268 206V283.940157M210.43937 291.940157H283.008268" fill="none" stroke="#1c1b22" stroke-width="0.8" stroke-dasharray="3 3"/>
+<path d="M285.008268 291.940157H297.008268M291.008268 285.940157V297.940157" stroke="#1c1b22" stroke-width="1.5"/>
+<path d="M210.43937 180H291.008268M210.43937 174V186M291.008268 174V186M210.43937 154H371.577165M210.43937 148V160M371.577165 148V160M371.577165 154H436.032283M371.577165 148V160M436.032283 148V160M436.032283 154H726.080315M436.032283 148V160M726.080315 148V160M210.43937 128H726.080315M210.43937 122V134M726.080315 122V134M184.43937 206V291.940157M178.43937 206H190.43937M178.43937 291.940157H190.43937M158.43937 206V377.880315M152.43937 206H164.43937M152.43937 377.880315H164.43937M158.43937 377.880315V463.820472M152.43937 377.880315H164.43937M152.43937 463.820472H164.43937M158.43937 463.820472V635.700787M152.43937 463.820472H164.43937M152.43937 635.700787H164.43937M132.43937 206V635.700787M126.43937 206H138.43937M126.43937 635.700787H138.43937" fill="none" stroke="#2a2833" stroke-width="1"/>
+<rect x="278.208268" y="328.167717" width="25.6" height="14" rx="3" fill="#ffffff" fill-opacity="0.88"/>
+<text x="291.008268" y="338.667717" font-family="Geist Mono, ui-monospace, monospace" font-size="12" fill="#1c1b22" text-anchor="middle">r 1</text>
+<text x="40" y="661.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The short variant is the flag at a proportion of 1.2, by its rule for a narrower flag, hoist-scale. Every size here is worked out from the</text>
+<text x="40" y="677.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">file’s by that rule, exactly.</text>
+<text x="40" y="697.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#55525f">The long variant and the hanging variant have sheets of their own.</text>
+<text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">COLOURS</text>
+<circle cx="845.519685" cy="171" r="13" fill="#006aa7"/>
+<text x="868.519685" y="172" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Blue</text>
+<text x="903.949085" y="172" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#006aa7</text>
+<circle cx="845.519685" cy="209" r="13" fill="#fecc00"/>
+<text x="868.519685" y="210" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Yellow</text>
+<text x="918.964085" y="210" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#fecc00</text>
+<circle cx="845.519685" cy="247" r="13" fill="#c8102e"/>
+<text x="868.519685" y="248" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Red</text>
+<text x="900.099785" y="248" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#c8102e</text>
+<path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
+<text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The red disc’s center is marked +.</text>
+<text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">Vexyl 1</text>
+</svg>

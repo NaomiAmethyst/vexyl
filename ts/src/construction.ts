@@ -8,6 +8,7 @@
 import {
 	compare, decimal, exactOf, fraction, half, minus, over, placesOf, plus, same, sum, times, toNumber, zero, type Fraction,
 } from "./exact.js";
+import { withRatioExactly } from "./adapt-exact.js";
 import { resolve } from "./adapt.js";
 import { axis } from "./geometry.js";
 import { svg } from "./svg.js";
@@ -485,14 +486,15 @@ const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), 
  * Measures a form of a flag: `shown` is the flag as that form has it, with its layers, outline and
  * border, and `flag` the file's own, whose other forms the notes point to.
  */
-function measure(flag: Flag, shown: Flag | null, form: SheetForm): Measured {
+function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
 	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], rows: [], guides: [], slanting: false, details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: 0 };
-	if (shown === null) {
-		skip(m, `the ${form.variant} variant, which has ${flag.variants[form.variant!]?.ratio !== undefined ? "a proportion of its own by the flag’s adapt rules" : "a proportion of its own"}`);
-		return m;
-	}
 	const root: Frame = { x: zero, y: zero, w: exactOf(shown.fly), h: exactOf(shown.hoist) };
 	walk(shown.layers, root, m);
+	const ratio = form.variant !== undefined ? flag.variants[form.variant]?.ratio : undefined;
+	if (ratio !== undefined && ratio > 0) {
+		const rule = ratio > flag.fly / flag.hoist ? flag.adapt?.wider : flag.adapt?.narrower;
+		m.notes.push(() => `The ${form.variant} variant is the flag at a proportion of ${ratio}, by its rule for ${ratio > flag.fly / flag.hoist ? "a wider" : "a narrower"} flag, ${rule}. Every size here is worked out from the file’s by that rule, exactly.`);
+	}
 	if (m.slanting) {
 		m.notes.push(() => "Sizes along a slanting axis are measured along it, and across it square to it.");
 	}
@@ -510,15 +512,11 @@ function measure(flag: Flag, shown: Flag | null, form: SheetForm): Measured {
 	if (flag.reverse !== undefined && form.side !== "reverse") {
 		others.push("the reverse");
 	}
-	for (const [name, v] of Object.entries(flag.variants)) {
+	for (const name of Object.keys(flag.variants)) {
 		if (name === form.variant) {
 			continue;
 		}
-		if (v.ratio !== undefined || v.fly !== undefined) {
-			skip(m, `the ${name} variant`);
-		} else {
-			others.push(`the ${name} variant`);
-		}
+		others.push(`the ${name} variant`);
 	}
 	if (others.length > 0) {
 		const list = others.length === 1 ? others[0]! : `${others.slice(0, -1).join(", ")} and ${others.at(-1)!}`;
@@ -2170,8 +2168,6 @@ const turnVec = (m: Affine, v: Vec): Vec => ({ x: m[0] * v.x + m[2] * v.y, y: m[
 interface FormView {
 	/** The flag as the form has it, in its own frame, before any turn. */
 	flag: Flag;
-	/** Whether it can be measured: not yet, for a form with a proportion of its own. */
-	measured: boolean;
 	/** The form as the library draws it. */
 	drawn: string;
 	/** From the flag's own frame to the drawing's, as the library turns it. */
@@ -2201,9 +2197,17 @@ function formView(flag: Flag, form: SheetForm, idPrefix?: string): FormView {
 	}
 	const variant = form.variant !== undefined ? flag.variants[form.variant] : undefined;
 	const label = [form.variant, form.side === "reverse" ? "reverse" : undefined].filter((x) => x !== undefined).join(" · ");
+	let shown = resolved.flag;
+	if (variant?.ratio !== undefined && variant.ratio > 0) {
+		// The library adapted it with doubles, having checked that it can; the sheet adapts it again
+		// exactly, from the form before adapting, by the same rules.
+		const plain = { ...flag, variants: { ...flag.variants, [form.variant!]: { ...variant, ratio: undefined } } } as Flag;
+		const before = resolve(plain, form).flag;
+		const fromBehind = form.side === "reverse" && flag.reverse !== undefined && variant.layers.length === 0;
+		shown = withRatioExactly(before, exactOf(variant.ratio), fromBehind);
+	}
 	return {
-		flag: resolved.flag,
-		measured: variant === undefined || (variant.ratio === undefined && variant.fly === undefined),
+		flag: shown,
 		drawn,
 		map,
 		sideways: Math.abs(map[0]) < 0.5,
@@ -2211,7 +2215,6 @@ function formView(flag: Flag, form: SheetForm, idPrefix?: string): FormView {
 		label,
 	};
 }
-
 /** Lays out a sheet, and draws it. */
 export function constructionSheet(flag: Flag, options: ConstructionOptions = {}): Sheet {
 	const units = options.units ?? "grid";
@@ -2237,8 +2240,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 	const H = exactOf(view.flag.hoist);
 	const F = exactOf(view.flag.fly);
 	const t = formatFor(units, H, hoistMm);
-	const m = measure(flag, view.measured ? view.flag : null, form);
-	const measured = view.measured;
+	const m = measure(flag, view.flag, form);
 
 	// Whether any size has to be rounded, which the footer then says, worked out by writing them all.
 	const rounded = ((): boolean => {
@@ -2358,7 +2360,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 
 	const bodyTop = 100;
 	// Details of repeated charges, at most two, before the colours. Fewer are shown if the sidebar has no room.
-	const details = showSizes && measured
+	const details = showSizes
 		? m.details.map((d, i) => detailItems(d, view.map, (idPrefix) => svg(flag, { ...form, idPrefix }), `${prefix}d${i}-`, theme, t, sidebarWidth)).filter((x): x is SidebarItem[] => x !== null).slice(0, 2)
 		: [];
 	const sideItemsFor = (room: number): SidebarItem[] => {
@@ -2419,7 +2421,7 @@ export function constructionSheet(flag: Flag, options: ConstructionOptions = {})
 			chain("fly", 0, m.charges.filter((c) => compare(c.x, F) <= 0).map((c) => c.x), null);
 			chain("hoist", 0, m.charges.filter((c) => compare(c.y, H) <= 0).map((c) => c.y), null);
 		}
-		if (showSizes && measured) {
+		if (showSizes) {
 			if (m.flyParts.some((p) => compare(p, zero) > 0 && compare(p, F) < 0)) {
 				chain("fly", 1, m.flyParts, F);
 			}

@@ -8,6 +8,8 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
+import { withRatioExactly } from "../src/adapt-exact.js";
+import { withRatio } from "../src/adapt.js";
 import { constructionSheet, gridText, hoistText, labelOverlap, mmText, proportionText, type ConstructionOptions, type LabelBox } from "../src/construction.js";
 import { decimal, exactOf, fraction, over, placesOf, plus, readExact, sum, times } from "../src/exact.js";
 import { constructionSvg, parse, sheetFaces, type Flag, type SheetFont } from "../src/index.js";
@@ -296,11 +298,55 @@ test("a turned form is measured in the flag's own frame, and its rows turn with 
 	assert.throws(() => constructionSvg(chile, { form: { variant: "none-such" } }), /no variant/);
 });
 
-test("a form with a proportion of its own isn't measured yet, and says so", () => {
+test("a form with a proportion of its own is measured on its own grid, and one that adapts, exactly", () => {
+	// Guyana at sea: its own grid of 30 by 60, with its own piles.
 	const guyana = flagOf("guyana");
-	const sea = constructionSvg(guyana, { form: { variant: "sea" } });
-	assert.ok(textOf(sea).includes("Not measured on this sheet: the sea variant, which has a proportion of its own."));
-	assert.ok(textOf(constructionSvg(guyana)).includes("the sea variant"));
+	const sea = constructionSheet(guyana, { form: { variant: "sea" } });
+	assert.ok(sea.svg.includes(">1:2 · grid 30 × 60<") && sea.labels.some((l) => l.text === "60"));
+	assert.ok(textOf(sea.svg).includes("The gold pile stands on the hoist from 1.0308 to 28.9692, and reaches 55.8769 in from it, to a point."));
+	assert.ok(textOf(constructionSvg(guyana)).includes("The sea variant has a sheet of its own."));
+	golden("guyana-sea.svg", sea.svg);
+	// Longer, by extending: the cross's fly end grows to 13, and the disc stays 2.5 from the hoist.
+	const flag = flagOf("adapt");
+	const long = constructionSheet(flag, { form: { variant: "long" } });
+	for (const want of ["5", "2", "13", "20", "2.5"]) {
+		assert.ok(long.labels.some((l) => l.text === want), want);
+	}
+	assert.ok(textOf(long.svg).includes("The long variant is the flag at a proportion of 2, by its rule for a wider flag, extend."));
+	// Shorter, by scaling the hoist to 40/3: everything down it is a third longer, which no decimal says.
+	const short = constructionSheet(flag, { form: { variant: "short" } });
+	for (const want of ["16/3", "8/3", "40/3"]) {
+		assert.ok(short.labels.some((l) => l.text === want), want);
+	}
+	assert.ok(short.svg.includes(">5:6 · grid 40/3 × 16<"));
+	assert.ok(!textOf(short.svg).includes("~"), "nothing is rounded");
+	const hoist = constructionSheet(flag, { form: { variant: "short" }, units: "hoist" });
+	assert.ok(hoist.labels.some((l) => l.text === "2H/5") && hoist.labels.some((l) => l.text === "H/5"));
+	// Turned as well as adapted.
+	const hanging = constructionSheet(flag, { form: { variant: "hanging" } });
+	assert.equal(sideOfLabel(hanging, "20"), "left");
+	golden("adapt-short.svg", short.svg);
+	for (const variant of ["long", "short", "hanging"]) {
+		for (const side of ["obverse", "reverse"] as const) {
+			for (const opts of [{}, { units: "hoist" }, { paper: "fit", grid: true }] as ConstructionOptions[]) {
+				assert.deepEqual(collisions(flag, { ...opts, form: { variant, side } }), [], `${variant} ${side} ${JSON.stringify(opts)}`);
+			}
+		}
+	}
+});
+
+test("adapting exactly gives what the library draws", () => {
+	// Every number the exact adapter gives is the library's own, to within a double's error.
+	const flag = flagOf("adapt");
+	for (const ratio of [2, 1.2, 1.55]) {
+		const drawn = withRatio(flag, ratio);
+		const exact = withRatioExactly(flag, exactOf(ratio), false);
+		const numbers = (f: Flag): number[] => JSON.stringify(f.layers, (_, v: unknown) => (v instanceof Number ? Number(v) : v)).match(/-?[0-9.]+(e-?[0-9]+)?/g)!.map(Number);
+		const [a, b] = [numbers(drawn), numbers(exact)];
+		assert.equal(a.length, b.length);
+		a.forEach((x, i) => assert.ok(Math.abs(x - b[i]!) < 1e-9 * Math.max(1, Math.abs(x)), `${ratio}: ${x} and ${b[i]}`));
+		assert.ok(Math.abs(Number(exact.fly) / Number(exact.hoist) - ratio) < 1e-12);
+	}
 });
 
 /** The text set in a sheet's sidebar, which starts right of the drawing. */
