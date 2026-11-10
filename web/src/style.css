@@ -30,6 +30,12 @@ body { overflow-x: hidden; }
 /* The ground has the system's one decoration, gone in high contrast. */
 body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--fill-rgb), calc(var(--glow) * 0.6)), rgba(var(--fill-rgb), 0)); background-repeat: no-repeat; }
 
+.site-foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; padding: 18px 24px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); color: var(--muted); font-size: 0.75rem; }
+.site-foot a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.site-foot a:hover { color: var(--ink); }
+/* On a narrow screen, Undo and Redo and the small flag float over the bottom of the page, so the
+   footer leaves room under itself for them. */
+@media (max-width: 64rem) { body:has(.undo-redo.floating) .site-foot, body:has(.floating-flag) .site-foot { padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 104px); } }
 .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 24px; border-bottom: 1px solid var(--line); }
 /* On a wide screen, what's in the menu on a narrow one is a row of buttons. */
 .topbar-wide { display: contents; }

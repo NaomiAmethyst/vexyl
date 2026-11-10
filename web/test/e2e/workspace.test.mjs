@@ -940,3 +940,33 @@ test("Advanced has Undo and Redo buttons on a narrow screen only, in the same hi
 	assert.deepEqual(errors, []);
 	await context.close();
 });
+
+test("every page ends with where Vexyl comes from, which nothing floating covers on a phone", async () => {
+	const { p, context, errors } = await page("flags/country/united-states.kdl");
+	const foot = p.getByRole("contentinfo");
+	await foot.getByText("© 2026 Naomi Persephone Amethyst").waitFor();
+	const href = (name) => foot.getByRole("link", { name, exact: true }).getAttribute("href");
+	assert.equal(await href("Source on GitHub"), "https://github.com/NaomiAmethyst/vexyl");
+	assert.equal(await href("specification"), "https://github.com/NaomiAmethyst/vexyl/blob/main/SPEC.md");
+	assert.equal(await href("CC BY-SA 4.0"), "https://creativecommons.org/licenses/by-sa/4.0/");
+	assert.equal(await href("Apache 2.0"), "LICENSE.txt");
+	assert.equal((await p.request.get(new URL("LICENSE.txt", p.url()).href)).status(), 200, "the licence ships with the site");
+	assert.equal(await foot.getByRole("link").evaluateAll((all) => all.every((a) => a.target === "_blank" && a.rel === "noopener")), true, "following one keeps the flag open");
+	await p.goto(`${srv.base}?view=open`);
+	await p.getByRole("contentinfo").getByRole("link", { name: "Source on GitHub" }).waitFor();
+	await context.close();
+
+	const phone = await page("flags/country/united-states.kdl", { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	await phone.p.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+	const link = await phone.p.getByRole("contentinfo").getByRole("link", { name: "Source on GitHub" }).boundingBox();
+	for (const floating of [".undo-redo.floating", ".floating-flag"]) {
+		const box = await phone.p.locator(floating).boundingBox();
+		if (box !== null) {
+			const overlaps = link.x < box.x + box.width && box.x < link.x + link.width && link.y < box.y + box.height && box.y < link.y + link.height;
+			assert.ok(!overlaps, `${floating} covers the footer`);
+		}
+	}
+	assert.equal(await phone.p.evaluate(() => document.documentElement.scrollWidth), 390);
+	assert.deepEqual([...errors, ...phone.errors], []);
+	await phone.context.close();
+});
