@@ -50,6 +50,23 @@ test("the GitHub tab lists the default repository's flags, with real links", asy
 	await context.close();
 });
 
+test("rows draw files with coats of arms, and say when one is too large to draw rather than leave it empty", async () => {
+	const { p, context, log, errors } = await fresh();
+	await p.goto(`${srv.base}?view=open`);
+	await p.getByRole("button", { name: /^country \d+$/ }).click();
+	// Andorra's arms make it over 64 KB, which used to leave its square empty.
+	await p.locator('a.file-row[data-file="flags/country/andorra.kdl"] .row-thumb img').waitFor();
+	await p.getByRole("button", { name: /^country \(imported\) \d+$/ }).click();
+	const monaco = p.locator('a.file-row[data-file="imported/country/monaco-state.kdl"]');
+	await monaco.scrollIntoViewIfNeeded();
+	assert.equal(await monaco.locator(".row-thumb.large").textContent(), "large");
+	assert.equal(await monaco.locator(".row-thumb img").count(), 0);
+	await p.waitForTimeout(300);
+	assert.ok(!log.requests.some((u) => u.includes("monaco-state.kdl")), "a file too large to draw isn't fetched");
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
 test("a row opens in a new tab on a middle click", async () => {
 	const { p, context } = await fresh();
 	await p.goto(`${srv.base}?view=open`);

@@ -66,11 +66,19 @@ function thumbnail(url: string): Promise<string> {
 	return p;
 }
 
+/**
+ * The largest file a row draws a thumbnail of. Rows are only drawn as they come into view, a few at
+ * a time, so this only keeps the very largest imports, whole coats of arms path by path, from being
+ * fetched and drawn just to be scrolled past.
+ */
+const thumbMax = 512 * 1024;
+
 function Thumb(props: { url: string; size: number }): preact.JSX.Element {
 	const ref = useRef<HTMLSpanElement>(null);
 	const [src, setSrc] = useState<string>("");
+	const large = props.size > thumbMax;
 	useEffect(() => {
-		if (props.size > 64 * 1024) {
+		if (large) {
 			return undefined;
 		}
 		const seen = new IntersectionObserver((entries) => {
@@ -83,7 +91,11 @@ function Thumb(props: { url: string; size: number }): preact.JSX.Element {
 			seen.observe(ref.current);
 		}
 		return () => { seen.disconnect(); };
-	}, [props.url, props.size]);
+	}, [props.url, large]);
+	if (large) {
+		// Saying so, rather than leaving the square empty, which would look like it failed to draw.
+		return <span class="check row-thumb large" aria-hidden="true">large</span>;
+	}
 	return <span class="check row-thumb" ref={ref}>{src !== "" ? <img src={src} alt="" /> : null}</span>;
 }
 

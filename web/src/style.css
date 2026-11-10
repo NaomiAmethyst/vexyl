@@ -282,6 +282,7 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .file-list { flex: 1 1 auto; overflow: auto; display: flex; flex-direction: column; gap: 1px; }
 .row-thumb { width: 44px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex: 0 0 44px; }
 .row-thumb img { max-width: 40px; max-height: 26px; display: block; }
+.row-thumb.large { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.04em; color: var(--muted); }
 .preview { flex: 2 1 300px; gap: 12px; padding: 14px; }
 .preview-box { height: 190px; border-radius: 10px; border: 1px solid var(--line); padding: 12px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
 .preview-box img { max-width: 100%; max-height: 100%; display: block; }
