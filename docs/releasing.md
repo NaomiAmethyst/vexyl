@@ -89,31 +89,24 @@ way to set up a publisher for a name that hasn't been published yet.
 
 ### Maven Central
 
-The Java library isn't published yet, and nothing is set up for it. Publishing `name.amethyst:vexyl`
-will need these, through the Central Portal at <https://central.sonatype.com>:
+`name.amethyst:vexyl` goes to Maven Central through the Central Portal, <https://central.sonatype.com>,
+where the namespace `name.amethyst` is verified by a DNS TXT record on `amethyst.name`.
 
-1. **The namespace.** Sign in to the Portal and add the namespace `name.amethyst`. It's proved by a
-   DNS TXT record on `amethyst.name` holding the verification key the Portal shows, which can be
-   removed once it's verified. `io.github.naomiamethyst` would need no DNS, but isn't what the pom
-   says.
-2. **A token.** Generate a user token in the Portal (Account, Generate User Token), and keep its
-   name and password as repository secrets, such as `CENTRAL_USERNAME` and `CENTRAL_PASSWORD`.
-   Maven reads them from a `<server>` in `settings.xml`, which `actions/setup-java` can write with
-   `server-id: central`.
-3. **Signing.** Central needs every file signed with PGP. Make a key for releases, publish its public
-   half to a keyserver Central checks, such as `keyserver.ubuntu.com` or `keys.openpgp.org`, and keep
-   the private key and its passphrase as secrets (`setup-java` can import it with `gpg-private-key`).
-   The pom then needs `maven-gpg-plugin` in a release profile, so that ordinary builds don't sign.
-4. **Sources and Javadoc.** Central refuses a jar without them, so the release profile also needs
-   `maven-source-plugin` and `maven-javadoc-plugin` attaching their jars. The pom already has the
-   name, description, URL, licence, developer and SCM that Central requires.
-5. **The plugin.** `org.sonatype.central:central-publishing-maven-plugin`, with `<extensions>true`,
-   `<publishingServerId>central</publishingServerId>` and, at first, no `autoPublish`, so that each
-   upload waits in the Portal to be checked and published by hand. Once that's worked, `release.yml`
-   can run `mvn -f java/pom.xml -P release deploy` after the npm step, with `autoPublish` set.
-
-A version on Central can never be changed or removed, so it's worth uploading one by hand first and
-dropping it in the Portal, before letting a workflow publish.
+- **The upload.** `release.yml` calls `maven.yml`, which checks that `java/pom.xml` is the release's
+  version and runs `mvn -P release deploy`. The `release` profile adds the sources and Javadoc jars,
+  signs every file and uploads them with `central-publishing-maven-plugin`, with `autoPublish` off.
+  The deployment then waits in the Portal, under Deployments: check that it validated, and publish it
+  there. A version on Central can never be changed or removed, so nothing publishes it automatically.
+- **Trying it.** Running `maven.yml` by hand, from the Actions tab, uploads the current commit as
+  `0.0.0-check.N`. Check it in the Portal and drop it there; never publish one.
+- **The secrets.** `CENTRAL_USERNAME` and `CENTRAL_PASSWORD` are a Portal user token (Account, Generate
+  User Token). `GPG_PRIVATE_KEY` and `GPG_PASSPHRASE` are a key made only for signing releases, kept
+  with its revocation certificate in `~/.config/vexyl-release/` and published on keyserver.ubuntu.com:
+  `2A8872A8188BA3F3F7742ACA4A9293202EB8CE6F`. It expires on 2028-11-12; extend it with
+  `GNUPGHOME=~/.config/vexyl-release/gnupg gpg --quick-set-expire FINGERPRINT 2y`, send it to the
+  keyserver again and update `GPG_PRIVATE_KEY`.
+- **By hand.** With the key's keyring and a `settings.xml` holding the server `central`:
+  `GNUPGHOME=~/.config/vexyl-release/gnupg MAVEN_GPG_PASSPHRASE=... mvn -f java/pom.xml -P release -DskipTests deploy`.
 
 ### The images
 

@@ -1,0 +1,73 @@
+name: maven
+
+# Uploads the Java library to the Maven Central Portal, where the deployment waits to be checked
+# and published by hand; nothing here publishes it. release.yml calls this for each release.
+# Run by hand, it uploads a version marked 0.0.0-check, to try the whole path: check it in the
+# Portal, then drop it there, so that it's never published.
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: The release's version
+        type: string
+        required: true
+    secrets:
+      CENTRAL_USERNAME:
+        required: true
+      CENTRAL_PASSWORD:
+        required: true
+      GPG_PRIVATE_KEY:
+        required: true
+      GPG_PASSPHRASE:
+        required: true
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Writes a settings.xml with the server `central`, whose credentials come from the
+      # environment, and imports the signing key.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+          cache-dependency-path: java/pom.xml
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      # A release must be the version the pom says; a run by hand gets a version that can't be
+      # mistaken for one.
+      - name: Set the version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          pom="$(mvn -B -q -f java/pom.xml org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate -Dexpression=project.version -DforceStdout)"
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            mvn -B -q -f java/pom.xml org.codehaus.mojo:versions-maven-plugin:2.18.0:set -DnewVersion="0.0.0-check.$GITHUB_RUN_NUMBER" -DgenerateBackupPoms=false
+          elif [ "$pom" != "$VERSION" ]; then
+            echo "::error::java/pom.xml's version is $pom, but the release is $VERSION"
+            exit 1
+          fi
+
+      # The tests ran in CI for this commit, and one of them checks the pom's version, which a run
+      # by hand changes.
+      - name: Upload
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: mvn -B -f java/pom.xml -P release -DskipTests deploy

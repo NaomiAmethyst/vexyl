@@ -125,6 +125,14 @@ jobs:
           fi
           gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes --title "Vexyl $VERSION" "${flags[@]}"
 
+  # The upload waits in the Central Portal to be published by hand.
+  maven:
+    needs: version
+    uses: ./.github/workflows/maven.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+    secrets: inherit
+
   # Trusted publishing: npm trusts this workflow by its OIDC token, so there's no token secret.
   # The publish carries provenance, which links it to this run.
   npm:
