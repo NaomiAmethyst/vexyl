@@ -945,18 +945,23 @@ Using it for lettering or seals doesn't make them part of the format.
 Artwork uses `currentColor` only where a paint (`fill`, `stroke`, `stop-color`, `flood-color` or
 `lighting-color`) or `color` has it as its value, or as a keyword within its value, such as the
 fallback after a `url(#id)`. That's as an attribute or as a declaration in a `style`, on any element,
-the root included. The keyword is matched ignoring ASCII case, as CSS keywords are. An `id`, or any
-other text that contains the word, doesn't count, and nor does a `url(#id)` naming one.
+the root included, with a `style` split at each `;` and each declaration at its first `:`. The keyword
+is matched ignoring ASCII case, as CSS keywords are, and only as a whole word of ASCII letters, digits,
+`_` and `-`, once each `url(#id)` is taken out. An `id`, or any other text that contains the word,
+doesn't count, and nor does a `url(#id)` naming one, so `currentColor-x` doesn't either.
 
 Markup MUST be a well-formed XML 1.0 document (fifth edition) that's also namespace-well-formed
 under Namespaces in XML 1.0, and every library MUST read it that way, whatever its XML parser
-allows. In particular:
+allows. That's all of it, including what's removed below. In particular:
 
 - Its encoding is UTF-8. An XML declaration is optional, MUST come first if it's there, and can
-  only say version `1.0` and encoding UTF-8.
+  only say version `1.0`, then optionally encoding UTF-8, with its name in any case, then optionally
+  `standalone` as `yes` or `no`. A processing instruction whose target is `xml` in any case is a
+  declaration, so `<?XML ?>` is an error, and no target can have a colon.
 - An attribute MUST NOT be repeated, by its written name or by its namespace and local name.
   `href` and `xlink:href` on one element count as a repeat, because they mean the same.
-- Every prefix MUST be declared, and `xml` and `xmlns` keep their reserved meanings.
+- Every prefix MUST be declared, and `xml` and `xmlns` keep their reserved meanings. `xmlns=""` is
+  allowed, and leaves what it covers in no namespace.
 - Only the five predefined entities exist. A character reference MUST refer to an XML character,
   so `&#xD800;` and `&#0;` are errors, as is any such character written literally, even in a
   comment or inside something that would be removed.
@@ -968,7 +973,7 @@ any other. Style properties and CSS function names are matched ignoring ASCII ca
 
 The root MUST be an `svg` element in the SVG namespace, with a `viewBox` or with
 numeric `width` and `height` (optionally in `px`). Those give it a viewBox of
-`0 0 width height`. All of those numbers use the grammar in §4, within the limits in §15.
+`0 0 width height`, and an empty `viewBox` is the same as none. All of those numbers use the grammar in §4, within the limits in §15.
 Artwork is always fitted as SVG's default `preserveAspectRatio` fits it, so the root MAY say
 `xMidYMid` or `xMidYMid meet`, with any ASCII whitespace around and between the words, and MUST
 NOT say anything else.
@@ -988,12 +993,14 @@ A renderer MUST reject a document whose inline SVG contains:
 - any other element or attribute in the SVG namespace, or with no namespace, including a root-only
   attribute anywhere but the root
 - text other than whitespace, or a DOCTYPE or other directive
-- an `href` (or `xlink:href`) that isn't `#id`
+- an `href` (or `xlink:href`) that isn't `#` and an `id` as below, so `#1` is refused
 - a presentation value using any function other than `url(#id)`, `rgb()`,
-  `rgba()`, `hsl()` or `hsla()`
+  `rgba()`, `hsl()` or `hsla()`: once each `url(#id)` is taken out, however it's written, that's any `(`
+  that doesn't end one of those four names, with no letter, digit or `_` before the name
 - an `id` that doesn't match `[A-Za-z_][A-Za-z0-9_.:-]*`
 - a `style` attribute with a backslash, `@`, or `/*`
-- elements nested more than 64 levels deep
+- elements nested more than 64 levels deep, with the root at level 1, and not counting a removed
+  element or anything in it
 - more than one root element
 
 These are excluded for specific reasons: `script`, event handlers, `a` and
@@ -1003,7 +1010,8 @@ can multiply work exponentially; and `text` depends on fonts that the document
 can't carry, so lettering must be converted to paths.
 
 A renderer MUST remove, without error, these elements with their contents:
-`title`, `desc`, `metadata` and anything in another namespace. It MUST also remove
+`title`, `desc`, `metadata` and anything in another namespace, without checking them against the
+allowlist. It MUST also remove
 attributes in other namespaces, other than `xlink:href`, along with comments and
 processing instructions. Editors commonly add these, and they don't affect how
 the artwork draws.

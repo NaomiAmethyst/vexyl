@@ -23,7 +23,8 @@ COMMAND render -tags ...          marks each drawn element with the layer that d
 COMMAND locate FILE               prints each part of a document, as SDK.md section 7.3 says, as JSON
 COMMAND locate -line N FILE       prints what's innermost at that line, as JSON
 COMMAND share encode FILE         prints the document as a share link's part after its #
-COMMAND share decode FILE         prints the document held by the link in a file, exiting nonzero if it's refused
+COMMAND share decode FILE         prints the document held by the link in a file, exiting nonzero if it's refused,
+                                  after dropping only line feeds at the file's end, so a CR there is refused
 ```
 
 It runs `--jobs` cases at once, by default `$VEXYL_JOBS` or one for each CPU, each with files of its own. What it

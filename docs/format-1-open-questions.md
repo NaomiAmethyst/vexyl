@@ -137,76 +137,60 @@ sanitizer agrees with Go's on 40,424 pieces of markup: every table in go/conform
 `markup` in conformance/, flags/ and go/testdata/, and mutations of them.
 
 ### SPEC §8.3, nesting depth
-- **Unclear:** "elements nested more than 64 levels deep" doesn't say whether the root counts, or
-  whether removed elements (`title`, foreign ones) count.
-- **Go:** the root is level 1, so it can hold 63 levels of elements (conformance's "nesting up to the
-  limit" has 63 `<g>`s inside the root). What's inside a removed element doesn't count at all.
+- **Settled:** §8.3 now says the root is level 1, and a removed element and what's in it aren't
+  counted, as all three libraries have it. The suite refuses 64 `<g>`s inside the root, and keeps 63
+  around a `title` holding another.
 
 ### SPEC §8.3, the XML declaration
-- **Unclear:** "can only say version `1.0` and encoding UTF-8". Is `standalone` allowed? Is the
-  encoding's name matched in any case? What of a processing instruction whose target is `XML` or
-  `Xml`?
-- **Go:** `version` is required, then optionally `encoding` and `standalone`, in that order, with
-  `standalone` only `yes` or `no`. The encoding is matched ignoring case (`utf-8` is fine). Any
-  target that's `xml` in any case is a declaration, and anything but lowercase `xml` at offset 0 is
-  refused. A target with a colon is refused, as Namespaces in XML says.
+- **Settled:** §8.3 now says a declaration is `version`, then optionally `encoding` (its name in any
+  case) and `standalone` (`yes` or `no`), in that order; a target that's `xml` in any case is a
+  declaration; and no target has a colon. The suite refuses `standalone="maybe"`, `standalone` before
+  `encoding`, and `<?XML ...?>` first.
 
 ### SPEC §8.3, an empty `viewBox`
-- **Unclear:** whether `viewBox=""` is an invalid viewBox, or no viewBox.
-- **Go:** an empty value counts as no viewBox, so `width` and `height` are read instead.
+- **Settled:** §8.3 now says an empty `viewBox` is the same as none, so `width` and `height` are
+  read. The suite keeps one.
 
 ### SPEC §8.3, `href`
-- **Unclear:** "an `href` that isn't `#id`" doesn't say whether the part after `#` has to match the
-  `id` grammar.
-- **Go:** it has to match `[A-Za-z_][A-Za-z0-9_.:-]*`, so `href="#1"` is refused.
+- **Settled:** §8.3 now says an `href` is `#` and an `id` by its grammar, so `#1` is refused, as the
+  suite now checks.
 
 ### SPEC §8.3, which functions count
-- **Unclear:** what counts as "a function" in a presentation value.
-- **Go:** after removing each `url(#id)` (as SDK §4.2 matches it) and each `rgb(`, `rgba(`,
-  `hsl(` or `hsla(` (ASCII case-insensitive, not preceded by a letter, digit or `_`), any `(` left
-  is refused. So `xrgb(1)`, an unclosed `url(#a` and a lone `(` are all refused, and `-rgb(1)` is
-  allowed.
+- **Settled:** §8.3 now says that once each `url(#id)` is taken out, any `(` that doesn't end `rgb`,
+  `rgba`, `hsl` or `hsla`, with no letter, digit or `_` before it, is a function that's refused. The
+  suite refuses `_rgb(1)`, an unclosed `url(#a` and a lone `(`, and keeps `-rgb(1,2,3)`.
 
 ### SPEC §8.3, prefixes inside removed content
-- **Unclear:** whether removed content (foreign elements, `title`) still has to be
-  namespace-well-formed.
-- **Go:** yes. The whole document is read first as XML with namespaces, so an undeclared prefix,
-  a bad character reference or a repeated attribute anywhere is an error, removed or not. Attributes
-  of removed elements aren't checked against the allowlist.
+- **Settled:** §8.3 now says all of the markup has to be well-formed, removed content included, and
+  that what's removed isn't checked against the allowlist. The suite refuses a repeated attribute in
+  a `title`.
 
 ### SPEC §8.3, `xmlns=""`
-- **Unclear:** undeclaring the default namespace.
-- **Go:** allowed (only a prefix can't be undeclared). Elements in no namespace are then refused,
-  as the allowlist says, and attributes with no namespace are checked as usual.
+- **Settled:** §8.3 now says `xmlns=""` is allowed and leaves what it covers in no namespace. The
+  suite keeps a prefixed SVG root that has one.
 
 ### SDK §4.2, a `style` declaration with an empty value
-- **Unclear:** "Empty ones are dropped" could mean declarations that are only whitespace, or also
-  `fill:` with nothing after the colon.
-- **Go:** only those that are whitespace. `fill:` is kept and written `fill:`. A declaration with no
-  colon is refused as an unknown property.
+- **Settled:** SDK §4.2 now says only declarations of whitespace are dropped, and `fill: ;` is
+  written `fill:`, which the suite checks.
 
 ### SDK §4.2, currentColor in a `style`
-- **Unclear:** how a `style` is split when looking for currentColor before it's checked.
-- **Go:** split at every `;`, each at its first `:`, the property trimmed and lowercased, and
-  `url(#id)`s removed from the value before looking for the keyword as a whole word of
-  `[A-Za-z0-9_-]`.
+- **Settled:** §8.3 now says a `style` is split at each `;` and each declaration at its first `:`,
+  and the keyword counts only as a whole word of ASCII letters, digits, `_` and `-` once each
+  `url(#id)` is taken out. The suite accepts `currentColor-x`, `xcurrentColor` and `currentColor1`
+  with no palette color.
 
 ### SDK §8, stray bits after the stream's end
-- **Unclear:** "apart from the bits that fill its last byte" doesn't say whether those bits have to
-  be zero.
-- **Go:** they're ignored, whatever they are. Java's zlib ignores them too.
+- **Settled:** SDK §8 now says the bits that fill the last byte are ignored, whatever they are. The
+  suite reads a link with them set.
 
 ### SDK §8, versions
-- **Unclear:** how a version is written, such as `v01.` or `v.`.
-- **Go:** `^v([0-9]+)\.`, and the digits have to be exactly `1`, so `v01.` is refused as another
-  version and `v.` as having no version.
+- **Settled:** SDK §8 now says a link starts with `v`, its version's digits and a `.`, so `v01.` is
+  another version and `v.` has none. The suite already refuses both.
 
 ### SDK §8 / conformance README, the command reading a link from a file
-- **Unclear:** what `share decode FILE` does with a line ending after the link.
-- **Go:** it removes trailing LFs only (`strings.TrimRight(src, "\n")`), so a CR or a space is still
-  refused as outside base64url.
+- **Settled:** the conformance README now says `share decode FILE` drops only line feeds at the
+  file's end. The suite reads a link followed by an LF and refuses one followed by a CRLF.
 
 ### SDK §8, which compression level
-- **Unclear:** nothing says how hard an encoder has to compress, only that it's within 15% of zlib
-  with the dictionary.
-- **Go:** `flate.BestCompression`. Java uses `Deflater.BEST_COMPRESSION`.
+- **Settled:** SDK §8 now says how hard an encoder compresses is its own, as long as its links are
+  within 15% of zlib's with the dictionary, which the suite already checks.

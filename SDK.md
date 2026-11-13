@@ -235,8 +235,8 @@ attribute = " " name '="' value '"'
   and `href`s are as written. In a presentation attribute, each `url(#id)` is written just so, however
   its case, spaces and quotes were written, and the rest is as it was.
 - A `style` is its declarations in order, each `property:value` with the property in lowercase,
-  neither with whitespace around it, and with any `url(#id)` written as above. Empty ones are
-  dropped, and the rest are joined by `;`.
+  neither with whitespace around it, and with any `url(#id)` written as above. Empty ones, of only
+  whitespace, are dropped, and the rest are joined by `;`, so `fill: ;` is written `fill:`.
 - In values, `& < > " ' tab LF CR` are written `&amp; &lt; &gt; &#34; &#39; &#x9; &#xA; &#xD;`.
 
 So `<s:svg xmlns:s="http://www.w3.org/2000/svg" version="1.1" width="20px" height="10"><s:rect
@@ -384,7 +384,8 @@ opened without any server storing it or even seeing it:
 so that each reads the others' links:
 
 - The compression is raw DEFLATE (RFC 1951), with no zlib or gzip wrapper, of the document's exact bytes
-  in UTF-8. Line endings and a byte order mark are kept.
+  in UTF-8. Line endings and a byte order mark are kept. How hard an encoder compresses is its own, as
+  long as its links are within 15% of zlib's with the dictionary, as the suite checks.
 - The base64url (RFC 4648 section 5) has no padding. Anything else MUST be refused: `=`, a character
   outside the alphabet, whitespace, an impossible length, or stray bits in the last character.
 - The preset dictionary of version 1 is the file [`share/v1.dict`](share/v1.dict), of 8,192 bytes, with a SHA-256
@@ -392,7 +393,9 @@ so that each reads the others' links:
   dictionary can never change once it's released, because every link ever sent depends on every byte of it, so
   a better one would be a new version, with a new prefix, read beside this one.
 - A decoder MUST refuse a stream that's corrupt, ends early, or has anything after its end, apart from
-  the bits that fill its last byte, and one holding anything but UTF-8. It MUST refuse a version it doesn't know.
+  the bits that fill its last byte, whatever they are, and one holding anything but UTF-8. It MUST refuse a
+  version it doesn't know. A link starts with `v`, its version's digits and a `.`, so `v01.` is a version
+  other than 1, and `v.` has none.
 - A link can hold up to 8 MiB (8,388,608 bytes). A decoder MUST stop as soon as its output passes
   that, rather than finding out afterward, since a few kilobytes of link can inflate to gigabytes.
   An encoder MUST refuse a larger document.

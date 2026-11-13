@@ -1647,6 +1647,11 @@
   "line": 5
  },
  {
+  "name": "sanitizer: a repeated attribute in a dropped element",
+  "file": "invalid/sanitizer-a-repeated-attribute-in-a-dropped-element.kdl",
+  "line": 5
+ },
+ {
   "name": "sanitizer: surrogate reference",
   "file": "invalid/sanitizer-surrogate-reference.kdl",
   "line": 5
@@ -1842,6 +1847,11 @@
   "line": 5
  },
  {
+  "name": "sanitizer: href to an id starting with a digit",
+  "file": "invalid/sanitizer-href-to-an-id-starting-with-a-digit.kdl",
+  "line": 5
+ },
+ {
   "name": "sanitizer: xlink href to another file",
   "file": "invalid/sanitizer-xlink-href-to-another-file.kdl",
   "line": 5
@@ -1899,6 +1909,21 @@
  {
   "name": "sanitizer: a function a color only ends",
   "file": "invalid/sanitizer-a-function-a-color-only-ends.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a color function after an underscore",
+  "file": "invalid/sanitizer-a-color-function-after-an-underscore.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a url never closed",
+  "file": "invalid/sanitizer-a-url-never-closed.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a parenthesis alone",
+  "file": "invalid/sanitizer-a-parenthesis-alone.kdl",
   "line": 5
  },
  {
@@ -2197,6 +2222,11 @@
   "line": 5
  },
  {
+  "name": "sanitizer: a level past the limit, counting the root",
+  "file": "invalid/sanitizer-a-level-past-the-limit-counting-the-root.kdl",
+  "line": 5
+ },
+ {
   "name": "sanitizer: text before the root",
   "file": "invalid/sanitizer-text-before-the-root.kdl",
   "line": 5
@@ -2239,6 +2269,21 @@
  {
   "name": "sanitizer: a declaration with no spaces",
   "file": "invalid/sanitizer-a-declaration-with-no-spaces.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration standalone neither yes nor no",
+  "file": "invalid/sanitizer-a-declaration-standalone-neither-yes-nor-no.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration with standalone before the encoding",
+  "file": "invalid/sanitizer-a-declaration-with-standalone-before-the-encoding.kdl",
+  "line": 5
+ },
+ {
+  "name": "sanitizer: a declaration in capitals",
+  "file": "invalid/sanitizer-a-declaration-in-capitals.kdl",
   "line": 5
  },
  {

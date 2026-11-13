@@ -172,6 +172,9 @@ def build_share(vexyl):
     accept("exactly at the limit", at_limit, raw_deflate(at_limit, dictionary))
     accept("line endings kept", b'vexyl 1\r\nmeta {\r\n}\r\n', raw_deflate(b'vexyl 1\r\nmeta {\r\n}\r\n', dictionary))
     accept("a byte order mark and other text kept", "\ufeffvexyl 1\n// \u00e9\U0001f3f3\n".encode(), raw_deflate("\ufeffvexyl 1\n// \u00e9\U0001f3f3\n".encode(), dictionary))
+    accept("bits set past the stream's end in its last byte", b"vexyl 1\n\n\n\n", padding_set(raw_deflate(b"vexyl 1\n\n\n\n", dictionary), dictionary))
+    accepted.append({"name": "a line feed after the link", "link": write("a line feed after the link", link_of(packed) + "\n"),
+                     "bytes": len(document), "sha256": hashlib.sha256(document).hexdigest()})
 
     good = link_of(packed)
     over = raw_deflate(b"a" * (SHARE_LIMIT + 1), dictionary)
@@ -188,6 +191,7 @@ def build_share(vexyl):
         ("base64 padding", link_of(raw_deflate(b"vexyl")) + "="),
         ("the standard alphabet", "v1." + base64.b64encode(raw_deflate(bytes(range(256)) * 4)).rstrip(b"=").decode()),
         ("whitespace inside", good[:20] + "\n" + good[20:]),
+        ("a carriage return and line feed after it", good + "\r\n"),
         ("an impossible length", good[:3] + "A" * (4 * 3 + 1)),
         ("stray bits at its end", non_canonical(raw_deflate(b"vexyl 1\n", dictionary))),
         ("cut short", link_of(packed[:len(packed) // 2])),
@@ -221,6 +225,21 @@ def far_distance():
     code(0, 7)  # end of block
     bits.extend([0] * (-len(bits) % 8))
     return bytes(sum(bits[i + j] << j for j in range(8)) for i in range(0, len(bits), 8))
+
+
+def padding_set(stream, dictionary):
+    """The same stream with every bit after its end in its last byte set, which a decoder ignores."""
+    for bit in range(8):
+        candidate = stream[:-1] + bytes([stream[-1] | (0xFF << bit) & 0xFF])
+        d = zlib.decompressobj(-15, zdict=dictionary)
+        try:
+            if d.decompress(candidate) == zlib.decompressobj(-15, zdict=dictionary).decompress(stream) and d.eof and not d.unused_data:
+                if candidate == stream:
+                    break
+                return candidate
+        except zlib.error:
+            pass
+    raise ValueError("no bits after the stream's end to set")
 
 
 def non_canonical(stream):

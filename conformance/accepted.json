@@ -116,6 +116,10 @@
   "file": "accepted/a-pennant-s-tip-written-as-0.kdl"
  },
  {
+  "name": "words that only contain currentColor, with no palette color",
+  "file": "accepted/words-that-only-contain-currentcolor-with-no-palette-color.kdl"
+ },
+ {
   "name": "an id containing currentColor, with no palette color",
   "file": "accepted/an-id-containing-currentcolor-with-no-palette-color.kdl"
  },

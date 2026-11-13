@@ -62,6 +62,18 @@
    "link": "share/a byte order mark and other text kept.link",
    "bytes": 21,
    "sha256": "c6a74b54516a729111fb8150459ba8f98821be8f38e6a9a95dedadc5c5500b4d"
+  },
+  {
+   "name": "bits set past the stream's end in its last byte",
+   "link": "share/bits set past the stream's end in its last byte.link",
+   "bytes": 11,
+   "sha256": "68b2e4ed0f19c6ea9e1074608bb7e10218125ec9bf6c605729e4bcaf6df96a2d"
+  },
+  {
+   "name": "a line feed after the link",
+   "link": "share/a line feed after the link.link",
+   "bytes": 4152,
+   "sha256": "029d1618b1163ef4d1285a2560454ddba72101da088c796e6204a2b254fc0ad1"
   }
  ],
  "refused": [
@@ -104,6 +116,10 @@
   {
    "name": "whitespace inside",
    "link": "share/whitespace inside.link"
+  },
+  {
+   "name": "a carriage return and line feed after it",
+   "link": "share/a carriage return and line feed after it.link"
   },
   {
    "name": "an impossible length",
