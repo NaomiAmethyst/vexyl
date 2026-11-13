@@ -505,7 +505,7 @@ def check_invalid(command, wanted, failures):
             try:
                 lines = [p.get("line") for p in json.loads(done.stdout)]
             except ValueError:
-                return 1, [f"{case['name']}: problems aren't JSON"]
+                return 1, [f"{case['name']}: problems aren't JSON (exit {done.returncode}): {(done.stdout.strip() or done.stderr.strip())[:300]!r}"]
             if case["line"] not in lines:
                 found.append(f"{case['name']}: no problem on line {case['line']}: {lines}")
             if "column" in case and not any(p.get("line") == case["line"] and p.get("column") == case["column"] for p in json.loads(done.stdout)):

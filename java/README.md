@@ -54,6 +54,11 @@ java -jar java/target/vexyl.jar locate -line 12 flags/sweden.kdl
 java -jar java/target/vexyl.jar share encode flags/sweden.kdl
 ```
 
+The JVM writes its own warnings to standard output, ahead of the command's. A script that reads
+the output, such as `check -json`'s, should send them to standard error with
+`java -Xlog:disable -Xlog:all=warning:stderr -jar …`. Many JVMs starting at once can warn about a
+locked file in `/tmp/hsperfdata_*`, as the conformance suite's do.
+
 ## Development
 
 It's built with Maven, on any JDK from 17, with `--release 17`. From the repository's root,

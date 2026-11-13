@@ -49,7 +49,7 @@ check-java:
 
 conformance-java:
 	$(MVN) -q -f java/pom.xml package -DskipTests
-	python3 conformance/run.py java -jar java/target/vexyl.jar
+	python3 conformance/run.py java -Xlog:disable -Xlog:all=warning:stderr -jar java/target/vexyl.jar
 
 # Changes what every implementation must do, so review the diff.
 conformance-fixtures: vexyl

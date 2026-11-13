@@ -106,7 +106,7 @@ jobs:
 
       # Built with 25, and run with 17.
       - run: mvn -B -q -f java/pom.xml package -DskipTests
-      - run: python3 conformance/run.py "$JAVA_HOME_17_X64/bin/java" -jar java/target/vexyl.jar
+      - run: python3 conformance/run.py "$JAVA_HOME_17_X64/bin/java" -Xlog:disable -Xlog:all=warning:stderr -jar java/target/vexyl.jar
 
   # Runs the suite against libraries with one thing wrong, some of them the Go reference patched.
   conformance-prove:
