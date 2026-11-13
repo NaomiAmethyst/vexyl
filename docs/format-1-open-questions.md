@@ -20,10 +20,8 @@ and what Go does.
   value and inside a string.
 
 ### SPEC §15 / §8.1, small numbers in path data
-- **Unclear:** §8.1 says a path's numbers are "within the largest magnitude in §15", which reads as
-  only the upper limit, while §15 says every number has a magnitude that's zero or from 1e-12.
-- **Go:** path data checks only `|v| <= 1e12`, so `M0 0L1e-20 1` is valid. Numbers in a `box`,
-  `through` or `viewBox` get both limits.
+- **Settled:** §8.1 and §15 now say a path's `d` has only the upper limit, so `M0 0L1e-20 1` is
+  valid, as all three libraries have it. The conformance suite accepts one.
 
 ### SPEC §4.1, dates
 - **Unclear:** whether `YYYY-MM-DD` has to be a real day, and whether a year can be `0000`.

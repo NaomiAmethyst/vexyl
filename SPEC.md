@@ -791,7 +791,7 @@ from 0 to 1 of its slot that each ray fills at its base, which defaults to 1.
 
 A `path` is for shapes that have no other name. `d` is path data by SVG's grammar, with its numbers
 within the largest magnitude in §15, and anything else MUST be rejected rather than drawn as far as
-it goes. `box` is
+it goes. Only that upper limit applies to them, so `M0 0L1e-20 1` is fine. `box` is
 `"x y width height"`, the area of its coordinates that fits within `fly` by `hoist`,
 keeping its shape and centered on the charge's position. Either size can be left out to
 take its size from the other. It keeps a palette color and everything else a charge has,
@@ -1496,7 +1496,8 @@ document when it's parsed, so that validating it says so too:
   counted on the flag's own shape, step by step, when the document is read.
 
 A number MUST be finite, with a magnitude that's zero or from 1e-12 to 1e12, so that nothing worked
-out from it can overflow. A renderer MUST reject any other.
+out from it can overflow. A renderer MUST reject any other. Numbers in a path's `d` have only the
+upper limit (§8.1).
 
 A flag's grid SHOULD stay under 10000000 units in each direction. Anything larger is valid, but some
 SVG renderers lose precision past about 33000000, and draw clips and shapes wrongly or not at all.

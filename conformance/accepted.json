@@ -72,6 +72,10 @@
   "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
  },
  {
+  "name": "path data with numbers smaller than 1e-12",
+  "file": "accepted/path-data-with-numbers-smaller-than-1e-12.kdl"
+ },
+ {
   "name": "a zero with an exponent too small for a double",
   "file": "accepted/a-zero-with-an-exponent-too-small-for-a-double.kdl"
  },
