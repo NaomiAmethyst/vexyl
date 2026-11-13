@@ -114,6 +114,8 @@ These MUST be errors, so that no option is ever silently ignored:
   both sides and is cropped to its pieces, so neither has a meaning. A `fold` with a `ratio` folds
   the flag at that proportion.
 
+When several are wrong at once, which is reported is the library's own.
+
 ## 4. The model
 
 `model` gives a flag as plain maps, lists, strings, numbers and booleans. It's the same in every
@@ -263,7 +265,8 @@ document that draws the same as `svg`, with the same title and description.
 
 IDs in a document SHOULD NOT collide with those of a different document, or a different form of
 the same one, so that several flags can be inlined in one page. A library works them out from a
-hash of the document, which is enough for documents that aren't trying to collide. A hostile one
+hash of the document, and of the options that make it a different form, which is enough for
+documents that aren't trying to collide. Which hash, and how, is the library's own. A hostile one
 can search for a hash that lets its definitions capture another flag's references, so a page showing
 documents it doesn't trust MUST pass an `idPrefix` that it knows is unique. Each is then an `id`'s
 first characters, and within one render, IDs MUST be unique.
@@ -341,7 +344,7 @@ With the option `tags`, every element that draws something MUST have an attribut
 `data-vexyl-layer` holding the path of the layer that drew it. That's any shape, and each piece
 of inline SVG, which is marked on its own root as one thing. Whatever's only a definition isn't marked, such
 as what's in a `clipPath`, a `mask` or a gradient. A fold's artwork is in `defs`, but it's drawn with
-`use`, so it's marked. Nothing else in a render changes, so it MUST draw the same pixels
+`use`, so it's marked there, and the `use`s placing it aren't. Nothing else in a render changes, so it MUST draw the same pixels
 as without the option.
 
 These keep a path through whatever changes the drawing but not the layer:

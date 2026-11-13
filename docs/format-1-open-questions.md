@@ -72,56 +72,68 @@ and what Go does.
 
 ## Rendering
 
-These were settled from go/svg.go, go/shapes.go, go/geometry.go, go/adapt.go and go/fold.go.
+These were first settled from go/svg.go, go/shapes.go, go/geometry.go, go/adapt.go and go/fold.go.
+Each was then checked against all three libraries, and all three agree on every one.
 
-1. **SDK §5, SPEC §14 (IDs from a hash).** Which hash, of what, and how two *forms* of one document get different IDs.
-   Go: `vx-` + hex of the first 8 bytes of SHA-256 of the source after line endings are normalized, then `-`. When any
-   option other than `height` and `tags` is given (and no `idPrefix`), it appends hex of the first 2 bytes of SHA-256 of
-   `ratio|variant|side|fit|align|fold|foldStep` (ratio formatted with Go's `%v`) and `-`. Each ID is then that prefix,
-   a kind (`flag`, `clip`, `mask`, `gradient`, `panel`, `svg`, `front`, `back`, `facet`) and a counter. Java follows it,
-   but formats the ratio with its own shortest decimal, so its IDs aren't byte-identical to Go's for fractional ratios
-   (nothing requires them to be).
-2. **SPEC §11 (asking for the flag's own proportion).** Whether a `ratio` equal to the flag's own needs `adapt`. Go treats
-   a ratio within a relative 1e-9 of the flag's own as no change, so it renders even without `adapt`.
-3. **SPEC §11 `range`.** Whether the limits are inclusive. Go: inclusive (refuses only below `min` or above `max`).
-4. **SPEC §9 `define NAME hoist= fly=` ("scaled to fill wherever it's used").** Whether the scale keeps the design's
-   aspect. Go stretches it non-uniformly: `scale(region.w / fly, region.h / hoist)`.
-5. **SPEC §7.10 pile fimbriation.** The pile's shape is "the part inside the region", but a fimbriation stroked on that
-   polygon would run along the region's edge. Go extends the pile's sides back past its edge by the region's diagonal
-   (and the pall's arms and stem past the region by the diagonal plus its width) and lets the region's clip cut them, so
-   no edging shows along the flag's edge. The gradient box stays the part inside the region.
-6. **SPEC §7.11 wavy edge sampling, §8.1 curve tolerance.** How finely a wave or a cardioid is approximated. Go samples
-   24 points per wavy period, and 180 segments for a cardioid; zigzags are exact.
-7. **SPEC §7.11 / §15 waves at render time.** An edge's waves are counted on the flag's own grid when it's read, but a
-   variant's or another proportion's region can make more. Go refuses the render with "a shaped edge can't have more
-   than 10000 waves" when a single edge would exceed it at render time.
-8. **SPEC §11 side panels running along the axis.** What size the panel's own layers see across the axis while adapting.
-   Go uses the panel's `width` (not `width + depth/2` for a panel with an `edge`).
-9. **SPEC §11, scale under `scale` of a side panel's or placed panel's layers.** Go adapts the layers inside against the
-   panel's own size along the axis (`width`, `fly` or `hoist`), with that size scaled by the same factor.
-10. **SPEC §9 emblem frame and §6 cuts.** A cut's mask needs a rectangle, but an emblem's frame has no size. Go gives the
-    frame a "local" reach equal to the distance from the emblem's origin to the region's farthest corner, and masks
-    `-reach..reach` in both directions.
-11. **SPEC §8.1 ring arc under rotation.** Go adds a charge's `rotate` (and a repeat's turn) to `from` and to `to`, so the
-    arc turns with the charge.
-12. **SPEC §13 (tagged folds, SDK §7.2).** Which element carries the tag in a fold. Go marks the artwork inside `defs`
-    (drawn through `use`) and leaves the `use` and the crease lines unmarked. The reverse's artwork in a fold is tagged
-    under `reverse/`.
-13. **SPEC §13 fold at another proportion with its own reverse.** Go adapts the reverse's layers too, as seen from behind,
-    so the back of each facet is at the same proportion.
-14. **SPEC §12 upright on a mirrored reverse.** With no own reverse, which turn the charges undo. Go undoes the front's
-    turn (the back is the mirror image of the front, then turned), not the reverse turn.
-15. **SDK §3 option checks order.** Go checks values (height, ratio, idPrefix), then fit/align, then fold rules, then
-    the variant and fold names, then the unknown `fit`, `align` and `side` values. An unknown `fit` with no ratio is
-    refused for having no ratio first. Only that something is refused is normative.
-16. **SPEC §11.1 padding with a turned variant.** The canvas ratio is the design's, so for `rotate`, `counter-rotate`,
-    `transpose` and `anti-transpose` Go pads to `1 / ratio` in the turned image.
-17. **SPEC §7.3 bars "MAY extend under the ones after".** Go extends each bar to the far side of the region unless a
-    gap (`none`) or a gradient needs its true width; rotated bars' outermost bars reach well past the region. Quarters
-    and checks do the same, and rays paint the first color under the whole region when there's no gap.
-18. **SVG numbers (SDK §5).** Go rounds coordinates to 6 decimal places and writes scales (`scale(...)` of paths, uses
-    with their own grid, path outlines) to 10 significant digits. Java does the same with BigDecimal, since
-    `Double.toString` on Java 17 isn't always the shortest representation.
+1. **SDK §5, SPEC §14 (IDs from a hash).** **Settled:** SDK §5 now says IDs come from a hash of the
+   document and of the options that make another form, and that which hash, and how, is the
+   library's own. Go and Java use `vx-` and SHA-256 of the source (and of the form's options); TypeScript
+   uses a hash of its own. None of it is normative, only that IDs don't collide.
+2. **SPEC §11 (asking for the flag's own proportion).** **Settled:** §11 now says a proportion
+   within a relative 1e-9 of the flag's own is the flag's own, so it needs no `adapt`.
+3. **SPEC §11 `range`.** **Settled:** §11 now says both ends are included. `every-field` and `variants`
+   have `range 1 3` and render at exactly 1.
+4. **SPEC §9 `define NAME hoist= fly=`.** **Settled:** §9 now says the grid is scaled along each axis
+   on its own, so a region of another shape stretches it.
+5. **SPEC §7.10 pile fimbriation.** **Settled:** §7.10 now says the pile's sides and the pall's arms
+   and stem carry on past the region, which cuts them off, so the region's side isn't edged. How far
+   they carry on (the region's diagonal, plus the width for a pall) is the library's own.
+6. **SPEC §7.11 wavy edge sampling, §8.1 curve tolerance.** **Open.** All three libraries draw a wave
+   as 24 straight pieces a period, and a cardioid as 180, with zigzags exact. But 24 pieces miss a
+   sine by about 0.0043 of its depth, which is past §8.1's "error under 0.1% of the flag's hoist"
+   once a wave is deeper than about 23% of the hoist, and the 180 pieces of a cardioid are enough
+   only up to a radius of about the hoist. It isn't said whether §8.1's allowance covers waves at
+   all, or whether they have to be exact. Settling it means choosing between those, and probably
+   finer pieces in all three libraries, which only changes renders within the suite's tolerance.
+7. **SPEC §7.11 / §15 waves at render time.** **Settled:** §15 now says an edge's waves are counted
+   again when it's drawn, along the line it actually runs, and a render that would draw more than
+   10000 in one edge is refused. That's how a valid document such as `proportion hoist=1 fly=1` with
+   `bars a b { along bend; edge wavy depth=0.0001 period=0.0001; }` is refused even in its own form,
+   in all three, since the read-time count uses the longer side and the bend runs along the
+   diagonal. Counting the line it runs when it's read would make such documents invalid, which is a
+   question for a later format.
+8. **SPEC §11 side panels running along the axis.** **Open.** All three libraries adapt a panel's
+   layers as if the panel were `width` across the axis, even when its `edge` makes it
+   `width + depth/2` (§7.11). So a charge anchored `start` in a `side hoist; width 1; edge zigzag
+   depth=0.4` panel is at fly 0.6 in its own form and jumps to 0.5 at `-ratio 2:3.003`, which isn't
+   "pinned to where the center was". Writing `width` into the text would make the jump normative;
+   using the drawn size is a line in each library's adapter, but it changes renders.
+9. **SPEC §11, scale under `scale` of a side panel's or placed panel's layers.** **Settled:** §11's
+   table now says a panel's size along the axis scales with the flag's, and its layers adapt from
+   its old size to its new one.
+10. **SPEC §9 emblem frame and §6 cuts.** **Settled:** nothing to add. Painting is clipped to the
+    region, so how large a mask is past it can't be seen, and SDK §5 compares renders as pixels. All
+    three use the distance from the emblem's origin to the region's farthest corner.
+11. **SPEC §8.1 ring arc under rotation.** **Settled:** §8.1 now says `from` and `to` are on the
+    shape, so they turn with the charge's `rotate` and with a repeat's turn.
+12. **SPEC §13 (tagged folds, SDK §7.2).** **Settled:** SDK §7.2 now says the artwork in `defs` is
+    marked and the `use`s placing it aren't, as the suite already checks. The reverse's artwork in
+    a fold is under `reverse/`, as §7.1 already gives.
+13. **SPEC §13 fold at another proportion with its own reverse.** **Settled:** §13 now says that
+    reverse's layers adapt too, as seen from behind, and the fold is refused if they can't.
+14. **SPEC §12 upright on a mirrored reverse.** **Settled:** §12 now says that without a `reverse`
+    of its own, an upright charge on the back is the charge with the obverse's turn undone, then
+    mirrored with the flag.
+15. **SDK §3 option checks order.** **Settled:** SDK §3 now says which of several wrong options is
+    reported is the library's own. Every case in `options.json` is refused by all three.
+16. **SPEC §11.1 padding with a turned variant.** **Settled:** §11.1 now says a variant that swaps
+    width and height is padded after it turns, to `1 / ratio`, which follows from SDK §3's `ratio`
+    being measured before the turn. The suite's `variant-*-pad-1-4` renders pin it.
+17. **SPEC §7.3 bars "MAY extend under the ones after".** **Settled:** §7.3 now gives `quarters`,
+    `checks` and `rays` the same leave, as long as the visible result is the same.
+18. **SVG numbers (SDK §5).** **Settled:** nothing to add. SDK §5 already makes number formatting
+    the library's own, with a SHOULD of 6 decimal places and significant digits for scales. Go
+    writes 6 places and scales to 10 significant digits; Java does the same with BigDecimal.
 
 ## Inline SVG and share links
 

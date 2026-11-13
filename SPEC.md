@@ -453,7 +453,8 @@ function paint_bars(bars, region, target):
 
 Renderers MAY extend each bar under the ones after it, as long as the visible
 result is the same. This stops antialiasing from showing a hairline of whatever
-lies beneath the flag between adjacent bars.
+lies beneath the flag between adjacent bars. The same goes for the parts of `quarters` and
+`checks`, and for `rays`, which MAY paint their first color under the whole region.
 
 ### 7.4 chevrons
 
@@ -658,6 +659,10 @@ A `pall` is a Y: two arms of `width` run from the edge's corners to a point `jun
 in from the middle of the edge, then one stem of the same width runs on to the far
 side. `junction` defaults to half the edge's length. Its corners are mitered.
 
+A pile's or pall's fimbriation doesn't edge the region's side. For it, the pile's sides, and the
+pall's arms and stem, carry on past the region, which cuts them off, so only what's inside it is
+edged.
+
 ### 7.11 edge
 
 `bars` and side panels can take a shaped line between divisions:
@@ -782,7 +787,8 @@ or `repeat`.
 
 A `ring` can take `from` and `to`, in degrees clockwise from up, to draw only that part
 of it, going clockwise, with straight ends along radii. Either defaults to 0 if the other is given,
-and they MUST NOT be the same place, since that leaves nothing to draw.
+and they MUST NOT be the same place, since that leaves nothing to draw. They're on the shape, so
+they turn with the charge's `rotate`, and with a repeat's turn.
 
 `hollow W` draws any shape's outline at a width of `W` centered on its edge, instead of
 filling it. `lines W` draws a star as lines between its points, skipping one each time.
@@ -1091,7 +1097,8 @@ itself. It can hold one of two things:
   `charge svg` included, is a design.
 - **A design:** any layers, used with `use NAME`, which paints them in the current
   region. `define NAME hoist=H fly=F` gives a design its own grid, which is scaled to
-  fill wherever it's used, as a flag within a canton needs.
+  fill wherever it's used, as a flag within a canton needs, along each axis on its own, so a
+  region of another shape stretches it.
 
 **`outline ...`** gives a flag a non-rectangular shape, and everything paints inside
 it. The proportion still sets the grid, which SHOULD be the outline's bounding box.
@@ -1167,10 +1174,11 @@ adapt {
 }
 ```
 
-`range` limits the proportion, as fly divided by hoist. `wider` and `narrower` each name
-a rule for when that's more or less than the flag's own. Without one, the flag MUST NOT
+`range` limits the proportion, as fly divided by hoist, both ends included. `wider` and `narrower`
+each name a rule for when that's more or less than the flag's own. Without one, the flag MUST NOT
 be rendered in that direction, and without `adapt` it can't be rendered at another
-proportion at all. A design whose shape is fixed by law should say nothing here.
+proportion at all. A proportion within a relative 1e-9 of the flag's own is the flag's own, so it
+needs no `adapt`. A design whose shape is fixed by law should say nothing here.
 
 | Rule | Effect |
 |---|---|
@@ -1221,7 +1229,7 @@ function move(x, old, new, anchor):
 | A charge's `repeat line` | Its position moves by the anchor. The step only changes under `scale`, in proportion |
 | A charge's `repeat grid` | Its copies follow the region, since they're spread across it |
 | A charge's several `at`s | Each moves by the anchor |
-| `panel` | Stays on its edge or corner, keeping its size unless `scale`. One running along the axis grows, and its layers adapt with it |
+| `panel` | Stays on its edge or corner, keeping its size unless `scale`. One running along the axis grows, and its layers adapt with it. Under `scale`, its size along the axis scales with the flag's, and its layers adapt from its old size to its new one |
 | `group`, `use` | Their layers adapt. A design with its own grid doesn't, because it fills its region |
 | `outline polygon` | Its points scale. Named outlines are recalculated for the new size |
 
@@ -1321,7 +1329,8 @@ function canvas(box, target, align):
 ```
 
 If the rules allow the nearest proportion but the design can't reach it, as when a cut
-would remove a cross's arm, the flag is padded from its own proportion instead.
+would remove a cross's arm, the flag is padded from its own proportion instead. A variant that
+swaps width and height, such as `rotate` or `transpose`, is padded after it turns, to `1 / ratio`.
 
 ## 12. Variants
 
@@ -1394,6 +1403,8 @@ it as the obverse's turn does:
 | `counter-rotate` | `rotate` |
 
 With `upright`, each charge on the reverse is drawn the way it is on the back, the right way up.
+Without a `reverse` of its own, that's the charge with the obverse's turn undone, then mirrored with
+the flag.
 
 A variant with `upright` draws each charge exactly as it is on the obverse, around its own
 position, leaving where it sits on the flag alone. It undoes the whole turn there, reflection and
@@ -1481,6 +1492,9 @@ facets instead, first mirrored across the flag so that it's in the same coordina
 (x, y) -> (fly - x, y)
 ```
 
+At another proportion, that reverse's layers adapt too, as seen from behind (§11), and the fold is
+refused if they can't.
+
 So that the folds can be seen, a renderer MUST mark each facet's edge with a black line of 35%
 opacity with round joins, as wide as 0.4% of the longer side of the facets' bounds. It's drawn
 above that facet and beneath the next. The image is cropped to the facets' bounds. Rendering takes a fold's name and optionally a number
@@ -1507,7 +1521,10 @@ document when it's parsed, so that validating it says so too:
 - Up to 10000 bars or wedges from a `count`, points of a star or sun, cells of `checks`, or copies
   from a single `repeat`.
 - Up to 10000 waves in a shaped edge, and up to 10000 pieces from a fold. A fold's pieces are
-  counted on the flag's own shape, step by step, when the document is read.
+  counted on the flag's own shape, step by step, when the document is read. An edge's waves are
+  counted again when it's drawn, along the line it actually runs, which a bend, a variant or
+  another proportion can make longer, and a render that would draw more than 10000 in one edge
+  MUST be refused.
 
 A number MUST be finite, with a magnitude that's zero or from 1e-12 to 1e12, so that nothing worked
 out from it can overflow. A renderer MUST reject any other. Numbers in a path's `d` have only the
