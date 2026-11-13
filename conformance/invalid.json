@@ -353,6 +353,21 @@
   "line": 2
  },
  {
+  "name": "a leap day in a year without one",
+  "file": "invalid/a-leap-day-in-a-year-without-one.kdl",
+  "line": 2
+ },
+ {
+  "name": "a month of one digit",
+  "file": "invalid/a-month-of-one-digit.kdl",
+  "line": 2
+ },
+ {
+  "name": "names that aren't strings",
+  "file": "invalid/names-that-aren-t-strings.kdl",
+  "line": 5
+ },
+ {
   "name": "cmyk count",
   "file": "invalid/cmyk-count.kdl",
   "line": 3

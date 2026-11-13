@@ -687,6 +687,7 @@ var acceptedDocuments = []invalidCase{
 	{name: "a zero with an exponent too small for a double", src: header + "band a { along bend; width 1; offset 0.0e-400; }\ncharge path a { d \"M0 0L1 1Z\"; box \"0.0e-400 0 1 1\"; fly 1; at fly=0e-999 hoist=5; }\n"},
 	{name: "switches written with #true and #false", src: header + "quarters a b a b { diagonal #false; }\nsaltire a { width 1; counterchange #true; }\ncharge path a { d \"M0 0H1V1Z\"; box \"0 0 1 1\"; fly 1; evenodd #false; }\nvariant v { from rotate; upright #false; }\n"},
 	{name: "stops at the same place", src: "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; b \"#445566\"; g gradient a b a { stops 0 0.5 0.5; }; }\nproportion hoist=1 fly=1\nfield g\n"},
+	{name: "dates in year zero and on a leap day", src: "vexyl 1\nmeta { name \"T\"; date \"0000-02-29\"; until \"2024-02-29\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
 	{name: "a series with digits", src: "vexyl 1\nmeta { name \"T\"; series \"flag-2\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
 	{name: "a render license over a work under the same one", src: "vexyl 1\nmeta {\n  name \"T\"\n  render-license \"CC-BY-4.0\"\n  adapted-from \"https://example.test/a\" {\n    license \"CC-BY-4.0\"\n  }\n  adapted-from \"https://example.test/b\" {\n    license \"CC0-1.0\"\n  }\n}\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},
 	{name: "an apex past the end of its edge", src: header + "chevrons a { depth 2; angle 30; apex 15; }\n"},

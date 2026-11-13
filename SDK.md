@@ -58,11 +58,14 @@ starts:
 - Something missing, or values that don't go together, is on the node they belong to: a `charge`
   with no `radius` or an `inner` past it, a `bars` whose `ratio` doesn't match its colors, or a
   `pile` with both `depth` and `tip`. So is a sun's `points` below 3 or `spread` above 1, and a
-  negative value in `grow`. A gradient's `stops` that don't match its colors are on `stops`.
+  negative value in `grow`. A gradient's `stops` that don't match its colors are on `stops`, and a
+  `render-license` that can't cover a work in `adapted-from` is on `meta`.
 - A shape's problems are on the node naming it, which for a charge is the `charge`, and inline SVG's
   are on its `charge` too.
 - A child given twice is on the second, and an unknown one on itself. A top-level node out of order
-  is on itself.
+  is on itself. A property given twice is on its node, or a syntax error, since a KDL parser can
+  refuse it itself.
+- A type annotation is on the node holding it, which for an annotated node is that node.
 - An outside border that can't go around the shape is on the `border`, or on the `variant` whose
   outline or border brings them together.
 - A flag that paints too much is on the top-level layer that takes it past the limit, or on the
@@ -204,9 +207,12 @@ A shape has `shape`, `at`, `rotate` (0) and `hollow`, then:
 | `pile`, `pall` | As the layers of those names, only in a `clip` or `cut` |
 
 A position is `fly` and `hoist`, both always there. A shape's `at` is a list of positions and the
-word `center`. One `at center` is the default, so it isn't there.
+word `center`, in their order. One `at center` is the default, so it isn't there, but among others
+it's `center` in its place.
 
-A charge using a defined shape gives that shape's fields, with the charge's changes applied.
+A charge using a defined shape gives that shape's fields, with the charge's changes applied. What's
+worked out is worked out again from them, so a star whose definition leaves out `inner` has the
+`inner` of the charge's `radius`, while a value the definition gives stays as it is.
 
 ### 4.2 Inline SVG
 
@@ -367,7 +373,8 @@ column 8. As well as each layer by its path, these are there:
 | `fold/NAME` | A fold |
 
 It reads only the document's syntax, so that a program can still find its way around a document with
-other problems, and it gives nothing for one that isn't KDL. It doesn't check that a layer's name or a part's
+other problems, and it gives nothing for one that isn't KDL. A definition, variant or fold whose name
+isn't a string has no path, so neither it nor anything in it is in the list. It doesn't check that a layer's name or a part's
 place is valid, since `validate` does that. `layerAt` gives what holds a line: of those that do, the one that
 starts latest, and in a tie, whichever comes last.
 

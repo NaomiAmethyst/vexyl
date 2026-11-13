@@ -1,0 +1,4 @@
+vexyl 1
+meta { name "T"; date "0000-02-29"; until "2024-02-29"; }
+palette { a "#112233"; }
+proportion hoist=1 fly=1

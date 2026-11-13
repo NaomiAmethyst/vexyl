@@ -8,11 +8,10 @@ and what Go does.
 ## Reading documents
 
 ### SPEC §4, a property given twice
-- **Unclear:** the spec says a property MUST NOT be given twice, but not whether that's a syntax
-  error (no line, since SDK §2 lets a KDL parser stop at its first) or a problem on the node.
-- **Go:** kdl-go is run with `DupError`, so it's a syntax error and the rest of the document isn't
-  checked. `conformance/invalid.json` records no line for it.
-- **Java:** a problem on the node, with its line, and the rest is still checked. Both pass.
+- **Settled:** SDK §2 now says a property given twice is a problem on its node, or a syntax error,
+  since a KDL parser can refuse it itself. Go and TypeScript stop there, Go with the second
+  property's line and TypeScript with the node's; Java puts it on the node and goes on. All refuse
+  the document, and the suite records no line for it.
 
 ### SPEC §15, a number too small to hold
 - **Settled:** a number that's not zero as written, such as `1e-400`, is refused even though a
@@ -24,58 +23,52 @@ and what Go does.
   valid, as all three libraries have it. The conformance suite accepts one.
 
 ### SPEC §4.1, dates
-- **Unclear:** whether `YYYY-MM-DD` has to be a real day, and whether a year can be `0000`.
-- **Go:** Go's `time.Parse` with `2006`, `2006-01` and `2006-01-02`: four-digit years from 0000, two
-  digits for the month and day, and the day real in its month, leap years included (`2023-02-29` is
-  refused; `conformance/invalid/impossible-date.kdl` covers one case).
+- **Settled:** §4.1 now says a date is a Gregorian day, carried back before the calendar began, with
+  four digits for the year from `0000` and two each for the month and day, and the day one its
+  month has. The suite accepts `0000-02-29` and `2024-02-29`, and refuses `1900-02-29` and `2023-4`.
 
 ### SPEC §4.1, `until` before `date`
-- **Unclear:** "not before `date` as far as both are known" doesn't say how `2020` compares with
-  `2020-05`.
-- **Go:** each is cut to the shorter one's length and compared as text, so `date 2020-05` with
-  `until 2020` is fine, and so is `until 2020-05` with `date 2020`.
+- **Settled:** §4.1 now says they're compared only as far as the shorter goes, as all three
+  libraries do. The suite already has both directions.
 
 ### SDK §2, where a `render-license` problem goes
-- **Unclear:** a `render-license` that can't cover an adapted work could be on `render-license`, on
-  the `adapted-from`, or on `meta`.
-- **Go:** on `meta`. The fixtures agree.
+- **Settled:** SDK §2 now says it's on `meta`, as all three libraries and the fixtures have it.
 
 ### SDK §4, a defined shape whose worked-out values a charge changes
-- **Unclear:** "A charge using a defined shape gives that shape's fields, with the charge's changes
-  applied." If a defined star leaves out `inner`, its inner is worked out from its radius. When a
-  charge using it changes the radius, is `inner` the definition's worked-out value or worked out
-  again?
-- **Go:** worked out again, from the charge's radius, and the same for a heart's `spread`. A value
-  the definition gave stays.
+- **Settled:** SDK §4.1 now says what's worked out is worked out again from the charge's values,
+  while a value the definition gives stays, as all three libraries do. `go/testdata/defined-shapes.kdl`
+  pins the first half.
 
 ### SDK §4, several `at`s and `at center`
-- **Unclear:** "One `at center` is the default, so it isn't there" doesn't say what `at center`
-  among several positions looks like.
-- **Go:** each is the word `"center"` in the list, and a single `at center` is left out.
+- **Settled:** SDK §4.1 now says that among others `at center` is `center` in its place in the list,
+  and only a single one is left out, as all three libraries do and `every-field` pins.
 
 ### SPEC §13, when folds are checked
-- **Unclear:** "Steps are checked when the document is read, on the flag's own shape" doesn't say
-  whether that happens for a document with other problems.
-- **Go:** only when there are no other problems, since a broken outline or border gives no shape to
-  fold.
+- **Settled:** §13 now says steps are checked once the document has no other problems, as all three
+  libraries do. Such a document is invalid either way, so the suite can't see it.
 
 ### SPEC §4 and SDK §2, a type annotation's problem
-- **Unclear:** which node a type annotation on an argument or property is reported on.
-- **Go:** the node holding it, and for an annotated node, the node itself.
+- **Settled, apart from one point:** SDK §2 now says a type annotation is on the node holding it,
+  and an annotated node's is on that node, as all three libraries do and the suite's "annotation on"
+  cases check.
+- **Open:** where an annotated node starts. Go takes its name, as kdl-go places a node; TypeScript
+  and Java take its annotation. `(x)field a` differs only in its column, but with a line continuation
+  between them, `(x) \` then `field a`, Go reports and locates the node a line later. Only a document
+  that's invalid anyway is affected, but `locate` is meant for those too.
 
 ### SPEC §4, bare `-inf` and the KDL keywords
-- **Unclear:** nothing; KDL v2 already refuses bare `true`, `false`, `null`, `inf`, `-inf` and `nan`.
-- **Go:** kdl-go accepts a bare `-inf` as a string, so the reference refuses it itself. The Java
-  parser refuses all six as KDL does, as a syntax error.
+- **Settled:** nothing to add, since KDL v2 already refuses bare `true`, `false`, `null`, `inf`,
+  `-inf` and `nan`. All three libraries refuse each on the same line, Go refusing `-inf` itself
+  since kdl-go reads it as a string, and the suite has three cases of it.
 
 ### SDK §7.3, where a part ends
 - **Settled:** SDK §7.3 now says a part ends just past its last character, not counting a `;`, a
   line ending or a comment after it, as all three libraries do.
 
 ### SDK §7.3, a name that isn't a string
-- **Unclear:** `locate` reads only syntax; what does it give for `define 5 { ... }` or a variant
-  with no name?
-- **Go:** nothing for that definition, variant or fold, or its layers.
+- **Settled:** SDK §7.3 now says a definition, variant or fold whose name isn't a string has no
+  path, so neither it nor anything in it is listed, as all three libraries do. The suite locates
+  the parts of a document with one of each.
 
 ## Rendering
 

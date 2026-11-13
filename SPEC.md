@@ -149,6 +149,11 @@ errors. Each number is subject to the limits in §15.
 | `adapted-from` | no, repeatable | The URL of a work this file derives from |
 | `source` | no, repeatable | URL of the specification or reference used |
 
+A date is a day of the Gregorian calendar, carried back before it began: four digits for the year,
+from `0000`, and two each for the month and day, with the day one its month has, so `2024-02-29` is
+a date and `2023-02-29` isn't. `date` and `until` are compared only as far as the shorter of them
+goes, so `until 2020` is fine with `date 2020-05`, and so is `until 2020-05` with `date 2020`.
+
 A design and its encoding can have different owners, so they are separate.
 
 `license` covers the file. `render-license` is an additional permission from the file's
@@ -1444,7 +1449,8 @@ point saying which part moves MUST NOT be on it. The shape that folds is the fla
 rectangle if it has none, and a `path` outline folds as its rectangle too, with the curve still
 clipping the art on each piece. An `outside` border is part of the shape, so it folds with the flag.
 
-Steps are checked when the document is read, on the flag's own shape. One that fails only at
+Steps are checked when the document is read, on the flag's own shape, once it has no other
+problems, since a flag that's wrong elsewhere may have no shape to fold. One that fails only at
 another proportion, or with a variant's own outline, border or proportion, is an error when that's
 rendered.
 

@@ -122,7 +122,7 @@ def build_locate(vexyl):
     """Records where each part of some documents is, including one with CRLF line endings and one
     that isn't otherwise valid, since an editor has to find its way around that as well."""
     files = ["tags/everything.kdl", "valid/line-endings.kdl", "valid/inline-svg.kdl", "valid/united-states.kdl", "valid/south-korea.kdl",
-             "invalid/unknown-child.kdl", "invalid/out-of-order.kdl"]
+             "invalid/unknown-child.kdl", "invalid/out-of-order.kdl", "invalid/names-that-aren-t-strings.kdl"]
     cases = []
     for file in files:
         spans = json.loads(subprocess.run([vexyl, "locate", os.path.join(OUT, file)], check=True, capture_output=True, text=True).stdout)

@@ -421,5 +421,38 @@
     3
    ]
   }
+ },
+ {
+  "file": "invalid/names-that-aren-t-strings.kdl",
+  "spans": {
+   "vexyl": [
+    1,
+    1
+   ],
+   "meta": [
+    2,
+    2
+   ],
+   "palette": [
+    3,
+    3
+   ],
+   "palette/a": [
+    3,
+    3
+   ],
+   "palette/b": [
+    3,
+    3
+   ],
+   "proportion": [
+    4,
+    4
+   ],
+   "0": [
+    6,
+    6
+   ]
+  }
  }
 ]

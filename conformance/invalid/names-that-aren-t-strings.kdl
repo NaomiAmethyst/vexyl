@@ -1,0 +1,8 @@
+vexyl 1
+meta { name "T"; }
+palette { a "#112233"; b "#445566"; }
+proportion hoist=10 fly=20
+define 5 { disc { radius 1; } }
+field a
+variant 7 { from rotate; }
+fold 1.5 { over along=fly at=0.5 move=hoist; }

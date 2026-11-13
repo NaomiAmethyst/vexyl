@@ -88,6 +88,10 @@
   "file": "accepted/stops-at-the-same-place.kdl"
  },
  {
+  "name": "dates in year zero and on a leap day",
+  "file": "accepted/dates-in-year-zero-and-on-a-leap-day.kdl"
+ },
+ {
   "name": "a series with digits",
   "file": "accepted/a-series-with-digits.kdl"
  },
