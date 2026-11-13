@@ -56,7 +56,7 @@ public final class Flag {
 	 * @throws VexylException if an option can't be used, or the flag can't be drawn as asked
 	 */
 	public String svg(RenderOptions options) throws VexylException {
-		throw new VexylException("rendering isn't written yet");
+		return Render.svg(doc, options);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public final class Flag {
 	 * @throws VexylException if an option can't be used, or the flag can't be drawn as asked
 	 */
 	public Element svgTree(RenderOptions options) throws VexylException {
-		throw new VexylException("rendering isn't written yet");
+		return Render.tree(Render.svg(doc, options));
 	}
 
 	/** The canonical model as JSON, as the conformance suite compares it. */
