@@ -2,8 +2,10 @@
 
 The Java library was written from the frozen SPEC.md and SDK.md. Where they didn't settle something,
 the answer came from the Go reference (and the TypeScript library where it says so), and the Java
-library does the same unless an entry says otherwise. Each entry gives the section, what was unclear,
-and what Go does.
+library does the same unless an entry says otherwise. Each entry was then checked against Go,
+TypeScript and Java. Where they agree, the text now says what they do, and the entry is **Settled**
+with where. The three marked **Open** are left for a decision, as
+[`format-2.md`](format-2.md) lists them.
 
 ## Reading documents
 

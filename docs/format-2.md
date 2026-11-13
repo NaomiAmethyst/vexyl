@@ -155,52 +155,23 @@ date "2018-04-30" { by; }   // introduced no later than this
 
 ## Clarifications for the version 1 text
 
-Writing the Java library from the frozen documents alone turned these up. In each, the libraries
-already agree, and the text should say what they do. The full list, with what Go does for each, is
-in [`format-1-open-questions.md`](format-1-open-questions.md).
+Writing the Java library from the frozen documents alone turned up about forty questions. Where the
+libraries agreed, SPEC.md and SDK.md now say what they do, and
+[`format-1-open-questions.md`](format-1-open-questions.md) marks each **Settled**, with where. These
+are left, because the libraries agree but what they do isn't plainly what the text means, or they
+differ:
 
-### Reading
+- **Where an annotated node starts** (SDK §2, §7.3): Go takes its name and TypeScript and Java its
+  annotation, which puts a node with a line continuation after its annotation on different lines.
+  Only an invalid document is affected.
+- **How finely waves are drawn** (SPEC §7.11, §8.1): all three draw 24 pieces a period, which is
+  past §8.1's 0.1% of the hoist for a wave deeper than about a quarter of it.
+- **What size a side panel's layers see across the axis** (SPEC §11): all three use its `width`,
+  not its drawn size with an `edge`, so a charge anchored in it jumps when the flag adapts at all.
 
-- **A property given twice** (SPEC §4): whether it's a syntax error or a problem on the node.
-- **Small numbers in path data** (SPEC §8.1 and §15): §8.1 gives paths only the upper limit, while
-  §15 says every number is zero or from 1e-12. All three libraries allow `1e-20` in a path.
-- **Dates** (SPEC §4.1): whether `YYYY-MM-DD` has to be a real day, whether year `0000` is
-  allowed, and how `until` compares with a `date` of a different precision.
-- **Where some problems go** (SDK §2): a `render-license` problem, and a type annotation's.
-- **A defined shape a charge changes** (SDK §4): whether a star's `inner` or a heart's `spread`
-  is worked out again when a charge using the definition changes its size.
-- **Several `at`s with `at center`** (SDK §4).
-- **When folds are checked** (SPEC §13): only when the document has no other problems.
-- **`locate` with a name that isn't a string** (SDK §7.3), such as `define 5 { ... }`.
-
-### Rendering
-
-- **IDs from a hash** (SDK §5, SPEC §14): which hash, of what, and how two forms of one document
-  get different IDs.
-- **A ratio equal to the flag's own** (SPEC §11): within 1e-9 counts as unchanged.
-- **Whether `adapt`'s `range` is inclusive** (SPEC §11): it is.
-- **A design with its own grid** (SPEC §9): whether "scaled to fill" may stretch it unevenly.
-- **Fimbriation on piles and palls** (SPEC §7.10): the sides are extended past the region.
-- **How finely curves are drawn** (SPEC §7.11, §8.1): the error allowed for waves and cardioids,
-  and when an edge's waves are counted.
-- **Adapting side panels and placed panels** (SPEC §11): what size their layers see.
-- **An emblem's frame under a cut** (SPEC §9, §6): the rectangle a cut's mask uses.
-- **A ring's arc on a rotated charge** (SPEC §8.1): the charge's turn is added to `from` and `to`.
-- **Tags in a fold** (SPEC §13, SDK §7.2): which element carries the tag.
-- **A fold at another proportion with its own reverse** (SPEC §13): the reverse adapts too.
-- **Upright charges on a mirrored reverse** (SPEC §12).
-- **The order options are checked in** (SDK §3).
-- **Padding a turned variant** (SPEC §11.1): to the inverted ratio.
-- **Bars, quarters and checks running on under the next part** (SPEC §7.3).
-- **Number precision in SVG output** (SDK §5).
-
-### Inline SVG and share links
-
-- **The sanitizer** (SPEC §8.3): nesting depth, the XML declaration, an empty `viewBox`, the
-  grammar of an `href` id, which functions count, prefixes inside removed content, `xmlns=""`,
-  and empty or `currentColor` values in a `style`.
-- **Share links** (SDK §8): stray bits after the stream's end, how a version prefix is read, the
-  command dropping only trailing line feeds, and the compression level.
+One settled entry may want more here: an edge's waves are counted again when it's drawn, so a valid
+document can be refused in its own form, as a bend runs further than the longer side its count
+uses.
 
 ## Left undefined on purpose
 
