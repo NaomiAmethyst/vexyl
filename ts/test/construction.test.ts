@@ -32,17 +32,53 @@ const golden = (file: string, out: string): void => {
 const overlap = (a: { x0: number; y0: number; x1: number; y1: number }, b: { x0: number; y0: number; x1: number; y1: number }): number =>
 	Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
 
-/** Every label that overlaps another, crosses the flag's edge or leaves the sheet. */
+/** Whether a line from a to b passes through a label, a unit inside its edges, clipped to each of its sides in turn. */
+function crosses(label: LabelBox, a: { x: number; y: number }, b: { x: number; y: number }): boolean {
+	const c = label.corners ?? [{ x: label.x0, y: label.y0 }, { x: label.x1, y: label.y0 }, { x: label.x1, y: label.y1 }, { x: label.x0, y: label.y1 }];
+	const mx = c.reduce((s, p) => s + p.x, 0) / c.length;
+	const my = c.reduce((s, p) => s + p.y, 0) / c.length;
+	const poly = c.map((p) => {
+		const d = Math.hypot(p.x - mx, p.y - my);
+		return d < 1 ? p : { x: p.x + (mx - p.x) / d, y: p.y + (my - p.y) / d };
+	});
+	const turn = Math.sign(poly.reduce((s, p, i) => s + p.x * poly[(i + 1) % poly.length]!.y - poly[(i + 1) % poly.length]!.x * p.y, 0));
+	let [t0, t1] = [0, 1];
+	for (let i = 0; i < poly.length; i++) {
+		const p = poly[i]!;
+		const q = poly[(i + 1) % poly.length]!;
+		const f = (v: { x: number; y: number }): number => turn * ((q.x - p.x) * (v.y - p.y) - (q.y - p.y) * (v.x - p.x));
+		const [fa, fb] = [f(a), f(b)];
+		if (fa < 0 && fb < 0) {
+			return false;
+		}
+		if (fa < 0) {
+			t0 = Math.max(t0, fa / (fa - fb));
+		} else if (fb < 0) {
+			t1 = Math.min(t1, fa / (fa - fb));
+		}
+	}
+	return t0 < t1;
+}
+
+/**
+ * Every label that overlaps another, crosses the flag's edge or leaves the sheet, or hides what's
+ * drawn: off the flag, on any of its drawing; on it, across a charge or its outline or border.
+ */
 function collisions(flag: Flag, opts: ConstructionOptions): string[] {
 	const sheet = constructionSheet(flag, opts);
 	const out: string[] = [];
+	const holds = (outer: { x0: number; y0: number; x1: number; y1: number }, b: LabelBox): boolean => b.x0 >= outer.x0 - 0.5 && b.x1 <= outer.x1 + 0.5 && b.y0 >= outer.y0 - 0.5 && b.y1 <= outer.y1 + 0.5;
 	sheet.labels.forEach((a, i) => {
 		if (a.x0 < 0 || a.y0 < 0 || a.x1 > sheet.width || a.y1 > sheet.height) {
 			out.push(`off the sheet: ${a.text}`);
 		}
-		const inside = a.x0 >= sheet.flag.x0 && a.x1 <= sheet.flag.x1 && a.y0 >= sheet.flag.y0 && a.y1 <= sheet.flag.y1;
-		if (a.onFlag ? !inside : overlap(a, sheet.flag) > 0.5) {
+		if (a.onFlag ? !holds(sheet.flag, a) : overlap(a, sheet.drawn) > 0.5) {
 			out.push(`across the flag's edge: ${a.text}`);
+		}
+		if (sheet.charges.some((c) => labelOverlap(a, { ...c, text: "", onFlag: true }) > 0.5 && !holds(c, a))) {
+			out.push(`across a charge: ${a.text}`);
+		} else if (sheet.edges.some((e) => crosses(a, e.a, e.b))) {
+			out.push(`across the outline: ${a.text}`);
 		}
 		for (const b of sheet.labels.slice(i + 1)) {
 			if (labelOverlap(a, b) > 0.5) {
@@ -669,9 +705,11 @@ test("rays: the point they come from, and each wedge's share, by angle or along 
 
 test("clips and cuts: each shape measured as a charge is, with its outline drawn dashed", () => {
 	// Nepal's moon: a disc cut by one of radius 12.8401, 18.7868 down, and a star clipped to a rect.
+	// There's no room for their sizes on the moon, which they'd hide, so they're beside the drawing, off it.
 	const nepal = constructionSheet(flagOf("nepal"), {});
 	for (const want of ["r 12.8401", "15.4462 × 7.7231"]) {
-		assert.ok(nepal.labels.some((l) => l.text === want && l.onFlag), want);
+		const label = nepal.labels.find((l) => l.text === want);
+		assert.ok(label !== undefined && !label.onFlag && label.x0 > nepal.drawn.x1, want);
 	}
 	assert.ok(nepal.labels.some((l) => l.text === "18.7868"), "the cut's center, down the hoist");
 	const nepalText = textOf(nepal.svg);

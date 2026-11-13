@@ -1509,9 +1509,9 @@ function emblemRows(l: EmblemLayer, f: Frame, m: Measured): void {
  * is in the emblem's frame, along the axis from the origin and across it, on a row of its own.
  */
 function emblemShape(s: Shape, name: string, c: ChargeLayer | undefined, frame: Affine, emblem: string, m: Measured): void {
-	if (m.charges.length >= mostCharges) {
+	const counted = m.charges.length >= mostCharges;
+	if (counted) {
 		m.extra.set(name, (m.extra.get(name) ?? 0) + 1);
-		return;
 	}
 	let p: XY;
 	let size: ((t: Format) => string) | undefined;
@@ -1531,10 +1531,17 @@ function emblemShape(s: Shape, name: string, c: ChargeLayer | undefined, frame: 
 		p = first !== undefined && first !== null ? point(first) : { x: zero, y: zero };
 		({ size, reach, circle } = sizeOf(s, null));
 	}
-	// Its reach in the flag's directions, which the frame turns, so as far as it reaches any way.
-	const d = Math.hypot(reach.x, reach.y);
+	// Its reach in the flag's directions, which the frame turns: a round one's the same every way,
+	// and anything else's that of its box, turned.
+	const round = ["disc", "ring", "star", "sun", "crescent", "triangle"].includes(s.kind) && s.rotate === 0;
+	const scale = Math.hypot(frame[0], frame[1]);
+	const turned = round ? { x: reach.x * scale, y: reach.y * scale } : { x: Math.abs(frame[0]) * reach.x + Math.abs(frame[2]) * reach.y, y: Math.abs(frame[1]) * reach.x + Math.abs(frame[3]) * reach.y };
 	const at = apply(frame, vec(p));
-	m.charges.push({ x: exactOf(at.x), y: exactOf(at.y), at, reach: { x: d, y: d }, ...(circle !== undefined ? { circle } : {}), ...(size !== undefined ? { size } : {}), name, free: true });
+	if (counted) {
+		m.unmarked.push({ at, reach: turned });
+		return;
+	}
+	m.charges.push({ x: exactOf(at.x), y: exactOf(at.y), at, reach: turned, ...(circle !== undefined ? { circle } : {}), ...(size !== undefined ? { size } : {}), name, free: true });
 	if (circle !== undefined) {
 		m.circles = true;
 	}
@@ -2054,6 +2061,7 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 		unmarked(m, s, base, center, region, l, 0);
 		return;
 	}
+	// Its other copies, which aren't measured, but which labels stay off.
 	unmarked(m, s, base, center, region, l, 1);
 	/** Measures its fimbriation on the copy at a place, once that's known. */
 	const fimbriated = (copy: Vec): void => {
@@ -2454,11 +2462,12 @@ function spread(points: readonly OrdinatePoint[], lo: number, hi: number): { kep
 
 /**
  * Lays out one side's rows, from the flag outward: positions, parts, then the whole. A chain that
- * would need more than a couple of rows is given as ordinates instead, in one row.
+ * would need more than a couple of rows is given as ordinates instead, in one row. `past` is how far
+ * the drawing reaches past the grid on that side, as a border outside it does, which the rows start beyond.
  */
-function laySide(segs: readonly Seg[], ordinates: Record<0 | 1, OrdinatePoint[]>, lo: number, hi: number): SideLayout {
-	const out: SideLayout = { rows: [], chains: [], ords: [], extent: 10, dropped: 0 };
-	let at = rowGap;
+function laySide(segs: readonly Seg[], ordinates: Record<0 | 1, OrdinatePoint[]>, lo: number, hi: number, past = 0): SideLayout {
+	const out: SideLayout = { rows: [], chains: [], ords: [], extent: 10 + past, dropped: 0 };
+	let at = rowGap + past;
 	for (const cat of [0, 1, 2] as const) {
 		const list = segs.filter((x) => x.cat === cat);
 		if (list.length === 0) {
@@ -3161,6 +3170,7 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 		}
 		const turned = [...m.turned];
 		list.push(...(turned.length > 4 ? [`${turned.length} charges are turned, by the angles the file gives.`] : turned));
+		list.push(...sameNotes);
 		list.push(...(fallbacks.length > 3 ? [`There’s no room on the drawing for the sizes of ${fallbacks.length} charges.`] : fallbacks));
 		if (dropped > 0) {
 			list.push(`There’s no room to label ${dropped} of the places marked along the edges.`);
@@ -3258,7 +3268,8 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 		return { side: [], below: [], condensed: false };
 	};
 
-	// The drawing: the flag's scale, where it goes, its rows and its notes.
+	// The drawing: the flag's scale, where it goes, its rows and its notes, and room beside it for
+	// sizes that have no room on it, if they need it.
 	interface Drawing {
 		s: number;
 		fx: number;
@@ -3273,6 +3284,8 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 
 	// The form's turn puts each row on a side of the drawing: the one its side of the flag turns to.
 	const map = view.map;
+	// The drawing's own box, in grid units from the grid's corner, which a border or an outline can take past the grid.
+	const vb = /viewBox="([^"]*)"/.exec(view.drawn)![1]!.split(" ").map(Number) as [number, number, number, number];
 	const sideOf = (v: Vec): Side => (Math.abs(v.x) > Math.abs(v.y) ? (v.x < 0 ? "left" : "right") : v.y < 0 ? "top" : "bottom");
 	const sides: Record<"fly" | "hoist", Side> = { fly: sideOf(turnVec(map, { x: 0, y: -1 })), hoist: sideOf(turnVec(map, { x: -1, y: 0 })) };
 
@@ -3324,11 +3337,18 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 
 	/** Details beside the notes, under the drawing: how wide and tall they are together. */
 	let beside = { w: 0, h: 0 };
+	/** How far past the grid the drawing reaches on each side, at a scale. */
+	const pastGrid = (s: number): Record<Side, number> => ({ left: Math.max(0, -vb[0]) * s, top: Math.max(0, -vb[1]) * s, right: Math.max(0, vb[0] + vb[2] - dw) * s, bottom: Math.max(0, vb[1] + vb[3] - dh) * s });
+	// The side with no rows, of the two beside the flag, where charges' sizes go that have no room on it.
+	const free: "left" | "right" = [sides.fly, sides.hoist].includes("right") ? "left" : "right";
+	/** How wide that column is, which is nothing until a size needs it. */
+	let calloutW = 0;
 	const layDrawing = (box: Box, fixedScale: number | null, fallbacks: readonly string[]): Drawing => {
 		const first = showSizes ? rowGap + pitch + 20 : showPositions ? rowGap + 20 : 10;
 		const ext: Record<Side, number> = { top: 0, bottom: 0, left: 0, right: 0 };
 		ext[sides.fly] = first;
 		ext[sides.hoist] = first;
+		ext[free] = calloutW;
 		let result: Drawing | null = null;
 		let dropped = 0;
 		for (let pass = 0; pass < 8; pass++) {
@@ -3343,22 +3363,24 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 			const fx = box.x0 + ext.left + spareW / 2;
 			const fy = box.y0 + ext.top + spareH / 2;
 			const { segs, ords } = segsFor(s, fx, fy);
-			const lay = (along: "fly" | "hoist"): SideLayout => (across90(sides[along]) ? laySide(segs[along], ords[along], Math.max(box.y0, fy - 14), fy + dh * s + 14) : laySide(segs[along], ords[along], box.x0, box.x1));
+			const past = pastGrid(s);
+			const lay = (along: "fly" | "hoist"): SideLayout => (across90(sides[along]) ? laySide(segs[along], ords[along], Math.max(box.y0, fy - 14), fy + dh * s + 14, past[sides[along]]) : laySide(segs[along], ords[along], box.x0, box.x1, past[sides[along]]));
 			const rows = { fly: lay("fly"), hoist: lay("hoist") };
 			const flagBox = { x0: fx, y0: fy, x1: fx + dw * s, y1: fy + dh * s };
 			const texts = (along: "fly" | "hoist"): RowText[] => rowTexts(rows[along], sides[along], flagBox);
 			const all = [...texts("fly"), ...texts("hoist")];
-			const right = Math.max(fx + dw * s, ...all.map((r) => r.box.x1));
+			const right = Math.max(fx + dw * s + past.right + (free === "right" ? calloutW : 0), ...all.map((r) => r.box.x1));
 			// Rows under the drawing push its notes down.
 			const below = Math.max(0, ...(["fly", "hoist"] as const).filter((a) => sides[a] === "bottom").flatMap((a) => texts(a)).map((r) => r.box.y1 - flagBox.y1));
 			result = { s, fx, fy, rows, notes, notesY: fy + dh * s + below + 26, right, bottom: fy + dh * s + below + nh + 12 };
 			const lost = rows.fly.dropped + rows.hoist.dropped;
-			if (rows.fly.extent <= ext[sides.fly] + 0.01 && rows.hoist.extent <= ext[sides.hoist] + 0.01 && lost <= dropped) {
+			if (rows.fly.extent <= ext[sides.fly] + 0.01 && rows.hoist.extent <= ext[sides.hoist] + 0.01 && past[free] + calloutW <= ext[free] + 0.01 && lost <= dropped) {
 				break;
 			}
 			dropped = Math.max(dropped, lost);
 			ext[sides.fly] = Math.max(ext[sides.fly], rows.fly.extent);
 			ext[sides.hoist] = Math.max(ext[sides.hoist], rows.hoist.extent);
+			ext[free] = Math.max(ext[free], past[free] + calloutW);
 		}
 		return result!;
 	};
@@ -3372,6 +3394,8 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 	let foot: string[];
 	let charges: ChargePlan;
 	let fallbacks: string[] = [];
+	/** What the notes say of sizes marked once for several charges. */
+	let sameNotes: string[] = [];
 	for (let attempt = 0; ; attempt++) {
 		if (fit) {
 			const s = Math.min(1000 / dw, 480 / dh);
@@ -3402,7 +3426,7 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 		// A label off the flag stays out of the rows below it and beside it, whose lines it would cross.
 		for (const a of ["fly", "hoist"] as const) {
 			const rows = drawing.rows[a].rows;
-			const out = rows.length === 0 ? 0 : rows.at(-1)!.at + 6;
+			const out = rows.length === 0 ? 0 : Math.max(rows.at(-1)!.at + 6, drawing.rows[a].extent);
 			if (sides[a] === "bottom") {
 				taken.push({ x0: flagBox.x0, y0: flagBox.y1 + 4, x1: flagBox.x1, y1: flagBox.y1 + out });
 			} else if (sides[a] === "right") {
@@ -3413,11 +3437,27 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 				taken.push({ x0: flagBox.x0 - out, y0: flagBox.y0, x1: flagBox.x0 - 4, y1: flagBox.y1 });
 			}
 		}
-		charges = planCharges(m, placingFor(map, drawing.s, drawing.fx, drawing.fy), view.sideways && !view.upright, taken, flagBox, area, t, showSizes, showPositions);
-		if (charges.fallbacks.length === 0 || attempt > 0) {
+		const placed = placingFor(map, drawing.s, drawing.fx, drawing.fy);
+		const swap = view.sideways && !view.upright;
+		const past = pastGrid(drawing.s);
+		const drawnBox = { x0: flagBox.x0 - past.left, y0: flagBox.y0 - past.top, x1: flagBox.x1 + past.right, y1: flagBox.y1 + past.bottom };
+		const column = calloutW === 0 ? null : { side: free, x: free === "right" ? drawnBox.x1 + calloutLead : drawnBox.x0 - calloutLead };
+		charges = planCharges(m, placed, swap, taken, flagBox, area, t, showSizes, showPositions, { charges: chargeBoxes(m, placed, swap, flagBox, drawnBox), edges: edgesOf(view.flag, placed), drawn: drawnBox, column });
+		// Sizes with no room on the drawing go in a column beside it, if there's room for one.
+		// It takes at most three tenths of the room, and a size wider than that goes in the notes.
+		if (column === null && charges.wanting.length > 0 && attempt === 0) {
+			const widest = (fit ? 1e6 : (heightOf(side) > 0 ? sideX - 20 : W - margin.side) - margin.side) * 0.3;
+			const fits = charges.wanting.map((w) => w + calloutLead + 6).filter((w) => w <= widest);
+			if (fits.length > 0) {
+				calloutW = Math.max(...fits);
+				continue;
+			}
+		}
+		if ((charges.fallbacks.length === 0 && sameNotes.length === charges.same.length) || attempt > 1) {
 			break;
 		}
 		fallbacks = charges.fallbacks;
+		sameNotes = charges.same;
 	}
 
 	const o = new Out();
@@ -3451,7 +3491,6 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 
 	// The flag, as the library draws it.
 	const drawn = view.drawn;
-	const vb = /viewBox="([^"]*)"/.exec(drawn)![1]!.split(" ").map(Number) as [number, number, number, number];
 	const body = drawn.replace(/^<svg [^>]*>\n?/, "").replace(/<\/svg>\n?$/, "");
 	o.add(`<svg x="${num(fx + vb[0] * s)}" y="${num(fy + vb[1] * s)}" width="${num(vb[2] * s)}" height="${num(vb[3] * s)}" viewBox="${vb.map(num).join(" ")}" overflow="hidden">`);
 	o.add(body.replace(/\n$/, ""));
@@ -3570,6 +3609,12 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 		if (plan.leader !== undefined) {
 			halo.push(plan.leader);
 			onFlag.push(`<path d="${plan.leader}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8"/>`);
+		}
+		if (plan.callout !== undefined) {
+			const { dot, on, off } = plan.callout;
+			halo.push(on);
+			onFlag.push(`<path d="${on}" fill="none" stroke="${theme.onFlag}" stroke-width="0.8"/>`, `<circle cx="${num(dot.x)}" cy="${num(dot.y)}" r="1.8" fill="${theme.onFlag}" stroke="${theme.halo}" stroke-width="1"/>`);
+			dims.push(off);
 		}
 	}
 	for (const d of charges.dims) {
@@ -3759,6 +3804,8 @@ interface ChargeLabel {
 	text?: string;
 	box?: Box;
 	leader?: string;
+	/** For a size in the column beside the flag, its leader: on the flag, from a dot at the charge, and then off it. */
+	callout?: { dot: Vec; on: string; off: string };
 }
 
 interface ChargePlan {
@@ -3771,6 +3818,41 @@ interface ChargePlan {
 	slanted: SlantLabel[];
 	/** Sizes with nowhere to go on the drawing, for the notes. */
 	fallbacks: string[];
+	/** How wide each charge's size is that had no room by its charge, which a column beside the flag could hold. */
+	wanting: number[];
+	/** Notes that a size in the column is the same for other charges like it, which aren't marked again. */
+	same: string[];
+}
+
+/** What labels on the flag stay clear of, and the column beside it for sizes with no room there. */
+interface Clear {
+	charges: readonly Box[];
+	edges: readonly { a: Vec; b: Vec }[];
+	/** Where the drawing reaches, which labels off the flag stay off. */
+	drawn: Box;
+	/** Where the column's labels start, beside the flag's drawing on its free side, if there's room for one. */
+	column: { side: "left" | "right"; x: number } | null;
+}
+
+/** How far from the drawing's edge the column of sizes beside it starts, which is room for their leaders to turn. */
+const calloutLead = 26;
+
+/** Whether a line from a to b passes through a box, grown by `gap` each way. */
+function lineHits(b: Box, a: Vec, c: Vec, gap: number): boolean {
+	let [t0, t1] = [0, 1];
+	const d = { x: c.x - a.x, y: c.y - a.y };
+	for (const [p, q, lo, hi] of [[a.x, d.x, b.x0 - gap, b.x1 + gap], [a.y, d.y, b.y0 - gap, b.y1 + gap]] as const) {
+		if (Math.abs(q) < 1e-12) {
+			if (p < lo || p > hi) {
+				return false;
+			}
+			continue;
+		}
+		const [u, v] = [(lo - p) / q, (hi - p) / q];
+		t0 = Math.max(t0, Math.min(u, v));
+		t1 = Math.min(t1, Math.max(u, v));
+	}
+	return t0 <= t1;
 }
 
 const hits = (a: Box, b: Box, gap = 2): boolean => a.x0 < b.x1 + gap && b.x0 < a.x1 + gap && a.y0 < b.y1 + gap && b.y0 < a.y1 + gap;
@@ -3780,7 +3862,7 @@ const hits = (a: Box, b: Box, gap = 2): boolean => a.x0 < b.x1 + gap && b.x0 < a
  * clear of every other label. What can't go anywhere goes in the notes instead. `swap` says that
  * the form's turn has turned charges a quarter turn, so that each reaches across where it reached down.
  */
-function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: readonly Box[], flag: Box, area: Box, t: Format, sizes: boolean, positions: boolean): ChargePlan {
+function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: readonly Box[], flag: Box, area: Box, t: Format, sizes: boolean, positions: boolean, clear: Clear): ChargePlan {
 	const s = place.s;
 	const taken: Box[] = [...rowBoxes];
 	if (positions) {
@@ -3789,18 +3871,29 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 			taken.push({ x0: q.x - 6, y0: q.y - 6, x1: q.x + 6, y1: q.y + 6 });
 		}
 	}
-	const plan: ChargePlan = { labels: [], dims: [], dashed: [], slanted: [], fallbacks: [] };
+	const plan: ChargePlan = { labels: [], dims: [], dashed: [], slanted: [], fallbacks: [], wanting: [], same: [] };
 	if (!sizes) {
 		return plan;
 	}
 	const within = (b: Box, outer: Box): boolean => b.x0 >= outer.x0 && b.x1 <= outer.x1 && b.y0 >= outer.y0 && b.y1 <= outer.y1;
+	/**
+	 * Whether a place for a label is free: on the flag, clear of every charge and of the outline,
+	 * which it would hide, and off it, clear of the whole drawing.
+	 */
+	const free = (b: Box, outside: boolean): boolean => (outside
+		? within(b, area) && !hits(b, clear.drawn, 3)
+		: within(b, flag) && !clear.charges.some((c) => hits(c, b, 1)) && !clear.edges.some((e) => lineHits(b, e.a, e.b, 1))) && !taken.some((x) => hits(x, b));
+	/**
+	 * Whether a leader from a charge to its label is clear: of other charges, but for any it starts
+	 * inside, and of the rows, so that it's plain which charge a label is for.
+	 */
+	const clearPath = (from: Vec | undefined, to: Vec | undefined): boolean => from === undefined || to === undefined || (!clear.charges.some((c) => !hits(c, { x0: from.x, y0: from.y, x1: from.x, y1: from.y }, 0.5) && lineHits(c, from, to, 0)) && !taken.some((b) => lineHits(b, from, to, 0)));
 	/** Takes the first of some places that's free, on the flag before off it. */
-	const first = (cands: { box: Box; leader?: string }[][]): { box: Box; leader?: string } | null => {
+	const first = (cands: { box: Box; leader?: string; from?: Vec; to?: Vec }[][]): { box: Box; leader?: string } | null => {
 		for (const outside of [false, true]) {
 			for (const group of cands) {
 				for (const c of group) {
-					const ok = outside ? within(c.box, area) && !hits(c.box, flag, 3) : within(c.box, flag);
-					if (ok && !taken.some((b) => hits(b, c.box))) {
+					if (free(c.box, outside) && clearPath(c.from, c.to)) {
 						taken.push(c.box);
 						return c;
 					}
@@ -3809,7 +3902,14 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 		}
 		return null;
 	};
+	// Between the drawing and the column beside it is where the column's leaders turn, which nothing else takes.
+	if (clear.column !== null) {
+		const [a, b] = clear.column.side === "right" ? [clear.drawn.x1 + 2, clear.column.x - 6] : [clear.column.x + 6, clear.drawn.x0 - 2];
+		taken.push({ x0: a, y0: area.y0, x1: b, y1: area.y1 });
+	}
 	const h = 14;
+	/** Sizes with no room by their charges, for the column beside the flag. */
+	const homeless: { out: ChargeLabel; text: string; w: number; rx: number; ry: number; name: string }[] = [];
 	for (const c of m.charges) {
 		const { x: cx, y: cy } = place.at(c.at);
 		const out: ChargeLabel = { cx, cy };
@@ -3822,15 +3922,17 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 			const rx = Math.max((swap ? c.reach.y : c.reach.x) * s, 2);
 			const ry = Math.max((swap ? c.reach.x : c.reach.y) * s, 2);
 			const line = (x0: number, y0: number, x1: number, y1: number, g: number): string | undefined => (g > 6 ? `M${num(x0)} ${num(y0)}L${num(x1)} ${num(y1)}` : undefined);
-			const at = (g: number): { box: Box; leader?: string }[] => [
-				{ box: { x0: cx - w / 2, y0: cy + ry + g, x1: cx + w / 2, y1: cy + ry + g + h }, leader: line(cx, cy + ry, cx, cy + ry + g, g) },
-				{ box: { x0: cx - w / 2, y0: cy - ry - g - h, x1: cx + w / 2, y1: cy - ry - g }, leader: line(cx, cy - ry, cx, cy - ry - g, g) },
-				{ box: { x0: cx + rx + g, y0: cy - h / 2, x1: cx + rx + g + w, y1: cy + h / 2 }, leader: line(cx + rx, cy, cx + rx + g, cy, g) },
-				{ box: { x0: cx - rx - g - w, y0: cy - h / 2, x1: cx - rx - g, y1: cy + h / 2 }, leader: line(cx - rx, cy, cx - rx - g, cy, g) },
-			].map((x) => (x.leader === undefined ? { box: x.box } : { box: x.box, leader: x.leader }));
+			// The leader's ends, a little inside the charge's box and the label's, which it's checked between.
+			const at = (g: number): { box: Box; leader?: string; from?: Vec; to?: Vec }[] => [
+				{ box: { x0: cx - w / 2, y0: cy + ry + g, x1: cx + w / 2, y1: cy + ry + g + h }, leader: line(cx, cy + ry, cx, cy + ry + g, g), from: { x: cx, y: cy + ry - 1 }, to: { x: cx, y: cy + ry + g - 3 } },
+				{ box: { x0: cx - w / 2, y0: cy - ry - g - h, x1: cx + w / 2, y1: cy - ry - g }, leader: line(cx, cy - ry, cx, cy - ry - g, g), from: { x: cx, y: cy - ry + 1 }, to: { x: cx, y: cy - ry - g + 3 } },
+				{ box: { x0: cx + rx + g, y0: cy - h / 2, x1: cx + rx + g + w, y1: cy + h / 2 }, leader: line(cx + rx, cy, cx + rx + g, cy, g), from: { x: cx + rx - 1, y: cy }, to: { x: cx + rx + g - 3, y: cy } },
+				{ box: { x0: cx - rx - g - w, y0: cy - h / 2, x1: cx - rx - g, y1: cy + h / 2 }, leader: line(cx - rx, cy, cx - rx - g, cy, g), from: { x: cx - rx + 1, y: cy }, to: { x: cx - rx - g + 3, y: cy } },
+			].map((x) => (x.leader === undefined ? { box: x.box } : x));
 			const got = first([at(4), at(12), at(24), at(40)]);
 			if (got === null) {
-				plan.fallbacks.push(`The ${c.name}’s size: ${text}.`);
+				homeless.push({ out, text, w, rx, ry, name: c.name });
+				plan.wanting.push(w);
 			} else {
 				out.text = text;
 				out.box = got.box;
@@ -3877,7 +3979,7 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 		let got: { o: MarkOption; box: Box } | null = null;
 		for (const outside of [false, true]) {
 			for (const o of options) {
-				const box = o.spots.find((b) => (outside ? within(b, area) && !hits(b, flag, 3) : within(b, flag)) && !taken.some((x) => hits(x, b)));
+				const box = o.spots.find((b) => free(b, outside));
 				if (box !== undefined) {
 					got = { o, box };
 					break;
@@ -3901,7 +4003,7 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 		plan.labels.push({ cx: (got.box.x0 + got.box.x1) / 2, cy: (got.box.y0 + got.box.y1) / 2, text, box: got.box });
 	}
 	for (const row of m.rows) {
-		const got = planRow(row, place, t, taken, flag);
+		const got = planRow(row, place, t, taken, flag, clear.charges);
 		if (got === null) {
 			plan.fallbacks.push(row.fallback(t));
 			continue;
@@ -3911,7 +4013,95 @@ function planCharges(m: Measured, place: Placing, swap: boolean, rowBoxes: reado
 		plan.dashed.push(...got.dashed);
 		plan.slanted.push(...got.labels);
 	}
+	callouts(homeless, plan, clear, area, taken);
 	return plan;
+}
+
+/**
+ * Sets the sizes that have no room by their charges in a column beside the flag, in the order
+ * their charges come down it, each at the end of a leader from a dot at its charge: along to the
+ * drawing's edge, and then aslant to its label. What the column can't hold goes in the notes.
+ */
+function callouts(all: { out: ChargeLabel; text: string; w: number; rx: number; ry: number; name: string }[], plan: ChargePlan, clear: Clear, area: Box, taken: Box[]): void {
+	const col = clear.column;
+	// A size that's the same for several charges of a kind is marked on the first, and said once for the rest.
+	const firsts = new Map<string, { first: (typeof all)[number]; more: number }>();
+	for (const x of all) {
+		const key = `${x.name}\u0000${x.text}`;
+		const seen = firsts.get(key);
+		if (seen === undefined) {
+			firsts.set(key, { first: x, more: 0 });
+		} else {
+			seen.more++;
+		}
+	}
+	const list = col === null ? all : [...firsts.values()].map((g) => g.first);
+	const h = 14;
+	const step = h + 2;
+	const sorted = [...list].sort((a, b) => a.out.cy - b.out.cy);
+	// From the top of the drawing to its foot, and a little past them if the column needs it.
+	const lo = Math.max(area.y0 + 4, clear.drawn.y0 - 2 * step);
+	const hi = Math.min(area.y1, clear.drawn.y1 + 2 * step);
+	const room = col === null ? 0 : Math.floor((hi - lo) / step);
+	// The most the column holds, kept in the order they're measured, and the rest in the notes.
+	const kept = new Set(list.slice(0, room));
+	const shown = sorted.filter((x) => kept.has(x));
+	const ys = shown.map((x) => x.out.cy - h / 2);
+	for (let i = 0; i < ys.length; i++) {
+		ys[i] = Math.max(ys[i]!, i === 0 ? lo : ys[i - 1]! + step);
+	}
+	for (let i = ys.length - 1; i >= 0; i--) {
+		ys[i] = Math.min(ys[i]!, i === ys.length - 1 ? hi - h : ys[i + 1]! - step);
+	}
+	// The labels already on the flag, which a leader along it mustn't cross.
+	const labels = [...plan.labels.flatMap((l) => (l.box !== undefined ? [l.box] : [])), ...plan.slanted.map((l) => l.box)];
+	shown.forEach((x, i) => {
+		const right = col!.side === "right";
+		const y0 = ys[i]!;
+		const { cx } = x.out;
+		const toEdge = right ? clear.drawn.x1 : clear.drawn.x0;
+		// Along the charge's middle, or a little above or below it if that would cross a label.
+		const leaveAt = [0, -1 / 3, 1 / 3, -2 / 3, 2 / 3].map((k) => x.out.cy + k * x.ry).find((y) => {
+			const from = { x: right ? Math.min(cx + x.rx, clear.drawn.x1 - 2) : Math.max(cx - x.rx, clear.drawn.x0 + 2), y };
+			return !labels.some((b) => lineHits(b, from, { x: toEdge, y }, 1));
+		});
+		if (leaveAt === undefined) {
+			kept.delete(x);
+			return;
+		}
+		const box = right ? { x0: col!.x, y0, x1: col!.x + x.w, y1: y0 + h } : { x0: col!.x - x.w, y0, x1: col!.x, y1: y0 + h };
+		if (!(box.x0 >= area.x0 && box.x1 <= area.x1 && box.y0 >= area.y0 && box.y1 <= area.y1) || taken.some((b) => hits(b, box))) {
+			kept.delete(x);
+			return;
+		}
+		taken.push(box);
+		const sign = right ? 1 : -1;
+		const cy = leaveAt;
+		// At the charge's edge, or the drawing's for one that reaches past it.
+		const dot = { x: right ? Math.min(cx + x.rx, clear.drawn.x1 - 2) : Math.max(cx - x.rx, clear.drawn.x0 + 2), y: cy };
+		const edge = right ? clear.drawn.x1 + 6 : clear.drawn.x0 - 6;
+		const end = { x: col!.x - sign * 4, y: y0 + h / 2 };
+		x.out.text = x.text;
+		x.out.box = box;
+		x.out.callout = { dot, on: `M${num(dot.x)} ${num(dot.y)}H${num(right ? clear.drawn.x1 : clear.drawn.x0)}`, off: `M${num(right ? clear.drawn.x1 : clear.drawn.x0)} ${num(cy)}H${num(edge)}L${num(end.x)} ${num(end.y)}` };
+	});
+	for (const x of list) {
+		if (!kept.has(x)) {
+			plan.fallbacks.push(`The ${x.name}’s size: ${x.text}.`);
+		}
+	}
+	if (col !== null) {
+		for (const { first, more } of firsts.values()) {
+			if (more === 0) {
+				continue;
+			}
+			if (kept.has(first)) {
+				plan.same.push(`The ${first.name}’s size, ${first.text}, is marked once, and is the same for ${more} more like it.`);
+			} else {
+				plan.fallbacks.push(...Array.from({ length: more }, () => `The ${first.name}’s size: ${first.text}.`));
+			}
+		}
+	}
 }
 
 /** A label set at a slant, along a row over the flag: its center, its angle, and its box. */
@@ -3924,9 +4114,10 @@ interface SlantLabel {
 
 /**
  * Places a slanting row over the flag, on whichever side of its axis has room: its line, its ticks
- * and its labels, turned to read along it the right way up. It's null if any label has no room.
+ * and its labels, turned to read along it the right way up, and none across a charge's edge. It's
+ * null if any label has no room.
  */
-function planRow(row: FlagRow, p: Placing, t: Format, taken: readonly Box[], flag: Box): { solid: string[]; dashed: string[]; labels: SlantLabel[] } | null {
+function planRow(row: FlagRow, p: Placing, t: Format, taken: readonly Box[], flag: Box, charges: readonly Box[]): { solid: string[]; dashed: string[]; labels: SlantLabel[] } | null {
 	const s = p.s;
 	const at = (x: number, y: number): Vec => p.at(apply(row.frame, { x, y }));
 	const way = (v: Vec): Vec => p.way(turnVec(row.frame, v));
@@ -3985,7 +4176,10 @@ function planRow(row: FlagRow, p: Placing, t: Format, taken: readonly Box[], fla
 				ok = false;
 			}
 		}
-		ok &&= labels.every((l, i) => within(l.box) && !taken.some((b) => hits(b, l.box)) && labels.slice(i + 1).every((o) => labelOverlap(l.box, o.box) === 0));
+		// Not across a charge's edge, by its own slanting box, which can pass a corner its upright one would
+		// cover. A row starts at its emblem's origin, so a label can be wholly on a charge, as on a field.
+		const across = (b: LabelBox): boolean => charges.some((c) => labelOverlap(b, { ...c, text: "", onFlag: true }) > 0.5 && !(b.x0 >= c.x0 && b.x1 <= c.x1 && b.y0 >= c.y0 && b.y1 <= c.y1));
+		ok &&= labels.every((l, i) => within(l.box) && !taken.some((b) => hits(b, l.box)) && !across(l.box) && labels.slice(i + 1).every((o) => labelOverlap(l.box, o.box) === 0));
 		if (!ok) {
 			continue;
 		}
