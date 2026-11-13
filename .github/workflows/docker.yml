@@ -29,14 +29,14 @@ jobs:
             dockerfile: web/Dockerfile
             description: The Vexyl flag editor, as a static site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-qemu-action@v4
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         env:
           # So that GHCR shows the description for the multi-arch image too.
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
@@ -59,13 +59,13 @@ jobs:
             org.opencontainers.image.description=${{ matrix.description }}
 
       - if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.dockerfile }}
