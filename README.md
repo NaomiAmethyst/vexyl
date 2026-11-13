@@ -118,6 +118,9 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: vexyl.Float(1200)})
   holds the conversions. The ones in `flags/` here are copies, kept as test fixtures.
 - [`docs/missing-from-spec.md`](docs/missing-from-spec.md) is the survey of real flags
   behind the format's vocabulary.
+- [`docs/format-2.md`](docs/format-2.md) collects what the frozen format can't yet say, as
+  plans for a format 2, and [`docs/format-1-open-questions.md`](docs/format-1-open-questions.md)
+  lists what the version 1 text leaves open.
 - [`docs/logo/`](docs/logo) holds the logo, which is itself a Vexyl flag.
 - [`tools/`](tools) holds the importer. `svg2vexyl.py` converts one SVG file, and
   `fetch_flags.py` and `import_flags.py` gather a corpus and check each result with resvg.
