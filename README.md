@@ -142,7 +142,8 @@ Its Construction view draws a flag's construction sheet: the flag on its grid wi
 as the drawings attached to flag laws are, in grid units, parts of the hoist or millimetres. It
 downloads as SVG, or as a PNG at 150, 300 or 600 dpi with its fonts inside it, and prints on A4,
 Letter or paper the size of the drawing. `make check-construction`
-draws one for every flag in a vexyl-flags checkout beside this one, and counts labels that collide.
+draws one for every flag in a vexyl-flags checkout beside this one, and counts labels that collide,
+with each other or with the drawing they'd hide.
 
 ## License
 

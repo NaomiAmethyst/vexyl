@@ -76,7 +76,7 @@ check-web: web/node_modules
 	cd web && $(NPM) run e2e
 
 # Draws a construction sheet for every form of every flag in a vexyl-flags checkout beside this one, or at
-# $$VEXYL_FLAGS, and counts labels that overlap or leave the sheet, and fails on a value rounded without a ~.
+# $$VEXYL_FLAGS, and counts labels that overlap, leave the sheet or sit on the drawing, and fails on a value rounded without a ~.
 # It takes a minute or two on one CPU, so CI leaves it out. check-rescale and the editor's tests take $$VEXYL_FLAGS too.
 check-construction: ts/node_modules
 	cd ts && $(NPM) run build

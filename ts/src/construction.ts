@@ -83,6 +83,12 @@ export interface Sheet {
 	labels: LabelBox[];
 	/** The flag's grid, on the sheet. */
 	flag: Box;
+	/** Where the flag's drawing reaches, which a border outside it or an outline can take past its grid. */
+	drawn: Box;
+	/** Where each charge the sheet measures is drawn, which labels on the flag stay off. */
+	charges: Box[];
+	/** The outline's edges, and a border's other edge, which a label would hide if it sat across one. */
+	edges: { a: { x: number; y: number }; b: { x: number; y: number } }[];
 	/**
 	 * Says the colour key or the laws are cut short for room, with how many more there are, which
 	 * only a palette or laws too long for the sheet need.
@@ -521,6 +527,11 @@ interface Measured {
 	turned: Set<string>;
 	/** Charges past the most a sheet measures, by what they are. */
 	extra: Map<string, number>;
+	/**
+	 * Where charges are drawn that aren't measured, as copies after the first and charges past the
+	 * most a sheet measures are, in grid units, which labels stay off as they do measured ones.
+	 */
+	unmarked: { at: Vec; reach: Vec }[];
 }
 
 /** The most charges one sheet measures. Past that, the drawing would be more marks than flag. */
@@ -568,7 +579,7 @@ const point = (p: Point): { x: Fraction; y: Fraction } => ({ x: exactOf(p.fly), 
  * border, and `flag` the file's own, whose other forms the notes point to.
  */
 function measure(flag: Flag, shown: Flag, form: SheetForm): Measured {
-	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], rows: [], guides: [], slanting: false, details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: new Map() };
+	const m: Measured = { fly: new Set(), hoist: new Set(), flyParts: [], hoistParts: [], charges: [], saltires: [], marks: [], rows: [], guides: [], slanting: false, details: [], notes: [], unmeasured: new Map(), circles: false, palls: 0, turned: new Set(), extra: new Map(), unmarked: [] };
 	const root: Frame = { x: zero, y: zero, w: exactOf(shown.fly), h: exactOf(shown.hoist) };
 	walk(shown.layers, root, m);
 	const ratio = form.variant !== undefined ? flag.variants[form.variant]?.ratio : undefined;
@@ -2040,8 +2051,10 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 	}
 	if (m.charges.length >= mostCharges) {
 		m.extra.set(name, (m.extra.get(name) ?? 0) + 1);
+		unmarked(m, s, base, center, region, l, 0);
 		return;
 	}
+	unmarked(m, s, base, center, region, l, 1);
 	/** Measures its fimbriation on the copy at a place, once that's known. */
 	const fimbriated = (copy: Vec): void => {
 		if (l.fimbriate === undefined) {
@@ -2130,6 +2143,36 @@ function charge(l: ChargeLayer, base: { x: Fraction; y: Fraction }, center: { x:
 	}
 	m.charges.push({ x: mark.x, y: mark.y, at: copy, reach, ...(circle !== undefined ? { circle } : {}), ...(size !== undefined ? { size } : {}), name });
 	fimbriated(copy);
+}
+
+/**
+ * Notes where a charge's copies are drawn, from the `from`th, for labels to stay off: those at the
+ * places it lists, and in a line. Copies in a ring, an arc or a grid are left to its detail.
+ */
+function unmarked(m: Measured, s: Shape, base: XY, center: XY, region: Frame | null, l: ChargeLayer, from: number): void {
+	let reach: Vec;
+	let places: Vec[];
+	if (s.kind === "polygon") {
+		const xs = s.vertices.map((v) => v.fly);
+		const ys = s.vertices.map((v) => v.hoist);
+		reach = { x: (Math.max(...xs) - Math.min(...xs)) / 2, y: (Math.max(...ys) - Math.min(...ys)) / 2 };
+		places = [{ x: toNumber(base.x) + (Math.max(...xs) + Math.min(...xs)) / 2, y: toNumber(base.y) + (Math.max(...ys) + Math.min(...ys)) / 2 }];
+	} else {
+		if (s.kind === "pile" || s.kind === "pall") {
+			return;
+		}
+		reach = sizeOf(s, region).reach;
+		// Copies are placed from where the first is: the frame's corner if it says where, and its center if not.
+		const copies = copiesOf(l);
+		const o = s.ats === undefined && (s.at === undefined || s.at === null) ? vec(center) : vec(base);
+		places = (copies ?? [{ x: zero, y: zero }]).map((p) => ({ x: o.x + toNumber(p.x), y: o.y + toNumber(p.y) }));
+	}
+	if (reach.x <= 0 && reach.y <= 0) {
+		return;
+	}
+	for (const at of places.slice(from)) {
+		m.unmarked.push({ at, reach });
+	}
 }
 
 type XY = { x: Fraction; y: Fraction };
@@ -3611,7 +3654,48 @@ function drawSheet(flag: Flag, options: ConstructionOptions, rounds: boolean): S
 	}
 
 	recording = null;
-	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh }, condensed, unmeasured: [...m.unmeasured.keys()], hoist: H, values: [...new Map(values.map((v) => [`${v.unit} ${v.text} ${v.exact.n}/${v.exact.d}`, v])).values()] };
+	const drawnBox = { x0: fx + vb[0] * s, y0: fy + vb[1] * s, x1: fx + (vb[0] + vb[2]) * s, y1: fy + (vb[1] + vb[3]) * s };
+	return { svg: o.lines.join("\n") + "\n", width: W, height: Hpx, widthMm: mmW, heightMm: mmH, labels: o.labels, flag: { x0: fx, y0: fy, x1: fx + fw, y1: fy + fh }, drawn: drawnBox, charges: chargeBoxes(m, place, view.sideways && !view.upright, flagBox, drawnBox), edges: edgesOf(view.flag, place), condensed, unmeasured: [...m.unmeasured.keys()], hoist: H, values: [...new Map(values.map((v) => [`${v.unit} ${v.text} ${v.exact.n}/${v.exact.d}`, v])).values()] };
+}
+
+/**
+ * Where each measured charge reaches on the sheet, as a box cut to the drawing, past which nothing
+ * is drawn, and which a label on the flag stays off. One that covers half the flag or more is the
+ * ground the rest are on, as a field is, and isn't one of them. `swap` is as for `planCharges`.
+ */
+function chargeBoxes(m: Measured, place: Placing, swap: boolean, flag: Box, drawn: Box): Box[] {
+	const size = (b: Box): number => Math.max(0, Math.min(b.x1, flag.x1) - Math.max(b.x0, flag.x0)) * Math.max(0, Math.min(b.y1, flag.y1) - Math.max(b.y0, flag.y0));
+	return [...m.charges, ...m.unmarked].filter((c) => c.reach.x > 0 || c.reach.y > 0).map((c) => {
+		const q = place.at(c.at);
+		const rx = (swap ? c.reach.y : c.reach.x) * place.s;
+		const ry = (swap ? c.reach.x : c.reach.y) * place.s;
+		return { x0: Math.max(q.x - rx, drawn.x0), y0: Math.max(q.y - ry, drawn.y0), x1: Math.min(q.x + rx, drawn.x1), y1: Math.min(q.y + ry, drawn.y1) };
+	}).filter((b) => b.x0 < b.x1 && b.y0 < b.y1 && size(b) < size(flag) / 2);
+}
+
+/** The flag's outline on the sheet, side by side, and a border's other edge too, as lines. */
+function edgesOf(shown: Flag, place: Placing): { a: Vec; b: Vec }[] {
+	const poly = shown.outline === undefined ? [{ x: 0, y: 0 }, { x: shown.fly, y: 0 }, { x: shown.fly, y: shown.hoist }, { x: 0, y: shown.hoist }] : outlinePoints(shown.outline, shown.fly, shown.hoist);
+	if (poly === null || poly.length < 2) {
+		return [];
+	}
+	const lines = (pts: readonly Vec[]): { a: Vec; b: Vec }[] => pts.map((p, i) => ({ a: place.at(p), b: place.at(pts[(i + 1) % pts.length]!) }));
+	const out = shown.outline === undefined && shown.border === undefined ? [] : lines(poly);
+	if (shown.border !== undefined) {
+		// Its other edge, each side moved out or in by its width.
+		const k = (shown.border.side === "inside" ? -1 : 1) * shown.border.width;
+		const turn = Math.sign(area(poly));
+		poly.forEach((p, i) => {
+			const q = poly[(i + 1) % poly.length]!;
+			const len = Math.hypot(q.x - p.x, q.y - p.y);
+			if (len < 1e-9 || turn === 0) {
+				return;
+			}
+			const n = { x: (turn * (q.y - p.y) * k) / len, y: (turn * -(q.x - p.x) * k) / len };
+			out.push({ a: place.at({ x: p.x + n.x, y: p.y + n.y }), b: place.at({ x: q.x + n.x, y: q.y + n.y }) });
+		});
+	}
+	return out;
 }
 
 /** How far apart the grid's lines are drawn, which is one unit unless that's too many lines. */

@@ -2,7 +2,8 @@
 // Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
 
 // Draws a construction sheet for every form of every flag in a vexyl-flags checkout, in each kind of units, and
-// counts the labels that overlap each other, cross the flag's edge or leave the sheet, and how often
+// counts the labels that overlap each other, cross the flag's edge, sit across a charge or the
+// outline, or leave the sheet, as test/collisions.mjs finds them, and how often
 // each reason for not measuring something is given. It needs the library built first, and takes the
 // checkout's path, or finds one beside this repository. It draws
 // --jobs flags at once, by default $VEXYL_JOBS or one for each CPU, each in a worker, and reports
@@ -18,7 +19,8 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { parse } from "../dist/index.js";
-import { constructionSheet, labelOverlap, sheetValueProblems } from "../dist/construction.js";
+import { constructionSheet, sheetValueProblems } from "../dist/construction.js";
+import { collisions } from "./collisions.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = isMainThread ? process.argv.slice(2) : workerData.args;
@@ -48,31 +50,6 @@ if (existsSync(join(root, "evidence.tsv"))) {
 			tiers.set(name, tier);
 		}
 	}
-}
-
-/** How much two boxes overlap, as an area, so that boxes that only touch don't count. */
-const overlap = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
-
-/** Every way a sheet's labels collide, as short descriptions. */
-export function collisions(sheet) {
-	const out = [];
-	const { labels, flag } = sheet;
-	for (let i = 0; i < labels.length; i++) {
-		const a = labels[i];
-		if (a.x0 < -0.5 || a.y0 < -0.5 || a.x1 > sheet.width + 0.5 || a.y1 > sheet.height + 0.5) {
-			out.push(`leaves the sheet: ${a.text}`);
-		}
-		const inside = a.x0 >= flag.x0 - 0.5 && a.x1 <= flag.x1 + 0.5 && a.y0 >= flag.y0 - 0.5 && a.y1 <= flag.y1 + 0.5;
-		if (a.onFlag ? !inside : overlap(a, flag) > 0.5) {
-			out.push(`crosses the flag's edge: ${a.text}`);
-		}
-		for (let j = i + 1; j < labels.length; j++) {
-			if (labelOverlap(a, labels[j]) > 0.5) {
-				out.push(`overlap: ${a.text} | ${labels[j].text}`);
-			}
-		}
-	}
-	return out;
 }
 
 const files = [...kdlFiles(join(root, "flags")), ...kdlFiles(join(root, "imported"))];
