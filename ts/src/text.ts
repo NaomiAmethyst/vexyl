@@ -47,7 +47,13 @@ export function decimalValue(text: string): number | undefined {
 		return undefined;
 	}
 	const v = Number(text);
-	return inLimits(v) ? v : undefined;
+	// One too small for a double comes out as 0, though it isn't zero as written.
+	return inLimits(v) && !(v === 0 && writtenNonzero(text)) ? v : undefined;
+}
+
+/** Says whether a number, as written, has a digit other than 0 before any exponent. */
+export function writtenNonzero(text: string): boolean {
+	return /[1-9]/.test(text.toLowerCase().split("e")[0]!);
 }
 
 /** Reads a string holding numbers, separated by whitespace, a comma or both. */

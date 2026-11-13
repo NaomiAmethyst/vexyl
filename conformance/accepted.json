@@ -72,6 +72,10 @@
   "file": "accepted/a-number-at-each-end-of-what-s-allowed.kdl"
  },
  {
+  "name": "a zero with an exponent too small for a double",
+  "file": "accepted/a-zero-with-an-exponent-too-small-for-a-double.kdl"
+ },
+ {
   "name": "switches written with #true and #false",
   "file": "accepted/switches-written-with-true-and-false.kdl"
  },

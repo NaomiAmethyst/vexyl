@@ -118,7 +118,17 @@ final class Sanitizer {
 		if (Double.isNaN(v) || a > 1e12 || (a != 0 && a < 1 / 1e12)) {
 			return null;
 		}
+		// One too small for a double comes out as 0, though it isn't zero as written.
+		if (v == 0 && writtenNonzero(text)) {
+			return null;
+		}
 		return v;
+	}
+
+	/** Whether a number, as written, has a digit other than 0 before any exponent. */
+	static boolean writtenNonzero(String text) {
+		String mantissa = text.toLowerCase(java.util.Locale.ROOT).split("e", 2)[0];
+		return mantissa.chars().anyMatch(c -> c >= '1' && c <= '9');
 	}
 
 	static String trim(String s) {

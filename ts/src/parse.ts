@@ -7,7 +7,7 @@ import { foldFacets, foldShape } from "./fold.js";
 import { boundary, offsetPolygon } from "./geometry.js";
 import { addSize, inLimits, layersHeight, layersSize, maxCopies, maxSize, waves } from "./limits.js";
 import { canonical, sanitizeSvg, usesCurrentColor } from "./sanitize.js";
-import { asciiLower, decimalForm, dict, formatNumber, hash, numbersIn } from "./text.js";
+import { asciiLower, decimalForm, dict, formatNumber, hash, numbersIn, writtenNonzero } from "./text.js";
 import type {
 	Adapt, AdaptRule, Adaptation, Anchor, Axis, BandLayer, BarsLayer, BlendMode, Border, Box, ChargeLayer, ChecksLayer, ChevronsLayer,
 	ColorRef, CornerName, CrossLayer, Define, EdgeName, Effects, EmblemLayer, EmbeddedSvg, FieldLayer, Fimbriation, Flag, Fold, FoldStep,
@@ -1502,6 +1502,13 @@ class Parser {
 		for (const n of nodes) {
 			if (n.getTag() !== null || n.entries.some((e) => e.getTag() !== null)) {
 				this.errf(n, "type annotations aren't used by this format");
+			}
+			// A number too small for a double reads as 0, though it isn't zero as written.
+			for (const e of n.entries) {
+				const rep = e.value.representation;
+				if (e.getValue() === 0 && rep !== undefined && writtenNonzero(rep)) {
+					this.errf(n, "needs a finite number of a reasonable size");
+				}
 			}
 			this.prepare(childNodes(n));
 		}

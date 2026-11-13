@@ -72,10 +72,17 @@ func decimalValue(text string) (float64, bool) {
 	if err != nil && !errors.Is(err, strconv.ErrRange) {
 		return 0, false
 	}
-	if !inLimits(v) {
+	// One too small for a float64 comes out as 0, though it isn't zero as written.
+	if !inLimits(v) || v == 0 && writtenNonzero(text) {
 		return 0, false
 	}
 	return v, true
+}
+
+// writtenNonzero says whether a decimal, as written, has a digit other than 0 before its exponent.
+func writtenNonzero(text string) bool {
+	mantissa, _, _ := strings.Cut(strings.ToLower(text), "e")
+	return strings.ContainsAny(mantissa, "123456789")
 }
 
 // numbersIn reads a string holding numbers, separated by whitespace, a comma or both.

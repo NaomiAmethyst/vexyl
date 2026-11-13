@@ -664,6 +664,7 @@ var acceptedDocuments = []invalidCase{
 	{name: "nests exactly the limit in a reverse", src: header + "field a\nreverse {\n" + strings.Repeat("group {\n", 31) + "field a\n" + strings.Repeat("}\n", 32)},
 	{name: "a count as large as the colors", src: header + "bars a b a { count 3; }\nrays a b a { count 3; }\n"},
 	{name: "a number at each end of what's allowed", src: header + "charge disc a { radius 1e12; at fly=1e-12 hoist=-1e12; }\n"},
+	{name: "a zero with an exponent too small for a double", src: header + "band a { along bend; width 1; offset 0.0e-400; }\ncharge path a { d \"M0 0L1 1Z\"; box \"0.0e-400 0 1 1\"; fly 1; at fly=0e-999 hoist=5; }\n"},
 	{name: "switches written with #true and #false", src: header + "quarters a b a b { diagonal #false; }\nsaltire a { width 1; counterchange #true; }\ncharge path a { d \"M0 0H1V1Z\"; box \"0 0 1 1\"; fly 1; evenodd #false; }\nvariant v { from rotate; upright #false; }\n"},
 	{name: "stops at the same place", src: "vexyl 1\nmeta { name \"T\"; }\npalette { a \"#112233\"; b \"#445566\"; g gradient a b a { stops 0 0.5 0.5; }; }\nproportion hoist=1 fly=1\nfield g\n"},
 	{name: "a series with digits", src: "vexyl 1\nmeta { name \"T\"; series \"flag-2\"; }\npalette { a \"#112233\"; }\nproportion hoist=1 fly=1\n"},

@@ -566,6 +566,11 @@
   "line": 5
  },
  {
+  "name": "box number that reads as zero",
+  "file": "invalid/box-number-that-reads-as-zero.kdl",
+  "line": 5
+ },
+ {
   "name": "box past what a number can hold",
   "file": "invalid/box-past-what-a-number-can-hold.kdl",
   "line": 5
@@ -628,6 +633,11 @@
  {
   "name": "number too small",
   "file": "invalid/number-too-small.kdl",
+  "line": 5
+ },
+ {
+  "name": "number that reads as zero",
+  "file": "invalid/number-that-reads-as-zero.kdl",
   "line": 5
  },
  {

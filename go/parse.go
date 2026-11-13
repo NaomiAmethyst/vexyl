@@ -1457,8 +1457,14 @@ func (p *parser) numberValue(n *kdl.Node, v kdl.Value) float64 {
 	case kdl.Float:
 		f = v.Float()
 	case kdl.BigFloat:
-		// The KDL parser keeps decimal literals at arbitrary precision.
-		f, _ = v.BigFloat().Float64()
+		// The KDL parser keeps decimal literals at arbitrary precision. One too small for a
+		// float64 comes out as 0, though it isn't zero as written, so it's out of the limits.
+		b := v.BigFloat()
+		f, _ = b.Float64()
+		if f == 0 && b.Sign() != 0 {
+			p.errf(n, "needs a finite number of a reasonable size")
+			return 0
+		}
 	default:
 		p.errf(n, "needs a number")
 		return 0
