@@ -1157,14 +1157,14 @@
      "options": {
       "ratio": "1:1"
      },
-     "refused": true
+     "svg": "valid/progress-pride/ratio-1-1.svg"
     },
     {
      "name": "ratio-1-2",
      "options": {
       "ratio": "1:2"
      },
-     "refused": true
+     "svg": "valid/progress-pride/ratio-1-2.svg"
     },
     {
      "name": "pad-center",

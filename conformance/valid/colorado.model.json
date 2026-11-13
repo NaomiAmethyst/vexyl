@@ -21,12 +21,12 @@
     }
    ],
    "color": "red",
-   "from": 112,
+   "from": 112.0243,
    "inner": 150,
    "layer": "charge",
    "radius": 400,
    "shape": "ring",
-   "to": 68
+   "to": 67.9757
   },
   {
    "at": [
@@ -45,25 +45,37 @@
   "encoder": [
    "Naomi Persephone Amethyst"
   ],
+  "law": [
+   {
+    "law": "Colorado Revised Statutes, section 24-80-904, State flag",
+    "source": [
+     "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-24.pdf"
+    ]
+   }
+  ],
   "license": "CC-BY-SA-4.0",
   "name": "Colorado",
   "note": [
-   "Sizes follow the drawing on Commons, not a checked construction sheet."
+   "From the statute: every size, in section 24-80-904 of the Colorado Revised Statutes 2024, read in the legislature's uncertified printout. Its history line gives the acts of 1911, 1929 and 1964. Reading the one-fifth as the distance from the staff to the C's nearest edge, and the opening's lines as straight, is this file's. The Commons drawing agrees.",
+   "From the statute too: the blue is the blue field's of the national flag and the red is the national flag's, so both match united-states.kdl, which says where they come from. FOTW says the 1929 act set those colors.",
+   "From the Commons drawing: the gold, #ffd700. The statute says only a golden disk, and no other source read gives a shade."
   ],
   "render-license": "CC0-1.0",
   "source": [
+   "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-24.pdf",
+   "https://www.crwflags.com/fotw/flags/us-co.html",
    "https://commons.wikimedia.org/wiki/File:Flag_of_Colorado.svg"
   ]
  },
  "palette": {
   "blue": {
-   "color": "#00205b"
+   "color": "#0a3161"
   },
   "gold": {
    "color": "#ffd700"
   },
   "red": {
-   "color": "#bf0a30"
+   "color": "#b31942"
   },
   "white": {
    "color": "#ffffff"

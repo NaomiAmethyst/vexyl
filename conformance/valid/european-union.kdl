@@ -1,15 +1,18 @@
-// The ring's radius is a third of the hoist, and each star's is an eighteenth, per the
-// EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16.
-// Colors are the Pantone Reflex Blue and Yellow conversions.
+// From the graphic specifications, on a hoist of 18: the fly is one and a half times the
+// hoist, so 27. The stars' circle has a radius of a third of the hoist, so 6, centered where
+// the diagonals cross. Each star's points are on a circle of radius 1/18 of the hoist, so 1.
+// The stars are upright, at the hours of a clock.
 vexyl 1
 meta {
   name "European Union"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://web.archive.org/web/20161123121646/http://publications.europa.eu/code/en/en-5000100.htm"
   source "https://cdn.fotw.info/flags/eu'eun.html"
   source "https://en.wikipedia.org/wiki/Flag_of_Europe"
-  note "The star radius of 1/18 of the hoist comes from the EU's text as quoted by FOTW. The Commons drawing's stars are larger, about 1/16."
+  note "From the specifications: every proportion, in the geometrical description of the European emblem's graphical specifications in the Publications Office's Interinstitutional Style Guide, read in the Wayback Machine's copy of 23 November 2016 (last updated 22 April 2015). The Commons drawing's stars are larger, about 1/16."
+  note "From the specifications too: the colors. Pantone Reflex Blue for the field and Pantone Yellow for the stars; in four-colour process, 100% Process Cyan with 80% Process Magenta, and 100% Process Yellow; and on the web, #003399 and #ffcc00."
 }
 palette {
   blue "#003399" {
@@ -18,7 +21,7 @@ palette {
   }
   gold "#ffcc00" {
     pantone "Yellow"
-    cmyk 0 21 100 0
+    cmyk 0 0 100 0
   }
 }
 proportion hoist=18 fly=27

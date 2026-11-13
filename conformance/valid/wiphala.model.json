@@ -20,37 +20,55 @@
   "encoder": [
    "Naomi Persephone Amethyst"
   ],
+  "law": [
+   {
+    "law": "Supreme Decree No. 241 of 5 August 2009 on the symbols of the Plurinational State of Bolivia, Articles 4, 27, 29, 30, 31 and 34",
+    "source": [
+     "https://www.lexivox.org/norms/BO-DS-N241.html"
+    ]
+   }
+  ],
   "license": "CC-BY-SA-4.0",
   "name": "Wiphala of the Qulla Suyu",
   "note": [
-   "Sizes follow the drawing on Commons, not a checked construction sheet."
+   "From the law: the squares and the order of their colors, in Article 27 and the definition in Article 4 of Supreme Decree 241, read on LexiVox, which isn't the official gazette. Article 31 sets the official sizes, 245 by 245 cm with squares of 35 cm, and 24.5 by 24.5 cm with squares of 3.5. Article 34 hoists it as a banner from the upper corner of the white diagonal.",
+   "From the law too: the colors' Pantone numbers, in Article 29: red 485 C, orange 165 C, yellow P-CVU, white with no code, green 356 C, blue 286 C and violet 266 C. Article 4 says cloth and other media approximate them.",
+   "From elsewhere: the decree gives Pantone only. The red, yellow and green match bolivia.kdl, which says where they come from; FOTW says the decree gives the tricolor and the wiphala the same three. The orange, blue and violet are the RGB approximations of FOTW's image, by Kjell Roll Elgsaas and António Martins, of 6 October 2017, which aren't legal."
   ],
   "render-license": "CC0-1.0",
   "source": [
+   "https://www.lexivox.org/norms/BO-DS-N241.html",
+   "https://www.crwflags.com/fotw/flags/bo_w.html",
    "https://commons.wikimedia.org/wiki/File:Banner_of_the_Qulla_Suyu.svg"
   ]
  },
  "palette": {
   "blue": {
-   "color": "#0f47af"
+   "color": "#003399",
+   "pantone": "286 C"
   },
   "green": {
-   "color": "#078930"
+   "color": "#007a33",
+   "pantone": "356 C"
   },
   "orange": {
-   "color": "#eb7711"
+   "color": "#ff6600",
+   "pantone": "165 C"
   },
   "purple": {
-   "color": "#742c64"
+   "color": "#6633cc",
+   "pantone": "266 C"
   },
   "red": {
-   "color": "#da121a"
+   "color": "#da291c",
+   "pantone": "485 C"
   },
   "white": {
    "color": "#ffffff"
   },
   "yellow": {
-   "color": "#fcdd09"
+   "color": "#f4e400",
+   "pantone": "Process Yellow CVU"
   }
  },
  "proportion": {

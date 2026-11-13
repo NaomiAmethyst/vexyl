@@ -1,18 +1,30 @@
-// No primary construction sheet found; the 2:1:2 stripes and colors follow Commons.
+// From the designer: pink 40% of the height, purple 20% and blue 40%, so 2:1:2. On 3:5.
 vexyl 1
 meta {
   name "Bisexual Pride Flag"
   designer "Michael Page"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
+  date "1998-12-05"
+  source "https://web.archive.org/web/20011204204150/http://biflag.com:80/Activism.asp?tag=EN000000000000"
+  source "https://web.archive.org/web/20090522164814/http://www.biflag.com/5img/logos/BiPrideFlagTrueColorSize.gif"
   source "https://en.wikipedia.org/wiki/Bisexual_pride_flag"
   source "https://commons.wikimedia.org/wiki/File:Bisexual_Pride_Flag.svg"
-  note "No primary construction sheet was found. The 2:1:2 stripes and colors follow the Commons drawing."
+  note "Designer's own page, The History of the Bi Pride Flag by Michael Page on BiFlag.com, read in the Wayback Machine's copy of 4 December 2001. It says the first Bi Pride Flag was unveiled on 5 December 1998, and that the flag is for free public usage."
+  note "From the page: the top 40% of the vertical dimension is pink, the middle 20% purple and the lower 40% blue, in flag-maker parlance magenta PMS 226, lavender PMS 258 and royal PMS 286. It asks for those exact PMS colors."
+  note "The hex values are sampled from BiPrideFlagTrueColorSize.gif on the designer's site, archived in 2009 with no page around it: #d60270, #9b4f96 and #0038a8, in stripes of 60, 30 and 60 pixels. The Commons drawing has the same values."
+  note "From elsewhere: the proportion. The page gives none. That image is 200 by 150, 3:4, which isn't stated as the flag's shape. 3:5 is the common format, as in Commons."
 }
 palette {
-  magenta "#d60270"
-  lavender "#9b4f96"
-  royal "#0038a8"
+  magenta "#d60270" {
+    pantone "226"
+  }
+  lavender "#9b4f96" {
+    pantone "258"
+  }
+  royal "#0038a8" {
+    pantone "286"
+  }
 }
 proportion hoist=3 fly=5
 

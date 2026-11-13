@@ -23,6 +23,7 @@
   }
  ],
  "meta": {
+  "date": "1999",
   "designer": [
    "Monica Helms"
   ],
@@ -32,9 +33,12 @@
   "license": "CC-BY-SA-4.0",
   "name": "Transgender Pride Flag",
   "note": [
-   "No primary construction sheet was found. The equal stripes and colors follow the Commons drawing."
+   "Designer's own post, These Colors Don't Run, on her blog on 28 January 2008, read in the Wayback Machine's copy of 1 March 2012. It says the flag was created in 1999 and has five stripes: light blue at the top and bottom, pink next to them, and white in the middle, so that it's always correct whichever way it's flown. Its picture is a photograph of the original flag.",
+   "The post gives no sizes or colors. The stripes look equal in the photograph, which is all it shows of their widths. No earlier publication by the designer was found. Wikipedia says the flag was first shown at a pride parade in Phoenix in 2000.",
+   "From the Commons drawing: the colors and the 3:5 proportion, the common format."
   ],
   "source": [
+   "https://web.archive.org/web/20120301065716/http://www.monicahelms.com/blog/category/tg-pride-flag",
    "https://en.wikipedia.org/wiki/Transgender_flag",
    "https://commons.wikimedia.org/wiki/File:Transgender_Pride_flag.svg"
   ]

@@ -27,14 +27,27 @@
   "encoder": [
    "Naomi Persephone Amethyst"
   ],
+  "law": [
+   {
+    "law": "Lov om Norges Flag (flaggloven), LOV-1898-12-10-1, sections 1 and 2",
+    "source": [
+     "https://lovdata.no/dokument/NL/lov/1898-12-10-1"
+    ]
+   }
+  ],
   "license": "CC-BY-SA-4.0",
   "name": "Norway (state and war flag)",
   "note": [
-   "Sizes follow the drawing on Commons, not a checked construction sheet.",
+   "From the law: section 2 says the flag of section 1 is used with split and tongue on the state's public buildings and its post and customs vessels. It gives no sizes for the split or the tongue. The cross and the fields up to the split are section 1's, as in norway.kdl.",
+   "From elsewhere: the length of 27, with 11 units for the split and tongue, is Store norske leksikon's. It gives 6-1-2-1-6 across and 6-1-2-1-6-11 along for the naval flag of 1844 to 1905, and 16:27 for today's. FOTW gives 16:27 too. Neither names the regulation it comes from, and none was found.",
+   "From the Commons drawing: the tongue's width, 4, which leaves the notches 6 from the top and the bottom. No source read gives it.",
    "Colors match norway.kdl, which says where they come from."
   ],
   "render-license": "CC0-1.0",
   "source": [
+   "https://lovdata.no/dokument/NL/lov/1898-12-10-1",
+   "https://snl.no/orlogsflagg",
+   "https://www.crwflags.com/fotw/flags/no_fact.html",
    "https://commons.wikimedia.org/wiki/File:Flag_of_Norway,_state.svg"
   ]
  },

@@ -1,20 +1,45 @@
+// From the decree: 49 squares in 7 columns by 7 rows, so a square flag of 7 by 7, as the
+// official 245 by 245 cm with squares of 35. Colors run in diagonals descending from left to
+// right, with the white one in the middle. From the top right corner: one green, two blue,
+// three violet, four red, five orange, six yellow, seven white, then six green, five blue, four
+// violet, three red, two orange and one yellow. With flow bend, a square's color is
+// (column - row) mod 7, so the list starts with white and the top right corner is the seventh.
 vexyl 1
 meta {
   name "Wiphala of the Qulla Suyu"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://www.lexivox.org/norms/BO-DS-N241.html"
+  source "https://www.crwflags.com/fotw/flags/bo_w.html"
   source "https://commons.wikimedia.org/wiki/File:Banner_of_the_Qulla_Suyu.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "From the law: the squares and the order of their colors, in Article 27 and the definition in Article 4 of Supreme Decree 241, read on LexiVox, which isn't the official gazette. Article 31 sets the official sizes, 245 by 245 cm with squares of 35 cm, and 24.5 by 24.5 cm with squares of 3.5. Article 34 hoists it as a banner from the upper corner of the white diagonal."
+  note "From the law too: the colors' Pantone numbers, in Article 29: red 485 C, orange 165 C, yellow P-CVU, white with no code, green 356 C, blue 286 C and violet 266 C. Article 4 says cloth and other media approximate them."
+  note "From elsewhere: the decree gives Pantone only. The red, yellow and green match bolivia.kdl, which says where they come from; FOTW says the decree gives the tricolor and the wiphala the same three. The orange, blue and violet are the RGB approximations of FOTW's image, by Kjell Roll Elgsaas and António Martins, of 6 October 2017, which aren't legal."
+  law "Supreme Decree No. 241 of 5 August 2009 on the symbols of the Plurinational State of Bolivia, Articles 4, 27, 29, 30, 31 and 34" {
+    source "https://www.lexivox.org/norms/BO-DS-N241.html"
+  }
 }
 palette {
   white "#ffffff"
-  yellow "#fcdd09"
-  orange "#eb7711"
-  red "#da121a"
-  purple "#742c64"
-  blue "#0f47af"
-  green "#078930"
+  yellow "#f4e400" {
+    pantone "Process Yellow CVU"
+  }
+  orange "#ff6600" {
+    pantone "165 C"
+  }
+  red "#da291c" {
+    pantone "485 C"
+  }
+  purple "#6633cc" {
+    pantone "266 C"
+  }
+  blue "#003399" {
+    pantone "286 C"
+  }
+  green "#007a33" {
+    pantone "356 C"
+  }
 }
 proportion hoist=7 fly=7
 

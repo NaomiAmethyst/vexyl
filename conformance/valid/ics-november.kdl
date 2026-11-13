@@ -4,8 +4,11 @@ meta {
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://web.archive.org/web/20260606134814/https://www.dco.uscg.mil/Portals/9/NMC/pdfs/examinations/Pub102_2020.pdf"
   source "https://commons.wikimedia.org/wiki/File:ICS_November.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "From the code: the design, in the plate International Flags and Pennants inside the front cover of the International Code of Signals, United States edition of 1969 as revised in 2020 (NGA Pub. 102), read in the Coast Guard's copy as the Wayback Machine kept it on 6 June 2026. Chapter 1, Section 3, says a set has 26 alphabetical flags, ten numeral pennants, three substitutes and the answering pennant, and the code gives no sizes or shades. The plate draws N as a checkerboard of 4 by 4 squares, blue in the upper hoist corner."
+  note "From the Commons drawing: the square shape. The plate draws the flags about 4:5, hoist to fly, but it's a small picture, not a construction."
+  note "The colors are the Commons drawing's pure primaries. The plate is in red, blue, yellow, black and white, with no shades given."
 }
 palette {
   blue "#0000ff"

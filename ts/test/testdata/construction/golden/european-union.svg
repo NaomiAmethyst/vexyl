@@ -7,10 +7,10 @@
 <path d="M40 90H1082.519685" stroke="#1c1b22" stroke-width="1.5"/>
 <svg x="112" y="187.010499" width="686.519685" height="457.67979" viewBox="0 0 27 18" overflow="hidden">
   <title>European Union</title>
-  <clipPath id="vx-95590b61a2a55570-cs-f-flag1">
+  <clipPath id="vx-c2fd047db69ef0ad-cs-f-flag1">
     <polygon points="0,0 27,0 27,18 0,18"/>
   </clipPath>
-  <g clip-path="url(#vx-95590b61a2a55570-cs-f-flag1)">
+  <g clip-path="url(#vx-c2fd047db69ef0ad-cs-f-flag1)">
     <polygon points="0,0 27,0 27,18 0,18" fill="#003399"/>
     <polygon points="13.5,2 13.724514,2.690983 14.451057,2.690983 13.863271,3.118034 14.087785,3.809017 13.5,3.381966 12.912215,3.809017 13.136729,3.118034 12.548943,2.690983 13.275486,2.690983" fill="#ffcc00"/>
     <polygon points="16.5,2.803848 16.724514,3.494831 17.451057,3.494831 16.863271,3.921882 17.087785,4.612865 16.5,4.185814 15.912215,4.612865 16.136729,3.921882 15.548943,3.494831 16.275486,3.494831" fill="#ffcc00"/>
@@ -45,10 +45,10 @@
 <text x="832.519685" y="141" font-family="Geist Mono, ui-monospace, monospace" font-size="11" font-weight="500" letter-spacing="0.88" fill="#55525f">DETAIL: GOLD STARS</text>
 <svg x="866.519685" y="184" width="130.232558" height="200" viewBox="12.2 1.7 5.6 8.6" overflow="hidden">
   <title>European Union</title>
-  <clipPath id="vx-95590b61a2a55570-cs-d0-flag1">
+  <clipPath id="vx-c2fd047db69ef0ad-cs-d0-flag1">
     <polygon points="0,0 27,0 27,18 0,18"/>
   </clipPath>
-  <g clip-path="url(#vx-95590b61a2a55570-cs-d0-flag1)">
+  <g clip-path="url(#vx-c2fd047db69ef0ad-cs-d0-flag1)">
     <polygon points="0,0 27,0 27,18 0,18" fill="#003399"/>
     <polygon points="13.5,2 13.724514,2.690983 14.451057,2.690983 13.863271,3.118034 14.087785,3.809017 13.5,3.381966 12.912215,3.809017 13.136729,3.118034 12.548943,2.690983 13.275486,2.690983" fill="#ffcc00"/>
     <polygon points="16.5,2.803848 16.724514,3.494831 17.451057,3.494831 16.863271,3.921882 17.087785,4.612865 16.5,4.185814 15.912215,4.612865 16.136729,3.921882 15.548943,3.494831 16.275486,3.494831" fill="#ffcc00"/>
@@ -89,7 +89,7 @@
 <text x="868.519685" y="577" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="500" fill="#1c1b22">Gold</text>
 <text x="904.849985" y="577" font-family="Geist Mono, ui-monospace, monospace" font-size="13" fill="#3b3947">#ffcc00</text>
 <text x="868.519685" y="596" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">Pantone Yellow</text>
-<text x="868.519685" y="615" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 21 100 0</text>
+<text x="868.519685" y="615" font-family="Geist, system-ui, sans-serif" font-size="13" fill="#3b3947">CMYK 0 0 100 0</text>
 <path d="M40 733.700787H1082.519685" stroke="#c9c6d2" stroke-width="1"/>
 <text x="40" y="755.700787" font-family="Geist, system-ui, sans-serif" font-size="12" fill="#3b3947">Sizes in grid units, as the file gives them. The gold star’s center is marked +.</text>
 <text x="1082.519685" y="755.700787" font-family="Geist Mono, ui-monospace, monospace" font-size="12" text-anchor="end" fill="#3b3947">flags/european-union.kdl · Vexyl 1</text>

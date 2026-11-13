@@ -1,16 +1,32 @@
+// From the statute, on a hoist of 1200: two-thirds width to length, so a fly of 1800, in three
+// equal stripes. The C's diameter is two-thirds of the width, so a radius of 400, and it's
+// one-fifth of the length, 360, from the staff, so its center is at 360 + 400 = 760.
+// The opening's inner line is three-fourths of the bar's width, and its outer line double the
+// inner, so with ends along radii the inner edge is half the outer, a radius of 200, the bar is
+// 200 wide, and the inner line is 150. Its half-angle is asin(75 / 200) = 22.0243 degrees, so the
+// C runs from 90 + 22.0243 = 112.0243 to 90 - 22.0243 = 67.9757, open toward the fly.
+// The golden disk fills the C, a radius of 200. The ring's hole is drawn smaller, 150, under
+// the disk, so that no seam shows between them.
 vexyl 1
 meta {
   name "Colorado"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-24.pdf"
+  source "https://www.crwflags.com/fotw/flags/us-co.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Colorado.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "From the statute: every size, in section 24-80-904 of the Colorado Revised Statutes 2024, read in the legislature's uncertified printout. Its history line gives the acts of 1911, 1929 and 1964. Reading the one-fifth as the distance from the staff to the C's nearest edge, and the opening's lines as straight, is this file's. The Commons drawing agrees."
+  note "From the statute too: the blue is the blue field's of the national flag and the red is the national flag's, so both match united-states.kdl, which says where they come from. FOTW says the 1929 act set those colors."
+  note "From the Commons drawing: the gold, #ffd700. The statute says only a golden disk, and no other source read gives a shade."
+  law "Colorado Revised Statutes, section 24-80-904, State flag" {
+    source "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-24.pdf"
+  }
 }
 palette {
-  blue "#00205b"
+  blue "#0a3161"
   white "#ffffff"
-  red "#bf0a30"
+  red "#b31942"
   gold "#ffd700"
 }
 proportion hoist=1200 fly=1800
@@ -19,8 +35,8 @@ bars blue white blue
 charge ring red {
   radius 400
   inner 150
-  from 112
-  to 68
+  from 112.0243
+  to 67.9757
   at fly=760 hoist=600
 }
 charge disc gold {

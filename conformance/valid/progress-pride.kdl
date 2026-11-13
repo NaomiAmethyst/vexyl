@@ -1,10 +1,11 @@
-// No official construction sheet was found, so the proportion and
-// chevron sizes follow the Commons drawing, and its nearly 45-degree arms are
-// treated as exactly 45.
+// From the designer, on a hoist of 24: six equal rainbow stripes, on the 3' by 5' of the
+// campaign's flag, so a fly of 40. The campaign's picture has five chevrons at 45 degrees, each
+// an eighth of the hoist, 3, along the middle line, with the white to 6 from the hoist, so the
+// black's point is at 6 + 4 x 3 = 18, and the light blue's outer edge meets the hoist's corners.
 //
 // Rights: the designer licenses this design under a Creative Commons license that
 // excludes commercial use, and has said small organizations can use it
-// commercially. This file's Apache-2.0 license covers the encoding, not the design.
+// commercially. This file's license covers the encoding, not the design.
 // Check the designer's current terms before using the flag or this file's output.
 vexyl 1
 meta {
@@ -12,31 +13,64 @@ meta {
   designer "Daniel Quasar"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
+  date "2018-06"
   design-rights "Creative Commons license excluding commercial use; check the designer's terms"
+  source "https://web.archive.org/web/20180614024221/https://www.kickstarter.com/projects/danielquasar/progress-a-pride-flag-reboot"
+  source "https://web.archive.org/web/20200715211035/https://quasar.digital/assets/HowToUse-ProgressPrideFlag-DanielQuasar.pdf"
+  source "https://web.archive.org/web/20200715211132/https://quasar.digital/assets/Progress-Pride-Flag-Daniel-Quasar_vector.eps"
   source "https://en.wikipedia.org/wiki/Progress_flag"
   source "https://commons.wikimedia.org/wiki/File:LGBTQ%2B_rainbow_flag_Quasar_%22Progress%22_variant.svg"
-  note "No official construction sheet was found, so the proportion and chevron sizes follow the Commons drawing, and its nearly 45-degree arms are treated as exactly 45."
+  note "Designer's own first publication: the Kickstarter campaign \"Progress\" A PRIDE Flag Reboot, launched 7 June 2018, read in the Wayback Machine's copy of 14 June 2018. It gives the six full-sized rainbow stripes in the background and five half-sized stripes at the hoist in a new arrow shape, light blue, light pink, white, brown and black, and its flag reward is sized at 3' by 5'."
+  note "The chevrons are measured from the campaign's picture of the flag, 680 by 383 pixels: along the middle line, the white ends at 0.249 of the hoist, then pink at 0.375, light blue at 0.496, brown at 0.621 and black at 0.748. Those are 1/4 to 3/4 in eighths, written exactly here. Its arms are at 45 degrees. The colors are sampled from the same picture, where each is one flat value. The Commons drawing has the same layout, with its depths a little off these and the common six rainbow colors."
+  note "The designer's later guide, How to use the Progress Pride Flag design, of 21 June 2019, and its vector file of 9 June 2019, move the chevrons an eighth of the hoist toward the fly, so that the light blue's inner edge meets the corners, and the guide draws the flag about 1:1.7. This file keeps the first publication. The guide says to change the length only at the fly, cropping or adding rainbow, which the adapt rules follow. The CMYK values are the vector file's, rounded."
   note "This file's license covers the encoding, not the design. Check the designer's current terms before using the flag."
 }
 palette {
-  red "#e40303"
-  orange "#ff8c00"
-  yellow "#ffed00"
-  green "#008026"
-  indigo "#004dff"
-  violet "#750787"
-  black "#000000"
-  brown "#613915"
-  sky "#74d7ee"
-  pink "#ffafc8"
-  white "#ffffff"
+  red "#d40606" {
+    cmyk 0 94 98 0
+  }
+  orange "#ee9c00" {
+    cmyk 0 62 96 0
+  }
+  yellow "#e3ff00" {
+    cmyk 4 0 95 0
+  }
+  green "#06bf00" {
+    cmyk 68 0 100 0
+  }
+  indigo "#001a98" {
+    cmyk 97 74 1 0
+  }
+  violet "#760089" {
+    cmyk 42 100 0 0
+  }
+  black "#000000" {
+    cmyk 75 68 67 90
+  }
+  brown "#603813" {
+    cmyk 42 70 95 49
+  }
+  sky "#74d7ec" {
+    cmyk 47 10 0 0
+  }
+  pink "#ffafc7" {
+    cmyk 0 51 0 0
+  }
+  white "#fbf9f5" {
+    cmyk 0 0 0 0
+  }
 }
-proportion hoist=3810 fly=6000
+proportion hoist=24 fly=40
 
 bars red orange yellow green indigo violet
 chevrons white pink sky brown black {
   from hoist
-  depth 2864
-  ratio 951 469 492 472 480
+  depth 18
+  ratio 2 1 1 1 1
   angle 45
+}
+
+adapt {
+  wider extend
+  narrower cut
 }

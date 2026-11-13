@@ -1,4 +1,8 @@
 {
+ "adapt": {
+  "narrower": "extend",
+  "wider": "extend"
+ },
  "layers": [
   {
    "colors": [
@@ -28,18 +32,19 @@
     "brown",
     "black"
    ],
-   "depth": 2864,
+   "depth": 18,
    "layer": "chevrons",
    "ratio": [
-    951,
-    469,
-    492,
-    472,
-    480
+    2,
+    1,
+    1,
+    1,
+    1
    ]
   }
  ],
  "meta": {
+  "date": "2018-06",
   "design-rights": "Creative Commons license excluding commercial use; check the designer's terms",
   "designer": [
    "Daniel Quasar"
@@ -50,52 +55,123 @@
   "license": "CC-BY-SA-4.0",
   "name": "Progress Pride Flag",
   "note": [
-   "No official construction sheet was found, so the proportion and chevron sizes follow the Commons drawing, and its nearly 45-degree arms are treated as exactly 45.",
+   "Designer's own first publication: the Kickstarter campaign \"Progress\" A PRIDE Flag Reboot, launched 7 June 2018, read in the Wayback Machine's copy of 14 June 2018. It gives the six full-sized rainbow stripes in the background and five half-sized stripes at the hoist in a new arrow shape, light blue, light pink, white, brown and black, and its flag reward is sized at 3' by 5'.",
+   "The chevrons are measured from the campaign's picture of the flag, 680 by 383 pixels: along the middle line, the white ends at 0.249 of the hoist, then pink at 0.375, light blue at 0.496, brown at 0.621 and black at 0.748. Those are 1/4 to 3/4 in eighths, written exactly here. Its arms are at 45 degrees. The colors are sampled from the same picture, where each is one flat value. The Commons drawing has the same layout, with its depths a little off these and the common six rainbow colors.",
+   "The designer's later guide, How to use the Progress Pride Flag design, of 21 June 2019, and its vector file of 9 June 2019, move the chevrons an eighth of the hoist toward the fly, so that the light blue's inner edge meets the corners, and the guide draws the flag about 1:1.7. This file keeps the first publication. The guide says to change the length only at the fly, cropping or adding rainbow, which the adapt rules follow. The CMYK values are the vector file's, rounded.",
    "This file's license covers the encoding, not the design. Check the designer's current terms before using the flag."
   ],
   "source": [
+   "https://web.archive.org/web/20180614024221/https://www.kickstarter.com/projects/danielquasar/progress-a-pride-flag-reboot",
+   "https://web.archive.org/web/20200715211035/https://quasar.digital/assets/HowToUse-ProgressPrideFlag-DanielQuasar.pdf",
+   "https://web.archive.org/web/20200715211132/https://quasar.digital/assets/Progress-Pride-Flag-Daniel-Quasar_vector.eps",
    "https://en.wikipedia.org/wiki/Progress_flag",
    "https://commons.wikimedia.org/wiki/File:LGBTQ%2B_rainbow_flag_Quasar_%22Progress%22_variant.svg"
   ]
  },
  "palette": {
   "black": {
+   "cmyk": [
+    75,
+    68,
+    67,
+    90
+   ],
    "color": "#000000"
   },
   "brown": {
-   "color": "#613915"
+   "cmyk": [
+    42,
+    70,
+    95,
+    49
+   ],
+   "color": "#603813"
   },
   "green": {
-   "color": "#008026"
+   "cmyk": [
+    68,
+    0,
+    100,
+    0
+   ],
+   "color": "#06bf00"
   },
   "indigo": {
-   "color": "#004dff"
+   "cmyk": [
+    97,
+    74,
+    1,
+    0
+   ],
+   "color": "#001a98"
   },
   "orange": {
-   "color": "#ff8c00"
+   "cmyk": [
+    0,
+    62,
+    96,
+    0
+   ],
+   "color": "#ee9c00"
   },
   "pink": {
-   "color": "#ffafc8"
+   "cmyk": [
+    0,
+    51,
+    0,
+    0
+   ],
+   "color": "#ffafc7"
   },
   "red": {
-   "color": "#e40303"
+   "cmyk": [
+    0,
+    94,
+    98,
+    0
+   ],
+   "color": "#d40606"
   },
   "sky": {
-   "color": "#74d7ee"
+   "cmyk": [
+    47,
+    10,
+    0,
+    0
+   ],
+   "color": "#74d7ec"
   },
   "violet": {
-   "color": "#750787"
+   "cmyk": [
+    42,
+    100,
+    0,
+    0
+   ],
+   "color": "#760089"
   },
   "white": {
-   "color": "#ffffff"
+   "cmyk": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "color": "#fbf9f5"
   },
   "yellow": {
-   "color": "#ffed00"
+   "cmyk": [
+    4,
+    0,
+    95,
+    0
+   ],
+   "color": "#e3ff00"
   }
  },
  "proportion": {
-  "fly": 6000,
-  "hoist": 3810
+  "fly": 40,
+  "hoist": 24
  },
  "vexyl": 1
 }

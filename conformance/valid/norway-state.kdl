@@ -1,12 +1,23 @@
+// Width 16, length 27. Across it 6:1:2:1:6, and along it 6:1:2:1:6:11, where the last 11 is
+// the split and tongue. The white is fimbriation of the blue cross, so the grid's 7 is 6 + 1,
+// and its 18 is 1 + 6 + 11. The tongue's width, 4, is the Commons drawing's.
 vexyl 1
 meta {
   name "Norway (state and war flag)"
   encoder "Naomi Persephone Amethyst"
   license "CC-BY-SA-4.0"
   render-license "CC0-1.0"
+  source "https://lovdata.no/dokument/NL/lov/1898-12-10-1"
+  source "https://snl.no/orlogsflagg"
+  source "https://www.crwflags.com/fotw/flags/no_fact.html"
   source "https://commons.wikimedia.org/wiki/File:Flag_of_Norway,_state.svg"
-  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+  note "From the law: section 2 says the flag of section 1 is used with split and tongue on the state's public buildings and its post and customs vessels. It gives no sizes for the split or the tongue. The cross and the fields up to the split are section 1's, as in norway.kdl."
+  note "From elsewhere: the length of 27, with 11 units for the split and tongue, is Store norske leksikon's. It gives 6-1-2-1-6 across and 6-1-2-1-6-11 along for the naval flag of 1844 to 1905, and 16:27 for today's. FOTW gives 16:27 too. Neither names the regulation it comes from, and none was found."
+  note "From the Commons drawing: the tongue's width, 4, which leaves the notches 6 from the top and the bottom. No source read gives it."
   note "Colors match norway.kdl, which says where they come from."
+  law "Lov om Norges Flag (flaggloven), LOV-1898-12-10-1, sections 1 and 2" {
+    source "https://lovdata.no/dokument/NL/lov/1898-12-10-1"
+  }
 }
 palette {
   red "#e62d23"
