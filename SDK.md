@@ -354,8 +354,9 @@ sanitizer's allowlist on purpose: it can't be in artwork, so only a renderer can
 ### 7.3 Locations
 
 `locate` gives a list in document order, with each part's `path`, its `node`, and where it starts and ends, as `line`,
-`column`, `endLine` and `endColumn`, counted as a problem's are in section 2. A part ends at its last
-character, not counting a `;` or line ending. As well as each layer by its path, these are there:
+`column`, `endLine` and `endColumn`, counted as a problem's are in section 2. A part ends just past its last
+character, not counting a `;`, a line ending or a comment after it, so `vexyl 1` on the first line ends at line 1,
+column 8. As well as each layer by its path, these are there:
 
 | Path | Is |
 |---|---|
