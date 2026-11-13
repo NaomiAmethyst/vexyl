@@ -70,6 +70,44 @@ jobs:
 
       - run: make conformance-ts
 
+  # The Java library is built with JDK 25 for Java 17, and its tests run on Java 17, so that
+  # nothing newer than 17 gets in. setup-java puts the last version listed on the path.
+  check-java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            25
+          cache: maven
+          cache-dependency-path: java/pom.xml
+
+      - run: make check-java MVN="mvn -B -Djvm=$JAVA_HOME_17_X64/bin/java"
+
+  conformance-java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            25
+          cache: maven
+          cache-dependency-path: java/pom.xml
+
+      - uses: ./.github/actions/conformance-tools
+
+      # Built with 25, and run with 17.
+      - run: mvn -B -q -f java/pom.xml package -DskipTests
+      - run: python3 conformance/run.py "$JAVA_HOME_17_X64/bin/java" -jar java/target/vexyl.jar
+
   # Runs the suite against libraries with one thing wrong, some of them the Go reference patched.
   conformance-prove:
     runs-on: ubuntu-latest

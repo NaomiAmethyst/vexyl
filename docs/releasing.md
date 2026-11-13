@@ -1,12 +1,14 @@
 # Releasing
 
-A release has one version for everything: the command, the Go module, the TypeScript library and
-the images. That version is the one in `ts/package.json`.
+A release has one version for everything: the command, the Go module, the TypeScript library, the
+Java library and the images. That version is the one in `ts/package.json`, and `java/pom.xml` has
+to say the same.
 
 ## Making a release
 
 1. Set the version in `ts/package.json`, and in `ts/package-lock.json` with it:
-   `cd ts && npm version --no-git-tag-version 1.2.3`. Commit that.
+   `cd ts && npm version --no-git-tag-version 1.2.3`, and in `java/pom.xml`:
+   `mvn -f java/pom.xml versions:set -DnewVersion=1.2.3 -DgenerateBackupPoms=false`. Commit that.
 2. Tag the commit `v1.2.3`, and push the commit and the tag:
    `git tag -s v1.2.3 -m 'Vexyl 1.2.3' && git push origin main v1.2.3`.
 
@@ -84,6 +86,34 @@ way to set up a publisher for a name that hasn't been published yet.
    match the repository exactly, which it does.
 4. On the same page, it's worth choosing "Require two-factor authentication and disallow tokens",
    so that only the workflow and someone with the second factor can publish.
+
+### Maven Central
+
+The Java library isn't published yet, and nothing is set up for it. Publishing `name.amethyst:vexyl`
+will need these, through the Central Portal at <https://central.sonatype.com>:
+
+1. **The namespace.** Sign in to the Portal and add the namespace `name.amethyst`. It's proved by a
+   DNS TXT record on `amethyst.name` holding the verification key the Portal shows, which can be
+   removed once it's verified. `io.github.naomiamethyst` would need no DNS, but isn't what the pom
+   says.
+2. **A token.** Generate a user token in the Portal (Account, Generate User Token), and keep its
+   name and password as repository secrets, such as `CENTRAL_USERNAME` and `CENTRAL_PASSWORD`.
+   Maven reads them from a `<server>` in `settings.xml`, which `actions/setup-java` can write with
+   `server-id: central`.
+3. **Signing.** Central needs every file signed with PGP. Make a key for releases, publish its public
+   half to a keyserver Central checks, such as `keyserver.ubuntu.com` or `keys.openpgp.org`, and keep
+   the private key and its passphrase as secrets (`setup-java` can import it with `gpg-private-key`).
+   The pom then needs `maven-gpg-plugin` in a release profile, so that ordinary builds don't sign.
+4. **Sources and Javadoc.** Central refuses a jar without them, so the release profile also needs
+   `maven-source-plugin` and `maven-javadoc-plugin` attaching their jars. The pom already has the
+   name, description, URL, licence, developer and SCM that Central requires.
+5. **The plugin.** `org.sonatype.central:central-publishing-maven-plugin`, with `<extensions>true`,
+   `<publishingServerId>central</publishingServerId>` and, at first, no `autoPublish`, so that each
+   upload waits in the Portal to be checked and published by hand. Once that's worked, `release.yml`
+   can run `mvn -f java/pom.xml -P release deploy` after the npm step, with `autoPublish` set.
+
+A version on Central can never be changed or removed, so it's worth uploading one by hand first and
+dropping it in the Portal, before letting a workflow publish.
 
 ### The images
 

@@ -7,10 +7,11 @@ DESTDIR ?=
 
 GO      ?= go
 NPM     ?= npm
+MVN     ?= mvn
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check check-ts check-rescale conformance conformance-ts conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
+.PHONY: all test check check-ts check-java check-rescale conformance conformance-ts conformance-java conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
 
 all: vexyl
 
@@ -41,6 +42,14 @@ check-ts: ts/node_modules
 conformance-ts: ts/node_modules
 	cd ts && $(NPM) run build
 	python3 conformance/run.py node ts/dist/cli.js
+
+# These need a JDK and Maven, so `check` leaves them out too. The library is built for Java 17.
+check-java:
+	$(MVN) -q -f java/pom.xml verify
+
+conformance-java:
+	$(MVN) -q -f java/pom.xml package -DskipTests
+	python3 conformance/run.py java -jar java/target/vexyl.jar
 
 # Changes what every implementation must do, so review the diff.
 conformance-fixtures: vexyl
