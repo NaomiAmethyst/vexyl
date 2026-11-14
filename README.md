@@ -51,8 +51,8 @@ The TypeScript library, which has the same command, is on npm:
 npm install @naomiamethyst/vexyl
 ```
 
-The [Java library](java/README.md), for Java 17 and later, will be on Maven Central as
-`name.amethyst:vexyl`, but isn't published yet. Its jar is the same command too.
+The [Java library](java/README.md), for Java 17 and later, is on Maven Central as
+`name.amethyst:vexyl`. Its jar is the same command too.
 
 The command is also an image. It reads files from `/work`, so mount the folder they're in:
 

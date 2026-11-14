@@ -11,6 +11,8 @@ to say the same.
    `mvn -f java/pom.xml versions:set -DnewVersion=1.2.3 -DgenerateBackupPoms=false`. Commit that.
 2. Tag the commit `v1.2.3`, and push the commit and the tag:
    `git tag -s v1.2.3 -m 'Vexyl 1.2.3' && git push origin main v1.2.3`.
+3. Once `release.yml` has finished, publish the Java library's deployment in the Central Portal,
+   as [Maven Central](#maven-central) says.
 
 Pushing the tag starts two workflows.
 

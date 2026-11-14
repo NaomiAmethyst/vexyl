@@ -6,15 +6,17 @@ from [SPEC.md](../SPEC.md) and [SDK.md](../SDK.md), and passes the same
 needs Java 17 or later, and nothing else: its KDL parser, XML reader, SVG writer and share links'
 compression are all its own or the JDK's. It never reads the network or the filesystem.
 
-It isn't published yet. Its coordinates will be `name.amethyst:vexyl`:
+It's on Maven Central as `name.amethyst:vexyl`, from version 1.3.0:
 
 ```xml
 <dependency>
   <groupId>name.amethyst</groupId>
   <artifactId>vexyl</artifactId>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
 </dependency>
 ```
+
+Or with Gradle, `implementation("name.amethyst:vexyl:1.3.0")`.
 
 ```java
 import name.amethyst.vexyl.*;
