@@ -120,7 +120,7 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: vexyl.Float(1200)})
   behind the format's vocabulary.
 - [`docs/format-2.md`](docs/format-2.md) collects what the frozen format can't yet say, as
   plans for a format 2, and [`docs/format-1-open-questions.md`](docs/format-1-open-questions.md)
-  lists what the version 1 text leaves open.
+  lists the questions the version 1 text left open, and where it now answers them.
 - [`docs/logo/`](docs/logo) holds the logo, which is itself a Vexyl flag.
 - [`tools/`](tools) holds the importer. `svg2vexyl.py` converts one SVG file, and
   `fetch_flags.py` and `import_flags.py` gather a corpus and check each result with resvg.

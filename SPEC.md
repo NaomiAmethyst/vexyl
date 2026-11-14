@@ -847,7 +847,9 @@ r(t) = radius * (1 - cos(t)) / 2       // t from 0 to 360
 point(t) = at + (r(t) * sin(t), -r(t) * cos(t))
 ```
 
-Renderers MAY approximate curves if the error stays under 0.1% of the flag's hoist.
+Renderers MAY approximate curves if the error stays under 0.1% of the flag's hoist. A wavy edge
+(§7.11) MAY instead be drawn as 24 straight pieces a period, and a cardioid as 180, even where that's
+further off, as for a wave deeper than about a quarter of the hoist.
 
 ### 8.2 repeat
 
@@ -1229,7 +1231,7 @@ function move(x, old, new, anchor):
 | A charge's `repeat line` | Its position moves by the anchor. The step only changes under `scale`, in proportion |
 | A charge's `repeat grid` | Its copies follow the region, since they're spread across it |
 | A charge's several `at`s | Each moves by the anchor |
-| `panel` | Stays on its edge or corner, keeping its size unless `scale`. One running along the axis grows, and its layers adapt with it. Under `scale`, its size along the axis scales with the flag's, and its layers adapt from its old size to its new one |
+| `panel` | Stays on its edge or corner, keeping its size unless `scale`. One running along the axis grows, and its layers adapt with it. Under `scale`, its size along the axis scales with the flag's, and its layers adapt from its old size to its new one. A side panel's layers adapt as if it were `width` across the axis, even where its `edge` makes it deeper |
 | `group`, `use` | Their layers adapt. A design with its own grid doesn't, because it fills its region |
 | `outline polygon` | Its points scale. Named outlines are recalculated for the new size |
 

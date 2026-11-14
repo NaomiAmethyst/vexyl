@@ -8,9 +8,8 @@ A document would say `vexyl 2` to use any of it. Every format 1 document would s
 mean the same, and libraries would read both, so the additions are all optional, with defaults
 that keep today's drawings unchanged.
 
-The second half lists things the text of format 1 leaves open. Those don't need a new format:
-they can be settled in the version 1 text, as SDK §7.3's wording on where a part ends was, as
-long as the libraries already agree.
+The second half lists what the version 1 text settled as the libraries already behave, which a
+later format could change.
 
 ## Additions
 
@@ -153,25 +152,23 @@ date now, or one given only in a note.
 date "2018-04-30" { by; }   // introduced no later than this
 ```
 
-## Clarifications for the version 1 text
+## What the version 1 text settled as the libraries have it
 
-Writing the Java library from the frozen documents alone turned up about forty questions. Where the
-libraries agreed, SPEC.md and SDK.md now say what they do, and
-[`format-1-open-questions.md`](format-1-open-questions.md) marks each **Settled**, with where. These
-are left, because the libraries agree but what they do isn't plainly what the text means, or they
-differ:
+Writing the Java library from the frozen documents alone turned up about forty questions, which
+SPEC.md and SDK.md now answer, as [`format-1-open-questions.md`](format-1-open-questions.md) lists.
+A few were settled as the libraries already behave, though a later format could do better:
 
-- **Where an annotated node starts** (SDK §2, §7.3): Go takes its name and TypeScript and Java its
-  annotation, which puts a node with a line continuation after its annotation on different lines.
-  Only an invalid document is affected.
-- **How finely waves are drawn** (SPEC §7.11, §8.1): all three draw 24 pieces a period, which is
-  past §8.1's 0.1% of the hoist for a wave deeper than about a quarter of it.
-- **What size a side panel's layers see across the axis** (SPEC §11): all three use its `width`,
-  not its drawn size with an `edge`, so a charge anchored in it jumps when the flag adapts at all.
-
-One settled entry may want more here: an edge's waves are counted again when it's drawn, so a valid
-document can be refused in its own form, as a bend runs further than the longer side its count
-uses.
+- **Where an annotated node starts** (SDK §2): at its annotation or at its name, as the library has
+  it. A later format could choose one.
+- **How finely waves are drawn** (SPEC §8.1): 24 pieces a period, and 180 for a cardioid, even
+  past the 0.1% allowance for a wave deeper than about a quarter of the hoist. A later format could
+  hold them to the allowance.
+- **What size a side panel's layers see across the axis** (SPEC §11): its `width`, not its drawn
+  size with an `edge`, so a charge anchored in it jumps when the flag adapts at all. A later format
+  could use the drawn size.
+- **Waves counted again when drawn** (SPEC §15): a valid document can be refused in its own form,
+  as a bend runs further than the longer side its count uses. A later format could count the line
+  each edge runs when the document is read.
 
 ## Left undefined on purpose
 

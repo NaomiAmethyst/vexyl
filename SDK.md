@@ -65,7 +65,9 @@ starts:
 - A child given twice is on the second, and an unknown one on itself. A top-level node out of order
   is on itself. A property given twice is on its node, or a syntax error, since a KDL parser can
   refuse it itself.
-- A type annotation is on the node holding it, which for an annotated node is that node.
+- A type annotation is on the node holding it, which for an annotated node is that node. An annotated
+  node starts at its annotation or at its name, as the library has it, which differ when a line
+  continuation comes between them.
 - An outside border that can't go around the shape is on the `border`, or on the `variant` whose
   outline or border brings them together.
 - A flag that paints too much is on the top-level layer that takes it past the limit, or on the

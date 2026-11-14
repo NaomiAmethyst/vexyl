@@ -3,9 +3,9 @@
 The Java library was written from the frozen SPEC.md and SDK.md. Where they didn't settle something,
 the answer came from the Go reference (and the TypeScript library where it says so), and the Java
 library does the same unless an entry says otherwise. Each entry was then checked against Go,
-TypeScript and Java. Where they agree, the text now says what they do, and the entry is **Settled**
-with where. The three marked **Open** are left for a decision, as
-[`format-2.md`](format-2.md) lists them.
+TypeScript and Java. Each is now **Settled**, with where. Where the libraries agreed, the text says
+what they do. Three where what they do isn't plainly what the text meant were settled as the
+libraries have them, and [`format-2.md`](format-2.md) lists what a later format could change.
 
 ## Reading documents
 
@@ -50,13 +50,13 @@ with where. The three marked **Open** are left for a decision, as
   libraries do. Such a document is invalid either way, so the suite can't see it.
 
 ### SPEC §4 and SDK §2, a type annotation's problem
-- **Settled, apart from one point:** SDK §2 now says a type annotation is on the node holding it,
-  and an annotated node's is on that node, as all three libraries do and the suite's "annotation on"
-  cases check.
-- **Open:** where an annotated node starts. Go takes its name, as kdl-go places a node; TypeScript
-  and Java take its annotation. `(x)field a` differs only in its column, but with a line continuation
-  between them, `(x) \` then `field a`, Go reports and locates the node a line later. Only a document
-  that's invalid anyway is affected, but `locate` is meant for those too.
+- **Settled:** SDK §2 now says a type annotation is on the node holding it, and an annotated node's
+  is on that node, as all three libraries do and the suite's "annotation on" cases check.
+- **Settled:** SDK §2 now says an annotated node starts at its annotation or at its name, as the
+  library has it. Go takes its name, as kdl-go places a node; TypeScript and Java take its
+  annotation. `(x)field a` differs only in its column, but with a line continuation between them,
+  `(x) \` then `field a`, Go reports and locates the node a line later. Only a document that's
+  invalid anyway is affected, and the suite doesn't check where such a node starts.
 
 ### SPEC §4, bare `-inf` and the KDL keywords
 - **Settled:** nothing to add, since KDL v2 already refuses bare `true`, `false`, `null`, `inf`,
@@ -90,13 +90,12 @@ Each was then checked against all three libraries, and all three agree on every 
 5. **SPEC §7.10 pile fimbriation.** **Settled:** §7.10 now says the pile's sides and the pall's arms
    and stem carry on past the region, which cuts them off, so the region's side isn't edged. How far
    they carry on (the region's diagonal, plus the width for a pall) is the library's own.
-6. **SPEC §7.11 wavy edge sampling, §8.1 curve tolerance.** **Open.** All three libraries draw a wave
-   as 24 straight pieces a period, and a cardioid as 180, with zigzags exact. But 24 pieces miss a
-   sine by about 0.0043 of its depth, which is past §8.1's "error under 0.1% of the flag's hoist"
-   once a wave is deeper than about 23% of the hoist, and the 180 pieces of a cardioid are enough
-   only up to a radius of about the hoist. It isn't said whether §8.1's allowance covers waves at
-   all, or whether they have to be exact. Settling it means choosing between those, and probably
-   finer pieces in all three libraries, which only changes renders within the suite's tolerance.
+6. **SPEC §7.11 wavy edge sampling, §8.1 curve tolerance.** **Settled:** §8.1 now says a wavy
+   edge MAY be drawn as 24 straight pieces a period and a cardioid as 180, even past its 0.1% of the
+   hoist, as all three libraries draw them, with zigzags exact. 24 pieces miss a sine by about
+   0.0043 of its depth, which is past 0.1% once a wave is deeper than about 23% of the hoist, and
+   180 pieces of a cardioid are enough only up to a radius of about the hoist. Finer pieces would
+   only change renders within the suite's tolerance, but every library would have to change.
 7. **SPEC §7.11 / §15 waves at render time.** **Settled:** §15 now says an edge's waves are counted
    again when it's drawn, along the line it actually runs, and a render that would draw more than
    10000 in one edge is refused. That's how a valid document such as `proportion hoist=1 fly=1` with
@@ -104,12 +103,12 @@ Each was then checked against all three libraries, and all three agree on every 
    in all three, since the read-time count uses the longer side and the bend runs along the
    diagonal. Counting the line it runs when it's read would make such documents invalid, which is a
    question for a later format.
-8. **SPEC §11 side panels running along the axis.** **Open.** All three libraries adapt a panel's
-   layers as if the panel were `width` across the axis, even when its `edge` makes it
-   `width + depth/2` (§7.11). So a charge anchored `start` in a `side hoist; width 1; edge zigzag
-   depth=0.4` panel is at fly 0.6 in its own form and jumps to 0.5 at `-ratio 2:3.003`, which isn't
-   "pinned to where the center was". Writing `width` into the text would make the jump normative;
-   using the drawn size is a line in each library's adapter, but it changes renders.
+8. **SPEC §11 side panels running along the axis.** **Settled:** §11's table now says a side
+   panel's layers adapt as if it were `width` across the axis, as all three libraries do, even when
+   its `edge` makes it `width + depth/2` (§7.11). So a charge anchored `start` in a `side hoist;
+   width 1; edge zigzag depth=0.4` panel is at fly 0.6 in its own form and jumps to 0.5 at
+   `-ratio 2:3.003`. Using the drawn size would be a line in each library's adapter, but it changes
+   renders, so it's for a later format.
 9. **SPEC §11, scale under `scale` of a side panel's or placed panel's layers.** **Settled:** §11's
    table now says a panel's size along the axis scales with the flag's, and its layers adapt from
    its old size to its new one.
