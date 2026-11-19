@@ -283,6 +283,11 @@ test("something read before a change is found where the change left it", () => {
 	// Changed, and moved too, there's no telling.
 	({ was, now } = readings(layered, { op: "entries", at: [6], args: [{ v: "b" }, { v: "a" }] }, { op: "move", at: [6], delta: 1 }));
 	assert.equal(d.relocate(bars(was), was, now), null);
+	// Changed in its place beside a twin written as it was, it's still what's in its place, not the twin.
+	const twins = layered.replace("charge disc b {\n  radius 3\n}", "charge disc b {\n  radius 3\n}\ncharge disc b {\n  radius 3\n}");
+	const second = (r) => r.nodes.filter((n) => n.name === "charge")[1];
+	({ was, now } = readings(twins, { op: "child", at: second({ nodes: outline(twins) }).at, name: "radius", args: [{ v: 2, raw: "2" }] }));
+	assert.equal(d.relocate(second(was), was, now).at.join(), second(now).at.join());
 	// Gone, it isn't found.
 	({ was, now } = readings(layered, { op: "remove", at: [6] }));
 	assert.equal(d.relocate(bars(was), was, now), null);

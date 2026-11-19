@@ -594,7 +594,10 @@ export function relocate(node: ONode, was: Reading, now: Reading): ONode | null 
 	const visit = (list: readonly ONode[]): void => {
 		for (const n of list) {
 			if (n.at.length === node.at.length) {
-				if (n.name === node.name && now.text.slice(n.start, n.end) === own) {
+				// One written the same way that was already there, unchanged, is a twin, not this moved.
+				const there = n.at.join() === node.at.join() ? undefined : partAt(was.nodes, n.at);
+				const twin = there !== undefined && there.name === n.name && was.text.slice(there.start, there.end) === own;
+				if (n.name === node.name && now.text.slice(n.start, n.end) === own && !twin) {
 					alike.push(n);
 				}
 			} else {
