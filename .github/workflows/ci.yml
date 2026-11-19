@@ -134,6 +134,40 @@ jobs:
 
       - run: make conformance-ruby
 
+  # The Rust library is checked with the stable toolchain, then its tests run on its
+  # rust-version, 1.88, so that nothing newer gets in.
+  check-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+          rust-src-dir: rust
+
+      - run: make check-rust
+
+      - name: Test on the rust-version
+        run: |
+          rustup toolchain install 1.88 --profile minimal
+          cargo +1.88 test --manifest-path rust/Cargo.toml
+
+  conformance-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          toolchain: stable
+          rust-src-dir: rust
+
+      - uses: ./.github/actions/conformance-tools
+
+      - run: make conformance-rust
+
   # Runs the suite against libraries with one thing wrong, some of them the Go reference patched.
   conformance-prove:
     runs-on: ubuntu-latest

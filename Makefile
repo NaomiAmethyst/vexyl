@@ -9,10 +9,11 @@ GO      ?= go
 NPM     ?= npm
 MVN     ?= mvn
 RUBY    ?= ruby
+CARGO   ?= cargo
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check check-ts check-java check-ruby check-rescale conformance conformance-ts conformance-java conformance-ruby conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
+.PHONY: all test check check-ts check-java check-ruby check-rust check-rescale conformance conformance-ts conformance-java conformance-ruby conformance-rust conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
 
 all: vexyl
 
@@ -60,6 +61,17 @@ check-ruby:
 
 conformance-ruby:
 	python3 conformance/run.py $(RUBY) --disable-gems ruby/exe/vexyl
+
+# These need Cargo, so `check` leaves them out too. The tests read the suite's fixtures.
+check-rust:
+	$(CARGO) build --manifest-path rust/Cargo.toml --all-targets
+	$(CARGO) test --manifest-path rust/Cargo.toml
+	$(CARGO) clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
+	$(CARGO) fmt --manifest-path rust/Cargo.toml --check
+
+conformance-rust:
+	$(CARGO) build --manifest-path rust/Cargo.toml --release
+	python3 conformance/run.py rust/target/release/vexyl
 
 # Changes what every implementation must do, so review the diff.
 conformance-fixtures: vexyl
