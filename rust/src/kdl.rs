@@ -514,8 +514,7 @@ impl<'a> Reader<'a> {
         } else {
             10
         };
-        let value;
-        if radix != 10 {
+        let value = if radix != 10 {
             self.pos += 2;
             let digit = |c: Option<char>| c.and_then(|c| c.to_digit(radix));
             if digit(self.peek()).is_none() {
@@ -530,7 +529,7 @@ impl<'a> Reader<'a> {
                 }
                 self.pos += 1;
             }
-            value = if negative { -whole } else { whole };
+            if negative { -whole } else { whole }
         } else {
             self.digits();
             if self.peek() == Some('.') {
@@ -564,8 +563,8 @@ impl<'a> Reader<'a> {
                     f64::from_bits(1)
                 };
             }
-            value = v;
-        }
+            v
+        };
         self.delimited()?;
         let mut v = Value::new(Kind::Number, annotated, start);
         v.number = value;
