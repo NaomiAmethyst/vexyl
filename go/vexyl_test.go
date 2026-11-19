@@ -625,6 +625,8 @@ func TestRejected(t *testing.T) {
 		{"through move nan", header + "field a\nfold f { over through=\"0 0 1 1\" move=\"nan 1\"; }\n", "decimal numbers"},
 		{"through with a no-break space", header + "field a\nfold f { over through=\"0\\u{a0}0 1 1\" move=\"0 1\"; }\n", "decimal numbers"},
 		{"number too small", header + `charge disc a { radius 1e-13; }`, "finite"},
+		{"hexadecimal number with a digit that isn't ascii", header + "charge disc a { radius 0x\u0661; }", "digits"},
+		{"unicode escape with a digit that isn't ascii", header + "field \"\\u{\u0666\u0661}\"\n", "hex digits"},
 		{"number that reads as zero", header + `band a { along bend; width 1; offset 1e-400; }`, "finite"},
 		{"number beyond the limit", header + `charge disc a { radius 1e13; }`, "finite"},
 		{"no meta", "vexyl 1\nproportion hoist=1 fly=1\n", "needs `meta`"},

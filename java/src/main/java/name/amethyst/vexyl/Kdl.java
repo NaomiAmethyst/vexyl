@@ -469,10 +469,10 @@ final class Kdl {
 			if (radix != 10) {
 				pos += 2;
 				int digitsFrom = pos;
-				if (Character.digit(peek(), radix) < 0) {
+				if (asciiDigit(peek(), radix) < 0) {
 					throw error("expected a digit");
 				}
-				while (!eof() && (Character.digit(peek(), radix) >= 0 || peek() == '_')) {
+				while (!eof() && (asciiDigit(peek(), radix) >= 0 || peek() == '_')) {
 					pos++;
 				}
 				BigInteger whole = new BigInteger(s.substring(digitsFrom, pos).replace("_", ""), radix);
@@ -721,13 +721,18 @@ final class Kdl {
 					}
 					String hex = body.substring(i + 3, close);
 					int code;
+					// Integer.parseInt takes any Unicode digit, and KDL's hex digits are ASCII.
+					if (!hex.chars().allMatch(h -> asciiDigit(h, 16) >= 0)) {
+						pos = start;
+						throw error("a `\\u` escape is written `\\u{` and 1 to 6 hexadecimal digits `}`");
+					}
 					try {
 						code = Integer.parseInt(hex, 16);
 					} catch (NumberFormatException ex) {
 						pos = start;
 						throw error("a `\\u` escape is written `\\u{` and 1 to 6 hexadecimal digits `}`");
 					}
-					if (!hex.chars().allMatch(h -> Character.digit(h, 16) >= 0) || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF)) {
+					if (code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF)) {
 						pos = start;
 						throw error("a `\\u` escape has to be a Unicode scalar value");
 					}
@@ -749,5 +754,10 @@ final class Kdl {
 			}
 			return out.toString();
 		}
+	}
+
+	/** A digit's value in the radix, or -1: KDL's digits are ASCII, where Character.digit takes any. */
+	private static int asciiDigit(int c, int radix) {
+		return c < 0x80 ? Character.digit(c, radix) : -1;
 	}
 }

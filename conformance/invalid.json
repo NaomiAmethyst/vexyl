@@ -651,6 +651,14 @@
   "line": 5
  },
  {
+  "name": "hexadecimal number with a digit that isn't ascii",
+  "file": "invalid/hexadecimal-number-with-a-digit-that-isn-t-ascii.kdl"
+ },
+ {
+  "name": "unicode escape with a digit that isn't ascii",
+  "file": "invalid/unicode-escape-with-a-digit-that-isn-t-ascii.kdl"
+ },
+ {
   "name": "number that reads as zero",
   "file": "invalid/number-that-reads-as-zero.kdl",
   "line": 5
