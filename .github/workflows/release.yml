@@ -31,6 +31,16 @@ jobs:
             echo "::error::the tag is $GITHUB_REF_NAME, but ts/package.json's version is $package"
             exit 1
           fi
+          # The other libraries say their version in their own files, and must say the same.
+          java="$(sed -n 's|^  <version>\(.*\)</version>$|\1|p' java/pom.xml | head -n 1)"
+          ruby="$(sed -n 's/^ *VERSION = "\(.*\)"$/\1/p' ruby/lib/vexyl/version.rb)"
+          rust="$(sed -n 's/^version = "\(.*\)"$/\1/p' rust/Cargo.toml | head -n 1)"
+          for pair in "java/pom.xml=$java" "ruby/lib/vexyl/version.rb=$ruby" "rust/Cargo.toml=$rust"; do
+            if [ "${pair#*=}" != "$tag" ]; then
+              echo "::error::the tag is $GITHUB_REF_NAME, but ${pair%%=*} says ${pair#*=}"
+              exit 1
+            fi
+          done
           if ! [[ "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::$tag isn't a version like 1.2.3 or 1.2.3-rc.1"
             exit 1
@@ -184,3 +194,93 @@ jobs:
             flags+=(--tag next)
           fi
           npm publish --provenance --access public "${flags[@]}"
+
+  # Trusted publishing: RubyGems trusts this workflow by its OIDC token and hands back a short-lived
+  # key, so there's no token secret.
+  rubygems:
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    defaults:
+      run:
+        working-directory: ruby
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+
+      - run: make -C .. check-ruby
+
+      # The license files live at the root.
+      - name: Build the gem
+        run: |
+          cp ../LICENSE ../NOTICE .
+          gem build vexyl.gemspec
+
+      # RubyGems writes 1.2.3-rc.1 as 1.2.3.pre.rc.1. A re-run, or a version published by hand, is
+      # left alone.
+      - name: Check whether it's there already
+        id: there
+        run: |
+          gem_version="$(ruby -e 'puts Gem::Version.new(ARGV[0])' "$VERSION")"
+          echo "file=vexyl-$gem_version.gem" >> "$GITHUB_OUTPUT"
+          if curl -fsS https://rubygems.org/api/v1/versions/vexyl.json 2> /dev/null \
+              | jq -e --arg v "$gem_version" 'any(.[]; .number == $v)' > /dev/null; then
+            echo "vexyl $gem_version is already on RubyGems"
+            echo "there=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.there.outputs.there != 'true'
+        uses: rubygems/configure-rubygems-credentials@v2.1.0
+
+      - if: steps.there.outputs.there != 'true'
+        run: gem push "${{ steps.there.outputs.file }}"
+
+  # Trusted publishing: crates.io trusts this workflow by its OIDC token and hands back a
+  # short-lived token. crates.io only takes a trusted publisher for a crate that's already there,
+  # so the first version was published by hand.
+  crates:
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          toolchain: stable
+          rust-src-dir: rust
+
+      - run: cargo test
+
+      # A re-run, or a version published by hand, is left alone. crates.io wants a User-Agent.
+      - name: Check whether it's there already
+        id: there
+        run: |
+          if curl -fsS -o /dev/null -A "vexyl-release (https://github.com/NaomiAmethyst/vexyl)" \
+              "https://crates.io/api/v1/crates/vexyl/$VERSION" 2> /dev/null; then
+            echo "vexyl $VERSION is already on crates.io"
+            echo "there=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.there.outputs.there != 'true'
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - if: steps.there.outputs.there != 'true'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: cargo publish

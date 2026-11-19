@@ -8,8 +8,10 @@ the same.
 ## Making a release
 
 1. Set the version in `ts/package.json`, and in `ts/package-lock.json` with it:
-   `cd ts && npm version --no-git-tag-version 1.2.3`, and in `java/pom.xml`:
-   `mvn -f java/pom.xml versions:set -DnewVersion=1.2.3 -DgenerateBackupPoms=false`. Commit that.
+   `cd ts && npm version --no-git-tag-version 1.2.3`; in `java/pom.xml`:
+   `mvn -f java/pom.xml versions:set -DnewVersion=1.2.3 -DgenerateBackupPoms=false`; in
+   `ruby/lib/vexyl/version.rb`; and in `rust/Cargo.toml`, and `rust/Cargo.lock` with it:
+   `cargo update --manifest-path rust/Cargo.toml --workspace`. Commit that.
 2. Tag the commit `v1.2.3`, and push the commit and the tag:
    `git tag -s v1.2.3 -m 'Vexyl 1.2.3' && git push origin main v1.2.3`.
 3. Once `release.yml` has finished, publish the Java library's deployment in the Central Portal,
@@ -17,7 +19,8 @@ the same.
 
 Pushing the tag starts two workflows.
 
-`release.yml` stops at once if the tag isn't `v` and the version in `ts/package.json`. Then it:
+`release.yml` stops at once if the tag isn't `v` and the version in `ts/package.json`, or if
+`java/pom.xml`, `ruby/lib/vexyl/version.rb` or `rust/Cargo.toml` says another. Then it:
 
 - tags the same commit `go/v1.2.3` and pushes that, since the Go module is in `go/` and Go looks
   for its versions under that prefix. It then asks the Go module proxy for the version, which is
@@ -25,13 +28,18 @@ Pushing the tag starts two workflows.
 - builds the command for Linux, macOS and Windows on amd64 and arm64, packs each with `LICENSE`
   and `NOTICE`, writes `SHA256SUMS`, and makes the GitHub release with notes from the changes since
   the last one.
-- tests and builds the library, and publishes it to npm with provenance. A version that's already
-  there is skipped, so the workflow can be run again.
+- tests and builds the library, and publishes it to npm with provenance.
+- tests the Ruby library, builds the gem and pushes it to RubyGems.
+- tests the Rust library and publishes the crate to crates.io.
+
+npm, RubyGems and crates.io all trust the workflow by its OIDC token, so there's no token secret for
+any of them. A version that's already on one is skipped, so the workflow can be run again.
 
 `docker.yml` pushes both images tagged `1.2.3`, `1.2`, `1` and `latest`.
 
 A version with a hyphen, such as `1.2.3-rc.1`, is a prerelease: the GitHub release says so, npm
-gets it under the `next` tag instead of `latest`, and the images get only `1.2.3-rc.1`.
+gets it under the `next` tag instead of `latest`, RubyGems gets it as `1.2.3.pre.rc.1`, and the
+images get only `1.2.3-rc.1`. Every registry but npm keeps a prerelease out of the way on its own.
 
 The Go module's path has no major version in it, so it can only have versions below 2. A 2.0.0
 would need the path to end in `/v2`.
@@ -110,6 +118,51 @@ where the namespace `name.amethyst` is verified by a DNS TXT record on `amethyst
   keyserver again and update `GPG_PRIVATE_KEY`.
 - **By hand.** With the key's keyring and a `settings.xml` holding the server `central`:
   `GNUPGHOME=~/.config/vexyl-release/gnupg MAVEN_GPG_PASSPHRASE=... mvn -f java/pom.xml -P release -DskipTests deploy`.
+
+### RubyGems
+
+The gem is `vexyl`. RubyGems takes a trusted publisher for a gem that doesn't exist yet, so the
+workflow makes the first version too.
+
+1. Make an account at <https://rubygems.org/sign_up>, and turn on two-factor authentication: the
+   gemspec sets `rubygems_mfa_required`.
+2. Under Settings → Trusted Publishers (<https://rubygems.org/profile/oidc/pending_trusted_publishers>),
+   add a pending trusted publisher:
+   - RubyGem name: `vexyl`
+   - Trusted publisher type: GitHub Actions
+   - Repository owner: `NaomiAmethyst`
+   - Repository name: `vexyl`
+   - Workflow filename: `release.yml`
+   - Leave the environment and the reusable workflow's owner and name empty.
+
+   It turns into the gem's own trusted publisher the first time it's used.
+
+The gem leaves `LICENSE` and `NOTICE` out of git: the workflow copies them in from the root before
+it builds, as it does for npm. To build by hand, do the same:
+`cd ruby && cp ../LICENSE ../NOTICE . && gem build vexyl.gemspec`.
+
+### crates.io
+
+The crate is `vexyl`. Like npm, crates.io only takes a trusted publisher for a crate that's already
+there, so the first version has to be published by hand. `rust/LICENSE` and `rust/NOTICE` are links
+to the root's, and Cargo packs the files they point to.
+
+1. Sign in at <https://crates.io> with GitHub, and verify the email address under Account
+   Settings: crates.io refuses a publish until it's verified.
+2. Make an API token under Account Settings → API Tokens, with the `publish-new` scope, and
+   publish once, from a clean checkout of the tagged commit:
+
+   ```sh
+   cd rust
+   cargo package --list    # Cargo.toml, Cargo.lock, README.md, LICENSE, NOTICE, src/
+   cargo publish           # CARGO_REGISTRY_TOKEN="$(cat token-file)" cargo publish
+   ```
+
+   If `release.yml` ran first, its `crates` job failed for want of a trusted publisher; once the
+   crate is published, there's nothing to run again.
+3. On the crate's Settings page, <https://crates.io/crates/vexyl/settings>, add a trusted publisher
+   for GitHub: owner `NaomiAmethyst`, repository `vexyl`, workflow `release.yml`, and no
+   environment. Then revoke the API token.
 
 ### The images
 

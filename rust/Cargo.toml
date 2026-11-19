@@ -14,8 +14,8 @@ homepage = "https://github.com/NaomiAmethyst/vexyl"
 readme = "README.md"
 keywords = ["flag", "kdl", "svg", "vexillology"]
 categories = ["graphics", "parser-implementations"]
-# Not on crates.io yet.
-publish = false
+# LICENSE and NOTICE are links to the root's; Cargo packs what they point to.
+include = ["src/**", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE", "NOTICE"]
 
 [lib]
 name = "vexyl"

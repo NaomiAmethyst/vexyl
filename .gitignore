@@ -2,3 +2,6 @@
 __pycache__/
 # A global rule ignoring ctags files must not hide the conformance suite's tags fixtures.
 !/conformance/tags/
+# Copied in from the root before the Ruby library is packaged.
+/ruby/LICENSE
+/ruby/NOTICE

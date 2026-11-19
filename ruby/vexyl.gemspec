@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
     "rubygems_mfa_required" => "true",
   }
   s.required_ruby_version = ">= 3.1"
-  s.files = Dir["lib/**/*.rb", "exe/*", "README.md", "LICENSE"]
+  s.files = Dir["lib/**/*.rb", "exe/*", "README.md", "LICENSE", "NOTICE"]
   s.bindir = "exe"
   s.executables = ["vexyl"]
   s.require_paths = ["lib"]
