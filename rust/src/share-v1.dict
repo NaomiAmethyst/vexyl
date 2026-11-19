@@ -1,0 +1,327 @@
+vexyl 1 meta { name description version date until series note law restriction designer design-rights encoder license render-license adapted-from source author part } palette { color gradient along stops pantone ncs ral munsell dye thread cmyk reference } proportion hoist= fly= outline swallowtail tongued pennant depth taper tongue tip polygon point path box border inside outside width define use field bars chevrons band cross saltire quarters checks rays pile pall charge emblem group panel canton count ratio rotate grow edge wavy zigzag period apex angle offset fimbriate counterchange diagonal split rows columns flow bend-sinister bend measure from center upper-hoist upper-fly lower-hoist lower-fly top bottom base flat hollow junction side corner opacity blend multiply screen overlay darken lighten clip cut anchor start end scale disc ellipse ring rect plus triangle star crescent sun lozenge heart cardioid svg radius inner points lines disc gap spread evenodd repeat grid stagger=#true turn=#true arc line at center fimbriate markup reverse mirror adapt range wider narrower extend hoist-extend hoist-center hoist-scale variant from none transpose upright fold over under tuck through= move= along=fly along=hoist at=
+oportion hoist=60 fly=90
+
+proportion hoist=600 fly=900
+
+proportion hoist=90 fly=180
+
+reverse mirror
+    cmyk 100 60 0     cmyk 100 70 0     cmyk 100 83     cmyk 100 87     reference "Album des Pavillons 2023"     reference "British Colour Council"     reference "Flags and Anthems Manual, London 2012, as reported by FOTW"  1/5 of the length  2000, as FOTW reports  Album des Pavillons 2000  Album des Pavillons 2000's  Articles 1 and  Constitutional  From elsewhere: the law's  From the law, Articles  From the law, section  Pavillons 2000, as FOTW  The law gives no  a white stripe  and green from the  as FOTW reports it,  blue white green  centered in the  centered on the flag,  des Pavillons 2000, as  diameter 1/3 of the  elsewhere: the law says  from the Commons drawing,  from the drawing, not  half the length,  horizontal stripes of equal  its center is at  parallel to the  read directly,  so its radius is  star in a circle  stripes of equal width,  the colors are  the hoist, with  three equal horizontal stripes,  vertical stripes,  with no shade.  with stripes of  with the width as //   star radius //   width to length // Derived here: the // FOTW reports // From elsewhere: 2:3 // From the law's // Measured from the bars white green proportion hoist=144 proportion hoist=32 proportion hoist=4 
+    pantone "185 C"
+
+  gold "#ffcc00" {
+
+  note "Sizes follow the drawing on Commons, not a checked construction sheet."
+
+  point fly=0 hoist=0
+
+  red "#ff0000"
+
+bars blue yellow red {
+
+bars green white red
+
+bars white blue red
+
+charge polygon white {
+
+chevrons red {
+
+proportion hoist=10 fly=15
+
+variant hanging {
+charge lozenge 
+    author "MapGrid"
+
+    cmyk 0 0 100 0
+
+    cmyk 0 92 89 0
+
+    cmyk 81 12 76 1
+
+    fimbriate white 2
+
+    fly 27 6 27
+
+    hoist 12 6 12
+
+    license "CC-BY-SA-4.0"
+
+    pantone "123 C"
+
+    pantone "2347 C"
+
+    pantone "294 C"
+
+    pantone "299 C"
+
+    pantone "362 C"
+
+    part "the coat of arms"
+
+    width 2
+
+    width 6
+
+  blue "#003580" {
+
+  blue "#004dff"
+
+  blue "#00a0e2" {
+
+  from hoist
+
+  gold "#ffc72c" {
+
+  green "#169b62" {
+
+  red "#e62d23" {
+
+bars red white black
+
+charge star green {
+
+chevrons black {
+
+proportion hoist=18 fly=27
+
+proportion hoist=24 fly=48
+
+proportion hoist=3 fly=6
+ 2/3 of the length,  Album des Pavillons 2000,  From the law, Schedule 1 of the  a circle of diameter  are from the Commons  are measured from the  as FOTW quotes  center, and  drawing is the Commons  from the center  from the hoist and  hex and CMYK are  in the center of  in the middle of  is 2/3 of the  is the Album  is the Commons file,  isn't in the  its center,  length twice the width,  of the hoist, so  of the width,  on a length of  on the flag's  on this grid. so its center is  star center  stars in the  stripes, so  stripes, the crescent's  the hex values are  the top of the upper hoist  the width of  width is 2/3 of // Article 1: bars red blue 
+  field green
+
+  pink "#750787"
+
+  radius 5
+
+bars blue white blue
+
+charge polygon red {
+
+chevrons white {
+
+proportion hoist=60 fly=120
+ a third of the bars blue red 
+    cmyk 0 0 0 0
+
+    cmyk 0 0 0 100
+
+    cmyk 89 29 100 18
+
+    cmyk 94 73 0 0
+
+    counterchange
+
+  along bend-sinister
+
+  charge star white {
+
+  cross red {
+
+  fimbriate white 1
+
+  from transpose
+
+  hoist 1
+
+  radius 10
+
+  radius 6
+
+  red "#ce1126" {
+
+  red "#ef3340" {
+
+  saltire red {
+
+  saltire white {
+
+  yellow "#fcd116" {
+
+bars red orange yellow green blue pink
+
+charge path gold {
+
+charge rect white {
+
+pile red {
+    reference "Album des Pavillons 2023, as reported by FOTW"   bars red   design-rights  From the Album des  Hex, Pantone and CMYK  at the center,  between the  blue white { from the top  from the top,  green, white and  is on the  of the fly  of the white  rectangle  the black  the height  toward the  white pink  yellow blue //   crescent //   white // From the Album 
+  anchor center
+
+  green "#008026"
+
+  orange "#ff8c00"
+
+  radius 1
+
+  radius 2
+
+  radius 3
+
+  yellow "#ffed00"
+
+charge polygon black {
+
+charge star gold {
+  light-pink  drawing's  green red black  stars are charge ring 
+    pantone "032 C"
+
+    pantone "286 C"
+
+    pantone "347 C"
+
+    pantone "348 C"
+
+    pantone "356 C"
+
+  field white
+
+  gold "#ffce00" {
+
+  green "#007229" {
+
+  red "#e40303"
+
+  side hoist
+
+field green
+  ratio 2 1  (derived). From the law: Article  From the law: the  a radius of  above the  and white  diameter,  from the hoist,  measured from the Commons  measures  of the width  red, white and  the center of the green  the lower  the stars  the stripes  three equal stripes,  with its // center 
+    license "CC0-1.0"
+
+  license "CC0-1.0"
+
+  ratio 1 2 1
+
+charge polygon yellow {
+ and each 
+    cmyk 6 94 96 0
+
+    pantone "280 C"
+
+    pantone "293 C"
+
+  blue "#0047b6" {
+
+  fly 3
+
+charge disc red {
+
+field white
+
+proportion hoist=20 fly=30
+ 1/4 of the  CMYK are the Album  From the law, the  and red  as FOTW reports it:  below the  of radius  of the length, so  quarter,  the flag  the law gives no  the star //   length // From the Constitution: 
+charge crescent white {
+
+charge disc white {
+
+charge path red {
+
+proportion hoist=6 fly=9
+ (derived  black,  centers  degrees  elsewhere: the law gives  in its  on its  read in  stripe,  the middle of the  yellow,  on a grid of  orange {
+    cmyk 84 12 100 1
+
+    pantone "361 C"
+
+  red "#da291c" {
+
+charge star red {
+ Decree  the same // From Article 
+    pantone "485 C"
+
+  green "#009530" {
+
+  hoist 2
+
+  yellow "#ffcc00" {
+
+charge path yellow {
+  purple  Annex  Pantone and CMYK are  a red  the red  wide,   offset   points 
+    cmyk 0 100 100 0
+
+    cmyk 0 21 93 0
+
+    cmyk 78 0 100 0
+
+    pantone "355 C"
+
+  black "#000000" {
+
+  green "#12ad2b" {
+
+charge path black {
+
+charge path white {
+  designer  across  on a hoist of  which is   hollow  along the 
+proportion hoist=1 fly=2
+    radius 
+  field blue
+
+  yellow "#ffce00" {
+ From elsewhere: the law  and CMYK are the // and 
+charge star yellow {
+
+panel {
+ and a  white, //      about 
+canton {
+
+field blue
+ wide 
+  white "#ffffff" {
+  restriction  size  with a 
+    cmyk 0 19 93 0
+
+    cmyk 14 100 79 4
+//   the   rotate  From the law, Article 
+  red "#c8102e" {
+
+    author "Wikimedia Commons contributors, listed in the file's history"
+// the   date   inner // From the law: 
+field red
+
+proportion hoist=3 fly=5
+
+  along hoist
+ that 
+charge star white {
+
+charge svg {
+ two 
+  markup #"""
+
+"""#
+// From elsewhere: the 
+    cmyk 10 100 74 2
+
+  red "#d21034" {
+
+    pantone "116 C"
+
+proportion hoist=2 fly=3
+  box  and the // The 
+  at center
+
+// Drawn from its source by tools/svg2vexyl.py, and not checked against an official construction.
+
+  black "#000000"
+// From the law, 
+    pantone "186 C"
+
+  license "LicenseRef-Public-Domain"
+
+    license "LicenseRef-Public-Domain"
+  adapted-from 
+  render-license "CC0-1.0"
+
+  license "CC-BY-SA-4.0"
+
+  white "#ffffff"
+    source 
+  encoder "Naomi Persephone Amethyst"
+
+meta {
+
+palette {
+
+vexyl 1
+  name 

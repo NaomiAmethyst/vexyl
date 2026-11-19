@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
+
+[package]
+name = "vexyl"
+version = "1.3.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Reads, checks and renders Vexyl flag documents, a KDL format for flag designs."
+license = "Apache-2.0"
+authors = ["Naomi Persephone Amethyst <naomi@amethyst.name>"]
+repository = "https://github.com/NaomiAmethyst/vexyl"
+homepage = "https://github.com/NaomiAmethyst/vexyl"
+readme = "README.md"
+keywords = ["flag", "kdl", "svg", "vexillology"]
+categories = ["graphics", "parser-implementations"]
+# Not on crates.io yet.
+publish = false
+
+[lib]
+name = "vexyl"
+path = "src/lib.rs"
+
+[[bin]]
+name = "vexyl"
+path = "src/main.rs"
+
+[dependencies]
+miniz_oxide = { version = "0.9", default-features = false, features = ["with-alloc"] }
