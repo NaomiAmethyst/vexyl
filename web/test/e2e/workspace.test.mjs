@@ -773,6 +773,8 @@ test("changing a charge's shape leaves out what the new shape doesn't take, and 
 	out = await savedText(p);
 	assert.ok(out.includes("charge rect a {\n  fly 2\n  hoist 1\n}"), out);
 	await p.locator('.shape-tile[data-shape="svg"]').click();
+	// The star is picked from what the form shows, so wait until it shows the artwork.
+	await p.locator('.shape-tile[data-shape="svg"][aria-pressed="true"]').waitFor();
 	await p.locator('.shape-tile[data-shape="star"]').click();
 	await valid(p);
 	assert.ok((await savedText(p)).includes("charge star a {\n  fly 2\n  hoist 1\n  radius 1\n}") === false, "a star has no fly or hoist");

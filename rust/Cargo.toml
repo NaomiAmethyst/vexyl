@@ -10,7 +10,6 @@ description = "Reads, checks and renders Vexyl flag documents, a KDL format for 
 license = "Apache-2.0"
 authors = ["Naomi Persephone Amethyst <naomi@amethyst.name>"]
 repository = "https://github.com/NaomiAmethyst/vexyl"
-homepage = "https://github.com/NaomiAmethyst/vexyl"
 readme = "README.md"
 keywords = ["flag", "kdl", "svg", "vexillology"]
 categories = ["graphics", "parser-implementations"]

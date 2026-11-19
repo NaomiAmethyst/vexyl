@@ -121,21 +121,26 @@ where the namespace `name.amethyst` is verified by a DNS TXT record on `amethyst
 
 ### RubyGems
 
-The gem is `vexyl`. RubyGems takes a trusted publisher for a gem that doesn't exist yet, so the
-workflow makes the first version too.
+The gem is `vexyl`. Since November 2026, trusted publishing only makes a new gem when the workflow
+names the account that will own it, and `rubygems/configure-rubygems-credentials` has no input for
+that yet (<https://github.com/rubygems/configure-rubygems-credentials/issues/489>). So, like npm and
+crates.io, the first version was pushed by hand, and the workflow publishes the ones after it.
 
 1. Make an account at <https://rubygems.org/sign_up>, and turn on two-factor authentication: the
    gemspec sets `rubygems_mfa_required`.
-2. Under Settings → Trusted Publishers (<https://rubygems.org/profile/oidc/pending_trusted_publishers>),
-   add a pending trusted publisher:
-   - RubyGem name: `vexyl`
-   - Trusted publisher type: GitHub Actions
-   - Repository owner: `NaomiAmethyst`
-   - Repository name: `vexyl`
-   - Workflow filename: `release.yml`
-   - Leave the environment and the reusable workflow's owner and name empty.
+2. Push the gem once, from a clean checkout of the tagged commit:
 
-   It turns into the gem's own trusted publisher the first time it's used.
+   ```sh
+   cd ruby
+   cp ../LICENSE ../NOTICE .
+   gem build vexyl.gemspec
+   gem signin
+   gem push vexyl-1.2.3.gem
+   rm LICENSE NOTICE vexyl-1.2.3.gem
+   ```
+3. On the gem's page, <https://rubygems.org/gems/vexyl/trusted_publishers>, add a trusted publisher:
+   GitHub Actions, owner `NaomiAmethyst`, repository `vexyl`, workflow `release.yml`, and leave
+   the environment and the reusable workflow's owner and name empty.
 
 The gem leaves `LICENSE` and `NOTICE` out of git: the workflow copies them in from the root before
 it builds, as it does for npm. To build by hand, do the same:
