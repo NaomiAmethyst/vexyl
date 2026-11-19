@@ -12,11 +12,11 @@ It's on Maven Central as `name.amethyst:vexyl`, from version 1.3.0:
 <dependency>
   <groupId>name.amethyst</groupId>
   <artifactId>vexyl</artifactId>
-  <version>1.3.0</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 
-Or with Gradle, `implementation("name.amethyst:vexyl:1.3.0")`.
+Or with Gradle, `implementation("name.amethyst:vexyl:1.4.0")`.
 
 ```java
 import name.amethyst.vexyl.*;

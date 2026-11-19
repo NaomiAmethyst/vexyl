@@ -6,10 +6,10 @@ from [SPEC.md](../SPEC.md) and [SDK.md](../SDK.md), and passes the same
 Ruby 3.1 or later, and nothing else: its KDL parser, XML reader and SVG writer are its own, and share
 links are compressed with Ruby's own `zlib`. It never reads the network or the filesystem.
 
-It isn't published as a gem yet. Until it is, build and install it from a checkout:
+It's on RubyGems as `vexyl`, from version 1.4.0:
 
 ```sh
-cd ruby && gem build vexyl.gemspec && gem install ./vexyl-1.3.0.gem
+gem install vexyl
 ```
 
 ```ruby

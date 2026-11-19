@@ -54,11 +54,19 @@ npm install @naomiamethyst/vexyl
 The [Java library](java/README.md), for Java 17 and later, is on Maven Central as
 `name.amethyst:vexyl`. Its jar is the same command too.
 
-The [Ruby library](ruby/README.md), for Ruby 3.1 and later, isn't published as a gem yet, so it's
-built from a checkout. It has the same command as well.
+The [Ruby library](ruby/README.md), for Ruby 3.1 and later, is on RubyGems, with the same command
+as well:
 
-The [Rust library](rust/README.md), for Rust 1.88 and later, isn't on crates.io yet either, so it's
-used from a checkout or from Git. Its crate builds the same command.
+```sh
+gem install vexyl
+```
+
+The [Rust library](rust/README.md), for Rust 1.88 and later, is on crates.io, and its crate builds
+the same command:
+
+```sh
+cargo add vexyl
+```
 
 The command is also an image. It reads files from `/work`, so mount the folder they're in:
 
@@ -116,8 +124,8 @@ err = flag.WriteSVG(os.Stdout, vexyl.Options{Height: vexyl.Float(1200)})
   [`go/cmd/vexyl`](go/cmd/vexyl).
 - [`ts/`](ts/README.md) is the TypeScript library, which runs in browsers and Node.
 - [`java/`](java/README.md) is the Java library, written from the two specifications.
-- [`ruby/`](ruby/README.md) is the Ruby library, also written from them. It isn't published yet.
-- [`rust/`](rust/README.md) is the Rust library, also written from them. It isn't published yet.
+- [`ruby/`](ruby/README.md) is the Ruby library, also written from them.
+- [`rust/`](rust/README.md) is the Rust library, also written from them.
 - [`flags/`](flags) holds flags written by hand and checked against official
   sources where possible, with notes on what each relies on.
 - [`vexyl-flags`](https://github.com/NaomiAmethyst/vexyl-flags), a separate repo, holds

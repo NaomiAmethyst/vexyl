@@ -7,11 +7,11 @@ Rust 1.88 or later, and is pure Rust: its KDL parser, XML reader, SVG writer and
 own, and share links are compressed with [miniz_oxide](https://crates.io/crates/miniz_oxide), its
 one dependency. It never reads the network or the filesystem.
 
-It isn't on crates.io yet. Until it is, depend on it from a checkout or from Git:
+It's on crates.io as `vexyl`, from version 1.4.0:
 
 ```toml
 [dependencies]
-vexyl = { git = "https://github.com/NaomiAmethyst/vexyl", version = "1.3.0" }
+vexyl = "1.4"
 ```
 
 ```rust
