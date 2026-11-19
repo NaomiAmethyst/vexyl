@@ -197,6 +197,8 @@ body { background-image: radial-gradient(60rem 26rem at 50% -14rem, rgba(var(--f
 .steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; counter-reset: step; }
 .step { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
 .record { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.clip-entry { padding: 10px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.clip-entry > .inline-fields { align-items: flex-end; }
 .more { border-top: 1px solid var(--line); padding-top: 12px; }
 .more summary, .term-source summary { cursor: pointer; color: var(--ink2); }
 .more .stack { margin-top: 10px; }

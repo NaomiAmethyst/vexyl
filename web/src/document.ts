@@ -5,7 +5,7 @@
 // touches only the node it's about: everything else, comments, order and spacing included, comes
 // back out exactly as it went in.
 
-import { format, getLocation, Identifier, InvalidKdlError, Node as NodeClass, parse as parseKdl, Value, type Document, type Entry, type Node } from "@bgotink/kdl";
+import { clearFormat, format, getLocation, Identifier, InvalidKdlError, Node as NodeClass, parse as parseKdl, Value, type Document, type Entry, type Node } from "@bgotink/kdl";
 import { hasMisreadHex, withoutMisreadHex } from "vexyl/hex";
 import { encodePathName } from "vexyl/paths";
 import { colorArgs } from "./colors.js";
@@ -317,11 +317,11 @@ export function topPlace(doc: Document, name: string): number {
 }
 
 /** Takes a node out, keeping any comments written above it. */
-function removeFrom(list: Document, index: number): void {
+function removeFrom(list: Document, index: number, keepComments = true): void {
 	const n = list.nodes[index]!;
 	const leading = n.leading ?? "";
 	list.nodes.splice(index, 1);
-	if (/\/[/*]/.test(leading)) {
+	if (keepComments && /\/[/*]/.test(leading)) {
 		const next = list.nodes[index];
 		if (next !== undefined) {
 			next.leading = leading.replace(/[ \t]*$/, "") + (next.leading ?? "");
@@ -334,6 +334,136 @@ function removeFrom(list: Document, index: number): void {
 	if (index === 0 && next !== undefined && leading.includes("\n") && !(next.leading ?? "").includes("\n")) {
 		next.leading = "\n" + (next.leading ?? "");
 	}
+}
+
+const canonical = (n: Node): string => format(clearFormat(n.clone()));
+
+/** Lines of text indented by one prefix, indented by another instead. */
+const reindent = (text: string, from: string, to: string, first: boolean): string =>
+	text.split("\n").map((l, i) => ((i > 0 || first) && l !== "" && l.startsWith(from) ? to + l.slice(from.length) : l)).join("\n");
+
+/**
+ * A node as it would be written at another indent, read back as a node of its own, with any
+ * comments written above it. Nothing it says may change, which a multi-line string could.
+ */
+function moved(n: Node, from: string, to: string): { node: Node; comments: string } {
+	const [leading, trailing] = [n.leading, n.trailing];
+	n.leading = "";
+	n.trailing = "";
+	const text = format(n);
+	n.leading = leading;
+	n.trailing = trailing;
+	const made = (parseKdl(reindent(text, from, to, false)) as Document).nodes;
+	if (made.length !== 1 || canonical(made[0]!) !== canonical(n)) {
+		throw new Error("that can't be moved without changing what it says, so move it in Source");
+	}
+	const above = /\/[/*]/.test(leading ?? "") ? reindent((leading ?? "").replace(/^\n+/, "").replace(/[ \t]*$/, ""), from, to, true) : "";
+	return { node: made[0]!, comments: above };
+}
+
+/** Puts comments that came with a node above it again, where it now is. */
+function withComments(n: Node, comments: string, indent: string): void {
+	if (comments !== "") {
+		n.leading = (n.leading ?? "").replace(/[ \t]*$/, "") + comments + indent;
+	}
+}
+
+function placeOf(doc: Document, at: number[]): { list: Document; index: number; node: Node } {
+	const parentAt = at.slice(0, -1);
+	const list = parentAt.length > 0 ? nodeAt(doc, parentAt).children : doc;
+	const index = at.at(-1)!;
+	const node = list?.nodes[index];
+	if (list === null || list === undefined || node === undefined) {
+		throw new Error("that part of the file has changed");
+	}
+	return { list, index, node };
+}
+
+/** The indent a holder's children have, or would have. */
+const innerIndent = (n: Node): string => {
+	const first = n.children?.nodes[0];
+	return first !== undefined && (first.leading ?? "").includes("\n") ? indentOf(first) : childIndent(indentOf(n));
+};
+
+/** Puts a layer in a new group of its own, in its place. */
+function wrap(doc: Document, at: number[]): void {
+	const { list, index, node } = placeOf(doc, at);
+	if (!layerNames.has(node.getName())) {
+		throw new Error("only a layer can go in a group");
+	}
+	const indent = indentOf(node);
+	// Comments above the layer stay above the group, in what it takes the place of.
+	const { node: inner } = moved(node, indent, childIndent(indent));
+	const group = new NodeClass(new Identifier("group"));
+	group.leading = node.leading;
+	group.trailing = node.trailing;
+	const kids = ensureBlock(group, indent);
+	list.nodes[index] = group;
+	insert(kids, [inner], 0, childIndent(indent), false);
+}
+
+/** Puts a group's layers where it was, if it has nothing else that would be lost. */
+function unwrap(doc: Document, at: number[]): void {
+	const { list, index, node } = placeOf(doc, at);
+	const kids = node.children?.nodes ?? [];
+	if (node.getName() !== "group") {
+		throw new Error("only a group can be taken apart");
+	}
+	if (kids.some((k) => !layerNames.has(k.getName()))) {
+		throw new Error("this group has its own clip, cut, opacity or blending, which would be lost, so take that out first");
+	}
+	const indent = indentOf(node);
+	const from = innerIndent(node);
+	const out = kids.map((k) => moved(k, from, indent));
+	list.nodes.splice(index, 1, ...out.map((o) => o.node));
+	const own = at.length === 1 ? "" : indent;
+	out.forEach((o, i) => {
+		o.node.leading = i === 0 ? (node.leading ?? "") : own;
+		o.node.trailing = i === out.length - 1 ? (node.trailing ?? "") : "\n";
+		withComments(o.node, o.comments, own);
+	});
+	if (out.length === 0) {
+		removeFrom(list, index);
+	}
+}
+
+/** Takes the layer just below or above a group into it, so that nothing paints in a different order. */
+function takeIn(doc: Document, at: number[], side: "below" | "above"): void {
+	const { list, index, node } = placeOf(doc, at);
+	if (node.getName() !== "group") {
+		throw new Error("only a group can take a layer in");
+	}
+	const j = side === "below" ? index - 1 : index + 1;
+	const other = list.nodes[j];
+	if (other === undefined || !layerNames.has(other.getName())) {
+		throw new Error(`there's no layer ${side} the group to take in`);
+	}
+	const indent = innerIndent(node);
+	const { node: inner, comments } = moved(other, indentOf(other), indent);
+	const kids = ensureBlock(node, indentOf(node));
+	insert(kids, [inner], side === "below" ? childPlace(node) : kids.nodes.length, indent, false);
+	withComments(inner, comments, indent);
+	removeFrom(list, j, false);
+}
+
+/** Takes a group's bottom or top layer out, to just below or above it, so that nothing paints in a different order. */
+function takeOut(doc: Document, at: number[]): void {
+	const groupAt = at.slice(0, -1);
+	const { list: kids, index, node } = placeOf(doc, at);
+	const { list, index: gi, node: group } = placeOf(doc, groupAt);
+	if (group.getName() !== "group") {
+		throw new Error("only a group's layers can be taken out of it");
+	}
+	const layersIn = kids.nodes.filter((k) => layerNames.has(k.getName()));
+	const bottom = layersIn[0] === node;
+	if (!bottom && layersIn.at(-1) !== node) {
+		throw new Error("only a group's bottom or top layer can be taken out, or it would paint in a different order");
+	}
+	const indent = indentOf(group);
+	const { node: outer, comments } = moved(node, indentOf(node), indent);
+	removeFrom(kids, index, false);
+	insert(list, [outer], bottom ? gi : gi + 1, indent, groupAt.length === 1);
+	withComments(outer, comments, indent);
 }
 
 function colorSpots(n: Node): Entry[] {
@@ -558,6 +688,21 @@ function apply(doc: Document, op: Op): void {
 			list.nodes[to] = a;
 			return;
 		}
+		case "rename":
+			nodeAt(doc, op.at).setName(op.name);
+			return;
+		case "wrap":
+			wrap(doc, op.at);
+			return;
+		case "unwrap":
+			unwrap(doc, op.at);
+			return;
+		case "takeIn":
+			takeIn(doc, op.at, op.side);
+			return;
+		case "takeOut":
+			takeOut(doc, op.at);
+			return;
 		case "renameColor":
 			renameColor(doc, op.from, op.to);
 			return;

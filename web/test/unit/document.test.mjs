@@ -428,3 +428,60 @@ test("a color can only be removed for one that can take its place everywhere", (
 	assert.ok(!out.includes("blue"), out);
 	assert.deepEqual(lib.validate(out), []);
 });
+
+const head = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\n';
+
+test("a layer can be put in a group of its own, and taken back out, keeping its comments and spacing", () => {
+	const text = head + "field a\n// the bars\nbars a b {\n  count 3\n  ratio 1 2 1\n}\ncharge disc b { radius 1; }\n";
+	const bars = outline(text).find((x) => x.name === "bars");
+	const wrapped = applyOps(text, [{ op: "wrap", at: bars.at }]).text;
+	assert.equal(wrapped, head + "field a\n// the bars\ngroup {\n  bars a b {\n    count 3\n    ratio 1 2 1\n  }\n}\ncharge disc b { radius 1; }\n");
+	assert.deepEqual(lib.validate(wrapped), []);
+	const group = outline(wrapped).find((x) => x.name === "group");
+	assert.equal(applyOps(wrapped, [{ op: "unwrap", at: group.at }]).text, text);
+});
+
+test("a nested layer is wrapped at its own indent", () => {
+	const text = head + "canton {\n  fly 10\n  hoist 5\n  field a\n  charge disc b {\n    radius 1\n  }\n}\n";
+	const disc = outline(text).find((x) => x.name === "canton").kids.find((k) => k.name === "charge");
+	const out = applyOps(text, [{ op: "wrap", at: disc.at }]).text;
+	assert.ok(out.includes("  field a\n  group {\n    charge disc b {\n      radius 1\n    }\n  }\n}\n"), out);
+	assert.deepEqual(lib.validate(out), []);
+});
+
+test("a group takes in the layers beside it, and lets them out, without changing what paints over what", () => {
+	const text = head + "field a\nbars a b\ngroup {\n  clip {\n    pile {\n      depth 5\n    }\n  }\n  // the disc\n  charge disc b {\n    radius 1\n  }\n}\n// last\nfield b { opacity 0.5; }\n";
+	const at = () => outline(now).find((x) => x.name === "group").at;
+	let now = applyOps(text, [{ op: "takeIn", at: outline(text).find((x) => x.name === "group").at, side: "below" }]).text;
+	assert.equal(now, head + "field a\ngroup {\n  clip {\n    pile {\n      depth 5\n    }\n  }\n  bars a b\n  // the disc\n  charge disc b {\n    radius 1\n  }\n}\n// last\nfield b { opacity 0.5; }\n");
+	now = applyOps(now, [{ op: "takeIn", at: at(), side: "above" }]).text;
+	assert.ok(now.endsWith("    radius 1\n  }\n  // last\n  field b { opacity 0.5; }\n}\n"), now);
+	assert.deepEqual(lib.validate(now), []);
+	const top = outline(now).find((x) => x.name === "group").kids.at(-1);
+	now = applyOps(now, [{ op: "takeOut", at: top.at }]).text;
+	const bottom = outline(now).find((x) => x.name === "group").kids.find((k) => k.name === "bars");
+	now = applyOps(now, [{ op: "takeOut", at: bottom.at }]).text;
+	assert.equal(now, text);
+});
+
+test("a group with its own clip isn't taken apart, and only an end layer leaves a group", () => {
+	const text = head + "group {\n  clip {\n    pile {\n      depth 5\n    }\n  }\n  field a\n  field b\n  field a\n}\n";
+	const group = outline(text).find((x) => x.name === "group");
+	assert.match(applyOps(text, [{ op: "unwrap", at: group.at }]).error, /clip/);
+	assert.match(applyOps(text, [{ op: "takeOut", at: group.kids[2].at }]).error, /bottom or top/);
+	assert.match(applyOps(text, [{ op: "takeIn", at: group.at, side: "below" }]).error, /no layer/);
+});
+
+test("a multi-line string keeps its value when its layer moves in or out of a group", () => {
+	const text = head + 'charge svg {\n  fly 1\n  hoist 1\n  markup #"""\n    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">\n      <rect width="1" height="1" fill="#112233"/>\n    </svg>\n    """#\n}\n';
+	const svg = outline(text).find((x) => x.name === "charge");
+	const out = applyOps(text, [{ op: "wrap", at: svg.at }]).text;
+	assert.ok(out.includes('      <svg xmlns'), out);
+	assert.equal(applyOps(out, [{ op: "unwrap", at: outline(out).find((x) => x.name === "group").at }]).text, text);
+});
+
+test("a shape can be renamed in place, keeping its children", () => {
+	const text = head + "field a {\n  clip {\n    disc {\n      radius 2\n    }\n  }\n}\n";
+	const disc = outline(text).find((x) => x.name === "field").kids[0].kids[0];
+	assert.equal(applyOps(text, [{ op: "rename", at: disc.at, name: "triangle" }]).text, text.replace("disc {", "triangle {"));
+});

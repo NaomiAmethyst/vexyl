@@ -42,7 +42,8 @@ type FieldKind =
 	| { k: "reference" }
 	| { k: "points"; label: string; child: string }
 	| { k: "artwork" }
-	| { k: "defineArg" };
+	| { k: "defineArg" }
+	| { k: "clips" };
 
 export interface Term {
 	label: string;
@@ -527,6 +528,29 @@ export function skeletonFor(key: string, colors: readonly string[], chosen?: str
 /** A charge using a defined shape can change any of that shape's sizes. */
 const definedShapeFields: readonly Field[] = [radius, { k: "num", label: "Inner", child: "inner" }, { k: "num", label: "Points", child: "points" }, ...size, hollow];
 
+/** What every layer can be clipped and cut by. */
+export const clipFields: readonly Field[] = [{ k: "clips" }];
+
+/** What a shape in a clip or cut can be: any of a charge's but inline artwork, a pile, a pall, or a defined shape. */
+export function clipShapes(defined: readonly string[], inFrame: boolean): Choice[] {
+	return [
+		...(inFrame ? [] : [["pile", "Pile"], ["pall", "Pall"]] as Choice[]),
+		...Object.entries(shapes).filter(([k]) => k !== "svg").map(([k, sh]) => [k, sh.label] as const),
+		...defined.map((d) => [d, d] as const),
+	];
+}
+
+/** A shape's own fields in a clip or cut, which uses its whole area, so it's never hollow or in lines, or colored. */
+export function clipShapeFields(name: string): readonly Field[] {
+	const solid = (f: Field): boolean => !(f.k === "num" && (f.child === "hollow" || f.child === "lines"));
+	const placed: readonly Field[] = [{ k: "at", label: "Position", note: "Empty means the middle of the region." }, { k: "num", label: "Rotate", child: "rotate", note: "Degrees clockwise, about its position." }];
+	if (name === "pile" || name === "pall") {
+		return layers[name]!.fields.filter((f) => f.k !== "colorArg" && f.k !== "fimbriate" && f.k !== "heading" && solid(f));
+	}
+	const shape = Object.hasOwn(shapes, name) ? shapes[name]! : undefined;
+	return [...(shape?.fields ?? definedShapeFields).filter(solid), ...(shape?.unplaced === true ? [] : placed)];
+}
+
 /** What the file's node can be read as: its table, for anything the form knows. */
 export function fieldsFor(node: { name: string; args: readonly { v: unknown }[] }, inPalette = false): { term: Term | null; fields: readonly Field[]; extra: readonly Field[] } {
 	if (inPalette) {
@@ -574,6 +598,10 @@ export function handledChildren(fields: readonly Field[], names: Set<string> = n
 				break;
 			case "artwork":
 				names.add("markup");
+				break;
+			case "clips":
+				names.add("clip");
+				names.add("cut");
 				break;
 			case "steps":
 				for (const s of ["over", "under", "tuck"]) {

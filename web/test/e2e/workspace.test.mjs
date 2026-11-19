@@ -259,23 +259,26 @@ test("a number that isn't one is said so, and the file isn't touched", async () 
 });
 
 test("anything the form can't edit says so, offers the source, and is left alone", async () => {
-	const body = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\nbars a b {\n  clip {\n    disc {\n      radius 3\n    }\n  }\n  along hoist\n}\n';
+	const body = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\ndefine badge {\n  path "M0 0H1V1Z" box="0 0 1 1"\n}\nfield b\ncharge badge a {\n  fly 2\n  hoist 2\n}\n';
 	const { p, context, errors } = await page(undefined);
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "Paste" }).click();
 	await p.getByLabel("KDL").fill(body);
 	await p.getByRole("button", { name: "Open", exact: true }).click();
 	await ready(p);
-	await row(p, "0").click();
+	await row(p, "define/badge").click();
 	await p.getByText("The form can't edit this yet").waitFor();
-	await p.locator(".source-only").getByText("clip").waitFor();
-	await p.getByRole("radiogroup", { name: "Runs along" }).getByRole("radio", { name: "Fly", exact: true }).click();
+	await p.locator(".source-only").getByText("path").waitFor();
+	const name = p.getByLabel("Name", { exact: true });
+	await name.fill("seal");
+	await name.press("Enter");
+	await p.locator(".panel-head h2", { hasText: "Seal" }).waitFor();
 	await p.waitForFunction(() => document.querySelector(".status")?.textContent === "Valid");
 	const out = await savedText(p);
-	assert.ok(out.includes("clip {\n    disc {\n      radius 3\n    }\n  }"), out);
-	assert.ok(!out.includes("along"), out);
+	assert.ok(out.includes('define seal {\n  path "M0 0H1V1Z" box="0 0 1 1"\n}'), out);
+	assert.ok(out.includes("charge seal a {"), out);
 	await p.getByRole("button", { name: "Edit in the source" }).click();
-	await p.locator(".cm-line", { hasText: "clip" }).waitFor();
+	await p.locator(".cm-line", { hasText: "path" }).waitFor();
 	assert.deepEqual(errors, []);
 	await context.close();
 });
@@ -502,7 +505,7 @@ test("a number can be typed one key at a time into any box, without losing its p
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("button", { name: "Start a new flag" }).click();
 	await startFlag(p);
-	for (const name of ["Lozenge", "Star", "Rectangle", "Band", "Cross", "Canton", "Panel"]) {
+	for (const name of ["Lozenge", "Star", "Rectangle", "Band", "Cross", "Pile", "Canton", "Panel"]) {
 		await p.getByRole("button", { name: "Add a term" }).click();
 		await p.locator(`.add-item[data-label='${name}']`).first().click();
 		await p.locator(".row-wrap .row", { hasText: name }).click();
@@ -708,6 +711,43 @@ test("removing and moving layers keep the file's other text", async () => {
 	const removed = await savedText(p);
 	assert.ok(!removed.includes("canton {"));
 	assert.ok(removed.includes("Executive Order 10834"));
+	await context.close();
+});
+
+test("layers can be put in a group, clipped and cut by any shape, and taken out again", async () => {
+	const { p, context, errors } = await page("flags/pride/transgender.kdl");
+	const original = readFlag("flags/pride/transgender.kdl");
+	const valid = () => p.waitForFunction(() => document.querySelector(".status")?.textContent === "Valid");
+	await row(p, "0").click();
+	await p.getByRole("button", { name: "Put in a group" }).click();
+	await p.waitForFunction(() => document.querySelector(".panel-head h2")?.textContent === "Group");
+	assert.ok((await savedText(p)).includes("group {\n  bars blue pink white pink blue\n}\n"));
+	await p.locator("summary", { hasText: "Clip and cut" }).click();
+	await p.getByRole("button", { name: "Add a clip" }).click();
+	await p.waitForFunction(() => document.querySelector("[data-clip=clip]") !== null);
+	await valid();
+	assert.ok((await savedText(p)).includes("group {\n  clip {\n    pile {\n      depth 1.5\n    }\n  }\n  bars"), await savedText(p));
+	assert.equal(await p.locator("[data-clip=clip]").getByLabel("Depth").inputValue(), "1.5");
+	await p.getByLabel("Clip to").selectOption("disc");
+	await p.waitForFunction(() => document.querySelector("[data-clip=clip] select")?.value === "disc");
+	await valid();
+	let out = await savedText(p);
+	assert.ok(out.includes("    disc {\n      radius 1\n    }"), out);
+	assert.ok(!out.includes("depth"), "a disc has no depth");
+	await p.getByRole("button", { name: "Add a cut" }).click();
+	await p.waitForFunction(() => document.querySelector("[data-clip=cut]") !== null);
+	await p.getByLabel("Cut out").selectOption("star");
+	await valid();
+	out = await savedText(p);
+	assert.match(out, /cut \{\n {4}star \{\n {6}radius 1\n {4}\}/);
+	assert.equal(await p.getByRole("button", { name: "Ungroup" }).isDisabled(), true);
+	await p.getByRole("button", { name: "Remove this cut" }).click();
+	await p.getByRole("button", { name: "Remove the clip" }).click();
+	await p.waitForFunction(() => document.querySelector("[data-clip]") === null);
+	await p.getByRole("button", { name: "Ungroup" }).click();
+	await p.waitForFunction((t) => document.querySelector(".panel-head h2")?.textContent === t, "Bars");
+	assert.equal(await savedText(p), original);
+	assert.deepEqual(errors, []);
 	await context.close();
 });
 

@@ -11,7 +11,7 @@ import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 import { colorUses, listText, replacementsFor, type ColorUse } from "./colors.js";
 import { layerSiblings, moveOps } from "./flagdrag.js";
 import { app, findPath } from "./store.js";
-import { addable, describeTerm, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
+import { addable, clipFields, clipShapeFields, clipShapes, describeTerm, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
 const numberText = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
 /** What a number can look like halfway through being typed, which isn't a mistake yet. */
@@ -226,9 +226,12 @@ function middleOf(node: ONode, nodes: readonly ONode[]): { fly: string; hoist: s
 	let fly = Number(prop(proportion, "fly")?.v ?? 0);
 	let hoist = Number(prop(proportion, "hoist")?.v ?? 0);
 	let list = nodes;
-	for (const i of node.at.slice(0, -1)) {
+	const chain = node.at.slice(0, -1);
+	for (const [k, i] of chain.entries()) {
 		const holder: ONode | undefined = list[i];
-		if (holder === undefined) {
+		// A clip's or cut's shape is measured in the region its layer sits in, not the layer's own.
+		const next = holder?.kids[chain[k + 1] ?? -1];
+		if (holder === undefined || next?.name === "clip" || next?.name === "cut") {
 			break;
 		}
 		const own = holder.name === "variant" ? child(holder, "proportion") : holder.name === "define" ? holder : undefined;
@@ -776,6 +779,8 @@ export function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JS
 				</Row>
 			);
 		}
+		case "clips":
+			return <ClipCut node={node} ctx={ctx} />;
 		case "defineArg":
 			return (
 				<Row label="Definition" id={id}>
@@ -786,6 +791,112 @@ export function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JS
 				</Row>
 			);
 	}
+}
+
+/** Whether a term is inside an emblem, whose frame has no size, so a pile or pall can't be measured in it. */
+function inFrame(node: ONode, nodes: readonly ONode[]): boolean {
+	let list = nodes;
+	for (const i of node.at.slice(0, -1)) {
+		const n: ONode | undefined = list[i];
+		if (n?.name === "emblem") {
+			return true;
+		}
+		list = n?.kids ?? [];
+	}
+	return node.name === "emblem";
+}
+
+/** The definitions that are a shape, which a clip or cut can use by name. */
+const shapeDefines = (nodes: readonly ONode[]): string[] =>
+	nodes.filter((n) => n.name === "define" && n.kids.length === 1 && Object.hasOwn(shapes, n.kids[0]!.name) && n.kids[0]!.name !== "svg").map((n) => String(n.args[0]?.v));
+
+/** A line of a skeleton, such as `radius 1` or `point fly=0 hoist=0`, as a change to make. */
+function skeletonChild(at: number[], line: string, nth: number): Op {
+	const [name, ...rest] = line.trim().split(" ");
+	const text = rest.join(" ");
+	if (text.startsWith('"')) {
+		return { op: "child", at, name: name!, args: [vStr(JSON.parse(text) as string)], nth };
+	}
+	const props = rest.filter((w) => w.includes("=")).map((w) => [w.slice(0, w.indexOf("=")), vNum(w.slice(w.indexOf("=") + 1))] as [string, OVal]);
+	return { op: "child", at, name: name!, args: rest.filter((w) => !w.includes("=")).map(vNum), ...(props.length > 0 ? { props } : {}), nth };
+}
+
+/** What a shape needs to be drawn at all, as lines of a skeleton. */
+function shapeSkeleton(name: string, middle: { fly: string; hoist: string }): string[] {
+	if (name === "pile") {
+		return [`depth ${middle.hoist}`];
+	}
+	if (name === "pall") {
+		return ["width 1"];
+	}
+	return Object.hasOwn(shapes, name) ? shapes[name]!.skeleton.split("\n") : [];
+}
+
+/** Changes a clip's or cut's shape, keeping what the two share and dropping what the new one can't have. */
+function shapeOps(shape: ONode, to: string, middle: { fly: string; hoist: string }): Op[] {
+	const keeps = handledChildren(clipShapeFields(to));
+	const ops: Op[] = [{ op: "rename", at: shape.at, name: to }];
+	for (const k of shape.kids) {
+		if (!keeps.has(k.name)) {
+			ops.push({ op: "dropChild", at: shape.at, name: k.name });
+		}
+	}
+	const kept = new Map<string, number>();
+	for (const k of shape.kids.filter((x) => keeps.has(x.name))) {
+		kept.set(k.name, (kept.get(k.name) ?? 0) + 1);
+	}
+	const seen = new Map<string, number>();
+	for (const line of shapeSkeleton(to, middle)) {
+		const name = line.trim().split(" ")[0]!;
+		const nth = seen.get(name) ?? 0;
+		seen.set(name, nth + 1);
+		// A pile with a tip has no depth, and a shape that already has a size keeps it.
+		if (nth >= (kept.get(name) ?? 0) && !(to === "pile" && name === "depth" && kept.has("tip"))) {
+			ops.push(skeletonChild(shape.at, line, nth));
+		}
+	}
+	return ops;
+}
+
+/** The shapes a layer is clipped to and cut by, each edited as a shape of its own. */
+function ClipCut(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
+	const { node, ctx } = props;
+	const wrappers = node.kids.filter((k) => k.name === "clip" || k.name === "cut");
+	const framed = inFrame(node, ctx.nodes);
+	const options = clipShapes(shapeDefines(ctx.nodes), framed);
+	const middle = middleOf(node, ctx.nodes);
+	const first = framed ? "disc" : "pile";
+	const add = (name: "clip" | "cut"): void => {
+		const last = node.kids.map((k) => k.name === "clip" || k.name === "cut").lastIndexOf(true);
+		const layer = node.kids.findIndex((k) => k.path !== undefined && layerTerms[k.name] !== undefined);
+		const index = last >= 0 ? last + 1 : layer >= 0 ? layer : node.kids.length;
+		const inner = shapeSkeleton(first, middle).map((l) => `    ${l}`).join("\n");
+		edit({ op: "add", at: node.at, text: `${name} {\n  ${first} {\n${inner}\n  }\n}`, index });
+	};
+	return (
+		<div class="stack">
+			<p class="nx-note">A clip keeps only what's inside its shape, and each cut takes away what's inside its own. They apply to this {node.name === "group" ? "group's layers together" : "layer as a whole"}, and their shapes are measured in the region it sits in.{node.name === "group" ? "" : " To clip several layers, put them in a group and clip that."}</p>
+			{wrappers.map((w) => {
+				const shape = w.kids.length === 1 ? w.kids[0]! : undefined;
+				const label = w.name === "clip" ? "Clip to" : "Cut out";
+				return (
+					<div class="clip-entry stack" key={w.at.join(".")} data-clip={w.name}>
+						<div class="inline-fields wrap">
+							{shape !== undefined
+								? <Choice label={label} id={fieldId(w.name, w.at)} value={shape.name} options={options} onPick={(v) => { if (v !== shape.name) { edit(...shapeOps(shape, v, middle)); } }} />
+								: <Row label={label}><p class="plain">{w.kids.length === 0 ? "No shape yet." : "Several shapes."} This is edited in the source.</p></Row>}
+							<button type="button" class="nx-ghost small danger" aria-label={`Remove ${w.name === "clip" ? "the clip" : "this cut"}`} onClick={() => { edit({ op: "remove", at: w.at }); }}>Remove</button>
+						</div>
+						{shape !== undefined ? shownFields(shape, clipShapeFields(shape.name)).map((f, j) => <FieldView key={`${shape.name}-${j}`} f={f} node={shape} ctx={ctx} />) : null}
+					</div>
+				);
+			})}
+			<div class="inline-fields wrap">
+				{wrappers.some((w) => w.name === "clip") ? null : <button type="button" class="nx-ghost small" onClick={() => { add("clip"); }}>Add a clip</button>}
+				<button type="button" class="nx-ghost small" onClick={() => { add("cut"); }}>Add a cut</button>
+			</div>
+		</div>
+	);
 }
 
 /** What the file has here that no field reads, which stays exactly as it is. */
@@ -1064,7 +1175,7 @@ function problemPaths(s: { problems: { line?: number; message: string }[]; spans
 	return out;
 }
 
-const fieldLabel = (f: Field): string => ("label" in f ? f.label : f.k === "fimbriate" ? "Fimbriation" : f.k === "edge" ? "Edge" : f.k === "repeat" ? "Repeat" : "");
+const fieldLabel = (f: Field): string => ("label" in f ? f.label : f.k === "fimbriate" ? "Fimbriation" : f.k === "edge" ? "Edge" : f.k === "repeat" ? "Repeat" : f.k === "clips" ? "Clip and cut" : "");
 
 /** Says a problem in the words on the screen, naming a box by its label instead of its name in the file. */
 function inFormWords(message: string, fields: readonly Field[]): string {
@@ -1172,14 +1283,15 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const inPalette = node.path?.startsWith("palette/") === true;
 	const isPalette = node.name === "palette" && node.path === "palette";
 	const { term, fields, extra } = fieldsFor(node, inPalette);
-	const placed = placeProblems(node, [...fields, ...extra], problems);
+	const clipping = extra.length > 0 && node.path !== undefined ? clipFields : [];
+	const placed = placeProblems(node, [...fields, ...extra, ...clipping], problems);
 	const pal = paletteOf(nodes);
 	const defines = nodes.filter((n) => n.name === "define").map((n) => String(n.args[0]?.v));
 	const toSource = (): void => {
 		app.setMode("source");
 	};
 	const ctx: Ctx = { nodes, paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, toSource };
-	const hidden = onlyInSource(node, [...fields, ...extra], inPalette);
+	const hidden = onlyInSource(node, [...fields, ...extra, ...clipping], inPalette);
 	const title = inPalette ? decodePathName(node.path!.slice(8)) : isPalette ? "Colors" : node.name === "variant" || node.name === "fold" || node.name === "define" ? capitalize(String(node.args[0]?.v ?? labelFor(node))) : labelFor(node);
 	const desc = inPalette ? (node.args[0]?.v === "gradient" ? "A gradient between other colors, which can be used wherever a color is." : "Pantone, CMYK and other references travel with the color, and are never drawn from.") : isPalette ? "The flag's palette. Pantone, CMYK and other references travel with each color." : node.name === "charge" ? (shapes[String(node.args[0]?.v)]?.desc ?? "A definition, placed at a position.") : term?.desc ?? "";
 	const noun = inPalette ? "color" : ["meta", "palette"].includes(node.name) ? "block" : node.name === "variant" ? "variant" : node.name === "fold" ? "fold" : "term";
@@ -1233,6 +1345,12 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 					<div class="stack gap">{extra.map((f, i) => <PlacedField key={i} f={f} node={node} ctx={ctx} problems={placed.at.get(f)} />)}</div>
 				</details>
 			) : null}
+			{clipping.length > 0 ? (
+				<details class="more" open={node.kids.some((k) => k.name === "clip" || k.name === "cut") || clipping.some((f) => placed.at.has(f)) ? true : undefined}>
+					<summary>Clip and cut</summary>
+					<div class="stack gap">{clipping.map((f, i) => <PlacedField key={i} f={f} node={node} ctx={ctx} problems={placed.at.get(f)} />)}</div>
+				</details>
+			) : null}
 			{hidden.length > 0 ? (
 				<div class="source-only">
 					<span class="nx-note">The form can't edit {hidden.length === 1 ? "this" : "these"} yet, so {hidden.length === 1 ? "it stays" : "they stay"} just as written: <span class="mono">{hidden.join(", ")}</span>.</span>
@@ -1243,6 +1361,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 			<div class="panel-actions">
 				{canMove ? <button type="button" class="nx-ghost small" disabled={place <= 0} onClick={() => { moveAmongLayers(node, siblings, -1); }}>Move down a layer</button> : null}
 				{canMove ? <button type="button" class="nx-ghost small" disabled={place < 0 || place >= siblings.length - 1} onClick={() => { moveAmongLayers(node, siblings, 1); }}>Move up a layer</button> : null}
+				{canMove ? <Regroup node={node} nodes={nodes} /> : null}
 				{removable ? <button type="button" class="nx-ghost small danger" aria-expanded={inPalette ? (uses.length > 0 ? "true" : "false") : undefined} onClick={() => {
 					// A color something uses can't just go, or the file would name a color it doesn't have.
 					if (inPalette && colorUses(nodes, node.name).length > 0) {
@@ -1259,6 +1378,37 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 				<TermSource key={node.at.join(".")} node={node} text={text} noun={noun} />
 				<button type="button" class="back link" onClick={toSource}>See it in the whole file</button>
 			</details>
+		</>
+	);
+}
+
+const isLayerNode = (n: ONode | undefined): n is ONode => n !== undefined && n.path !== undefined && layerTerms[n.name] !== undefined;
+
+/** Puts a layer in a group, or moves layers into and out of one, so that they can be clipped, cut or faded together. */
+function Regroup(props: { node: ONode; nodes: readonly ONode[] }): preact.JSX.Element {
+	const { node, nodes } = props;
+	const prefix = node.at.slice(0, -1);
+	let parent: ONode | undefined;
+	let list = nodes;
+	for (const i of prefix) {
+		parent = list[i];
+		list = parent?.kids ?? [];
+	}
+	const index = node.at.at(-1)!;
+	const group = node.name === "group";
+	const inGroup = parent?.name === "group" ? parent.kids.filter(isLayerNode) : [];
+	const bottom = inGroup[0] === node;
+	const top = inGroup.at(-1) === node;
+	const run = (op: Op, at: readonly number[]): void => {
+		void app.changeAndFollow([op], { at }).then(told);
+	};
+	return (
+		<>
+			<button type="button" class="nx-ghost small" onClick={() => { run({ op: "wrap", at: node.at }, node.at); }}>Put in a group</button>
+			{group ? <button type="button" class="nx-ghost small" disabled={!isLayerNode(list[index - 1])} onClick={() => { run({ op: "takeIn", at: node.at, side: "below" }, [...prefix, index - 1]); }}>Take in the layer below</button> : null}
+			{group ? <button type="button" class="nx-ghost small" disabled={!isLayerNode(list[index + 1])} onClick={() => { run({ op: "takeIn", at: node.at, side: "above" }, node.at); }}>Take in the layer above</button> : null}
+			{group ? <button type="button" class="nx-ghost small" disabled={node.kids.some((k) => !isLayerNode(k))} title={node.kids.some((k) => !isLayerNode(k)) ? "It has its own clip, cut, opacity or blending, which would be lost. Take that out first." : undefined} onClick={() => { run({ op: "unwrap", at: node.at }, node.at); }}>Ungroup</button> : null}
+			{bottom || top ? <button type="button" class="nx-ghost small" onClick={() => { const gi = prefix.at(-1)!; run({ op: "takeOut", at: node.at }, [...prefix.slice(0, -1), bottom ? gi : gi + 1]); }}>Take out of the group</button> : null}
 		</>
 	);
 }
