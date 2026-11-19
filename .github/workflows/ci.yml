@@ -108,6 +108,32 @@ jobs:
       - run: mvn -B -q -f java/pom.xml package -DskipTests
       - run: python3 conformance/run.py "$JAVA_HOME_17_X64/bin/java" -Xlog:disable -Xlog:all=warning:stderr -jar java/target/vexyl.jar
 
+  # The Ruby library's tests run on Ruby 3.1, the oldest it supports, so that nothing newer gets in,
+  # and the suite runs on the newest Ruby. It needs no gems beyond Ruby's own, so there's no bundle.
+  check-ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+
+      - run: make check-ruby
+
+  conformance-ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+
+      - uses: ./.github/actions/conformance-tools
+
+      - run: make conformance-ruby
+
   # Runs the suite against libraries with one thing wrong, some of them the Go reference patched.
   conformance-prove:
     runs-on: ubuntu-latest

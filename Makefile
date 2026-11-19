@@ -8,10 +8,11 @@ DESTDIR ?=
 GO      ?= go
 NPM     ?= npm
 MVN     ?= mvn
+RUBY    ?= ruby
 
 SOURCES := $(shell find go -name '*.go') go/go.mod go/go.sum
 
-.PHONY: all test check check-ts check-java check-rescale conformance conformance-ts conformance-java conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
+.PHONY: all test check check-ts check-java check-ruby check-rescale conformance conformance-ts conformance-java conformance-ruby conformance-fixtures conformance-prove fuzz install uninstall clean web check-web check-construction
 
 all: vexyl
 
@@ -50,6 +51,15 @@ check-java:
 conformance-java:
 	$(MVN) -q -f java/pom.xml package -DskipTests
 	python3 conformance/run.py java -Xlog:disable -Xlog:all=warning:stderr -jar java/target/vexyl.jar
+
+# These need Ruby 3.1 or later, with its bundled minitest for the tests, so `check` leaves them out as
+# well. The tests run with warnings on, and the suite runs the command without RubyGems, which it
+# doesn't need and which would take most of each run's time to load.
+check-ruby:
+	cd ruby && $(RUBY) -w -Ilib -Itest -e 'ARGV.each { |f| require File.expand_path(f) }' test/*_test.rb
+
+conformance-ruby:
+	python3 conformance/run.py $(RUBY) --disable-gems ruby/exe/vexyl
 
 # Changes what every implementation must do, so review the diff.
 conformance-fixtures: vexyl

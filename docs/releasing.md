@@ -1,8 +1,8 @@
 # Releasing
 
 A release has one version for everything: the command, the Go module, the TypeScript library, the
-Java library and the images. That version is the one in `ts/package.json`, and `java/pom.xml` has
-to say the same.
+Java library, the Ruby library and the images. That version is the one in `ts/package.json`, and
+`java/pom.xml` and `ruby/lib/vexyl/version.rb` have to say the same.
 
 ## Making a release
 
