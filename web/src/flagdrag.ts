@@ -617,7 +617,7 @@ function placeOf(op: Op): readonly number[] | null {
 	switch (op.op) {
 		case "add":
 			return op.at === null ? (op.index === undefined ? null : [op.index]) : op.index === undefined ? op.at : [...op.at, op.index];
-		case "entries": case "child": case "dropChild": case "remove": case "move":
+		case "entries": case "child": case "dropChild": case "remove": case "move": case "rename": case "wrap": case "unwrap": case "takeIn": case "takeOut": case "duplicate": case "moveTo":
 			return op.at;
 		default:
 			return null;

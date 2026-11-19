@@ -385,21 +385,61 @@ const innerIndent = (n: Node): string => {
 	return first !== undefined && (first.leading ?? "").includes("\n") ? indentOf(first) : childIndent(indentOf(n));
 };
 
-/** Puts a layer in a new group of its own, in its place. */
-function wrap(doc: Document, at: number[]): void {
+/** Puts a layer, or several next to each other, in a new group, in their place. */
+function wrap(doc: Document, at: number[], count = 1): void {
 	const { list, index, node } = placeOf(doc, at);
-	if (!layerNames.has(node.getName())) {
-		throw new Error("only a layer can go in a group");
+	const taken = list.nodes.slice(index, index + count);
+	if (count < 1 || taken.length !== count || taken.some((n) => !layerNames.has(n.getName()))) {
+		throw new Error(count === 1 ? "only a layer can go in a group" : "only layers next to each other can go in a group together");
 	}
 	const indent = indentOf(node);
-	// Comments above the layer stay above the group, in what it takes the place of.
-	const { node: inner } = moved(node, indent, childIndent(indent));
+	const inner = childIndent(indent);
+	// Comments above the first layer stay above the group, in what it takes the place of.
+	const made = taken.map((n, i) => moved(n, i === 0 ? indent : indentOf(n), inner));
 	const group = new NodeClass(new Identifier("group"));
 	group.leading = node.leading;
-	group.trailing = node.trailing;
+	group.trailing = taken.at(-1)!.trailing;
 	const kids = ensureBlock(group, indent);
-	list.nodes[index] = group;
-	insert(kids, [inner], 0, childIndent(indent), false);
+	list.nodes.splice(index, count, group);
+	insert(kids, made.map((m) => m.node), 0, inner, false);
+	made.forEach((m, i) => {
+		if (i > 0) {
+			withComments(m.node, m.comments, inner);
+		}
+	});
+}
+
+/** Puts a copy of a layer right above it. */
+function duplicate(doc: Document, at: number[]): void {
+	const { list, index, node } = placeOf(doc, at);
+	if (!layerNames.has(node.getName())) {
+		throw new Error("only a layer can be duplicated");
+	}
+	const indent = indentOf(node);
+	const { node: copy } = moved(node, indent, indent);
+	insert(list, [copy], index + 1, indent, at.length === 1);
+}
+
+/** Moves a layer into another list of layers, at a place in it, keeping its comments. */
+function moveTo(doc: Document, at: number[], into: number[] | null, index: number): void {
+	const { list, index: from, node } = placeOf(doc, at);
+	if (!layerNames.has(node.getName())) {
+		throw new Error("only a layer can be moved there");
+	}
+	if (into !== null && into.length >= at.length && at.every((v, i) => into[i] === v)) {
+		throw new Error("a layer can't go inside itself");
+	}
+	const holder = into === null ? null : nodeAt(doc, into);
+	if (holder !== null && !holdsLayers.has(holder.getName()) && !["define", "variant", "reverse"].includes(holder.getName())) {
+		throw new Error("only a group, panel, canton or emblem holds layers");
+	}
+	const indent = holder === null ? "" : innerIndent(holder);
+	const made = moved(node, indentOf(node), indent);
+	const target = holder === null ? doc : ensureBlock(holder, indentOf(holder));
+	const place = target === list && index > from ? index - 1 : index;
+	removeFrom(list, from, false);
+	insert(target, [made.node], Math.min(place, target.nodes.length), indent, holder === null);
+	withComments(made.node, made.comments, indent);
 }
 
 /** Puts a group's layers where it was, if it has nothing else that would be lost. */
@@ -692,7 +732,13 @@ function apply(doc: Document, op: Op): void {
 			nodeAt(doc, op.at).setName(op.name);
 			return;
 		case "wrap":
-			wrap(doc, op.at);
+			wrap(doc, op.at, op.count);
+			return;
+		case "duplicate":
+			duplicate(doc, op.at);
+			return;
+		case "moveTo":
+			moveTo(doc, op.at, op.into, op.index);
 			return;
 		case "unwrap":
 			unwrap(doc, op.at);

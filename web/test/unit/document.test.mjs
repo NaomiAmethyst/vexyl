@@ -485,3 +485,40 @@ test("a shape can be renamed in place, keeping its children", () => {
 	const disc = outline(text).find((x) => x.name === "field").kids[0].kids[0];
 	assert.equal(applyOps(text, [{ op: "rename", at: disc.at, name: "triangle" }]).text, text.replace("disc {", "triangle {"));
 });
+
+test("layers next to each other go in one group together, keeping the comments between them", () => {
+	const text = head + "field a\n// stripes\nbars a b\n// the disc\ncharge disc b {\n  radius 1\n}\nfield b\n";
+	const bars = outline(text).find((x) => x.name === "bars");
+	const out = applyOps(text, [{ op: "wrap", at: bars.at, count: 2 }]).text;
+	assert.equal(out, head + "field a\n// stripes\ngroup {\n  bars a b\n  // the disc\n  charge disc b {\n    radius 1\n  }\n}\nfield b\n");
+	assert.deepEqual(lib.validate(out), []);
+	assert.match(applyOps(text, [{ op: "wrap", at: bars.at, count: 4 }]).error, /next to each other/);
+});
+
+test("a layer is duplicated right above itself, at any level", () => {
+	const text = head + "field a\ncanton {\n  fly 10\n  hoist 5\n  field b\n  charge star a { radius 1; }\n}\n";
+	const star = outline(text).find((x) => x.name === "canton").kids.at(-1);
+	const out = applyOps(text, [{ op: "duplicate", at: star.at }]).text;
+	assert.equal(out, head + "field a\ncanton {\n  fly 10\n  hoist 5\n  field b\n  charge star a { radius 1; }\n  charge star a { radius 1; }\n}\n");
+	const top = applyOps(text, [{ op: "duplicate", at: outline(text).find((x) => x.name === "field").at }]).text;
+	assert.equal(top, head + "field a\nfield a\ncanton {\n  fly 10\n  hoist 5\n  field b\n  charge star a { radius 1; }\n}\n");
+});
+
+test("a layer moves into a holder, out of one, or into another, re-indented", () => {
+	const text = head + "field a\n// the disc\ncharge disc b {\n  radius 1\n}\ngroup {\n  field b\n}\ncanton {\n  fly 10\n  hoist 5\n  field b\n}\n";
+	const nodes = outline(text);
+	const disc = nodes.find((x) => x.name === "charge");
+	const group = nodes.find((x) => x.name === "group");
+	let out = applyOps(text, [{ op: "moveTo", at: disc.at, into: group.at, index: 1 }]).text;
+	assert.equal(out, head + "field a\ngroup {\n  field b\n  // the disc\n  charge disc b {\n    radius 1\n  }\n}\ncanton {\n  fly 10\n  hoist 5\n  field b\n}\n");
+	const now = outline(out);
+	const inner = now.find((x) => x.name === "group").kids[1];
+	const canton = now.find((x) => x.name === "canton");
+	out = applyOps(out, [{ op: "moveTo", at: inner.at, into: canton.at, index: 3 }]).text;
+	assert.ok(out.endsWith("  field b\n  // the disc\n  charge disc b {\n    radius 1\n  }\n}\n"), out);
+	const last = outline(out).find((x) => x.name === "canton").kids[3];
+	out = applyOps(out, [{ op: "moveTo", at: last.at, into: null, index: last.at[0] }]).text;
+	assert.ok(out.includes("\n// the disc\ncharge disc b {\n  radius 1\n}\ncanton {"), out);
+	assert.deepEqual(lib.validate(out), []);
+	assert.match(applyOps(text, [{ op: "moveTo", at: group.at, into: [...group.at], index: 0 }]).error, /inside itself/);
+});

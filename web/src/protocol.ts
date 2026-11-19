@@ -72,7 +72,9 @@ export type Op =
 	| { op: "add"; at: number[] | null; text: string; index?: number }
 	| { op: "move"; at: number[]; delta: number }
 	| { op: "rename"; at: number[]; name: string }
-	| { op: "wrap"; at: number[] }
+	| { op: "wrap"; at: number[]; count?: number }
+	| { op: "duplicate"; at: number[] }
+	| { op: "moveTo"; at: number[]; into: number[] | null; index: number }
 	| { op: "unwrap"; at: number[] }
 	| { op: "takeIn"; at: number[]; side: "below" | "above" }
 	| { op: "takeOut"; at: number[] }

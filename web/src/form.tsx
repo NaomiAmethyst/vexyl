@@ -11,7 +11,7 @@ import type { ONode, Op, OVal, RescalePreview } from "./protocol.js";
 import { colorUses, listText, replacementsFor, type ColorUse } from "./colors.js";
 import { layerSiblings, moveOps } from "./flagdrag.js";
 import { app, findPath } from "./store.js";
-import { addable, clipFields, clipShapeFields, clipShapes, describeTerm, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
+import { addable, clipFields, clipShapeFields, clipShapes, definedShapeOf, describeTerm, pathLineFields, shapeFieldsOf, placeLabel, exampleFor, freshName, kdlName, nameProblem, onlyOnce, takenNames, type NameKind, fieldsFor, handledChildren, layers as layerTerms, parts, repeatForms, shapes, shortLabel, skeletonFor, stepKinds, type Field } from "./vocab.js";
 
 const numberText = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
 /** What a number can look like halfway through being typed, which isn't a mistake yet. */
@@ -614,6 +614,8 @@ export interface Ctx {
 	names: readonly string[];
 	colors: ReadonlyMap<string, string>;
 	defines: readonly string[];
+	/** Each definition that's a shape, by name, with the shape it holds. */
+	shapes: ReadonlyMap<string, string>;
 	toSource: () => void;
 }
 
@@ -685,6 +687,9 @@ export function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JS
 			const c = child(node, f.child);
 			const arg = c?.args[0]?.v;
 			const custom = c !== undefined && typeof arg !== "string";
+			if (f.point === true) {
+				return <PointChoice node={node} f={f} ctx={ctx} />;
+			}
 			if (custom) {
 				return <Row label={f.label} note="Written as a position, which is edited in the source."><button type="button" class="nx-link self-start" onClick={ctx.toSource}>See it in the source</button></Row>;
 			}
@@ -720,6 +725,14 @@ export function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JS
 		case "propNum":
 			return <Input id={id} label={f.label} value={shown(prop(node, f.prop))} number {...(f.note !== undefined ? { note: f.note } : {})} onChange={(t) => { edit({ op: "entries", at: node.at, props: [[f.prop, t === "" ? null : vNum(t)]] }); }} />;
 		case "argText":
+			if (f.long === true) {
+				const big = node.args[f.i]?.big;
+				return <Input id={id} label={f.label} value={String(node.args[f.i]?.v ?? "")} wide mono={f.mono ?? false} long readonly={big !== undefined} {...(big !== undefined ? { note: `This is ${big.toLocaleString()} characters long, so it's edited in the source.` } : f.note !== undefined ? { note: f.note } : {})} onChange={(t) => {
+					const args = [...node.args];
+					args[f.i] = vStr(t);
+					edit({ op: "entries", at: node.at, args });
+				}} />;
+			}
 			return (
 				<Row label={f.label} id={id} note={f.note}>
 					<div class="inline-fields">
@@ -781,6 +794,12 @@ export function FieldView(props: { f: Field; node: ONode; ctx: Ctx }): preact.JS
 		}
 		case "clips":
 			return <ClipCut node={node} ctx={ctx} />;
+		case "propText":
+			return <Input id={id} label={f.label} value={shown(prop(node, f.prop))} mono={f.mono ?? false} {...(f.note !== undefined ? { note: f.note } : {})} onChange={(t) => { edit({ op: "entries", at: node.at, props: [[f.prop, t === "" ? null : vStr(t)]] }); }} />;
+		case "outlineForm":
+			return <OutlineForm node={node} ctx={ctx} />;
+		case "defineShape":
+			return <DefineShape node={node} ctx={ctx} />;
 		case "defineArg":
 			return (
 				<Row label="Definition" id={id}>
@@ -806,9 +825,17 @@ function inFrame(node: ONode, nodes: readonly ONode[]): boolean {
 	return node.name === "emblem";
 }
 
-/** The definitions that are a shape, which a clip or cut can use by name. */
-const shapeDefines = (nodes: readonly ONode[]): string[] =>
-	nodes.filter((n) => n.name === "define" && n.kids.length === 1 && Object.hasOwn(shapes, n.kids[0]!.name) && n.kids[0]!.name !== "svg").map((n) => String(n.args[0]?.v));
+/** The definitions that are a shape, by name, with the shape each holds, which charges, clips and cuts can use. */
+export function shapeDefines(nodes: readonly ONode[]): Map<string, string> {
+	const out = new Map<string, string>();
+	for (const n of nodes) {
+		const shape = n.name === "define" ? definedShapeOf(n) : undefined;
+		if (shape !== undefined && typeof n.args[0]?.v === "string") {
+			out.set(n.args[0].v, shape);
+		}
+	}
+	return out;
+}
 
 /** A line of a skeleton, such as `radius 1` or `point fly=0 hoist=0`, as a change to make. */
 function skeletonChild(at: number[], line: string, nth: number): Op {
@@ -834,8 +861,20 @@ function shapeSkeleton(name: string, middle: { fly: string; hoist: string }): st
 
 /** Changes a clip's or cut's shape, keeping what the two share and dropping what the new one can't have. */
 function shapeOps(shape: ONode, to: string, middle: { fly: string; hoist: string }): Op[] {
-	const keeps = handledChildren(clipShapeFields(to));
-	const ops: Op[] = [{ op: "rename", at: shape.at, name: to }];
+	const first: Op[] = [{ op: "rename", at: shape.at, name: to }];
+	// A one-line path's data and box go, since no other shape is written that way.
+	if (shape.args.length > 0 || shape.props.length > 0) {
+		first.push({ op: "entries", at: shape.at, args: [], props: shape.props.map(([k]) => [k, null]) });
+	}
+	return reshapeOps(shape, first, handledChildren(clipShapeFields(to)), shapeSkeleton(to, middle), to);
+}
+
+/**
+ * Changes what a term is, keeping the values the two share, dropping what the new one can't have,
+ * and adding what it needs to be drawn at all.
+ */
+function reshapeOps(shape: ONode, first: Op[], keeps: ReadonlySet<string>, skeleton: readonly string[], to: string): Op[] {
+	const ops: Op[] = [...first];
 	for (const k of shape.kids) {
 		if (!keeps.has(k.name)) {
 			ops.push({ op: "dropChild", at: shape.at, name: k.name });
@@ -846,7 +885,7 @@ function shapeOps(shape: ONode, to: string, middle: { fly: string; hoist: string
 		kept.set(k.name, (kept.get(k.name) ?? 0) + 1);
 	}
 	const seen = new Map<string, number>();
-	for (const line of shapeSkeleton(to, middle)) {
+	for (const line of skeleton) {
 		const name = line.trim().split(" ")[0]!;
 		const nth = seen.get(name) ?? 0;
 		seen.set(name, nth + 1);
@@ -858,12 +897,118 @@ function shapeOps(shape: ONode, to: string, middle: { fly: string; hoist: string
 	return ops;
 }
 
+/** A point picked from the region's named points, or given as a position anywhere. */
+function PointChoice(props: { node: ONode; f: Field & { k: "choice" }; ctx: Ctx }): preact.JSX.Element {
+	const { node, f, ctx } = props;
+	const c = child(node, f.child);
+	const arg = c?.args[0]?.v;
+	const at = c !== undefined && typeof arg !== "string";
+	const middle = middleOf(node, ctx.nodes);
+	const id = fieldId(f.label, node.at);
+	const value = at ? "position" : c === undefined ? (f.none ?? "") : String(arg);
+	return (
+		<div class="stack">
+			<Choice label={f.label} id={id} value={value} options={[...f.options, ["position", "A position"]]} {...(f.note !== undefined ? { note: f.note } : {})} onPick={(v) => {
+				if (v === "position") {
+					edit({ op: "child", at: node.at, name: f.child, args: [], props: [["fly", vNum(middle.fly)], ["hoist", vNum(middle.hoist)]] });
+				} else {
+					edit(v === (f.none ?? "") ? { op: "dropChild", at: node.at, name: f.child } : { op: "child", at: node.at, name: f.child, args: [vStr(v)], props: [["fly", null], ["hoist", null]] });
+				}
+			}} />
+			{at ? (
+				<div class="inline-fields">
+					<Input id={`${id}-f`} label="From the hoist edge" value={shown(prop(c, "fly"))} number onChange={(t) => { if (t !== "") { edit({ op: "child", at: node.at, name: f.child, props: [["fly", vNum(t)]] }); } }} />
+					<Input id={`${id}-h`} label="From the top" value={shown(prop(c, "hoist"))} number onChange={(t) => { if (t !== "") { edit({ op: "child", at: node.at, name: f.child, props: [["hoist", vNum(t)]] }); } }} />
+				</div>
+			) : null}
+		</div>
+	);
+}
+
+/** The flag's size on its grid, for drawing a new outline to fit it. */
+function flagSize(nodes: readonly ONode[]): { fly: number; hoist: number } {
+	const p = nodes.find((n) => n.name === "proportion");
+	return { fly: Number(prop(p, "fly")?.v ?? 3), hoist: Number(prop(p, "hoist")?.v ?? 2) };
+}
+
+const tidy = (n: number): string => String(Number(n.toFixed(6)));
+
+/** An outline's form: one of the named ones, a polygon or a path, each with its own values. */
+function OutlineForm(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
+	const { node, ctx } = props;
+	const polygon = child(node, "polygon");
+	const path = child(node, "path");
+	const named = typeof node.args[0]?.v === "string" ? String(node.args[0].v) : "";
+	const value = named !== "" ? named : polygon !== undefined ? "polygon" : path !== undefined ? "path" : "";
+	const { fly, hoist } = flagSize(ctx.nodes);
+	const pick = (v: string): void => {
+		if (v === value) {
+			return;
+		}
+		const ops: Op[] = [];
+		const drop = (name: string): void => {
+			for (let i = children(node, name).length; i > 0; i--) {
+				ops.push({ op: "dropChild", at: node.at, name });
+			}
+		};
+		for (const name of ["depth", "taper", "tongue", "tip", "polygon", "path"]) {
+			drop(name);
+		}
+		if (v === "polygon" || v === "path") {
+			ops.push({ op: "entries", at: node.at, args: [] });
+			ops.push({ op: "add", at: node.at, text: v === "polygon"
+				? `polygon {\n  point fly=0 hoist=0\n  point fly=${tidy(fly)} hoist=${tidy(hoist / 2)}\n  point fly=0 hoist=${tidy(hoist)}\n}`
+				: `path "M0 0H${tidy(fly)}L${tidy(fly * 0.75)} ${tidy(hoist / 2)}L${tidy(fly)} ${tidy(hoist)}H0Z" box="0 0 ${tidy(fly)} ${tidy(hoist)}"` });
+		} else {
+			ops.push({ op: "entries", at: node.at, args: [vStr(v)] });
+			if (v !== "pennant") {
+				ops.push({ op: "child", at: node.at, name: "depth", args: [vNum(tidy(fly / 4))] });
+			}
+			if (v === "tongued") {
+				ops.push({ op: "child", at: node.at, name: "tongue", args: [vNum(tidy(hoist / 3))] });
+			}
+		}
+		edit(...ops);
+	};
+	return (
+		<div class="stack">
+			<Choice label="Form" id={fieldId("outline-form", node.at)} value={value} options={[["swallowtail", "Swallowtail"], ["tongued", "Tongued"], ["pennant", "Pennant"], ["polygon", "Polygon"], ["path", "Path"]]} note="A polygon is any straight-edged shape. A path is any shape, stretched from its box to the flag." onPick={pick} />
+			{polygon !== undefined ? <Points node={polygon} f={{ k: "points", label: "Corners", child: "point" }} /> : null}
+			{path !== undefined ? pathLineFields.map((f, i) => <FieldView key={i} f={f} node={path} ctx={ctx} />) : null}
+		</div>
+	);
+}
+
+/** A definition that's a shape: which one, and its values. */
+function DefineShape(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
+	const { node, ctx } = props;
+	const shape = node.kids[0]!;
+	const form = definedShapeOf(node) ?? shape.name;
+	const fields = form === "path-line" ? pathLineFields : shapeFieldsOf(form);
+	const options = Object.entries(shapes).filter(([k]) => k !== "svg").map(([k, sh]) => [k, sh.label] as const);
+	return (
+		<div class="stack">
+			<Choice label="Shape" id={fieldId("define-shape", node.at)} value={shape.name} options={options} note="Charges, clips and cuts use it by this definition's name, and a charge can give it other sizes." onPick={(v) => {
+				if (v === shape.name) {
+					return;
+				}
+				const first: Op[] = [{ op: "rename", at: shape.at, name: v }];
+				if (shape.args.length > 0 || shape.props.length > 0) {
+					first.push({ op: "entries", at: shape.at, args: [], props: shape.props.map(([k]) => [k, null]) });
+				}
+				edit(...reshapeOps(shape, first, handledChildren(shapeFieldsOf(v)), shapes[v]!.skeleton.split("\n"), v));
+			}} />
+			{shownFields(shape, fields).map((f, i) => <FieldView key={`${form}-${i}`} f={f} node={shape} ctx={ctx} />)}
+		</div>
+	);
+}
+
 /** The shapes a layer is clipped to and cut by, each edited as a shape of its own. */
 function ClipCut(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
 	const { node, ctx } = props;
 	const wrappers = node.kids.filter((k) => k.name === "clip" || k.name === "cut");
 	const framed = inFrame(node, ctx.nodes);
-	const options = clipShapes(shapeDefines(ctx.nodes), framed);
+	const options = clipShapes([...ctx.shapes.keys()], framed);
 	const middle = middleOf(node, ctx.nodes);
 	const first = framed ? "disc" : "pile";
 	const add = (name: "clip" | "cut"): void => {
@@ -1196,7 +1341,7 @@ function placeProblems(node: ONode, fields: readonly Field[], problems: readonly
 		const f = fields.find((x) => names.some((n) => handledChildren([x]).has(n)))
 			?? (/\bcolor\b/i.test(p.message) ? fields.find((x) => x.k === "colorArg" || x.k === "colorArgs") : undefined);
 		if (f === undefined) {
-			rest.push(inFormWords(p.message, fields));
+			rest.push((kid !== undefined ? `${kid.name}: ` : "") + inFormWords(p.message, fields));
 		} else {
 			at.set(f, [...(at.get(f) ?? []), inFormWords(p.message, fields)]);
 		}
@@ -1226,6 +1371,7 @@ const panelFor = (path: string): string => path;
 
 export function Form(): preact.JSX.Element {
 	const [s] = useApp();
+	const [picked, setPicked] = useState<readonly string[]>([]);
 	const analysis = s.analysis;
 	const nodes = analysis?.readable === true ? analysis.nodes : s.lastReadable?.nodes ?? [];
 	const unreadable = analysis !== null && !analysis.readable;
@@ -1237,18 +1383,31 @@ export function Form(): preact.JSX.Element {
 		return <div class="form-body skeletons" aria-hidden="true"><span class="bone" /><span class="bone" /><span class="bone" /></div>;
 	}
 	const open = selected !== null;
+	const layerRowsAll = groups.flatMap((g) => g.rows).filter((r): r is RowDef & { layer: ONode } => r.layer !== undefined);
+	const pickedRows = picked.flatMap((p) => layerRowsAll.filter((r) => r.path === p));
+	const toggle = (r: RowDef & { layer: ONode }, range: boolean): void => {
+		const last = pickedRows.at(-1);
+		if (range && last !== undefined && sameLevel(last.layer, r.layer)) {
+			const [a, b] = [layerRowsAll.indexOf(last), layerRowsAll.indexOf(r)].sort((x, y) => x - y);
+			const between = layerRowsAll.slice(a!, b! + 1).filter((x) => sameLevel(x.layer, r.layer)).map((x) => x.path);
+			setPicked([...new Set([...picked, ...between])]);
+			return;
+		}
+		setPicked(picked.includes(r.path) ? picked.filter((p) => p !== r.path) : [...picked, r.path]);
+	};
 	return (
 		<div class="form-slider">
 			<div class={`form-track${open ? " open" : ""}`}>
 				<div class="form-page" hidden={open}>
 					{open ? null : paused()}
 					{nodes.length === 0 ? <p class="nx-empty">Nothing can be read in this file yet.</p> : null}
+					{pickedRows.length > 0 && !unreadable ? <PickBar rows={pickedRows.map((r) => r.layer)} onDone={() => { setPicked([]); }} /> : null}
 					{groups.map((g) => (
 						<div class="row-group" key={g.label}>
 							<span class="nx-label row-group-label">{g.label}</span>
 							{g.rows.length === 0 ? <p class="nx-empty pad-row">Nothing yet.</p> : null}
-							{g.label === "Layers" && g.rows.length > 1 ? <p class="nx-note pad-row">Each layer paints over the ones above it in this list.</p> : null}
-							{g.rows.map((r) => <RowView key={r.path} r={r} nodes={nodes} bad={marked.has(r.path)} hover={s.hover === r.path} />)}
+							{g.label.startsWith("Layers") && g.rows.length > 1 ? <p class="nx-note pad-row">Each layer paints over the ones above it in this list. Pick several with the box beside each, or Ctrl-click and Shift-click, to group, duplicate or remove them at once.</p> : null}
+							{g.rows.map((r) => <RowView key={r.path} r={r} nodes={nodes} bad={marked.has(r.path)} hover={s.hover === r.path} {...(r.layer !== undefined ? { pick: { on: picked.includes(r.path), toggle: (range: boolean) => { toggle(r as RowDef & { layer: ONode }, range); } } } : {})} />)}
 						</div>
 					))}
 					{!unreadable ? <AddTerm nodes={nodes} into={null} /> : null}
@@ -1282,7 +1441,8 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const [showSource, setShowSource] = useState(false);
 	const inPalette = node.path?.startsWith("palette/") === true;
 	const isPalette = node.name === "palette" && node.path === "palette";
-	const { term, fields, extra } = fieldsFor(node, inPalette);
+	const shapeMap = shapeDefines(nodes);
+	const { term, fields, extra } = fieldsFor(node, inPalette, shapeMap);
 	const clipping = extra.length > 0 && node.path !== undefined ? clipFields : [];
 	const placed = placeProblems(node, [...fields, ...extra, ...clipping], problems);
 	const pal = paletteOf(nodes);
@@ -1290,7 +1450,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 	const toSource = (): void => {
 		app.setMode("source");
 	};
-	const ctx: Ctx = { nodes, paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, toSource };
+	const ctx: Ctx = { nodes, paletteAt: nodes.find((n) => n.name === "palette")?.at ?? null, names: pal.names, colors: pal.colors, defines, shapes: shapeMap, toSource };
 	const hidden = onlyInSource(node, [...fields, ...extra, ...clipping], inPalette);
 	const title = inPalette ? decodePathName(node.path!.slice(8)) : isPalette ? "Colors" : node.name === "variant" || node.name === "fold" || node.name === "define" ? capitalize(String(node.args[0]?.v ?? labelFor(node))) : labelFor(node);
 	const desc = inPalette ? (node.args[0]?.v === "gradient" ? "A gradient between other colors, which can be used wherever a color is." : "Pantone, CMYK and other references travel with the color, and are never drawn from.") : isPalette ? "The flag's palette. Pantone, CMYK and other references travel with each color." : node.name === "charge" ? (shapes[String(node.args[0]?.v)]?.desc ?? "A definition, placed at a position.") : term?.desc ?? "";
@@ -1323,7 +1483,7 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 			</div>
 			{placed.rest.length > 0 ? <p class="nx-callout danger panel-problems" role="alert"><span>{placed.rest.join(" ")}</span></p> : null}
 			{isPalette ? <Palette node={node} nodes={nodes} ctx={ctx} /> : null}
-			{node.name === "charge" ? <ChargeShape node={node} /> : null}
+			{node.name === "charge" ? <ChargeShape node={node} ctx={ctx} /> : null}
 			{inPalette ? <NameField key={node.at.join(".")} node={node} kind="color" nodes={nodes} /> : null}
 			{node.name === "variant" || node.name === "fold" || node.name === "define" ? <NameField key={node.at.join(".")} node={node} kind={node.name} nodes={nodes} /> : null}
 			{ownField !== undefined ? (
@@ -1357,10 +1517,10 @@ function Panel(props: { node: ONode; nodes: readonly ONode[]; problems: readonly
 					<button type="button" class="nx-link self-start" onClick={toSource}>Edit in the source</button>
 				</div>
 			) : null}
-			{node.name === "outline" && (child(node, "polygon") !== undefined || child(node, "path") !== undefined) ? <p class="nx-note">This outline is drawn with a {child(node, "polygon") !== undefined ? "polygon" : "path"}, which is edited in the source.</p> : null}
 			<div class="panel-actions">
 				{canMove ? <button type="button" class="nx-ghost small" disabled={place <= 0} onClick={() => { moveAmongLayers(node, siblings, -1); }}>Move down a layer</button> : null}
 				{canMove ? <button type="button" class="nx-ghost small" disabled={place < 0 || place >= siblings.length - 1} onClick={() => { moveAmongLayers(node, siblings, 1); }}>Move up a layer</button> : null}
+				{canMove ? <button type="button" class="nx-ghost small" onClick={() => { void app.changeAndFollow([{ op: "duplicate", at: node.at }], { at: [...node.at.slice(0, -1), node.at.at(-1)! + 1] }).then(told); }}>Duplicate</button> : null}
 				{canMove ? <Regroup node={node} nodes={nodes} /> : null}
 				{removable ? <button type="button" class="nx-ghost small danger" aria-expanded={inPalette ? (uses.length > 0 ? "true" : "false") : undefined} onClick={() => {
 					// A color something uses can't just go, or the file would name a color it doesn't have.
@@ -1439,13 +1599,55 @@ let draggedRow: ONode | null = null;
 
 const sameLevel = (a: ONode, b: ONode): boolean => a.at.slice(0, -1).join(".") === b.at.slice(0, -1).join(".");
 
-/** A row in a list of what a flag has. A layer's can also be moved or taken out from where it is. */
-function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hover: boolean }): preact.JSX.Element {
-	const { r, nodes, bad } = props;
-	const [over, setOver] = useState(false);
+/** Whether one term holds another, however deep. */
+const holdsTerm = (outer: ONode, inner: ONode): boolean => inner.at.length > outer.at.length && outer.at.every((v, i) => inner.at[i] === v);
+
+/** Where a dragged layer would go if dropped on a row: just before it, just after it, or inside it. */
+type DropMode = "before" | "after" | "inside";
+
+function dropModeAt(e: DragEvent, target: ONode, dragged: ONode): DropMode | null {
+	if (dragged === target || holdsTerm(dragged, target)) {
+		return null;
+	}
+	const box = (e.currentTarget as HTMLElement).getBoundingClientRect();
+	const y = (e.clientY - box.top) / Math.max(box.height, 1);
+	const holder = layerTerms[target.name]?.layers === true && (target.name !== "emblem" || dragged.name === "charge");
+	if (holder && y > 0.25 && y < 0.75) {
+		return "inside";
+	}
+	return y < 0.5 ? "before" : "after";
+}
+
+/** Moves a dragged layer to where it was dropped, among its own siblings or into another list. */
+function dropLayer(dragged: ONode, target: ONode, mode: DropMode, nodes: readonly ONode[]): void {
+	if (mode === "inside") {
+		edit({ op: "moveTo", at: dragged.at, into: [...target.at], index: target.kids.length });
+	} else if (sameLevel(dragged, target)) {
+		const siblings = layerSiblings(target, nodes);
+		const d = siblings.indexOf(dragged);
+		const t = siblings.indexOf(target);
+		moveLayer(dragged, siblings, mode === "before" ? (d > t ? t : t - 1) : (d > t ? t + 1 : t));
+	} else {
+		const parent = target.at.slice(0, -1);
+		edit({ op: "moveTo", at: dragged.at, into: parent.length === 0 ? null : parent, index: target.at.at(-1)! + (mode === "after" ? 1 : 0) });
+	}
+	app.hover(null);
+}
+
+/** A row in a list of what a flag has. A layer's can also be moved, picked or taken out from the row. */
+function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hover: boolean; pick?: { on: boolean; toggle: (range: boolean) => void } }): preact.JSX.Element {
+	const { r, nodes, bad, pick } = props;
+	const [over, setOver] = useState<DropMode | null>(null);
 	const button = (
-		<button type="button" class={`row depth-${Math.min(r.depth, 4)}${props.hover ? " hover" : ""}${bad ? " bad" : ""}`} data-path={r.path}
-			onClick={() => { app.select(r.path); }} onMouseEnter={() => { app.hover(r.path); }} onMouseLeave={() => { app.hover(null); }} onFocus={() => { app.hover(r.path); }} onBlur={() => { app.hover(null); }}>
+		<button type="button" class={`row depth-${Math.min(r.depth, 4)}${props.hover ? " hover" : ""}${bad ? " bad" : ""}${pick?.on === true ? " picked" : ""}`} data-path={r.path}
+			onClick={(e) => {
+				if (pick !== undefined && (e.ctrlKey || e.metaKey || e.shiftKey)) {
+					e.preventDefault();
+					pick.toggle(e.shiftKey);
+					return;
+				}
+				app.select(r.path);
+			}} onMouseEnter={() => { app.hover(r.path); }} onMouseLeave={() => { app.hover(null); }} onFocus={() => { app.hover(r.path); }} onBlur={() => { app.hover(null); }}>
 			{r.swatch !== undefined ? <span class="swatch" aria-hidden="true" style={{ background: r.swatch }} /> : null}
 			<span class="row-label">{r.label}</span>
 			<span class={`row-note${r.mono === true ? " mono" : ""}`}>{r.note}</span>
@@ -1460,7 +1662,7 @@ function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hove
 	const siblings = layerSiblings(layer, nodes);
 	const place = siblings.indexOf(layer);
 	return (
-		<div class={`row-wrap${over ? " row-over" : ""}`} draggable data-row={r.path}
+		<div class={`row-wrap${over !== null ? ` row-over row-over-${over}` : ""}${pick?.on === true ? " row-picked" : ""}`} draggable data-row={r.path}
 			onDragStart={(e) => {
 				e.stopPropagation();
 				e.dataTransfer?.setData("text/plain", r.label);
@@ -1470,33 +1672,69 @@ function RowView(props: { r: RowDef; nodes: readonly ONode[]; bad: boolean; hove
 				draggedRow = layer;
 			}}
 			onDragOver={(e) => {
-				if (draggedRow !== null && draggedRow !== layer && sameLevel(draggedRow, layer)) {
+				const mode = draggedRow === null ? null : dropModeAt(e, layer, draggedRow);
+				if (mode !== null) {
 					e.preventDefault();
 					e.stopPropagation();
-					setOver(true);
+					setOver(mode);
 				}
 			}}
-			onDragLeave={() => { setOver(false); }}
+			onDragLeave={() => { setOver(null); }}
 			onDrop={(e) => {
 				e.preventDefault();
 				e.stopPropagation();
-				setOver(false);
-				if (draggedRow !== null && sameLevel(draggedRow, layer)) {
-					moveLayer(draggedRow, siblings, place);
+				const mode = draggedRow === null ? null : dropModeAt(e, layer, draggedRow);
+				setOver(null);
+				if (draggedRow !== null && mode !== null) {
+					dropLayer(draggedRow, layer, mode, nodes);
 				}
 				draggedRow = null;
 			}}
 			onDragEnd={() => {
 				draggedRow = null;
-				setOver(false);
+				setOver(null);
 			}}>
 			<span class="row-grip" aria-hidden="true">⠿</span>
 			{button}
 			<span class="row-actions">
+				{pick !== undefined ? <button type="button" class="row-act" role="checkbox" aria-checked={pick.on ? "true" : "false"} aria-label={`Pick ${r.label}`} title="Pick, to act on several at once" onClick={(e) => { pick.toggle(e.shiftKey); }}>{pick.on ? "☑" : "☐"}</button> : null}
 				<button type="button" class="row-act" aria-label={`Move ${r.label} up the list`} title="Up the list" disabled={place <= 0} onClick={() => { moveLayer(layer, siblings, place - 1); }}>↑</button>
 				<button type="button" class="row-act" aria-label={`Move ${r.label} down the list`} title="Down the list" disabled={place < 0 || place >= siblings.length - 1} onClick={() => { moveLayer(layer, siblings, place + 1); }}>↓</button>
 				<button type="button" class="row-act" aria-label={`Remove ${r.label}`} title="Remove" onClick={() => { edit({ op: "remove", at: layer.at }); app.hover(null); }}>×</button>
 			</span>
+		</div>
+	);
+}
+
+/** Later places first, so that acting on one never moves another still to come. */
+const laterFirst = (a: ONode, b: ONode): number => {
+	for (let i = 0; i < Math.min(a.at.length, b.at.length); i++) {
+		if (a.at[i] !== b.at[i]) {
+			return b.at[i]! - a.at[i]!;
+		}
+	}
+	return b.at.length - a.at.length;
+};
+
+/** What can be done to several picked layers at once. */
+function PickBar(props: { rows: readonly ONode[]; onDone: () => void }): preact.JSX.Element {
+	// A layer inside another that's picked goes with it.
+	const tops = props.rows.filter((n) => !props.rows.some((o) => o !== n && holdsTerm(o, n))).sort(laterFirst);
+	const sorted = [...tops].reverse();
+	const consecutive = sorted.every((n, i) => i === 0 || (sameLevel(n, sorted[0]!) && n.at.at(-1) === sorted[i - 1]!.at.at(-1)! + 1));
+	const act = (ops: Op[]): void => {
+		void app.edit(ops);
+		app.select(null, false);
+		props.onDone();
+	};
+	const count = props.rows.length;
+	return (
+		<div class="pick-bar" role="group" aria-label="Picked layers">
+			<span class="pick-count">{count} {count === 1 ? "layer" : "layers"} picked</span>
+			<button type="button" class="nx-ghost small" disabled={!consecutive} title={consecutive ? undefined : "Only layers next to each other, at the same level, go in a group together."} onClick={() => { act([{ op: "wrap", at: sorted[0]!.at, count: sorted.length }]); }}>Put in a group</button>
+			<button type="button" class="nx-ghost small" onClick={() => { act(tops.map((n) => ({ op: "duplicate", at: n.at }))); }}>Duplicate</button>
+			<button type="button" class="nx-ghost small danger" onClick={() => { act(tops.map((n) => ({ op: "remove", at: n.at }))); }}>Remove</button>
+			<button type="button" class="nx-ghost small" onClick={props.onDone}>Clear</button>
 		</div>
 	);
 }
@@ -1601,16 +1839,27 @@ function ProportionFields(props: { node: ONode; fields: readonly Field[]; ctx: C
 	);
 }
 
-function ChargeShape(props: { node: ONode }): preact.JSX.Element {
-	const { node } = props;
+function ChargeShape(props: { node: ONode; ctx: Ctx }): preact.JSX.Element {
+	const { node, ctx } = props;
 	const value = String(node.args[0]?.v ?? "");
 	const pick = (shape: string): void => {
-		const args = [...node.args];
-		args[0] = vStr(shape);
-		edit({ op: "entries", at: node.at, args });
+		if (shape === value) {
+			return;
+		}
+		// Inline artwork has no color, and anything else needs one.
+		const color = node.args[1] ?? vStr(ctx.names[0] ?? "none");
+		const args = shape === "svg" ? [vStr(shape)] : [vStr(shape), color, ...node.args.slice(2)];
+		const { fields, extra } = fieldsFor({ name: "charge", args }, false, ctx.shapes);
+		const keeps = handledChildren([...fields, ...extra, ...clipFields]);
+		// Inline artwork's markup is a multi-line string, which goes in whole.
+		const ops = reshapeOps(node, [{ op: "entries", at: node.at, args }], keeps, shape === "svg" ? ["fly 1", "hoist 1"] : Object.hasOwn(shapes, shape) ? shapes[shape]!.skeleton.split("\n") : [], shape);
+		if (shape === "svg" && child(node, "markup") === undefined) {
+			ops.push({ op: "add", at: node.at, text: shapes.svg!.skeleton.slice(shapes.svg!.skeleton.indexOf("markup")) });
+		}
+		edit(...ops);
 	};
 	return (
-		<Row label="Shape" note="Changing the shape keeps sizes they share. Others stay in the file until you change them.">
+		<Row label="Shape" note="Changing the shape keeps the sizes they share, and leaves out what the new one doesn't take.">
 			<div class="shape-picker" role="group" aria-label="Shape">
 				{Object.hasOwn(shapes, value) ? null : <button type="button" class="shape-tile on" aria-pressed="true" data-shape={value}><span class="shape-tile-name">{value}</span></button>}
 				{Object.entries(shapes).map(([k, s]) => (

@@ -76,7 +76,7 @@ export function BasicDetails(props: { nodes: readonly ONode[] }): preact.JSX.Ele
 	const meta = nodes.find((n) => n.name === "meta");
 	const palette = nodes.find((n) => n.name === "palette");
 	const pal = paletteOf(nodes);
-	const ctx: Ctx = { nodes, paletteAt: palette?.at ?? null, names: pal.names, colors: pal.colors, defines: [], toSource: () => { app.setMode("source"); } };
+	const ctx: Ctx = { nodes, paletteAt: palette?.at ?? null, names: pal.names, colors: pal.colors, defines: [], shapes: new Map(), toSource: () => { app.setMode("source"); } };
 	const printing = colorFields.filter((f) => f.k !== "argText" && f.k !== "heading");
 	const section = (title: string, about: string, body: preact.ComponentChildren): preact.JSX.Element => (
 		<details class="details-part">

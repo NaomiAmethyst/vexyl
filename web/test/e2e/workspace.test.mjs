@@ -259,26 +259,22 @@ test("a number that isn't one is said so, and the file isn't touched", async () 
 });
 
 test("anything the form can't edit says so, offers the source, and is left alone", async () => {
-	const body = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\ndefine badge {\n  path "M0 0H1V1Z" box="0 0 1 1"\n}\nfield b\ncharge badge a {\n  fly 2\n  hoist 2\n}\n';
+	const body = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\nfield b\nvariant v {\n  outline pennant\n}\n';
 	const { p, context, errors } = await page(undefined);
 	await p.goto(`${srv.base}?view=open`);
 	await p.getByRole("tab", { name: "Paste" }).click();
 	await p.getByLabel("KDL").fill(body);
 	await p.getByRole("button", { name: "Open", exact: true }).click();
 	await ready(p);
-	await row(p, "define/badge").click();
+	await row(p, "variant/v").click();
 	await p.getByText("The form can't edit this yet").waitFor();
-	await p.locator(".source-only").getByText("path").waitFor();
-	const name = p.getByLabel("Name", { exact: true });
-	await name.fill("seal");
-	await name.press("Enter");
-	await p.locator(".panel-head h2", { hasText: "Seal" }).waitFor();
+	await p.locator(".source-only").getByText("outline").waitFor();
+	await p.getByLabel("Turns by").selectOption("mirror");
 	await p.waitForFunction(() => document.querySelector(".status")?.textContent === "Valid");
 	const out = await savedText(p);
-	assert.ok(out.includes('define seal {\n  path "M0 0H1V1Z" box="0 0 1 1"\n}'), out);
-	assert.ok(out.includes("charge seal a {"), out);
+	assert.ok(out.includes("variant v {\n  outline pennant\n  from mirror\n}") || out.includes("variant v {\n  from mirror\n  outline pennant\n}"), out);
 	await p.getByRole("button", { name: "Edit in the source" }).click();
-	await p.locator(".cm-line", { hasText: "path" }).waitFor();
+	await p.locator(".cm-line", { hasText: "outline pennant" }).waitFor();
 	assert.deepEqual(errors, []);
 	await context.close();
 });
@@ -456,7 +452,7 @@ test("layers can be moved and taken out from the structure, by button or by drag
 	await p.getByRole("button", { name: `Move ${before[1]} up the list` }).click();
 	await p.waitForFunction((first) => document.querySelector(".row-wrap > .row .row-label")?.textContent === first, before[1]);
 	assert.equal(await p.locator(".panel-head").count() === 0 || !(await p.locator(".panel-head").isVisible()), true, "the panel stays closed");
-	await p.locator('[data-row="1"]').dragTo(p.locator('[data-row="0"]'));
+	await p.locator('[data-row="1"]').dragTo(p.locator('[data-row="0"]'), { targetPosition: { x: 40, y: 2 } });
 	await p.waitForFunction((first) => document.querySelector(".row-wrap > .row .row-label")?.textContent === first, before[0]);
 	await p.getByRole("button", { name: `Remove ${before[0]}` }).click();
 	await p.waitForFunction((gone) => ![...document.querySelectorAll(".row-wrap > .row .row-label")].some((r) => r.textContent === gone), before[0]);
@@ -747,6 +743,111 @@ test("layers can be put in a group, clipped and cut by any shape, and taken out 
 	await p.getByRole("button", { name: "Ungroup" }).click();
 	await p.waitForFunction((t) => document.querySelector(".panel-head h2")?.textContent === t, "Bars");
 	assert.equal(await savedText(p), original);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+/** Opens a pasted file. */
+async function pasted(body) {
+	const opened = await page(undefined);
+	await opened.p.goto(`${srv.base}?view=open`);
+	await opened.p.getByRole("tab", { name: "Paste" }).click();
+	await opened.p.getByLabel("KDL").fill(body);
+	await opened.p.getByRole("button", { name: "Open", exact: true }).click();
+	await ready(opened.p);
+	return opened;
+}
+
+const pastedHead = 'vexyl 1\nmeta {\n  name "T"\n}\npalette {\n  a "#112233"\n  b "#445566"\n}\nproportion hoist=10 fly=20\n';
+const valid = (p) => p.waitForFunction(() => document.querySelector(".status")?.textContent === "Valid");
+
+test("changing a charge's shape leaves out what the new shape doesn't take, and adds what it needs", async () => {
+	const { p, context, errors } = await pasted(pastedHead + "field b\ncharge ring a {\n  radius 2\n  inner 1\n}\n");
+	await row(p, "1").click();
+	await p.locator('.shape-tile[data-shape="disc"]').click();
+	await valid(p);
+	let out = await savedText(p);
+	assert.ok(out.includes("charge disc a {\n  radius 2\n}"), out);
+	await p.locator('.shape-tile[data-shape="rect"]').click();
+	await valid(p);
+	out = await savedText(p);
+	assert.ok(out.includes("charge rect a {\n  fly 2\n  hoist 1\n}"), out);
+	await p.locator('.shape-tile[data-shape="svg"]').click();
+	await p.locator('.shape-tile[data-shape="star"]').click();
+	await valid(p);
+	assert.ok((await savedText(p)).includes("charge star a {\n  fly 2\n  hoist 1\n  radius 1\n}") === false, "a star has no fly or hoist");
+	assert.match(await savedText(p), /charge star a \{\n {2}radius 1\n\}/);
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("a shape definition, an outline's polygon or path, and rays from a position are all edited in the form", async () => {
+	const body = pastedHead + 'outline pennant\ndefine leaf {\n  path "M0 0H1V1Z" box="0 0 1 1"\n}\nfield b\nrays a b {\n  from fly=3 hoist=4\n}\n';
+	const { p, context, errors } = await pasted(body);
+	await row(p, "define/leaf").click();
+	assert.equal(await p.getByLabel("Path data").inputValue(), "M0 0H1V1Z");
+	await p.getByLabel("Box", { exact: true }).fill("0 0 2 1");
+	await valid(p);
+	assert.ok((await savedText(p)).includes('path "M0 0H1V1Z" box="0 0 2 1"'));
+	assert.equal(await p.locator(".source-only").count(), 0, "nothing's left for the source");
+	await p.getByLabel("Shape", { exact: true }).selectOption("star");
+	await valid(p);
+	assert.ok((await savedText(p)).includes("define leaf {\n  star {\n    radius 1\n  }\n}"), await savedText(p));
+	await p.getByRole("button", { name: /Structure/ }).click();
+	await row(p, "1").click();
+	assert.equal(await p.getByLabel("From the hoist edge").inputValue(), "3");
+	await p.getByLabel("From the top").fill("5");
+	await valid(p);
+	assert.ok((await savedText(p)).includes("from fly=3 hoist=5"));
+	await p.getByLabel("From", { exact: true }).selectOption("upper-fly");
+	await valid(p);
+	assert.ok((await savedText(p)).includes("from upper-fly\n"), await savedText(p));
+	await p.getByRole("button", { name: /Structure/ }).click();
+	await row(p, "outline").click();
+	await p.getByRole("radiogroup", { name: "Form" }).getByRole("radio", { name: "Polygon" }).click();
+	await valid(p);
+	assert.ok((await savedText(p)).includes("outline {\n  polygon {\n    point fly=0 hoist=0\n    point fly=20 hoist=5\n    point fly=0 hoist=10\n  }\n}"), await savedText(p));
+	await p.getByRole("radiogroup", { name: "Form" }).getByRole("radio", { name: "Path" }).click();
+	await valid(p);
+	assert.match(await savedText(p), /outline \{\n {2}path "M0 0H20L15 5L20 10H0Z" box="0 0 20 10"\n\}/);
+	await p.getByRole("radiogroup", { name: "Form" }).getByRole("radio", { name: "Swallowtail" }).click();
+	await valid(p);
+	assert.ok((await savedText(p)).includes("outline swallowtail {\n  depth 5\n}"), await savedText(p));
+	assert.deepEqual(errors, []);
+	await context.close();
+});
+
+test("several layers can be picked, then grouped, duplicated or removed together, and dragged into or out of a holder", async () => {
+	const { p, context, errors } = await pasted(pastedHead + "field b\nbars a b\ncharge disc a {\n  radius 1\n}\ngroup {\n  field a\n}\n");
+	await row(p, "1").click({ modifiers: ["Control"] });
+	await row(p, "2").click({ modifiers: ["Shift"] });
+	await p.locator(".pick-bar").getByText("2 layers picked").waitFor();
+	assert.equal(await p.locator(".panel-head").isVisible(), false, "picking doesn't open a panel");
+	await p.locator(".pick-bar").getByRole("button", { name: "Duplicate" }).click();
+	await valid(p);
+	assert.ok((await savedText(p)).includes("bars a b\nbars a b\ncharge disc a {\n  radius 1\n}\ncharge disc a {\n  radius 1\n}\n"), await savedText(p));
+	await p.locator('[data-row="2"]').hover();
+	await p.getByRole("checkbox", { name: "Pick Bars" }).last().click();
+	await p.locator('[data-row="3"]').hover();
+	await p.getByRole("checkbox", { name: "Pick Disc" }).first().click();
+	await p.locator(".pick-bar").getByRole("button", { name: "Put in a group" }).click();
+	await valid(p);
+	assert.ok((await savedText(p)).includes("bars a b\ngroup {\n  bars a b\n  charge disc a {\n    radius 1\n  }\n}\ncharge disc a"), await savedText(p));
+	await p.locator('[data-row="3"]').dragTo(p.locator('[data-row="4"]'));
+	await valid(p);
+	assert.ok((await savedText(p)).endsWith("group {\n  field a\n  charge disc a {\n    radius 1\n  }\n}\n"), await savedText(p));
+	await p.locator('[data-row="3.1"]').dragTo(p.locator('[data-row="0"]'), { targetPosition: { x: 40, y: 2 } });
+	await valid(p);
+	assert.ok((await savedText(p)).includes(pastedHead + "charge disc a {\n  radius 1\n}\nfield b"), await savedText(p));
+	await row(p, "0").click({ modifiers: ["Control"] });
+	await row(p, "1").click({ modifiers: ["Control"] });
+	await p.locator(".pick-bar").getByRole("button", { name: "Remove" }).click();
+	await valid(p);
+	assert.ok((await savedText(p)).startsWith(pastedHead + "bars a b\ngroup {"), await savedText(p));
+	await row(p, "0").click();
+	await p.getByRole("button", { name: "Duplicate" }).click();
+	await p.waitForFunction(() => document.querySelector(".panel-head h2")?.textContent === "Bars");
+	assert.ok((await savedText(p)).startsWith(pastedHead + "bars a b\nbars a b\ngroup {"), await savedText(p));
 	assert.deepEqual(errors, []);
 	await context.close();
 });

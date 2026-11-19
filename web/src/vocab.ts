@@ -24,7 +24,7 @@ type FieldKind =
 	| { k: "colorArgs"; label: string; from: number; note?: string }
 	| { k: "num"; label: string; child: string; note?: string; wide?: boolean }
 	| { k: "nums"; label: string; child: string; count?: number; note?: string; hints?: readonly string[] }
-	| { k: "choice"; label: string; child: string; options: readonly Choice[]; none?: string; note?: string }
+	| { k: "choice"; label: string; child: string; options: readonly Choice[]; none?: string; note?: string; point?: boolean }
 	| { k: "flag"; label: string; child: string; note?: string }
 	| { k: "text"; label: string; child: string; wide?: boolean; note?: string; mono?: boolean; long?: boolean }
 	| { k: "texts"; label: string; child: string; add: string; note?: string; link?: boolean }
@@ -32,7 +32,8 @@ type FieldKind =
 	| { k: "at"; label: string; note?: string; many?: boolean }
 	| { k: "props"; label: string; child: string; props: readonly (readonly [string, string])[]; note?: string }
 	| { k: "propNum"; label: string; prop: string; note?: string }
-	| { k: "argText"; label: string; i: number; note?: string; mono?: boolean; readonly?: boolean }
+	| { k: "argText"; label: string; i: number; note?: string; mono?: boolean; readonly?: boolean; long?: boolean }
+	| { k: "propText"; label: string; prop: string; note?: string; mono?: boolean }
 	| { k: "argNum"; label: string; i: number; note?: string }
 	| { k: "argChoice"; label: string; i: number; options: readonly Choice[]; none?: string; note?: string }
 	| { k: "edge" }
@@ -43,7 +44,9 @@ type FieldKind =
 	| { k: "points"; label: string; child: string }
 	| { k: "artwork" }
 	| { k: "defineArg" }
-	| { k: "clips" };
+	| { k: "clips" }
+	| { k: "outlineForm" }
+	| { k: "defineShape" };
 
 export interface Term {
 	label: string;
@@ -163,7 +166,7 @@ export const layers: Readonly<Record<string, Term>> = {
 		label: "Rays", desc: "Wedges spreading from a point, going clockwise.", kind: "layer", skeleton: "rays {a} {b} {\n  count 8\n}",
 		fields: [
 			{ k: "colorArgs", label: "Colors", from: 0 },
-			{ k: "choice", label: "From", child: "from", none: "center", options: [["center", "Center"], ...corners, ...edge], note: "A position elsewhere is kept, and can be changed in the source." },
+			{ k: "choice", label: "From", child: "from", none: "center", options: [["center", "Center"], ...corners, ...edge], point: true, note: "The point the rays spread from: the middle, a corner, the middle of an edge, or any position." },
 			{ k: "num", label: "Count", child: "count" },
 			unevenly,
 			{ k: "choice", label: "Measure", child: "measure", options: [["angle", "Angle"], ["edge", "Edge"]], none: "angle" },
@@ -323,7 +326,7 @@ export const parts: Readonly<Record<string, Term>> = {
 	outline: {
 		label: "Outline", desc: "A shape other than a rectangle, such as a swallowtail or a pennant, which everything paints inside.", kind: "part", skeleton: "outline swallowtail {\n  depth 1\n}",
 		fields: [
-			{ k: "argChoice", label: "Form", i: 0, none: "", options: [["swallowtail", "Swallowtail"], ["tongued", "Tongued"], ["pennant", "Pennant"]], note: "A polygon or path outline is edited in the source." },
+			{ k: "outlineForm" },
 			{ k: "num", label: "Depth", child: "depth", note: "How far the cut reaches in from the fly.", when: { argIs: [0, ["swallowtail", "tongued"]] } },
 			{ k: "num", label: "Taper", child: "taper", note: "Narrows the ends of the tails.", when: { argIs: [0, ["swallowtail"]] } },
 			{ k: "num", label: "Tongue", child: "tongue", when: { argIs: [0, ["tongued"]] } },
@@ -552,7 +555,30 @@ export function clipShapeFields(name: string): readonly Field[] {
 }
 
 /** What the file's node can be read as: its table, for anything the form knows. */
-export function fieldsFor(node: { name: string; args: readonly { v: unknown }[] }, inPalette = false): { term: Term | null; fields: readonly Field[]; extra: readonly Field[] } {
+/** The shape a definition holds, if it's a shape and not a design: a shape's name, or "path-line" for a one-line path. */
+export function definedShapeOf(node: { name: string; kids: readonly { name: string; args: readonly unknown[] }[] }): string | undefined {
+	const only = node.kids.length === 1 ? node.kids[0]! : undefined;
+	if (node.name !== "define" || only === undefined || !Object.hasOwn(shapes, only.name) || only.name === "svg") {
+		return undefined;
+	}
+	return only.name === "path" && only.args.length > 0 ? "path-line" : only.name;
+}
+
+/** A one-line path's own fields, as a definition or an outline writes it. */
+export const pathLineFields: readonly Field[] = [
+	{ k: "argText", label: "Path data", i: 0, mono: true, long: true, note: "As in an SVG path's d attribute." },
+	{ k: "propText", label: "Box", prop: "box", mono: true, note: "The area it's drawn in: x y width height." },
+];
+
+/** A definition's shape's fields, which a charge using it can also give. */
+export function shapeFieldsOf(shape: string): readonly Field[] {
+	if (shape === "path-line") {
+		return [...size, hollow];
+	}
+	return Object.hasOwn(shapes, shape) ? shapes[shape]!.fields : definedShapeFields;
+}
+
+export function fieldsFor(node: { name: string; args: readonly { v: unknown }[]; kids?: readonly { name: string; args: readonly unknown[] }[] }, inPalette = false, defined: ReadonlyMap<string, string> = new Map()): { term: Term | null; fields: readonly Field[]; extra: readonly Field[] } {
 	if (inPalette) {
 		const gradient = node.args[0]?.v === "gradient";
 		return { term: null, fields: gradient ? gradientFields : colorFields, extra: [] };
@@ -561,13 +587,17 @@ export function fieldsFor(node: { name: string; args: readonly { v: unknown }[] 
 		const name = String(node.args[0]?.v);
 		const shape = Object.hasOwn(shapes, name) ? shapes[name] : undefined;
 		const kept = placeFields.filter((f) => !(shape?.unplaced === true && (f.k === "at" || f.k === "repeat" || f.k === "num")) && !(name === "svg" && (f.k === "repeat" || f.k === "fimbriate")));
-		return { term: layers.charge!, fields: [...chargeFields, { k: "heading", label: "Size", grid: true }, ...(shape?.fields ?? definedShapeFields), ...kept], extra: common };
+		const own = shape?.fields ?? (defined.has(name) ? shapeFieldsOf(defined.get(name)!).filter((f) => !(f.k === "text" && (f.child === "d" || f.child === "box"))) : definedShapeFields);
+		return { term: layers.charge!, fields: [...chargeFields, { k: "heading", label: "Size", grid: true }, ...own, ...kept], extra: common };
 	}
 	const layer = layers[node.name];
 	if (layer !== undefined) {
 		return { term: layer, fields: layer.fields, extra: common };
 	}
 	const part = parts[node.name];
+	if (node.name === "define" && node.kids !== undefined && definedShapeOf({ name: node.name, kids: node.kids }) !== undefined) {
+		return { term: { ...part!, layers: false, desc: "A shape with a name, which charges, clips and cuts can use like any other shape." }, fields: [{ k: "defineShape" }], extra: [] };
+	}
 	return { term: part ?? null, fields: part?.fields ?? [], extra: [] };
 }
 
@@ -602,6 +632,15 @@ export function handledChildren(fields: readonly Field[], names: Set<string> = n
 			case "clips":
 				names.add("clip");
 				names.add("cut");
+				break;
+			case "outlineForm":
+				names.add("polygon");
+				names.add("path");
+				break;
+			case "defineShape":
+				for (const name of Object.keys(shapes)) {
+					names.add(name);
+				}
 				break;
 			case "steps":
 				for (const s of ["over", "under", "tuck"]) {
