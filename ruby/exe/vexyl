@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Naomi Persephone Amethyst <naomi@amethyst.name>
+
+require_relative "../lib/vexyl"
+require_relative "../lib/vexyl/cli"
+
+exit Vexyl::CLI.main(ARGV)
